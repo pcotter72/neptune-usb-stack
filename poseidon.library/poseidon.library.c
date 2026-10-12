@@ -4718,9 +4718,10 @@ BOOL (psdSuspendBindings)(struct PsdDevice * pd asm("a0"), struct PsdBase * ps a
                 if(suspendable) {
                     res = usbDoMethod(UCM_AttemptSuspendDevice, pd->pd_DevBinding);
                     if(!res) {
-                        // didn't want to suspend
-                        psdAddErrorMsg(RETURN_ERROR, (STRPTR) libname,
-                                       "Class '%s' failed to suspend device '%s'.",
+                        /* the class said no - it is using the device. That is
+                           an answer, not a failure. */
+                        psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
+                                       "Class '%s' declined to suspend device '%s'.",
                                        puc->puc_Node.ln_Name, pd->pd_ProductStr);
                         return FALSE;
                     }
@@ -4752,9 +4753,9 @@ BOOL (psdSuspendBindings)(struct PsdDevice * pd asm("a0"), struct PsdBase * ps a
                         if(suspendable) {
                             res = usbDoMethod(UCM_AttemptSuspendDevice, pif->pif_IfBinding);
                             if(!res) {
-                                // didn't want to suspend
-                                psdAddErrorMsg(RETURN_ERROR, (STRPTR) libname,
-                                               "%s failed to suspend device '%s'.",
+                                /* said no, as above: an answer, not a failure */
+                                psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
+                                               "%s declined to suspend device '%s'.",
                                                puc->puc_Node.ln_Name, pd->pd_ProductStr);
                                 return FALSE;
                             }
@@ -4841,6 +4842,7 @@ BOOL (psdSuspendDevice)(struct PsdDevice * pd asm("a0"), struct PsdBase * ps asm
     struct PsdDevice *hubpd;
     APTR binding;
     BOOL res = FALSE;
+    BOOL agreed = FALSE;
 
     KPRINTF(5, ("psdSuspendDevice(0x%08lx)\n", pd));
     if(pd) {
@@ -4859,7 +4861,7 @@ BOOL (psdSuspendDevice)(struct PsdDevice * pd asm("a0"), struct PsdBase * ps asm
         hubpd = pd->pd_Hub;
 
         psdLockWriteDevice(pd);
-        res = psdSuspendBindings(pd);
+        res = agreed = psdSuspendBindings(pd);
         psdUnlockDevice(pd);
         if(res && hubpd) {
             /* wake arming needs a live EP0 - before the ring quiesce below.
@@ -4942,7 +4944,9 @@ BOOL (psdSuspendDevice)(struct PsdDevice * pd asm("a0"), struct PsdBase * ps asm
             psdResumeBindings(pd);
         }
     }
-    if(pd && !res) {
+    /* A binding that would not have it has said so itself
+       (psdSuspendBindings); what failed after the bindings agreed has not. */
+    if(pd && agreed && !res) {
         psdAddErrorMsg(RETURN_ERROR, (STRPTR) libname,
                        "Suspending of device '%s' failed.",
                        pd->pd_ProductStr);
