@@ -268,7 +268,8 @@ struct UsbVideoStats
 **   that have no UVCID_. You have to know the selectors and data layouts
 **   yourself (<devices/usb_video.h>), and the data is little-endian.
 **
-** All three control commands take the same structure:
+** The control commands are NSCMD_UV_GETCONTROL, NSCMD_UV_NEXTCONTROL and
+** NSCMD_UV_SETCONTROL. All three take the same structure:
 **     io_Data   = pointer to a struct UsbVideoControl
 **     io_Length = sizeof(struct UsbVideoControl)
 ** uvc_ID says which control you mean. Leave uvc_Entity 0 unless you have a
