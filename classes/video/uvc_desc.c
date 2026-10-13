@@ -134,10 +134,10 @@ static BOOL uvcIsFourCCGUID(const UBYTE *guid)
     {
         if(guid[4 + cnt] != UvcFourCCGUID[cnt])
         {
-            return(FALSE);
+            return FALSE;
         }
     }
-    return(TRUE);
+    return TRUE;
 }
 
 /* The row for a format descriptor. A format named by a GUID has one only if
@@ -151,10 +151,10 @@ static const struct UvcPayload * uvcFindPayload(ULONG formattype, const UBYTE *d
         if((up->up_FormatType == formattype) && (len >= up->up_FormatSize) &&
            (!up->up_GUID || uvcIsFourCCGUID(&desc[up->up_GUID])))
         {
-            return(up);
+            return up;
         }
     }
-    return(NULL);
+    return NULL;
 }
 
 /* /// "uvcFunctionSize()" */
@@ -165,10 +165,10 @@ ULONG uvcFunctionSize(ULONG ctrldescs, ULONG streams, ULONG streamdescs)
     /* a descriptor yields at most one entity, or one format, or one frame.
        The one format no descriptor stands for (uvcAddEmbeddedFormat()) takes
        a place that a frame descriptor left free. */
-    return(sizeof(struct UvcFunction) +
+    return sizeof(struct UvcFunction) +
            ctrldescs * sizeof(struct UvcEntity) +
            streams * sizeof(struct UvcStreamDesc) +
-           streamdescs * (sizeof(struct UvcFormat) + sizeof(struct UvcFrame)));
+           streamdescs * (sizeof(struct UvcFormat) + sizeof(struct UvcFrame));
 }
 /* \\\ */
 
@@ -184,7 +184,7 @@ struct UvcFunction * uvcInitFunction(APTR mem, ULONG ctrldescs, ULONG streams, U
     uf->uf_Streams = (struct UvcStreamDesc *) (uf->uf_Entities + ctrldescs);
     uf->uf_Formats = (struct UvcFormat *) (uf->uf_Streams + streams);
     uf->uf_Frames = (struct UvcFrame *) (uf->uf_Formats + streamdescs);
-    return(uf);
+    return uf;
 }
 /* \\\ */
 
@@ -352,7 +352,7 @@ struct UvcStreamDesc * uvcAddStream(struct UvcFunction *uf, ULONG ifnum)
 
     us->us_IfNum = ifnum;
     us->us_Formats = &uf->uf_Formats[uf->uf_NumFormats];
-    return(us);
+    return us;
 }
 /* \\\ */
 
@@ -367,7 +367,7 @@ static BOOL uvcAddStreamHeader(struct UvcStreamDesc *us, ULONG subtype, const UB
 
         if(len < sizeof(*ih))
         {
-            return(FALSE);
+            return FALSE;
         }
         us->us_EPAddr = ih->bEndpointAddress;
         us->us_Info = ih->bmInfo;
@@ -379,13 +379,13 @@ static BOOL uvcAddStreamHeader(struct UvcStreamDesc *us, ULONG subtype, const UB
         /* UVC 1.0 ends before the bitmap size */
         if(len < offsetof(struct UsbVideoOutputHeaderDesc, bControlSize))
         {
-            return(FALSE);
+            return FALSE;
         }
         us->us_EPAddr = oh->bEndpointAddress;
         us->us_TerminalLink = oh->bTerminalLink;
     }
     us->us_HeaderType = subtype;
-    return(TRUE);
+    return TRUE;
 }
 /* \\\ */
 
@@ -419,23 +419,23 @@ static BOOL uvcAddFrame(struct UvcFunction *uf, struct UvcStreamDesc *us, ULONG 
 {
     if(!us->us_NumFormats)
     {
-        return(TRUE);
+        return TRUE;
     }
     struct UvcFormat *ufo = &us->us_Formats[us->us_NumFormats - 1];
     const struct UvcPayload *up = ufo->ufo_Payload;
 
     if(!up || !up->up_FrameType || (subtype != up->up_FrameType))
     {
-        return(TRUE);
+        return TRUE;
     }
     if(len < up->up_FrameSize)
     {
-        return(FALSE);
+        return FALSE;
     }
     ULONG numintervals = desc[up->up_IntervalType];
     if(len < up->up_Intervals + 4 * (numintervals ? numintervals : 3))
     {
-        return(FALSE);
+        return FALSE;
     }
 
     struct UvcFrame *ufr = &uf->uf_Frames[uf->uf_NumFrames++];
@@ -461,7 +461,7 @@ static BOOL uvcAddFrame(struct UvcFunction *uf, struct UvcStreamDesc *us, ULONG 
         interval = longest;
     }
     ufr->ufr_DefInterval = interval;
-    return(TRUE);
+    return TRUE;
 }
 /* \\\ */
 
@@ -519,10 +519,10 @@ struct UvcEntity * uvcFindH264Unit(const struct UvcFunction *uf)
         }
         if(same == sizeof(guid))
         {
-            return(ue);
+            return ue;
         }
     }
-    return(NULL);
+    return NULL;
 }
 /* \\\ */
 
@@ -565,10 +565,10 @@ struct UvcEntity * uvcFindEntity(const struct UvcFunction *uf, ULONG id)
     {
         if(uf->uf_Entities[cnt].ue_ID == id)
         {
-            return(&uf->uf_Entities[cnt]);
+            return &uf->uf_Entities[cnt];
         }
     }
-    return(NULL);
+    return NULL;
 }
 /* \\\ */
 
@@ -580,17 +580,17 @@ ULONG uvcFrameInterval(const struct UvcFrame *ufr, ULONG idx)
     ULONG interval = AROS_LE2LONG(ufr->ufr_Intervals[idx]);
 
     /* cameras list intervals of zero; never hand out a divisor of 0 */
-    return(interval ? interval : 1);
+    return interval ? interval : 1;
 }
 
 ULONG uvcFrameMinInterval(const struct UvcFrame *ufr)
 {
-    return(uvcFrameInterval(ufr, 0));
+    return uvcFrameInterval(ufr, 0);
 }
 
 ULONG uvcFrameMaxInterval(const struct UvcFrame *ufr)
 {
-    return(uvcFrameInterval(ufr, ufr->ufr_NumIntervals ? ufr->ufr_NumIntervals - 1 : 1));
+    return uvcFrameInterval(ufr, ufr->ufr_NumIntervals ? ufr->ufr_NumIntervals - 1 : 1);
 }
 /* \\\ */
 
@@ -600,7 +600,7 @@ ULONG uvcFrameMaxInterval(const struct UvcFrame *ufr)
    and at least one frame that parsed. */
 BOOL uvcIsStreamable(const struct UvcFormat *ufo)
 {
-    return(ufo->ufo_Payload && ufo->ufo_NumFrames);
+    return ufo->ufo_Payload && ufo->ufo_NumFrames;
 }
 /* \\\ */
 
@@ -613,7 +613,7 @@ ULONG uvcFourCC(const struct UvcFormat *ufo)
     const UBYTE *guid = &ufo->ufo_Desc[up->up_GUID];
 
     /* four characters in reading order: a big-endian long */
-    return(up->up_GUID ? AROS_BE2LONG(*(const ULONG *) guid) : up->up_FourCC);
+    return up->up_GUID ? AROS_BE2LONG(*(const ULONG *) guid) : up->up_FourCC;
 }
 /* \\\ */
 
@@ -626,12 +626,12 @@ ULONG uvcPictureSize(const struct UvcFormat *ufo, const struct UvcFrame *ufr)
 
     if(!(up->up_Flags & UPF_FIXEDSIZE))
     {
-        return(0);
+        return 0;
     }
     /* only an uncompressed format has samples of one size; a planar 4:2:0
        format has 12 bits a pixel */
     const struct UsbVideoUncompressedFormatDesc *fd = (const struct UsbVideoUncompressedFormatDesc *) ufo->ufo_Desc;
-    return((ULONG) ufr->ufr_Width * ufr->ufr_Height * fd->bBitsPerPixel / 8);
+    return (ULONG) ufr->ufr_Width * ufr->ufr_Height * fd->bBitsPerPixel / 8;
 }
 /* \\\ */
 
@@ -654,7 +654,7 @@ struct UvcFormat * uvcFindFormat(const struct UvcStreamDesc *us, ULONG fourcc)
         {
             if(uvcFourCC(ufo) == fourcc)
             {
-                return(ufo);
+                return ufo;
             }
         }
         else if(!best || (ufo->ufo_Payload < best->ufo_Payload))
@@ -662,7 +662,7 @@ struct UvcFormat * uvcFindFormat(const struct UvcStreamDesc *us, ULONG fourcc)
             best = ufo;
         }
     }
-    return(best);
+    return best;
 }
 /* \\\ */
 
@@ -677,10 +677,10 @@ struct UvcFrame * uvcFindFrame(const struct UvcFormat *ufo, ULONG width, ULONG h
         if((width || height) ? ((ufr->ufr_Width == width) && (ufr->ufr_Height == height))
                              : (ufr->ufr_Index == ufo->ufo_DefFrame))
         {
-            return(ufr);
+            return ufr;
         }
     }
-    return((width || height || !ufo->ufo_NumFrames) ? NULL : ufo->ufo_Frames);
+    return (width || height || !ufo->ufo_NumFrames) ? NULL : ufo->ufo_Frames;
 }
 /* \\\ */
 
@@ -698,7 +698,7 @@ struct UvcFrame * uvcSmallestFrame(const struct UvcFormat *ufo)
             smallest = ufr;
         }
     }
-    return(smallest);
+    return smallest;
 }
 /* \\\ */
 
@@ -709,7 +709,7 @@ struct UvcFrame * uvcDefaultFrame(const struct UvcFormat *ufo, ULONG width, ULON
 {
     struct UvcFrame *ufr = (width || height) ? uvcFindFrame(ufo, width, height) : NULL;
 
-    return(ufr ? ufr : uvcFindFrame(ufo, 0, 0));
+    return ufr ? ufr : uvcFindFrame(ufo, 0, 0);
 }
 /* \\\ */
 
@@ -721,7 +721,7 @@ ULONG uvcDefaultInterval(const struct UvcFrame *ufr, ULONG width, ULONG height, 
 {
     BOOL users = (ufr->ufr_Width == width) && (ufr->ufr_Height == height);
 
-    return(uvcSnapInterval(ufr, users ? interval : 0));
+    return uvcSnapInterval(ufr, users ? interval : 0);
 }
 /* \\\ */
 
@@ -733,10 +733,10 @@ struct UvcFormat * uvcFormatByIndex(const struct UvcStreamDesc *us, ULONG index)
     {
         if(us->us_Formats[cnt].ufo_Index == index)
         {
-            return(&us->us_Formats[cnt]);
+            return &us->us_Formats[cnt];
         }
     }
-    return(NULL);
+    return NULL;
 }
 
 struct UvcFrame * uvcFrameByIndex(const struct UvcFormat *ufo, ULONG index)
@@ -745,10 +745,10 @@ struct UvcFrame * uvcFrameByIndex(const struct UvcFormat *ufo, ULONG index)
     {
         if(ufo->ufo_Frames[cnt].ufr_Index == index)
         {
-            return(&ufo->ufo_Frames[cnt]);
+            return &ufo->ufo_Frames[cnt];
         }
     }
-    return(NULL);
+    return NULL;
 }
 /* \\\ */
 
@@ -759,7 +759,7 @@ ULONG uvcSnapInterval(const struct UvcFrame *ufr, ULONG interval)
 {
     if(!interval)
     {
-        return(ufr->ufr_DefInterval);
+        return ufr->ufr_DefInterval;
     }
     if(!ufr->ufr_NumIntervals)
     {
@@ -769,13 +769,13 @@ ULONG uvcSnapInterval(const struct UvcFrame *ufr, ULONG interval)
         ULONG step = uvcFrameInterval(ufr, 2);
         if(interval <= shortest)
         {
-            return(shortest);
+            return shortest;
         }
         if(interval >= longest)
         {
-            return(longest);
+            return longest;
         }
-        return(shortest + ((interval - shortest + step / 2) / step) * step);
+        return shortest + ((interval - shortest + step / 2) / step) * step;
     }
     ULONG best = uvcFrameInterval(ufr, 0);
     for(ULONG cnt = 1; cnt < ufr->ufr_NumIntervals; cnt++)
@@ -788,6 +788,6 @@ ULONG uvcSnapInterval(const struct UvcFrame *ufr, ULONG interval)
             best = cand;
         }
     }
-    return(best);
+    return best;
 }
 /* \\\ */

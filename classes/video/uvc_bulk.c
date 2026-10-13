@@ -32,7 +32,7 @@ ULONG uvcBulkBufferSize(struct NepVideoStream *ns)
 {
     ULONG payloadsize = ns->ns_Mode.um_PayloadSize;
 
-    return((payloadsize && (payloadsize < UVC_BULK_CHUNK)) ? payloadsize : UVC_BULK_CHUNK);
+    return (payloadsize && (payloadsize < UVC_BULK_CHUNK)) ? payloadsize : UVC_BULK_CHUNK;
 }
 /* \\\ */
 
@@ -46,7 +46,7 @@ static ULONG uvcBulkAsk(struct NepVideoStream *ns)
 {
     ULONG left = ns->ns_Mode.um_PayloadSize - ns->ns_Bulk.ub_PayDone;
 
-    return((ns->ns_Mode.um_PayloadSize && (left < ns->ns_ScratchSize)) ? left : ns->ns_ScratchSize);
+    return (ns->ns_Mode.um_PayloadSize && (left < ns->ns_ScratchSize)) ? left : ns->ns_ScratchSize;
 }
 /* \\\ */
 
@@ -67,7 +67,7 @@ static ULONG uvcBulkTransfer(struct NepVideoStream *ns, LONG ioerr, ULONG len)
            the next transfer is taken for the start of a payload */
         uvcPayloadBegin(ns, ns->ns_Scratch, 0, TRUE, 0);
         ns->ns_Bulk.ub_PayDone = 0;
-        return((++ns->ns_Bulk.ub_Errors < UVC_BULK_MAX_ERRORS) ? uvcBulkAsk(ns) : 0);
+        return (++ns->ns_Bulk.ub_Errors < UVC_BULK_MAX_ERRORS) ? uvcBulkAsk(ns) : 0;
     }
     ns->ns_Bulk.ub_Errors = 0;
     if(!ns->ns_Bulk.ub_PayDone)
@@ -76,7 +76,7 @@ static ULONG uvcBulkTransfer(struct NepVideoStream *ns, LONG ioerr, ULONG len)
         {
             /* nothing, between two payloads: a camera may end one of the
                full size like that */
-            return(asked);
+            return asked;
         }
         hdrlen = uvcPayloadBegin(ns, ns->ns_Scratch, len, FALSE, 0);
         ns->ns_Bulk.ub_PaySkip = !hdrlen;
@@ -94,7 +94,7 @@ static ULONG uvcBulkTransfer(struct NepVideoStream *ns, LONG ioerr, ULONG len)
         }
         ns->ns_Bulk.ub_PayDone = 0;
     }
-    return(uvcBulkAsk(ns));
+    return uvcBulkAsk(ns);
 }
 /* \\\ */
 
@@ -123,7 +123,7 @@ LONG uvcBulkStart(struct NepClassVideo *ncv, struct NepVideoStream *ns, struct P
 {
     if(!(ns->ns_Bulk.ub_Pipe = psdAllocPipe(ncv->ncv_Device, ncv->ncv_TaskMsgPort, pep)))
     {
-        return(UHIOERR_OUTOFMEMORY);
+        return UHIOERR_OUTOFMEMORY;
     }
     /* a payload is as long as it is, and a camera with nothing to send - a
        grabber without a source - may take as long as it likes */
@@ -135,7 +135,7 @@ LONG uvcBulkStart(struct NepClassVideo *ncv, struct NepVideoStream *ns, struct P
     ns->ns_Bulk.ub_PaySkip = FALSE;
     ns->ns_Bulk.ub_Errors = 0;
     psdSendPipe(ns->ns_Bulk.ub_Pipe, ns->ns_Scratch, uvcBulkAsk(ns));
-    return(0);
+    return 0;
 }
 /* \\\ */
 

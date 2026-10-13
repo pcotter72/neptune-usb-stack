@@ -353,6 +353,7 @@ struct NepVideoStream
     ULONG               ns_OpenFlags;     /* UVOF_ of the opener */
     UBYTE               ns_ProductName[80];
     UBYTE               ns_SerialNumber[44];
+    UBYTE               ns_Manufacturer[sizeof(((struct UsbVideoInfo *) NULL)->uvi_Manufacturer)];
 
     struct UvcMode      ns_Mode;          /* The mode in force */
     struct UvcDefault   ns_Default;       /* The mode a request without a size gets */

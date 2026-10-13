@@ -30,9 +30,9 @@ DEVBASETYPEPTR devInit(DEVBASETYPEPTR base asm("d0"), BPTR seglist asm("a0"), st
     if((base->np_UtilityBase = OpenLibrary("utility.library", 0)))
     {
         KPRINTF(10, ("devInit: Ok\n"));
-        return(base);
+        return base;
     }
-    return(NULL);
+    return NULL;
 }
 
 #undef UtilityBase
@@ -75,7 +75,7 @@ DEVBASETYPEPTR (devOpen)(struct IOStdReq * ioreq asm("a1"), ULONG unit asm("d0")
                 ioreq->io_Unit = (struct Unit *) ns;
                 ioreq->io_Message.mn_Node.ln_Type = NT_REPLYMSG;
                 ioreq->io_Error = 0;
-                return(base);
+                return base;
             }
             ns = (struct NepVideoStream *) ns->ns_Unit.unit_MsgPort.mp_Node.ln_Succ;
         }
@@ -86,7 +86,7 @@ DEVBASETYPEPTR (devOpen)(struct IOStdReq * ioreq asm("a1"), ULONG unit asm("d0")
     ioreq->io_Device = (APTR) -1;
     base->np_Library.lib_OpenCnt--;
 
-    return(NULL);
+    return NULL;
 }
 
 BPTR (devClose)(struct IOStdReq * ioreq asm("a1"), struct NepVideoDevBase * base asm("a6"))
@@ -119,7 +119,7 @@ BPTR (devClose)(struct IOStdReq * ioreq asm("a1"), struct NepVideoDevBase * base
             ret = devExpunge(base, base);
         }
     }
-    return(ret);
+    return ret;
 }
 
 BPTR (devExpunge)(DEVBASETYPEPTR extralh asm("d0"), struct NepVideoDevBase * base asm("a6"))
@@ -139,11 +139,11 @@ BPTR (devExpunge)(DEVBASETYPEPTR extralh asm("d0"), struct NepVideoDevBase * bas
                 (ULONG) (base->np_Library.lib_NegSize + base->np_Library.lib_PosSize));
 
         KPRINTF(5, ("devExpunge: Unloading done! " DEVNAME " expunged!\n\n"));
-        return(ret);
+        return ret;
     }
     KPRINTF(5, ("devExpunge: Could not expunge, LIBF_DELEXP set!\n"));
     base->np_Library.lib_Flags |= LIBF_DELEXP;
-    return(BNULL);
+    return BNULL;
 }
 
 DEVBASETYPEPTR (devReserved)(struct NepVideoDevBase * base asm("a6"))
@@ -156,12 +156,12 @@ DEVBASETYPEPTR (devReserved)(struct NepVideoDevBase * base asm("a6"))
    or the three numbers of a range */
 static ULONG nModeIntervals(const struct UvcFrame *ufr)
 {
-    return(ufr->ufr_NumIntervals ? ufr->ufr_NumIntervals : 3);
+    return ufr->ufr_NumIntervals ? ufr->ufr_NumIntervals : 3;
 }
 
 static ULONG nModeSize(const struct UvcFrame *ufr)
 {
-    return(offsetof(struct UsbVideoMode, uvm_Intervals) + nModeIntervals(ufr) * sizeof(ULONG));
+    return offsetof(struct UsbVideoMode, uvm_Intervals) + nModeIntervals(ufr) * sizeof(ULONG);
 }
 
 /* Walk the modes of a unit's stream: one per frame of every streamable
@@ -219,7 +219,7 @@ static ULONG nModeTable(const struct NepVideoStream *ns, UBYTE *buf, ULONG bufle
             }
         }
     }
-    return(written);
+    return written;
 }
 /* \\\ */
 
@@ -267,7 +267,7 @@ static ULONG nTopology(const struct UvcFunction *uf, UBYTE *buf, ULONG buflen,
             written += size;
         }
     }
-    return(written);
+    return written;
 }
 /* \\\ */
 
@@ -283,7 +283,7 @@ static WORD cmdGetInfo(struct IOStdReq *ioreq, struct NepVideoStream *ns)
 
     if(!ioreq->io_Data || (len < offsetof(struct UsbVideoInfo, uvi_NumEntities)))
     {
-        return(IOERR_BADLENGTH);
+        return IOERR_BADLENGTH;
     }
     memset(uvi, 0, sizeof(struct UsbVideoInfo));
 
@@ -309,12 +309,13 @@ static WORD cmdGetInfo(struct IOStdReq *ioreq, struct NepVideoStream *ns)
         }
         memcpy(uvi->uvi_ProductName, ns->ns_ProductName, sizeof(uvi->uvi_ProductName));
         memcpy(uvi->uvi_SerialNumber, ns->ns_SerialNumber, sizeof(uvi->uvi_SerialNumber));
+        memcpy(uvi->uvi_Manufacturer, ns->ns_Manufacturer, sizeof(uvi->uvi_Manufacturer));
         ioreq->io_Actual = len;
         ret = RC_OK;
     }
     Permit();
     memcpy(ioreq->io_Data, uvi, len);
-    return(ret);
+    return ret;
 }
 /* \\\ */
 
@@ -329,7 +330,7 @@ static WORD cmdGetTopology(struct IOStdReq *ioreq, struct NepVideoStream *ns)
 
     if(!ioreq->io_Data)
     {
-        return(IOERR_BADLENGTH);
+        return IOERR_BADLENGTH;
     }
     Forbid();
     if(ns->ns_Binding)
@@ -339,7 +340,7 @@ static WORD cmdGetTopology(struct IOStdReq *ioreq, struct NepVideoStream *ns)
         ret = RC_OK;
     }
     Permit();
-    return(ret);
+    return ret;
 }
 /* \\\ */
 
@@ -354,7 +355,7 @@ static WORD cmdGetModes(struct IOStdReq *ioreq, struct NepVideoStream *ns)
 
     if(!ioreq->io_Data)
     {
-        return(IOERR_BADLENGTH);
+        return IOERR_BADLENGTH;
     }
     Forbid();
     if(ns->ns_Binding)
@@ -363,7 +364,7 @@ static WORD cmdGetModes(struct IOStdReq *ioreq, struct NepVideoStream *ns)
         ret = RC_OK;
     }
     Permit();
-    return(ret);
+    return ret;
 }
 /* \\\ */
 
@@ -373,7 +374,7 @@ static WORD cmdGetStats(struct IOStdReq *ioreq, struct NepVideoStream *ns)
 {
     if(!ioreq->io_Data || (ioreq->io_Length < sizeof(struct UsbVideoStats)))
     {
-        return(IOERR_BADLENGTH);
+        return IOERR_BADLENGTH;
     }
     /* the transport counts in the controller driver's task: kept out, the
        copy is of one moment. The counts outlive the stream and the camera. */
@@ -381,7 +382,7 @@ static WORD cmdGetStats(struct IOStdReq *ioreq, struct NepVideoStream *ns)
     memcpy(ioreq->io_Data, &ns->ns_Stats, sizeof(struct UsbVideoStats));
     Permit();
     ioreq->io_Actual = sizeof(struct UsbVideoStats);
-    return(RC_OK);
+    return RC_OK;
 }
 /* \\\ */
 
@@ -405,14 +406,14 @@ static WORD cmdNSDeviceQuery(struct IOStdReq *ioreq)
        (query->DevQueryFormat != 0) ||
        (query->SizeAvailable != 0))
     {
-        return(IOERR_NOCMD);
+        return IOERR_NOCMD;
     }
     ioreq->io_Actual         = query->SizeAvailable
                              = sizeof(struct my_NSDeviceQueryResult);
     query->DeviceType        = NSDEVTYPE_UNKNOWN;
     query->DeviceSubType     = 0;
     query->SupportedCommands = NSDSupported;
-    return(RC_OK);
+    return RC_OK;
 }
 /* \\\ */
 
@@ -551,7 +552,7 @@ LONG (devAbortIO)(struct IOStdReq * ioreq asm("a1"), struct NepVideoDevBase * ba
         }
     }
     Permit();
-    return(ret);
+    return ret;
 }
 
 /*

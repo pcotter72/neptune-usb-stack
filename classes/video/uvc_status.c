@@ -42,11 +42,11 @@ static BOOL uvcEventHasUnit(const struct List *list, const struct Unit *unit)
     {
         if(ioreq->io_Unit == unit)
         {
-            return(TRUE);
+            return TRUE;
         }
         ioreq = (const struct IOStdReq *) ioreq->io_Message.mn_Node.ln_Succ;
     }
-    return(FALSE);
+    return FALSE;
 }
 /* \\\ */
 
@@ -100,7 +100,7 @@ LONG uvcEventWait(struct NepClassVideo *ncv, struct IOStdReq *ioreq)
 
     if(!ioreq->io_Data)
     {
-        return(IOERR_BADLENGTH);
+        return IOERR_BADLENGTH;
     }
     Forbid();
     if(ncv->ncv_Status.ust_Pipe)
@@ -111,7 +111,7 @@ LONG uvcEventWait(struct NepClassVideo *ncv, struct IOStdReq *ioreq)
         ret = RC_DONTREPLY;
     }
     Permit();
-    return(ret);
+    return ret;
 }
 /* \\\ */
 
@@ -135,7 +135,7 @@ BOOL uvcEventAbort(struct NepClassVideo *ncv, struct IOStdReq *ioreq)
         found = TRUE;
     }
     Permit();
-    return(found);
+    return found;
 }
 /* \\\ */
 

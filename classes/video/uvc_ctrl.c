@@ -53,7 +53,7 @@ LONG uvcRequest(struct NepClassVideo *ncv, ULONG request, ULONG entity, ULONG if
             *reason = code;
         }
     }
-    return(ioerr);
+    return ioerr;
 }
 /* \\\ */
 
@@ -70,7 +70,7 @@ LONG uvcPassRequest(struct NepClassVideo *ncv, struct IOStdReq *ioreq)
 
     if(!uvr || (ioreq->io_Length < sizeof(struct UsbVideoRequest)) || (uvr->uvr_Length && !uvr->uvr_Data))
     {
-        return(IOERR_BADLENGTH);
+        return IOERR_BADLENGTH;
     }
     uvr->uvr_ErrorCode = UVREC_NO_ERROR;
     uvr->uvr_Actual = 0;
@@ -78,11 +78,11 @@ LONG uvcPassRequest(struct NepClassVideo *ncv, struct IOStdReq *ioreq)
                        uvr->uvr_Data, uvr->uvr_Length, &uvr->uvr_ErrorCode);
     if(ioerr)
     {
-        return((ioerr == UHIOERR_STALL) ? UVERR_REFUSED : UVERR_USB);
+        return (ioerr == UHIOERR_STALL) ? UVERR_REFUSED : UVERR_USB;
     }
     uvr->uvr_Actual = psdGetPipeActual(ncv->ncv_EP0Pipe);
     ioreq->io_Actual = sizeof(struct UsbVideoRequest);
-    return(0);
+    return 0;
 }
 /* \\\ */
 
@@ -129,7 +129,7 @@ LONG uvcNegotiate(struct NepClassVideo *ncv, struct NepVideoStream *ns,
                        "Negotiating %ldx%ld failed: %s (%ld)",
                        (ULONG) ufr->ufr_Width, (ULONG) ufr->ufr_Height,
                        psdNumToStr(NTS_IOERR, ioerr, "unknown"), ioerr);
-        return((ioerr == UHIOERR_STALL) ? UVERR_REFUSED : UVERR_USB);
+        return (ioerr == UHIOERR_STALL) ? UVERR_REFUSED : UVERR_USB;
     }
 
     /* the camera may have settled on something else than was proposed; a
@@ -145,7 +145,7 @@ LONG uvcNegotiate(struct NepClassVideo *ncv, struct NepVideoStream *ns,
         psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
                        "The camera answered with a mode it does not have (format %ld, frame %ld).",
                        (ULONG) probe.bFormatIndex, (ULONG) probe.bFrameIndex);
-        return(UVERR_REFUSED);
+        return UVERR_REFUSED;
     }
 
     /* The block itself is kept as received - it goes back to the camera
@@ -189,7 +189,7 @@ LONG uvcNegotiate(struct NepClassVideo *ncv, struct NepVideoStream *ns,
         psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
                        "%ldx%ld needs %ld bytes per interval: more than any alternate setting carries.",
                        (ULONG) ufr->ufr_Width, (ULONG) ufr->ufr_Height, payloadsize);
-        return(UVERR_NOBANDWIDTH);
+        return UVERR_NOBANDWIDTH;
     }
     IPTR altnum = 0;
     psdGetAttrs(PGA_INTERFACE, altif, IFA_AlternateNum, &altnum, TAG_END);
@@ -209,7 +209,7 @@ LONG uvcNegotiate(struct NepClassVideo *ncv, struct NepVideoStream *ns,
     ns->ns_Mode.um_PayloadSize = payloadsize;
     ns->ns_Mode.um_Format = ufo;
     Permit();
-    return(0);
+    return 0;
 }
 /* \\\ */
 
@@ -228,7 +228,7 @@ LONG uvcEmbedCommit(struct NepClassVideo *ncv, const struct UvcxVideoConfig *cfg
         ioerr = uvcRequest(ncv, UVUDR_SET_CUR, unit, ncv->ncv_IfNum, UVCX_VIDEO_CONFIG_COMMIT,
                            (APTR) cfg, sizeof(*cfg), NULL);
     }
-    return(ioerr);
+    return ioerr;
 }
 /* \\\ */
 
@@ -261,7 +261,7 @@ LONG uvcNegotiateEmbedded(struct NepClassVideo *ncv, struct NepVideoStream *ns,
 
     if((ioerr = uvcRequest(ncv, UVUDR_GET_CUR, unit, ncv->ncv_IfNum, UVCX_VIDEO_CONFIG_PROBE, &was, sizeof(was), NULL)))
     {
-        return((ioerr == UHIOERR_STALL) ? UVERR_REFUSED : UVERR_USB);
+        return (ioerr == UHIOERR_STALL) ? UVERR_REFUSED : UVERR_USB;
     }
     /* what the unit has, with this size and rate held to - beside whatever
        it was told to hold to before - as a byte stream */
@@ -296,11 +296,11 @@ LONG uvcNegotiateEmbedded(struct NepClassVideo *ncv, struct NepVideoStream *ns,
         psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
                        "The camera's H.264 unit does not do %ldx%ld.",
                        (ULONG) ufr->ufr_Width, (ULONG) ufr->ufr_Height);
-        return((ioerr && (ioerr != UHIOERR_STALL)) ? UVERR_USB : UVERR_REFUSED);
+        return (ioerr && (ioerr != UHIOERR_STALL)) ? UVERR_USB : UVERR_REFUSED;
     }
     if((ioerr = uvcEmbedCommit(ncv, &cfg)))
     {
-        return((ioerr == UHIOERR_STALL) ? UVERR_REFUSED : UVERR_USB);
+        return (ioerr == UHIOERR_STALL) ? UVERR_REFUSED : UVERR_USB;
     }
     struct UvcFrame *carrier = uvcSmallestFrame(ufo);
     err = uvcNegotiate(ncv, ns, ufo, carrier, uvcSnapInterval(carrier, interval));
@@ -320,6 +320,6 @@ LONG uvcNegotiateEmbedded(struct NepClassVideo *ncv, struct NepVideoStream *ns,
         ns->ns_Mode.um_Embed = cfg;
         Permit();
     }
-    return(err);
+    return err;
 }
 /* \\\ */

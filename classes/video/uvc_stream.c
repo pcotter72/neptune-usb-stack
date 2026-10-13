@@ -36,7 +36,7 @@ static ULONG uvcCapacity(struct NepClassVideo *ncv, struct PsdEndpoint *pep)
                 EA_NumTransMuFrame, &mult,
                 EA_BytesPerInterval, &bytesperinterval,
                 TAG_END);
-    return(superspeed ? bytesperinterval : pktsize * mult);
+    return superspeed ? bytesperinterval : pktsize * mult;
 }
 /* \\\ */
 
@@ -73,7 +73,7 @@ struct PsdInterface * uvcFindAlternate(struct NepClassVideo *ncv, struct UvcStre
         if(type == USEAF_BULK)
         {
             *pepptr = pep;
-            return(pif);
+            return pif;
         }
         ULONG capacity = uvcCapacity(ncv, pep);
         if((type == USEAF_ISOCHRONOUS) && (capacity >= payloadsize) && (capacity < bestcap))
@@ -83,7 +83,7 @@ struct PsdInterface * uvcFindAlternate(struct NepClassVideo *ncv, struct UvcStre
             *pepptr = pep;
         }
     }
-    return(bestif);
+    return bestif;
 }
 /* \\\ */
 
@@ -98,7 +98,7 @@ BOOL uvcStreamIsBulk(struct NepClassVideo *ncv, struct UvcStreamDesc *us)
     {
         psdGetAttrs(PGA_ENDPOINT, pep, EA_TransferType, &type, TAG_END);
     }
-    return(type == USEAF_BULK);
+    return type == USEAF_BULK;
 }
 /* \\\ */
 
@@ -148,12 +148,12 @@ static ULONG uvcJpegSegment(const UBYTE *buf, ULONG len, ULONG pos)
 {
     if((pos + JPEG_MARKER_SIZE + JPEG_LENGTH_SIZE > len) || (buf[pos] != JPEG_MARKER) || (buf[pos + 1] == JPEG_SOS))
     {
-        return(0);
+        return 0;
     }
     /* big-endian, as all of JPEG's own, and at any address */
     ULONG seglen = AROS_BE2WORD(*(const UWORD *) &buf[pos + JPEG_MARKER_SIZE]);
 
-    return(((seglen >= JPEG_LENGTH_SIZE) && (pos + JPEG_MARKER_SIZE + seglen <= len)) ? seglen : 0);
+    return ((seglen >= JPEG_LENGTH_SIZE) && (pos + JPEG_MARKER_SIZE + seglen <= len)) ? seglen : 0;
 }
 /* \\\ */
 
@@ -172,13 +172,13 @@ static ULONG uvcEmbeddedHeader(const UBYTE *data, ULONG datalen, ULONG *fourcc, 
     *size = 0;
     if((hdrlen < sizeof(*mh)) || (hdrlen + sizeof(ULONG) > datalen))
     {
-        return(0);
+        return 0;
     }
     /* four characters in reading order: the one big-endian field */
     *fourcc = AROS_BE2LONG(mh->dwStreamType);
     /* behind the header, however long a later version makes it: the size */
     *size = AROS_LE2LONG(*(const ULONG *) &data[hdrlen]);
-    return(hdrlen + sizeof(ULONG));
+    return hdrlen + sizeof(ULONG);
 }
 /* \\\ */
 
@@ -227,7 +227,7 @@ static ULONG uvcExtractEmbedded(UBYTE *buf, ULONG len, ULONG fourcc)
             out += datalen;
         }
     }
-    return(out);
+    return out;
 }
 /* \\\ */
 
@@ -335,7 +335,7 @@ ULONG uvcPayloadBegin(struct NepVideoStream *ns, const UBYTE *hdr, ULONG len, BO
             ns->ns_Stats.uvs_BadPayloads++;
         }
         ns->ns_Asm.ua_Damaged = TRUE; /* whatever this was, the open frame lost it */
-        return(0);
+        return 0;
     }
     if(ph->bmHeaderInfo & UVPHF_ERR)
     {
@@ -366,7 +366,7 @@ ULONG uvcPayloadBegin(struct NepVideoStream *ns, const UBYTE *hdr, ULONG len, BO
         ns->ns_Asm.ua_SCRClock = ns->ns_Asm.ua_HasSCR ? AROS_LE2LONG(scr->dwSourceClock) : 0;
         ns->ns_Asm.ua_SCRFrame = ns->ns_Asm.ua_HasSCR ? (AROS_LE2WORD(scr->wSOFCounter) & UVPH_SCR_FRAME_MASK) : 0;
     }
-    return(hdrlen);
+    return hdrlen;
 }
 /* \\\ */
 
@@ -444,7 +444,7 @@ BOOL uvcIsConnected(struct NepClassVideo *ncv)
     IPTR connected = FALSE;
 
     psdGetAttrs(PGA_DEVICE, ncv->ncv_Device, DA_IsConnected, &connected, TAG_END);
-    return(connected != 0);
+    return connected != 0;
 }
 /* \\\ */
 
@@ -463,11 +463,11 @@ LONG uvcStart(struct NepClassVideo *ncv, struct NepVideoStream *ns)
 
     if(ns->ns_Streaming)
     {
-        return(UVERR_BUSY);
+        return UVERR_BUSY;
     }
     if(!ns->ns_Mode.um_Format)
     {
-        return(UVERR_NOMODE);
+        return UVERR_NOMODE;
     }
 
     /* a mode of H.264 inside the frames: the camera's H.264 unit is told
@@ -478,7 +478,7 @@ LONG uvcStart(struct NepClassVideo *ncv, struct NepVideoStream *ns)
         psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
                        "The camera's H.264 unit did not take its configuration: %s (%ld)",
                        psdNumToStr(NTS_IOERR, ioerr, "unknown"), ioerr);
-        return((ioerr == UHIOERR_STALL) ? UVERR_REFUSED : UVERR_USB);
+        return (ioerr == UHIOERR_STALL) ? UVERR_REFUSED : UVERR_USB;
     }
     /* the block goes back as the camera sent it at negotiation */
     if((ioerr = uvcRequest(ncv, UVUDR_SET_CUR, 0, us->us_IfNum, UVVSCS_COMMIT_CONTROL,
@@ -487,7 +487,7 @@ LONG uvcStart(struct NepClassVideo *ncv, struct NepVideoStream *ns)
         psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
                        "The camera did not accept the mode: %s (%ld)",
                        psdNumToStr(NTS_IOERR, ioerr, "unknown"), ioerr);
-        return((ioerr == UHIOERR_STALL) ? UVERR_REFUSED : UVERR_USB);
+        return (ioerr == UHIOERR_STALL) ? UVERR_REFUSED : UVERR_USB;
     }
     /* a bulk stream has the one setting it is in and takes no bandwidth:
        nothing to select, and a camera may refuse a request it has no use for */
@@ -496,7 +496,7 @@ LONG uvcStart(struct NepClassVideo *ncv, struct NepVideoStream *ns)
     {
         psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
                        "No bus bandwidth for %ld bytes per interval.", ns->ns_Mode.um_PayloadSize);
-        return(UVERR_NOBANDWIDTH);
+        return UVERR_NOBANDWIDTH;
     }
 
     /* one service interval, or one bulk transfer */
@@ -514,7 +514,7 @@ LONG uvcStart(struct NepClassVideo *ncv, struct NepVideoStream *ns)
         if(!(ioerr = ns->ns_IsBulk ? uvcBulkStart(ncv, ns, pep) : uvcIsoStart(ncv, ns, pep)))
         {
             ns->ns_Streaming = TRUE;
-            return(0);
+            return 0;
         }
         psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
                        "Could not start the stream: %s (%ld)",
@@ -526,7 +526,7 @@ LONG uvcStart(struct NepClassVideo *ncv, struct NepVideoStream *ns)
     {
         uvcZeroBandwidth(ncv, us);
     }
-    return(UVERR_USB);
+    return UVERR_USB;
 }
 /* \\\ */
 

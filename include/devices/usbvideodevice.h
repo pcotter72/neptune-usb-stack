@@ -146,6 +146,10 @@ struct UsbVideoInfo
     /* a request shorter than this gets the fields above only */
     ULONG uvi_NumEntities;    /* records NSCMD_UV_GETTOPOLOGY returns... */
     ULONG uvi_TopologySize;   /* ...and the buffer they need, in bytes */
+    /* and one shorter than this the fields above */
+    UBYTE uvi_Manufacturer[48]; /* who made the camera: the name the camera gives, else
+                                   the one the USB stack has for its vendor ID; "n/a" if
+                                   neither */
 };
 
 #define UVIF_STREAMING   0x0001 /* between CMD_START and CMD_STOP */

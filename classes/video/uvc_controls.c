@@ -115,16 +115,16 @@ static LONG uvcControlRaw(const struct UvcControlInfo *uci, const UBYTE *data)
     switch(uci->uci_Bytes)
     {
         case sizeof(UBYTE):
-            return((uci->uci_Flags & UCF_SIGNED) ? (LONG) (BYTE) field[0] : (LONG) field[0]);
+            return (uci->uci_Flags & UCF_SIGNED) ? (LONG) (BYTE) field[0] : (LONG) field[0];
 
         case sizeof(UWORD):
         {
             UWORD value = AROS_LE2WORD(*(const UWORD *) field);
 
-            return((uci->uci_Flags & UCF_SIGNED) ? (LONG) (WORD) value : (LONG) value);
+            return (uci->uci_Flags & UCF_SIGNED) ? (LONG) (WORD) value : (LONG) value;
         }
     }
-    return((LONG) AROS_LE2LONG(*(const ULONG *) field));
+    return (LONG) AROS_LE2LONG(*(const ULONG *) field);
 }
 /* \\\ */
 
@@ -161,13 +161,13 @@ static LONG uvcControlNumber(const struct UvcControlInfo *uci, LONG raw)
 
     if(!(uci->uci_Flags & UCF_BITS))
     {
-        return(raw);
+        return raw;
     }
     while((choice < UVC_CHOICE_BITS) && !((raw >> choice) & 1))
     {
         choice++;
     }
-    return((choice < UVC_CHOICE_BITS) ? choice : 0);
+    return (choice < UVC_CHOICE_BITS) ? choice : 0;
 }
 /* \\\ */
 
@@ -178,9 +178,9 @@ static LONG uvcControlWire(const struct UvcControlInfo *uci, LONG value)
 {
     if(!(uci->uci_Flags & UCF_BITS))
     {
-        return(value);
+        return value;
     }
-    return(((ULONG) value < UVC_CHOICE_BITS) ? (1L << value) : 0);
+    return ((ULONG) value < UVC_CHOICE_BITS) ? (1L << value) : 0;
 }
 /* \\\ */
 
@@ -191,8 +191,8 @@ static BOOL uvcControlPresent(const struct UvcControlInfo *uci, const struct Uvc
 {
     ULONG byte = uci->uci_Bit / 8;
 
-    return((ue->ue_Type == uci->uci_UnitType) && (byte < ue->ue_ControlSize) &&
-           ((ue->ue_Controls[byte] >> (uci->uci_Bit % 8)) & 1));
+    return (ue->ue_Type == uci->uci_UnitType) && (byte < ue->ue_ControlSize) &&
+           ((ue->ue_Controls[byte] >> (uci->uci_Bit % 8)) & 1);
 }
 /* \\\ */
 
@@ -226,12 +226,12 @@ static const struct UvcControlInfo * uvcControlLocate(const struct UvcFunction *
             if(passed || (named && !next))
             {
                 *ueptr = ue;
-                return(uci);
+                return uci;
             }
             passed = named;
         }
     }
-    return(NULL);
+    return NULL;
 }
 /* \\\ */
 
@@ -246,10 +246,10 @@ static BOOL uvcControlAsk(struct NepClassVideo *ncv, const struct UvcControlInfo
 
     if(uvcRequest(ncv, request, entity, ncv->ncv_IfNum, uci->uci_Selector, data, uci->uci_Size, reason))
     {
-        return(FALSE);
+        return FALSE;
     }
     *raw = uvcControlRaw(uci, data);
-    return(TRUE);
+    return TRUE;
 }
 /* \\\ */
 
@@ -264,13 +264,13 @@ static ULONG uvcControlChoices(struct NepClassVideo *ncv, const struct UvcContro
 
     if(uci->uci_Flags & UCF_BITS)
     {
-        return(uvcControlAsk(ncv, uci, entity, UVUDR_GET_RES, &raw, NULL) ? ((ULONG) raw & all) : all);
+        return uvcControlAsk(ncv, uci, entity, UVUDR_GET_RES, &raw, NULL) ? ((ULONG) raw & all) : all;
     }
     if(!uvcControlAsk(ncv, uci, entity, UVUDR_GET_MAX, &raw, NULL) || ((ULONG) raw >= UVC_CHOICE_BITS))
     {
-        return(all);
+        return all;
     }
-    return(all & ((2UL << raw) - 1));
+    return all & ((2UL << raw) - 1);
 }
 /* \\\ */
 
@@ -292,7 +292,7 @@ LONG uvcControlQuery(struct NepClassVideo *ncv, struct UsbVideoControl *uvc, BOO
 
     if(!uci)
     {
-        return(UVERR_NOCONTROL);
+        return UVERR_NOCONTROL;
     }
     ULONG entity = ue->ue_ID;
 
@@ -321,7 +321,7 @@ LONG uvcControlQuery(struct NepClassVideo *ncv, struct UsbVideoControl *uvc, BOO
                             &info, sizeof(info), &uvc->uvc_Reason);
     if(ioerr && (ioerr != UHIOERR_STALL))
     {
-        return(UVERR_USB);
+        return UVERR_USB;
     }
     if(ioerr)
     {
@@ -335,7 +335,7 @@ LONG uvcControlQuery(struct NepClassVideo *ncv, struct UsbVideoControl *uvc, BOO
     uvc->uvc_Flags |= (info & UVCF_CAMERA) | ((info & UVGIF_DISABLED_COMMIT) ? UVCF_INACTIVE : 0);
     if(!(info & UVGIF_GET))
     {
-        return(0);
+        return 0;
     }
     uvc->uvc_Value = uvcControlNumber(uci, raw);
     if(uvcControlAsk(ncv, uci, entity, UVUDR_GET_DEF, &raw, NULL))
@@ -364,7 +364,7 @@ LONG uvcControlQuery(struct NepClassVideo *ncv, struct UsbVideoControl *uvc, BOO
             uvc->uvc_Step = raw;
         }
     }
-    return(0);
+    return 0;
 }
 /* \\\ */
 
@@ -383,7 +383,7 @@ LONG uvcControlWrite(struct NepClassVideo *ncv, ULONG id, ULONG entity, LONG val
 
     if(!uci)
     {
-        return(UVERR_NOCONTROL);
+        return UVERR_NOCONTROL;
     }
     memset(data, 0, sizeof(data));
     if(uci->uci_Bytes < uci->uci_Size)
@@ -399,9 +399,9 @@ LONG uvcControlWrite(struct NepClassVideo *ncv, ULONG id, ULONG entity, LONG val
     }
     if(ioerr)
     {
-        return((ioerr == UHIOERR_STALL) ? UVERR_REFUSED : UVERR_USB);
+        return (ioerr == UHIOERR_STALL) ? UVERR_REFUSED : UVERR_USB;
     }
-    return(0);
+    return 0;
 }
 /* \\\ */
 
@@ -416,7 +416,7 @@ LONG uvcControlCommand(struct NepClassVideo *ncv, struct IOStdReq *ioreq)
 
     if(!uvc || (ioreq->io_Length < sizeof(struct UsbVideoControl)))
     {
-        return(IOERR_BADLENGTH);
+        return IOERR_BADLENGTH;
     }
     if(ioreq->io_Command == NSCMD_UV_SETCONTROL)
     {
@@ -429,6 +429,6 @@ LONG uvcControlCommand(struct NepClassVideo *ncv, struct IOStdReq *ioreq)
     {
         ioreq->io_Actual = sizeof(struct UsbVideoControl);
     }
-    return(err);
+    return err;
 }
 /* \\\ */

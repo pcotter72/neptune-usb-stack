@@ -81,7 +81,7 @@ LONG uvcIsoStart(struct NepClassVideo *ncv, struct NepVideoStream *ns, struct Ps
                                              RTA_ReportInErrors, TRUE,
                                              TAG_END)))
     {
-        return(UHIOERR_OUTOFMEMORY);
+        return UHIOERR_OUTOFMEMORY;
     }
     LONG ioerr = psdStartRTIso(ns->ns_Iso.ui_Handler);
     if(ioerr)
@@ -89,7 +89,7 @@ LONG uvcIsoStart(struct NepClassVideo *ncv, struct NepVideoStream *ns, struct Ps
         psdFreeRTIsoHandler(ns->ns_Iso.ui_Handler);
         ns->ns_Iso.ui_Handler = NULL;
     }
-    return(ioerr);
+    return ioerr;
 }
 /* \\\ */
 
