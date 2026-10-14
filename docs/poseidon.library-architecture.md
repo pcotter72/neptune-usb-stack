@@ -1019,7 +1019,7 @@ broadcasting `UCM_DOSAvailableEvent` - before scanning. The pass is not tied to 
 so it runs whether or not a prefs file exists; what it does need is for the disk classes to be
 loaded before that first scan, which is why `PsdStackLoader` loads them before it applies the
 config. `psdParseCfg` still uses `nodos` for the boot delay. The ROM resident that sets the
-latch is `romstartup/usbromstart.c` - see [rom-image.md](rom-image.md); it never calls
+latch is `romstartup/usbromstart.c`; it never calls
 `psdParseCfg`, and calls `psdClassScan` unconditionally, even on a machine where no host
 controller turned up.
 
@@ -1689,7 +1689,7 @@ declaration of every LVO, in LVO order, with its register arguments.
 | `poseidon.library/poseidon.sfd` | the public ABI (`==bias 30`) + register args - the canonical API list |
 | `poseidon.library/numtostr.c` | `const` string tables for `psdNumToStr` |
 | `poseidon.library/popo.gui.c` | the built-in MUI device requester task |
-| `romstartup/usbromstart.c` | the ROM startup resident that brings the stack up before DOS (§11, [rom-image.md](rom-image.md)) |
+| `romstartup/usbromstart.c` | the ROM startup resident that brings the stack up before DOS (§11) |
 | `include/devices/usbhcd_common.h` | **lower-edge** shared contract: `UHCMD_QUERYDEVICE`/`USBRESET`, `UHIOERR_*`, `UHA_*`, `UHCF_*` |
 | `include/devices/usbhardware.h` | **lower-edge** legacy transfer contract (`IOUsbHWReq`, the transfer `UHCMD_*`) |
 | `include/devices/usbhcd_context.h` | **lower-edge** context contract (`NSCMD_USB_*` ops, `UhcdAttach`, submit entries, tokens) |
