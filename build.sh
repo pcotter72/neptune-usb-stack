@@ -23,7 +23,8 @@
 #     --upload    push the built binaries to the Amiga: the library, the classes, the
 #                 commands, Trident, USBEject and the VHI driver (to LIBS:VHI/)
 #     (none of --build/--package/--upload => --build --upload)
-#     --tools     also upload the optional per-gadget tools to SYS:Tools/
+#     --tools     also upload the optional per-gadget tools to SYS:Tools/, and the test
+#                 tools that no archive has (UVCTest)
 #     --all-cpus  build/package every released CPU (68020, 68040, 68060) in turn, each
 #                 in its own build dir; cannot be combined with --upload
 #     --dry-run   upload: show what would be copied; copy nothing
@@ -160,6 +161,10 @@ GADGET_TOOLS=(
     "tools/UPSTool|SYS:Tools/UPSTool"
     "tools/UVCTool|SYS:Tools/UVCTool"
 )
+# Test tools: built and uploaded with the gadget tools, in no archive
+TEST_TOOLS=(
+    "tools/UVCTest|SYS:Tools/UVCTest"
+)
 
 # --- helpers -----------------------------------------------------------------
 ae() { "$AE" "$@"; }                       # AE.exe always exits 0 - parse its output, not $?
@@ -285,9 +290,9 @@ if (( DO_UPLOAD )); then
     deploy_group "${CORE[@]}"
 
     if (( DO_TOOLS )); then
-        echo ">> deploying per-gadget tools to SYS:Tools ..."
+        echo ">> deploying per-gadget and test tools to SYS:Tools ..."
         (( DRY )) || ensure_dir "SYS:Tools"
-        deploy_group "${GADGET_TOOLS[@]}"
+        deploy_group "${GADGET_TOOLS[@]}" "${TEST_TOOLS[@]}"
     fi
 fi
 

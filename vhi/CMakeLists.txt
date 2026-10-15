@@ -10,7 +10,7 @@ target_compile_options(usbvideo_vhi PRIVATE -Os -ffreestanding)
 target_compile_definitions(usbvideo_vhi PRIVATE __NOLIBBASE__)
 target_include_directories(usbvideo_vhi PRIVATE
     ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR})           # mjpegdht.h, which UVCTool uses as well
+    ${CMAKE_CURRENT_SOURCE_DIR})           # mjpegdht.h, which the UVC tools use as well
 # -lnix: the C library's memmove() (the frame is slid down over itself) rests on a block
 # copy that lives there. Nothing else is taken from it.
 target_link_libraries(usbvideo_vhi PRIVATE
