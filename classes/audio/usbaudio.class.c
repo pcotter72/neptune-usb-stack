@@ -2656,6 +2656,7 @@ void nInDoneHook(struct Hook * hook asm("a0"), struct IOUsbHWRTIso * urti asm("a
 
         case 3:
             cnt /= 3;
+            break;
 
         case 4:
             cnt >>= 2;
