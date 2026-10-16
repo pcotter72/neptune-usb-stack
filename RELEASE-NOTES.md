@@ -1,3 +1,75 @@
+# Release notes - Poseidon for AmigaOS 6.3
+
+Everything in this archive - `poseidon.library`, all 30 class drivers, Trident, USBEject
+and the command-line tools - reports version **6.3**, followed by the CPU it was built
+for.
+
+**Upgrading from 6.2:** install the whole archive. Your settings are untouched.
+
+## USB cameras
+
+A new class, `usbvideo.class`, drives webcams that follow the USB Video Class standard
+(UVC 1.0, 1.1 and 1.5). Each camera becomes a unit of `usbvideo.device`, from which programs
+fetch their pictures. It needs `xhci.device` 6.4 from the Emu68 driver stack on a Pi 4 or
+CM4. Tested with a Logitech C930e, up to 1920x1080 at 30 frames a second.
+
+* **Formats:** Motion-JPEG and uncompressed (YUY2, NV12 and others) in every size and rate
+  the camera offers; H.264 from cameras that carry it inside Motion-JPEG, such as the C930e.
+  The H.264 and VP8 formats of UVC 1.5, frame-based formats and cameras that send over bulk
+  transfers are supported but not tested.
+* **A VHI driver, `usbvideo.vhi`,** for cAMIra and other VHI programs; the Installer offers
+  to put it into `LIBS:VHI/`. Each camera is one input; the program's own size setting picks
+  the camera's nearest size.
+* **A settings window per camera** in Trident: brightness, exposure, focus, white balance and
+  the other standard controls, acting at once. Save keeps them for that camera; the Mode
+  page sets the picture size and rate for programs that ask for none.
+* **`UVCTool`**, among the optional tools: `UVCTool` lists the camera's modes,
+  `UVCTool TO=RAM:shot` saves a picture, `UVCTool WIDTH=1280 HEIGHT=720 FRAMES=10 TO=RAM:cam`
+  ten. `FORMAT=H264 ... TO=RAM:cam` saves `RAM:cam.h264`; `BITRATE=` and `KEYFRAME=` set the
+  encoder.
+* **The camera's microphone** is an AHI recording mode (see below), and an idle camera is
+  suspended with power saving on.
+
+Not in this release: choosing the frame rate from a VHI program, still images, and the
+makers' own controls in the settings window.
+
+For programmers: `<devices/usbvideodevice.h>`. Besides the pictures it gives the controls by
+name (`NSCMD_UV_NEXTCONTROL`, `NSCMD_UV_GETCONTROL`, `NSCMD_UV_SETCONTROL`) and raw
+(`NSCMD_UV_GETTOPOLOGY`, `NSCMD_UV_REQUEST`), and what the camera reports by itself
+(`NSCMD_UV_WAITEVENT`). `psdAllocRTIsoHandler()` has a new tag, `RTA_ReportInErrors`, for
+classes that must know about isochronous intervals lost without data.
+
+## USB audio: devices that only record
+
+A device with a microphone and no loudspeaker, such as a webcam, now gets AHI modes of its
+own, named "Rec" with their format. Recorded sound reaches AHI in blocks of 1024 samples, as
+from AHI's other drivers.
+
+## USB in ROM
+
+* The custom Kickstart holds 1.5 MB of modules instead of 1 MB.
+* The build script is now Python: `python3 ROM/build-kickstart.py`, same arguments.
+
+## Bug fixes
+
+* **Rare crashes and freezes under load:** the library's memory pool was not guarded against
+  two tasks at once.
+* **USB audio:** 24 bit mono recording delivered a quarter of the samples; high speed devices
+  of the 1.0 audio standard had their timing taken eight times too long; the device is now
+  set to the sample rate AHI really uses, not the one the program first asked for.
+* **NTFS and exFAT** filesystems get 64 KB of stack instead of 8 KB (mounting NTFS crashed);
+  the stack is now a setting per filesystem in the mass storage settings.
+* **A device in use is no longer logged as a failed suspend** - once, as a warning, that
+  the class declined.
+* **Disk-change notification with several partitions** read its list unprotected.
+* **A failed switch of an interface's alternate setting is taken back**, so the host
+  controller and the library no longer disagree about the endpoints ("Adding RT Iso Handler
+  failed", no sound).
+* **Unplugging a device could leave its hub deaf** to new devices until a reboot, when a
+  class was resetting the device's port at that moment.
+* **Unloading a class driver could crash** when a program still had its device open.
+* **A bus error on a UAS disk's endpoint** is now cleared on the disk as well.
+
 # Release notes - Poseidon for AmigaOS 6.2
 
 Everything in this archive - `poseidon.library`, all 29 class drivers, Trident, USBEject

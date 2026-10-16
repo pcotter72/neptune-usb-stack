@@ -97,6 +97,7 @@ foreach(i RANGE ${_n})
 endforeach()
 
 # Niche per-gadget tools - opt-in at install time (the Installer asks); shipped under Tools/.
+# UVCTest, the test bench of usbvideo.class, is built but not shipped.
 install(TARGETS DRadioTool PencamTool PowManTool RocketTool SonixcamTool UPSTool UVCTool
         RUNTIME DESTINATION Tools)
 
