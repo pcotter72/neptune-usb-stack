@@ -11,6 +11,7 @@
 #include "usbaudio.class.h"
 
 #include <proto/ahi.h>
+#include <proto/timer.h>
 
 #include <stdlib.h>
 
@@ -546,17 +547,69 @@ static const ULONG commonFreqs[] =
     0x8A2D, 0x88C5, 0x8759, 0x85E9, 0x8475, 0x82FD, 0x8180, 0x8000
 };*/
 
+/* /// "nRecMode()" */
+/* The recording half of an AHI mode, if it has one. A playback stream brings
+   the recording stream of its shape along (nam_RecStream). A recording stream
+   that no playback stream matches - a camera's microphone - is an AHI mode by
+   itself: it records, the timer keeps AHI's player and mixer going, and what
+   is mixed goes nowhere. */
+static struct NepAudioMode * nRecMode(struct NepAudioMode *nam)
+{
+    return nam->nam_IsInput ? nam : nam->nam_RecStream;
+}
+/* \\\ */
+
+/* /// "nAltForFreq()" */
+/* The alternate setting of a mode that carries the rate. Only a mode that
+   records and nothing else has more than one: a camera's microphone has an
+   alternate setting per sample rate, and they are one AHI mode with all the
+   rates (nExamineAudioUnits). */
+static struct NepAudioMode * nAltForFreq(struct NepAudioMode *nam, ULONG freq)
+{
+    if(!nam->nam_IsInput)
+    {
+        return nam;   /* only a record-only mode has alternates */
+    }
+    for(struct NepAudioMode *alt = (struct NepAudioMode *) nam->nam_Unit->nch_AudioModes.lh_Head;
+        alt->nam_Node.ln_Succ;
+        alt = (struct NepAudioMode *) alt->nam_Node.ln_Succ)
+    {
+        if(alt->nam_PartOf != nam)
+        {
+            continue;
+        }
+        for(ULONG cnt = 0; cnt < alt->nam_NumFrequencies; cnt++)
+        {
+            if(alt->nam_FreqArray[cnt] == freq)
+            {
+                return alt;
+            }
+        }
+    }
+    return nam;   /* the rate is the mode's own */
+}
+/* \\\ */
+
+/* /// "nGetOutputUnit()" */
+/* The unit that holds the playback controls of a mode, if it plays */
+static struct NepAudioUnit * nGetOutputUnit(struct NepAudioMode *nam)
+{
+    return(nam->nam_IsInput ? NULL : nam->nam_RootUnit);
+}
+/* \\\ */
+
 /* /// "nGetInputUnit()" */
 struct NepAudioUnit * nGetInputUnit(struct NepAudioMode *nam)
 {
+    struct NepAudioMode *recnam = nRecMode(nam);
     struct NepAudioUnit *nau = NULL;
-    if(nam->nam_Sibling)
+    if(recnam)
     {
-        if(nam->nam_Sibling->nam_RootUnit->nau_SelectorUnit)
+        if(recnam->nam_RootUnit->nau_SelectorUnit)
         {
-            nau = nam->nam_Sibling->nam_RootUnit->nau_SelectorUnit->nau_InputUnit[nam->nam_CurrInput]->nau_RootUnit;
+            nau = recnam->nam_RootUnit->nau_SelectorUnit->nau_InputUnit[nam->nam_CurrInput]->nau_RootUnit;
         } else {
-            nau = nam->nam_Sibling->nam_RootUnit;
+            nau = recnam->nam_RootUnit;
         }
     }
     return(nau);
@@ -569,7 +622,9 @@ void nAudioTask()
 
     struct NepClassAudio *nch;
     struct NepAudioMode *nam;
+    struct NepAudioMode *recnam;
     struct NepAudioUnit *innau;
+    struct NepAudioUnit *outnau;
     ULONG sigmask;
     ULONG sigs;
     UBYTE buf[2];
@@ -591,9 +646,11 @@ void nAudioTask()
             if(nch->nch_UpdateFlags)
             {
                 nam = nch->nch_CurrentMode;
-                if((nch->nch_UpdateFlags & UAF_SELECT_OUTPUT) && nam->nam_RootUnit->nau_SelectorUnit)
+                recnam = nRecMode(nam);
+                outnau = nGetOutputUnit(nam);
+                if((nch->nch_UpdateFlags & UAF_SELECT_OUTPUT) && outnau && outnau->nau_SelectorUnit)
                 {
-                    struct NepAudioUnit *nau = nam->nam_RootUnit->nau_SelectorUnit;
+                    struct NepAudioUnit *nau = outnau->nau_SelectorUnit;
                     KPRINTF(10, ("Setting output %ld to %08lx\n", nau->nau_UnitID, nam->nam_CurrOutput));
                     buf[0] = nam->nam_CurrOutput + 1;
                     psdPipeSetup(nch->nch_EP0Pipe, URTF_CLASS|URTF_INTERFACE, UAUDR_SET_CUR, 0, (nau->nau_UnitID<<8)|nch->nch_IfNum);
@@ -605,9 +662,9 @@ void nAudioTask()
                                        psdNumToStr(NTS_IOERR, ioerr, "unknown"), ioerr);
                     }
                 }
-                if((nch->nch_UpdateFlags & UAF_SELECT_INPUT) && nam->nam_Sibling && nam->nam_Sibling->nam_RootUnit->nau_SelectorUnit)
+                if((nch->nch_UpdateFlags & UAF_SELECT_INPUT) && recnam && recnam->nam_RootUnit->nau_SelectorUnit)
                 {
-                    struct NepAudioUnit *nau = nam->nam_Sibling->nam_RootUnit->nau_SelectorUnit;
+                    struct NepAudioUnit *nau = recnam->nam_RootUnit->nau_SelectorUnit;
                     KPRINTF(10, ("Setting input %ld to %08lx\n", nau->nau_UnitID, nam->nam_CurrInput));
                     buf[0] = nam->nam_CurrInput + 1;
                     psdPipeSetup(nch->nch_EP0Pipe, URTF_CLASS|URTF_INTERFACE, UAUDR_SET_CUR, 0, (nau->nau_UnitID<<8)|nch->nch_IfNum);
@@ -619,9 +676,9 @@ void nAudioTask()
                                        psdNumToStr(NTS_IOERR, ioerr, "unknown"), ioerr);
                     }
                 }
-                if((nch->nch_UpdateFlags & UAF_MASTER_VOLUME) && nam->nam_RootUnit->nau_VolumeControl)
+                if((nch->nch_UpdateFlags & UAF_MASTER_VOLUME) && outnau && outnau->nau_VolumeControl)
                 {
-                    struct NepAudioUnit *nau = nam->nam_RootUnit->nau_VolumeUnit;
+                    struct NepAudioUnit *nau = outnau->nau_VolumeUnit;
                     Fixed vol;
                     UWORD cnt;
 
@@ -1026,8 +1083,6 @@ void nExamineAudioDescriptors(struct NepClassAudio *nch)
     struct UsbAudioType1FormatDesc *uat1f;
     struct UsbAudioGeneralEPDesc *uage;
     ULONG audioformat;
-    ULONG ahisamtype = 0;
-    BOOL typegood;
     BOOL freqctrl = FALSE;
     BOOL pitchctrl = FALSE;
     ULONG ahimodeid = AHI_USB_MODE_BASE + (nch->nch_UnitNo<<12);
@@ -1114,51 +1169,11 @@ void nExamineAudioDescriptors(struct NepClassAudio *nch)
                             }
                         }
 
-                        typegood = TRUE;
-                        if(uat1f->bNrChannels == 1)
-                        {
-                            if(uat1f->bBitResolution == 8)
-                            {
-                                ahisamtype = AHIST_M8S;
-                            }
-                            else if(uat1f->bBitResolution == 16)
-                            {
-                                ahisamtype = AHIST_M16S;
-                            }
-                            else if((uat1f->bBitResolution > 16) && (uat1f->bBitResolution <= 24))
-                            {
-                                ahisamtype = 0; // no AHI representation of this mode
-                            }
-                            else if((uat1f->bBitResolution > 24) && (uat1f->bBitResolution <= 32))
-                            {
-                                ahisamtype = AHIST_M32S;
-                            } else {
-                                typegood = FALSE;
-                            }
-                        }
-                        else if(uat1f->bNrChannels == 2)
-                        {
-                            if(uat1f->bBitResolution == 8)
-                            {
-                                ahisamtype = AHIST_S8S;
-                            }
-                            else if(uat1f->bBitResolution == 16)
-                            {
-                                ahisamtype = AHIST_S16S;
-                            }
-                            else if((uat1f->bBitResolution > 16) && (uat1f->bBitResolution <= 24))
-                            {
-                                ahisamtype = 0; // no AHI representation of this mode
-                            }
-                            else if((uat1f->bBitResolution > 24) && (uat1f->bBitResolution <= 32))
-                            {
-                                ahisamtype = AHIST_S32S;
-                            } else {
-                                typegood = FALSE;
-                            }
-                        } else {
-                            typegood = FALSE;
-                        }
+                        /* mono or stereo, of 8, 16 or 17 to 32 bits */
+                        BOOL typegood = ((uat1f->bNrChannels == 1) || (uat1f->bNrChannels == 2)) &&
+                                        ((uat1f->bBitResolution == 8) || (uat1f->bBitResolution == 16) ||
+                                         ((uat1f->bBitResolution > 16) && (uat1f->bBitResolution <= 32)));
+
                         if(!typegood)
                         {
                             psdAddErrorMsg(RETURN_WARN, (STRPTR) libname, "Unsupported mode '%s' with %ld bits x %ld channels ignored.",
@@ -1184,7 +1199,6 @@ void nExamineAudioDescriptors(struct NepClassAudio *nch)
                                 }
 
                                 nam->nam_IfNum = ifnum;
-                                nam->nam_SampleType = ahisamtype;
                                 nam->nam_NumChannels = uat1f->bNrChannels;
                                 nam->nam_FrameSize = uat1f->bSubframeSize * nam->nam_NumChannels;
                                 nam->nam_SampleSize = uat1f->bSubframeSize;
@@ -1353,7 +1367,6 @@ void nExamineAudioUnits(struct NepClassAudio *nch)
     UBYTE *descdata;
     IPTR subtype;
     struct NepAudioMode *nam;
-    struct NepAudioMode *sibnam;
     struct NepAudioUnit *nau;
     KPRINTF(10, ("ExamineAudioDesc Stage 2\n"));
 
@@ -1820,82 +1833,133 @@ void nExamineAudioUnits(struct NepClassAudio *nch)
         nam = (struct NepAudioMode *) nam->nam_Node.ln_Succ;
     }
 
-    // find recording modes and assign as sibling
+    // pair recording streams with playback modes (the modes outlive a binding: what is paired stays paired)
     nam = (struct NepAudioMode *) nch->nch_AudioModes.lh_Head;
     while(nam->nam_Node.ln_Succ)
     {
-        if(nam->nam_IsInput)
+        if(nam->nam_IsInput && !nam->nam_PartOf)
         {
             KPRINTF(10, ("Trying to find matching record mode for %ld channel(s) and %ld bits.\n", nam->nam_NumChannels, nam->nam_Resolution));
-            sibnam = (struct NepAudioMode *) nch->nch_AudioModes.lh_Head;
-            while(sibnam->nam_Node.ln_Succ)
+            struct NepAudioMode *playmode = (struct NepAudioMode *) nch->nch_AudioModes.lh_Head;
+
+            while(playmode->nam_Node.ln_Succ)
             {
-                if(!sibnam->nam_IsInput)
+                if(!playmode->nam_IsInput)
                 {
-                    if((sibnam->nam_Resolution == nam->nam_Resolution) &&
-                       (sibnam->nam_NumChannels == nam->nam_NumChannels) &&
-                       (sibnam->nam_FrameSize == nam->nam_FrameSize) &&
-                       (sibnam->nam_NumFrequencies == nam->nam_NumFrequencies) &&
-                       (sibnam->nam_MinFreq == nam->nam_MinFreq) &&
-                       (sibnam->nam_MaxFreq == nam->nam_MaxFreq) &&
-                       (sibnam->nam_FreqArray[0] == nam->nam_FreqArray[0]))
+                    if((playmode->nam_Resolution == nam->nam_Resolution) &&
+                       (playmode->nam_NumChannels == nam->nam_NumChannels) &&
+                       (playmode->nam_FrameSize == nam->nam_FrameSize) &&
+                       (playmode->nam_NumFrequencies == nam->nam_NumFrequencies) &&
+                       (playmode->nam_MinFreq == nam->nam_MinFreq) &&
+                       (playmode->nam_MaxFreq == nam->nam_MaxFreq) &&
+                       (playmode->nam_FreqArray[0] == nam->nam_FreqArray[0]))
                     {
                         KPRINTF(10, ("Recording mode with %ld channel(s) and %ld bits matched.\n", nam->nam_NumChannels, nam->nam_Resolution));
-                        if(sibnam->nam_Sibling)
+                        if(playmode->nam_RecStream)
                         {
                             psdAddErrorMsg(RETURN_WARN, (STRPTR) libname, "Matching playback mode with %ld channel(s) and %ld bits is already occupied.",
-                                           sibnam->nam_NumChannels,
-                                           sibnam->nam_Resolution);
+                                           playmode->nam_NumChannels,
+                                           playmode->nam_Resolution);
                         } else {
-                            nam->nam_Sibling = sibnam;
-                            sibnam->nam_Sibling = nam;
+                            nam->nam_PartOf = playmode;
+                            playmode->nam_RecStream = nam;
                             break;
                         }
                     }
                 }
-                sibnam = (struct NepAudioMode *) sibnam->nam_Node.ln_Succ;
+                playmode = (struct NepAudioMode *) playmode->nam_Node.ln_Succ;
             }
-            if(!sibnam->nam_Node.ln_Succ)
+            if(!playmode->nam_Node.ln_Succ)
             {
                 KPRINTF(10, ("Recording mode with %ld channel(s) and %ld bits could not be matched to an input mode.\n", nam->nam_NumChannels, nam->nam_Resolution));
-                sibnam = (struct NepAudioMode *) nch->nch_AudioModes.lh_Head;
-                while(sibnam->nam_Node.ln_Succ)
+                playmode = (struct NepAudioMode *) nch->nch_AudioModes.lh_Head;
+                while(playmode->nam_Node.ln_Succ)
                 {
-                    if(!sibnam->nam_IsInput)
+                    if(!playmode->nam_IsInput)
                     {
-                        if((sibnam->nam_NumFrequencies == nam->nam_NumFrequencies) &&
-                           (sibnam->nam_MinFreq == nam->nam_MinFreq) &&
-                           (sibnam->nam_MaxFreq == nam->nam_MaxFreq) &&
-                           (sibnam->nam_FreqArray[0] == nam->nam_FreqArray[0]))
+                        if((playmode->nam_NumFrequencies == nam->nam_NumFrequencies) &&
+                           (playmode->nam_MinFreq == nam->nam_MinFreq) &&
+                           (playmode->nam_MaxFreq == nam->nam_MaxFreq) &&
+                           (playmode->nam_FreqArray[0] == nam->nam_FreqArray[0]))
                         {
                             KPRINTF(10, ("Recording mode partially matched.\n"));
-                            if(sibnam->nam_Sibling)
+                            if(playmode->nam_RecStream)
                             {
                                 psdAddErrorMsg(RETURN_WARN, (STRPTR) libname, "Partially matching playback mode with %ld channel(s) and %ld bits is already occupied.",
-                                               sibnam->nam_NumChannels,
-                                               sibnam->nam_Resolution);
+                                               playmode->nam_NumChannels,
+                                               playmode->nam_Resolution);
                             } else {
-                                nam->nam_Sibling = sibnam;
-                                sibnam->nam_Sibling = nam;
+                                nam->nam_PartOf = playmode;
+                                playmode->nam_RecStream = nam;
                                 break;
                             }
                         }
                     }
-                    sibnam = (struct NepAudioMode *) sibnam->nam_Node.ln_Succ;
+                    playmode = (struct NepAudioMode *) playmode->nam_Node.ln_Succ;
                 }
-                if(!sibnam->nam_Node.ln_Succ)
+                if(playmode->nam_Node.ln_Succ)
                 {
-                    psdAddErrorMsg(RETURN_WARN, (STRPTR) libname, "Recording mode with %ld channel(s) and %ld bits could not be matched to an output mode.",
-                                   nam->nam_NumChannels,
-                                   nam->nam_Resolution);
-                } else {
                     psdAddErrorMsg(RETURN_WARN, (STRPTR) libname, "Recording mode with %ld ch@%ldb was assigned to %ld ch@%ldb output mode.",
                                    nam->nam_NumChannels,
                                    nam->nam_Resolution,
-                                   sibnam->nam_NumChannels,
-                                   sibnam->nam_Resolution);
+                                   playmode->nam_NumChannels,
+                                   playmode->nam_Resolution);
                 }
             }
+        }
+        nam = (struct NepAudioMode *) nam->nam_Node.ln_Succ;
+    }
+
+    /* Recording modes that are left over go with no playback mode: each is an
+       AHI mode of its own. Those of one interface that differ in nothing but
+       the alternate setting - a camera has one per sample rate - are one mode,
+       the first of them, with the rates of all; the others hang on to it as
+       its alternates (nAltForFreq). */
+    nam = (struct NepAudioMode *) nch->nch_AudioModes.lh_Head;
+    while(nam->nam_Node.ln_Succ)
+    {
+        if(nam->nam_IsInput && !nam->nam_PartOf)
+        {
+            ULONG had = nam->nam_NumFrequencies;
+            struct NepAudioMode *alt = (struct NepAudioMode *) nam->nam_Node.ln_Succ;
+
+            while(alt->nam_Node.ln_Succ)
+            {
+                if(alt->nam_IsInput && !alt->nam_PartOf &&
+                   (alt->nam_IfNum == nam->nam_IfNum) &&
+                   (alt->nam_NumChannels == nam->nam_NumChannels) &&
+                   (alt->nam_SampleSize == nam->nam_SampleSize) &&
+                   (alt->nam_Resolution == nam->nam_Resolution))
+                {
+                    for(ULONG cnt = 0; cnt < alt->nam_NumFrequencies; cnt++)
+                    {
+                        ULONG freq = alt->nam_FreqArray[cnt];
+                        ULONG have;
+
+                        /* a rate that is there already is listed once */
+                        for(have = 0; (have < nam->nam_NumFrequencies) && (nam->nam_FreqArray[have] != freq); have++);
+                        if((have == nam->nam_NumFrequencies) && (have < 64))
+                        {
+                            nam->nam_FreqArray[nam->nam_NumFrequencies++] = freq;
+                            nam->nam_MinFreq = (freq < nam->nam_MinFreq) ? freq : nam->nam_MinFreq;
+                            nam->nam_MaxFreq = (freq > nam->nam_MaxFreq) ? freq : nam->nam_MaxFreq;
+                        }
+                    }
+                    alt->nam_PartOf = nam;
+                }
+                alt = (struct NepAudioMode *) alt->nam_Node.ln_Succ;
+            }
+            if(nam->nam_NumFrequencies != had)
+            {
+                qsort(nam->nam_FreqArray,
+                      nam->nam_NumFrequencies,
+                      sizeof(nam->nam_FreqArray[0]),
+                      compare_frequencies);
+            }
+            psdAddErrorMsg(RETURN_OK, (STRPTR) libname, "Recording with %ld channel(s) and %ld bits goes with no output mode: an AHI mode of its own, %ld rate(s).",
+                           nam->nam_NumChannels,
+                           nam->nam_Resolution,
+                           nam->nam_NumFrequencies);
         }
         nam = (struct NepAudioMode *) nam->nam_Node.ln_Succ;
     }
@@ -1915,18 +1979,29 @@ void nAddAudioModes(struct NepClassAudio *nch)
     nam = (struct NepAudioMode *) nch->nch_AudioModes.lh_Head;
     while(nam->nam_Node.ln_Succ)
     {
-        if(!nam->nam_IsInput)
+        /* every playback stream, and every recording stream that goes with none */
+        if(!nam->nam_IsInput || !nam->nam_PartOf)
         {
             struct TagItem *tags = nam->nam_Tags;
-            ahimodename = psdCopyStrFmt("%.20s: %s%ld bit %s (%ld bpf)",
-                                        devname,
-                                        (nam->nam_Resolution > 16) ? "HiFi " : "",
-                                        nam->nam_Resolution,
-                                        (nam->nam_NumChannels > 1) ? "stereo++" : "mono",
-                                        nam->nam_FrameSize);
+            struct NepAudioUnit *outnau = nGetOutputUnit(nam);
+            if(nam->nam_IsInput)
+            {
+                ahimodename = psdCopyStrFmt("%.20s: Rec %ld bit %s (%ld bpf)",
+                                            devname,
+                                            nam->nam_Resolution,
+                                            (nam->nam_NumChannels > 1) ? "stereo" : "mono",
+                                            nam->nam_FrameSize);
+            } else {
+                ahimodename = psdCopyStrFmt("%.20s: %s%ld bit %s (%ld bpf)",
+                                            devname,
+                                            (nam->nam_Resolution > 16) ? "HiFi " : "",
+                                            nam->nam_Resolution,
+                                            (nam->nam_NumChannels > 1) ? "stereo++" : "mono",
+                                            nam->nam_FrameSize);
+            }
 
-            KPRINTF(10, ("AHI Mode %s NumInput=%ld, NumOutput=%ld, Sib=%08lx\n",
-                         ahimodename, nam->nam_NumInputs, nam->nam_NumOutputs, nam->nam_Sibling));
+            KPRINTF(10, ("AHI Mode %s NumInput=%ld, NumOutput=%ld, Rec=%08lx\n",
+                         ahimodename, nam->nam_NumInputs, nam->nam_NumOutputs, nam->nam_RecStream));
 
             // AHI samples are always 16 bit, except for HiFi mode, which returns 32 bit
             nam->nam_AHIFrameSize = nam->nam_NumChannels * ((nam->nam_Resolution > 16) ? 4 : 2);
@@ -1944,7 +2019,7 @@ void nAddAudioModes(struct NepClassAudio *nch)
             tags->ti_Data = (ULONG) "";
             tags++;*/
             tags->ti_Tag = AHIDB_Volume;
-            tags->ti_Data = nam->nam_RootUnit->nau_VolumeControl;
+            tags->ti_Data = outnau ? outnau->nau_VolumeControl : FALSE;
             tags++;
             tags->ti_Tag = AHIDB_Panning;
             tags->ti_Data = (nam->nam_NumChannels > 1) ? TRUE : FALSE;
@@ -2497,22 +2572,34 @@ struct NepAudioSubLibBase * (subLibReserved)(struct NepAudioSubLibBase * nas asm
 }
 /* \\\ */
 
+/* /// "nMixAndConvert()" */
+/* One player interval: AHI mixes into nam_MixBuffer, the conversion hook
+   writes it into the fill buffer in the device's format, and that buffer is
+   the next to go to the device (nOutReqHook). */
+static void nMixAndConvert(struct NepAudioMode *nam)
+{
+    struct NepAudioSubLibBase *nas = nam->nam_SubLibBase;
+    struct AHIAudioCtrlDrv *audioctrl = nam->nam_AudioCtrl;
+    UWORD fill = nam->nam_FillBuf;
+
+    CallHookPkt(audioctrl->ahiac_MixerFunc, audioctrl, nam->nam_MixBuffer);
+    CallHookPkt(&nam->nam_SamConvHook, nam->nam_PlayBuffer[fill], (APTR) (IPTR) audioctrl->ahiac_BuffSamples);
+    nam->nam_SendBuf = fill;
+    nam->nam_FillBuf = 1 - fill;
+}
+/* \\\ */
+
 /* /// "subLibPlayerIntV4()" */
 ULONG subLibPlayerIntV4(struct NepAudioMode * nam asm("a1"))
 {
     
     struct NepAudioSubLibBase *nas = nam->nam_SubLibBase;
     struct AHIAudioCtrlDrv *audioctrl = nam->nam_AudioCtrl;
-    UWORD bufnum = nam->nam_NextBufW;
 
     CallHookPkt(audioctrl->ahiac_PlayerFunc, nam->nam_AudioCtrl, NULL);
-    //KPRINTF(1, ("%ld F, %ld sam\n", nam->nam_PlayerMS, cnt));
     if(!nam->nam_Unit->nch_DenyRequests)
     {
-        CallHookPkt(audioctrl->ahiac_MixerFunc, nam->nam_AudioCtrl, nam->nam_AHIBuffer);
-        CallHookPkt(&nam->nam_SamConvHook, nam->nam_USBBuffer[bufnum], (APTR) (IPTR) nam->nam_AudioCtrl->ahiac_BuffSamples);
-        nam->nam_NextBufR = bufnum;
-        nam->nam_NextBufW = 1 - bufnum;
+        nMixAndConvert(nam);
     }
     
     return FALSE;
@@ -2526,23 +2613,59 @@ ULONG subLibPlayerIntV6(struct NepAudioMode * nam asm("a1"))
     
     struct NepAudioSubLibBase *nas = nam->nam_SubLibBase;
     struct AHIAudioCtrlDrv *audioctrl = nam->nam_AudioCtrl;
-    UWORD bufnum = nam->nam_NextBufW;
-    BOOL skipit;
 
     CallHookPkt(audioctrl->ahiac_PlayerFunc, nam->nam_AudioCtrl, NULL);
-    skipit = CallHookPkt(audioctrl->ahiac_PreTimerFunc, nam->nam_AudioCtrl, NULL);
-    //KPRINTF(1, ("%ld F, %ld sam\n", nam->nam_PlayerMS, cnt));
+    BOOL skipit = CallHookPkt(audioctrl->ahiac_PreTimerFunc, nam->nam_AudioCtrl, NULL);
     if(!(skipit || nam->nam_Unit->nch_DenyRequests))
     {
-        CallHookPkt(audioctrl->ahiac_MixerFunc, nam->nam_AudioCtrl, nam->nam_AHIBuffer);
-        CallHookPkt(&nam->nam_SamConvHook, nam->nam_USBBuffer[bufnum], (APTR) (IPTR) nam->nam_AudioCtrl->ahiac_BuffSamples);
-        nam->nam_NextBufR = bufnum;
-        nam->nam_NextBufW = 1 - bufnum;
+        nMixAndConvert(nam);
     }
     CallHookPkt(audioctrl->ahiac_PostTimerFunc, nam->nam_AudioCtrl, NULL);
 
     return FALSE;
     
+}
+/* \\\ */
+
+/* /// "nPlayerTick()" */
+/* The player is called: the milliseconds until its next call
+   (nam_PlayerMS), and the frames AHI mixes for them, at most what the
+   buffers hold. The parts of a millisecond and of a frame carry over: carry
+   is the part frame this pass starts with, *nextcarry gets the one the next
+   pass starts with. */
+static ULONG nPlayerTick(struct NepAudioMode *nam, Fixed carry, Fixed *nextcarry)
+{
+    nam->nam_PlayerInterval &= 0xffff;
+    nam->nam_PlayerInterval += nam->nam_PlayerFrac;
+    nam->nam_PlayerMS = nam->nam_PlayerInterval >> 16;
+
+    /* whole and part frames apart: a slow player at a high rate would
+       overflow 16.16 */
+    ULONG ms = nam->nam_PlayerMS;
+    ULONG part = (carry & 0xffff) + (nam->nam_FramesPerMS & 0xffff) * ms;
+    ULONG frames = (nam->nam_FramesPerMS >> 16) * ms + (part >> 16);
+
+    *nextcarry = part & 0xffff;
+    return (frames > nam->nam_MaxMixFrames) ? nam->nam_MaxMixFrames : frames;
+}
+/* \\\ */
+
+/* /// "nAbortTimer()" */
+/* The timer stops calling the player. Returns whether its request is back
+   in the port, to be collected with WaitIO() (or GetMsg() by the player).
+   AbortIO() is for a request that was sent at least once (exec.doc); a mode
+   that only records, or one unplugged while stopped, has the timer for a
+   clock without having sent it, and the player gives the request its
+   command when it first sends it. */
+static BOOL nAbortTimer(struct NepAudioMode *nam)
+{
+    nam->nam_TimerMsgPort.mp_Flags = PA_IGNORE;
+    if(nam->nam_TimerIOReq->tr_node.io_Command != TR_ADDREQUEST)
+    {
+        return FALSE;
+    }
+    AbortIO((struct IORequest *) nam->nam_TimerIOReq);
+    return TRUE;
 }
 /* \\\ */
 
@@ -2553,13 +2676,24 @@ ULONG subLibPlayerIntDummy(struct NepAudioMode * nam asm("a1"))
     struct NepAudioSubLibBase *nas = nam->nam_SubLibBase;
     struct AHIAudioCtrlDrv *audioctrl = nam->nam_AudioCtrl;
 
-    CallHookPkt(audioctrl->ahiac_PlayerFunc, nam->nam_AudioCtrl, NULL);
-    CallHookPkt(audioctrl->ahiac_MixerFunc, nam->nam_AudioCtrl, nam->nam_AHIBuffer);
+    /* the timer request, if it is what called */
+    GetMsg(&nam->nam_TimerMsgPort);
+
+    /* The next call is due nam_PlayerMS from now; the request goes out
+       before the mixing, which would otherwise stretch every interval.
+       nOutReqHook does not run on the timer clock: its send carry keeps
+       the part frame of this mix. */
+    ULONG frames = nPlayerTick(nam, nam->nam_SendCarry, &nam->nam_SendCarry);
 
     nam->nam_TimerIOReq->tr_node.io_Command = TR_ADDREQUEST;
-    nam->nam_TimerIOReq->tr_time.tv_secs = 0;
-    nam->nam_TimerIOReq->tr_time.tv_micro = 1000000 / (audioctrl->ahiac_PlayerFreq>>16);
+    nam->nam_TimerIOReq->tr_time.tv_secs = nam->nam_PlayerMS / 1000;
+    nam->nam_TimerIOReq->tr_time.tv_micro = (nam->nam_PlayerMS % 1000) * 1000;
     SendIO((struct IORequest *) nam->nam_TimerIOReq);
+
+    /* what plays until then; nobody hears it */
+    audioctrl->ahiac_BuffSamples = frames;
+    CallHookPkt(audioctrl->ahiac_PlayerFunc, nam->nam_AudioCtrl, NULL);
+    CallHookPkt(audioctrl->ahiac_MixerFunc, nam->nam_AudioCtrl, nam->nam_MixBuffer);
 
     return FALSE;
     
@@ -2576,27 +2710,20 @@ void nOutReqHook(struct Hook * hook asm("a0"), struct IOUsbHWRTIso * urti asm("a
     nam->nam_PlayerTimer -= nam->nam_Interval;
     if(nam->nam_PlayerTimer < 0)
     {
-        UWORD bufnum = nam->nam_NextBufW;
-        Fixed cnt = nam->nam_USBBufCnt[bufnum];
+        UWORD bufnum = nam->nam_FillBuf;
+        /* the other buffer starts with the part frame this one leaves */
+        ULONG cnt = nPlayerTick(nam, nam->nam_PlayCarry[bufnum], &nam->nam_PlayCarry[1 - bufnum]);
 
-        nam->nam_PlayerInterval &= 0xffff;
-        nam->nam_PlayerInterval += nam->nam_PlayerFrac;
-        nam->nam_PlayerMS = nam->nam_PlayerInterval>>16;
         nam->nam_PlayerTimer += nam->nam_PlayerMS;
-
-        // calc number of samples to mix
-        cnt += nam->nam_SampleFrac * nam->nam_PlayerMS;
-        nam->nam_USBBufCnt[1 - bufnum] = cnt & 0xffff; // start of buffer count for next buffer
-        cnt >>= 16;
         nam->nam_AudioCtrl->ahiac_BuffSamples = cnt;
-        nam->nam_USBBufLen[bufnum] = cnt * nam->nam_FrameSize;
+        nam->nam_PlayLen[bufnum] = cnt * nam->nam_FrameSize;
 
         Cause(&nam->nam_PlayerInt);
-        /*if(nam->nam_USBCount)
+        /*if(nam->nam_SendLeft)
         {
-            KPRINTF(200, ("narf %ld - %ld, %lx, %lx %ld!\n", nam->nam_USBCount, ubr->ubr_Length, nam->nam_PlayerInterval, nam->nam_BufferCount, nam->nam_PlayerTimer));
+            KPRINTF(200, ("narf %ld - %ld, %lx, %lx %ld!\n", nam->nam_SendLeft, ubr->ubr_Length, nam->nam_PlayerInterval, nam->nam_SendCarry, nam->nam_PlayerTimer));
         }*/
-        nam->nam_USBCount = 0;
+        nam->nam_SendLeft = 0;
         //KPRINTF(1, ("NT %ld\n", nam->nam_PlayerTimer));
     }
     if(nam->nam_Unit->nch_DenyRequests)
@@ -2605,19 +2732,28 @@ void nOutReqHook(struct Hook * hook asm("a0"), struct IOUsbHWRTIso * urti asm("a
         return;
     }
  
-    if(nam->nam_USBCount <= 0)
+    if(nam->nam_SendLeft <= 0)
     {
         // switching is done via Mixer Int
         // ubr_Buffer automatically increases
-        ubr->ubr_Buffer = (UBYTE *) nam->nam_USBBuffer[nam->nam_NextBufR];
-        nam->nam_BufferCount = nam->nam_USBBufCnt[nam->nam_NextBufR];
-        nam->nam_USBCount = nam->nam_USBBufLen[nam->nam_NextBufR];
+        ubr->ubr_Buffer = nam->nam_PlayBuffer[nam->nam_SendBuf];
+        nam->nam_SendCarry = nam->nam_PlayCarry[nam->nam_SendBuf];
+        nam->nam_SendLeft = nam->nam_PlayLen[nam->nam_SendBuf];
     }
-    nam->nam_BufferCount &= 0xffff;
-    nam->nam_BufferCount += nam->nam_SampleFrac;
-    ubr->ubr_Length = (nam->nam_BufferCount>>16) * nam->nam_FrameSize;
-    nam->nam_USBCount -= ubr->ubr_Length;
+    nam->nam_SendCarry &= 0xffff;
+    nam->nam_SendCarry += nam->nam_FramesPerMS * nam->nam_Interval;
+    ubr->ubr_Length = (nam->nam_SendCarry>>16) * nam->nam_FrameSize;
+    nam->nam_SendLeft -= ubr->ubr_Length;
     
+}
+/* \\\ */
+
+/* /// "nRecBlockFrames()" */
+/* Frames each record block has room for: the block, and the service
+   interval that fills it up arrives whole (nInDoneHook) */
+static ULONG nRecBlockFrames(struct NepAudioMode *nam)
+{
+    return REC_BLOCK_FRAMES + nam->nam_IntervalBytes / nam->nam_FrameSize;
 }
 /* \\\ */
 
@@ -2626,11 +2762,13 @@ void nInReqHook(struct Hook * hook asm("a0"), struct IOUsbHWRTIso * urti asm("a2
 {
     
     struct NepAudioMode *nam = (struct NepAudioMode *) hook->h_Data;
-    //struct NepAudioSubLibBase *nas = nam->nam_SubLibBase;
 
-    //KPRINTF(1, ("IR %ld\n", ubr->ubr_Length));
-    ubr->ubr_Buffer = (UBYTE *) nam->nam_USBBuffer[0];
-    
+    /* the packet buffer holds one service interval: more is cut off */
+    ubr->ubr_Buffer = nam->nam_PacketBuffer;
+    if(ubr->ubr_Length > nam->nam_IntervalBytes)
+    {
+        ubr->ubr_Length = nam->nam_IntervalBytes;
+    }
 }
 /* \\\ */
 
@@ -2641,43 +2779,31 @@ void nInDoneHook(struct Hook * hook asm("a0"), struct IOUsbHWRTIso * urti asm("a
     struct NepAudioMode *nam = (struct NepAudioMode *) hook->h_Data;
     struct NepAudioSubLibBase *nas = nam->nam_SubLibBase;
 
-    ULONG cnt = ubr->ubr_Length;
+    ULONG cnt = ubr->ubr_Length / nam->nam_FrameSize;
 
-    //KPRINTF(1, ("ID %ld\n", cnt));
-    if(cnt < nam->nam_FrameSize)
+    if(!cnt)
     {
         return;
     }
-    switch(nam->nam_FrameSize)
+    /* AHI gets what was recorded in blocks, not interval by interval */
+    WORD *block = nam->nam_RecMsg.ahirm_Buffer;
+    ULONG have = nam->nam_RecMsg.ahirm_Length;
+
+    /* have < REC_BLOCK_FRAMES, and nInReqHook let in one service interval
+       at most: the block has room for it (nRecBlockFrames) */
+    CallHookPkt(&nam->nam_SamConvHook, block + have * REC_FRAME_WORDS, (APTR) (IPTR) cnt);
+    nam->nam_RecFrames += cnt;
+    nam->nam_RecMsg.ahirm_Length = have + cnt;
+    if(nam->nam_RecMsg.ahirm_Length >= REC_BLOCK_FRAMES)
     {
-        case 2:
-            cnt >>= 1;
-            break;
-
-        case 3:
-            cnt /= 3;
-            break;
-
-        case 4:
-            cnt >>= 2;
-            break;
-
-        case 6:
-            cnt /= 6;
-            break;
-
-        case 8:
-            cnt >>= 3;
-            break;
+        CallHookPkt(nam->nam_AudioCtrl->ahiac_SamplerFunc, nam->nam_AudioCtrl, &nam->nam_RecMsg);
+        /* on with the other block: the one handed over stays as it is until the next one goes */
+        nam->nam_RecMsg.ahirm_Buffer = (block == nam->nam_RecBuffer)
+                                       ? nam->nam_RecBuffer + nRecBlockFrames(nam) * REC_FRAME_WORDS
+                                       : nam->nam_RecBuffer;
+        nam->nam_RecMsg.ahirm_Length = 0;
     }
-    // target format is always 16 bit stereo
-    nam->nam_RecMsg.ahirm_Type = AHIST_S16S;
-    nam->nam_RecMsg.ahirm_Buffer = nam->nam_AHIBuffer;
-    nam->nam_RecMsg.ahirm_Length = cnt;
-    CallHookPkt(&nam->nam_SamConvHook, nam->nam_AHIBuffer, (APTR) (IPTR) cnt);
 
-    CallHookPkt(nam->nam_AudioCtrl->ahiac_SamplerFunc, nam->nam_AudioCtrl, &nam->nam_RecMsg);
-    
 }
 /* \\\ */
 
@@ -2694,10 +2820,14 @@ void nReleaseHook(struct Hook * hook asm("a0"), APTR prt asm("a2"), APTR unused 
         // we can only stop recording, we still need to call the player func until audio is done
         psdAddErrorMsg(RETURN_ERROR, (STRPTR) libname, psdTxt("Recording stopped.", "Violently stopped recording!"));
     } else {
-        nam->nam_PlayerInt.is_Code = (VOID_FUNC)subLibPlayerIntDummy;
-        // start timer device
+        /* AHI's player goes on, on the timer clock, until AHI stops it;
+           if it is not playing, subLibStart() starts the timer */
+        nam->nam_PlayerInt.is_Code = (VOID_FUNC) subLibPlayerIntDummy;
         nam->nam_FallbackTimer = TRUE;
-        Cause(&nam->nam_PlayerInt);
+        if(nam->nam_Playing)
+        {
+            Cause(&nam->nam_PlayerInt);
+        }
     }
     nch->nch_DenyRequests = TRUE;
     psdAddErrorMsg(RETURN_ERROR, (STRPTR) libname,
@@ -2987,16 +3117,22 @@ BOOL nSelectAudioMode(struct NepAudioMode *nam)
     struct NepClassAudio *nch = nam->nam_Unit;
     UBYTE freqbuf[3];
     ULONG freq = nam->nam_AudioCtrl->ahiac_MixFreq;
+    struct NepAudioMode *alt = nAltForFreq(nam, freq);
+    IPTR highspeed = FALSE;
+    IPTR superspeed = FALSE;
+    IPTR pktsize = 0;
+    IPTR mult = 1;
+    IPTR bytesperinterval = 0;
     LONG ioerr;
     ULONG maxfreq;
 
     KPRINTF(1, ("SelectingAltInterface\n"));
-    if(!(psdSetAltInterface(nam->nam_EP0Pipe, nam->nam_Interface)))
+    if(!(psdSetAltInterface(nam->nam_EP0Pipe, alt->nam_Interface)))
     {
         psdAddErrorMsg(RETURN_FAIL, (STRPTR) libname, "Cannot select alternate interface!");
         return(FALSE);
     }
-    nam->nam_EP = psdFindEndpoint(nam->nam_Interface, NULL,
+    nam->nam_EP = psdFindEndpoint(alt->nam_Interface, NULL,
                                   EA_IsIn, nam->nam_IsInput,
                                   EA_TransferType, USEAF_ISOCHRONOUS,
                                   TAG_END);
@@ -3010,22 +3146,40 @@ BOOL nSelectAudioMode(struct NepAudioMode *nam)
     }
     psdGetAttrs(PGA_ENDPOINT, nam->nam_EP,
                 EA_EndpointNum, &nam->nam_EPNum,
-                EA_MaxPktSize, &nam->nam_MaxPktSize,
+                EA_MaxPktSize, &pktsize,
+                EA_NumTransMuFrame, &mult,
+                EA_BytesPerInterval, &bytesperinterval,
                 EA_Interval, &nam->nam_Interval,
                 TAG_END);
     /* endpoint-recipient requests carry the full endpoint address (incl. direction bit) in wIndex */
     nam->nam_EPAddr = nam->nam_EPNum | (nam->nam_IsInput ? URTF_IN : 0);
 
-    maxfreq = (1000 * nam->nam_MaxPktSize) / (nam->nam_FrameSize * nam->nam_Interval);
-    if(maxfreq < nam->nam_MaxFreq)
+    /* A high speed or SuperSpeed endpoint has its interval in microframes;
+       everything here counts milliseconds. (One that is served more often
+       than once a millisecond is taken for one that is not: it records, and
+       it would play at the wrong pace.) */
+    psdGetAttrs(PGA_DEVICE, nch->nch_Device,
+                DA_IsHighspeed, &highspeed,
+                DA_IsSuperspeed, &superspeed,
+                TAG_END);
+    if(highspeed || superspeed)
     {
-        psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
-                       "Maximum frequency was indicated as %ld Hz, but bandwidth-wise, only %ld Hz is possible.",
-                       nam->nam_MaxFreq, maxfreq);
-        nam->nam_MaxFreq = maxfreq;
+        nam->nam_Interval = (nam->nam_Interval > 8) ? (nam->nam_Interval >> 3) : 1;
     }
 
-    if(nam->nam_HasFreqCtrl)
+    /* What the endpoint of this alternate setting can carry: a high speed
+       endpoint may make up to three transactions a microframe, a SuperSpeed
+       one says it in its companion descriptor */
+    nam->nam_IntervalBytes = superspeed ? bytesperinterval : pktsize * mult;
+    maxfreq = (1000 * nam->nam_IntervalBytes) / (nam->nam_FrameSize * nam->nam_Interval);
+    if(maxfreq < freq)
+    {
+        psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
+                       "%ld Hz was asked for, but bandwidth-wise, only %ld Hz is possible.",
+                       freq, maxfreq);
+    }
+
+    if(alt->nam_HasFreqCtrl)
     {
         KPRINTF(1, ("Setting frequency\n"));
         freqbuf[0] = freq;
@@ -3041,7 +3195,7 @@ BOOL nSelectAudioMode(struct NepAudioMode *nam)
                            psdNumToStr(NTS_IOERR, ioerr, "unknown"), ioerr);
         }
     }
-    if(nam->nam_HasPitchCtrl)
+    if(alt->nam_HasPitchCtrl)
     {
         KPRINTF(1, ("Setting pitch control\n"));
         freqbuf[0] = 1;
@@ -3113,12 +3267,74 @@ BOOL nSelectAudioMode(struct NepAudioMode *nam)
 }
 /* \\\ */
 
+/* /// "nConverter()" */
+/* Sample conversion hooks by bytes per sample (1 to 4) and channels (1, 2):
+   playback converts AHI's mix into the device's format, recording the
+   device's format into 16 bit stereo for AHI. */
+static const APTR PlayConverters[4][2] =
+{
+    { (APTR) nConv8BitMono,  (APTR) nConv8BitStereo },
+    { (APTR) nConv16BitMono, (APTR) nConv16BitStereo },
+    { (APTR) nConv24BitMono, (APTR) nConv24BitStereo },
+    { (APTR) nConv32BitMono, (APTR) nConv32BitStereo }
+};
+static const APTR RecConverters[4][2] =
+{
+    { (APTR) nRec8BitMono,  (APTR) nRec8BitStereo },
+    { (APTR) nRec16BitMono, (APTR) nRec16BitStereo },
+    { (APTR) nRec24BitMono, (APTR) nRec24BitStereo },
+    { (APTR) nRec32BitMono, (APTR) nRec32BitStereo }
+};
+
+/* Set the mode's conversion hook from table; FALSE for a sample format
+   it has none for */
+static BOOL nConverter(struct NepAudioMode *nam, const APTR table[4][2])
+{
+    UWORD size = nam->nam_SampleSize;
+    UWORD channels = nam->nam_NumChannels;
+
+    if((size < 1) || (size > 4) || (channels < 1) || (channels > 2))
+    {
+        KPRINTF(10, ("Unknown sample format\n"));
+        return FALSE;
+    }
+    nam->nam_SamConvHook.h_Entry = table[size - 1][channels - 1];
+    return TRUE;
+}
+/* \\\ */
+
+/* /// "nMaxMixFrames()" */
+/* The most frames one player pass mixes (nPlayerTick): the time between two
+   player calls at the slowest rate the program gave AHI - its player rate or
+   its minimum, whichever is lower - and one millisecond more for the part
+   carried over, at the mix rate. At least 100 ms per millisecond of USB
+   interval, what the buffers always had. Both rates normalised to 16.16. */
+static ULONG nMaxMixFrames(struct NepAudioMode *nam, struct AHIAudioCtrlDrv *audioctrl)
+{
+    Fixed slowest = audioctrl->ahiac_PlayerFreq;
+    ULONG frames = (audioctrl->ahiac_MixFreq * nam->nam_Interval) / 10;
+
+    if(audioctrl->ahiac_MinPlayerFreq && (audioctrl->ahiac_MinPlayerFreq < slowest))
+    {
+        slowest = audioctrl->ahiac_MinPlayerFreq;
+    }
+    if(slowest >= 0x10000)
+    {
+        ULONG ms = (((1000UL<<20) / (slowest>>12)) >> 16) + 1;
+        ULONG need = (audioctrl->ahiac_MixFreq * ms) / 1000 + 1;
+
+        frames = (need > frames) ? need : frames;
+    }
+    return frames;
+}
+/* \\\ */
+
 /* /// "subLibAllocAudio()" */
 ULONG (subLibAllocAudio)(struct TagItem * tags asm("a1"), struct AHIAudioCtrlDrv * audioctrl asm("a2"), struct NepAudioSubLibBase * nas asm("a6"))
 {
     
     struct NepAudioMode *nam = (struct NepAudioMode *) GetTagData(AHIDB_NepAudioMode, (IPTR) NULL, tags);
-    struct NepAudioMode *sibnam;
+    struct NepAudioMode *recnam;
     struct NepClassAudio *nch;
     ULONG flags;
     UWORD cnt;
@@ -3144,6 +3360,7 @@ ULONG (subLibAllocAudio)(struct TagItem * tags asm("a1"), struct AHIAudioCtrlDrv
     }
 
     nam->nam_FallbackTimer = FALSE;
+    nam->nam_Playing = FALSE;
     nam->nam_TimerMsgPort.mp_Node.ln_Type = NT_MSGPORT;
     nam->nam_TimerMsgPort.mp_Flags = PA_SOFTINT;
     nam->nam_TimerMsgPort.mp_SigTask = &nam->nam_PlayerInt;
@@ -3160,6 +3377,38 @@ ULONG (subLibAllocAudio)(struct TagItem * tags asm("a1"), struct AHIAudioCtrlDrv
         }
     } else {
         return AHISF_ERROR;
+    }
+
+    /* the rate first: which alternate setting is selected can depend on it */
+    for(cnt = 0; cnt < nam->nam_NumFrequencies; cnt++)
+    {
+        if(audioctrl->ahiac_MixFreq == nam->nam_FreqArray[cnt])
+        {
+            break;
+        }
+    }
+    if(cnt == nam->nam_NumFrequencies)
+    {
+        // need rate adaption
+        ULONG target = audioctrl->ahiac_MixFreq;
+        ULONG diff = 100000;
+        for(cnt = 0; cnt < nam->nam_NumFrequencies; cnt++)
+        {
+            if(nam->nam_FreqArray[cnt] > target)
+            {
+                if(nam->nam_FreqArray[cnt] - target < diff)
+                {
+                    diff = nam->nam_FreqArray[cnt] - target;
+                    audioctrl->ahiac_MixFreq = nam->nam_FreqArray[cnt];
+                }
+            } else {
+                if(target - nam->nam_FreqArray[cnt] < diff)
+                {
+                    diff = target - nam->nam_FreqArray[cnt];
+                    audioctrl->ahiac_MixFreq = nam->nam_FreqArray[cnt];
+                }
+            }
+        }
     }
 
     nch = nam->nam_Unit;
@@ -3205,9 +3454,11 @@ ULONG (subLibAllocAudio)(struct TagItem * tags asm("a1"), struct AHIAudioCtrlDrv
     {
         audioctrl->ahiac_MinPlayerFreq <<= 16;
     }
+    nam->nam_MaxMixFrames = nMaxMixFrames(nam, audioctrl);
+    /* AHI is told 10 Hz at least, as it always was; the buffers are sized
+       above, from what the program gave */
     if(audioctrl->ahiac_MinPlayerFreq < 10<<16)
     {
-        // 100ms intervals max
         audioctrl->ahiac_MinPlayerFreq = 10<<16;
     }
 
@@ -3219,59 +3470,16 @@ ULONG (subLibAllocAudio)(struct TagItem * tags asm("a1"), struct AHIAudioCtrlDrv
     /* ahiac_Channels is the number of mixer channels the application asked
        for, not the device's output channel count - AHI sizes its per-channel
        data by it. The device's layout is reported via AHISF_KNOWSTEREO. */
-    /*audioctrl->ahiac_BuffType = nam->nam_SampleType; */
 
-    for(cnt = 0; cnt < nam->nam_NumFrequencies; cnt++)
-    {
-        if(audioctrl->ahiac_MixFreq == nam->nam_FreqArray[cnt])
-        {
-            break;
-        }
-    }
-    if(cnt == nam->nam_NumFrequencies)
-    {
-        // need rate adaption
-        ULONG target = audioctrl->ahiac_MixFreq;
-        ULONG diff = 100000;
-        for(cnt = 0; cnt < nam->nam_NumFrequencies; cnt++)
-        {
-            if(nam->nam_FreqArray[cnt] > target)
-            {
-                if(nam->nam_FreqArray[cnt] - target < diff)
-                {
-                    diff = nam->nam_FreqArray[cnt] - target;
-                    audioctrl->ahiac_MixFreq = nam->nam_FreqArray[cnt];
-                }
-            } else {
-                if(target - nam->nam_FreqArray[cnt] < diff)
-                {
-                    diff = target - nam->nam_FreqArray[cnt];
-                    audioctrl->ahiac_MixFreq = nam->nam_FreqArray[cnt];
-                }
-            }
-        }
-    }
-
-    // buffer for 100 ms max
-    audioctrl->ahiac_BuffSamples = (audioctrl->ahiac_MixFreq * nam->nam_Interval) / 10;
+    audioctrl->ahiac_BuffSamples = nam->nam_MaxMixFrames;
     audioctrl->ahiac_BuffSize = audioctrl->ahiac_BuffSamples * nam->nam_AHIFrameSize;
 
-    nam->nam_AHIBuffer = psdAllocVec(audioctrl->ahiac_BuffSize);
-    nam->nam_USBBuffer[0] = psdAllocVec(audioctrl->ahiac_BuffSamples * nam->nam_FrameSize);
-    nam->nam_USBBuffer[1] = psdAllocVec(audioctrl->ahiac_BuffSamples * nam->nam_FrameSize);
-    if(!(nam->nam_AHIBuffer && nam->nam_USBBuffer[0] && nam->nam_USBBuffer[1]))
+    /* what AHI mixes into */
+    nam->nam_MixBuffer = psdAllocVec(audioctrl->ahiac_BuffSize);
+    if(!nam->nam_MixBuffer)
     {
         return AHISF_ERROR;
     }
-
-    // make sure to play silence, if CPU is too slow on first frame
-    nam->nam_NextBufR = 1;
-    nam->nam_NextBufW = 0;
-    nam->nam_BufferCount = 0;
-    nam->nam_PlayerTimer = 0;
-    nam->nam_USBCount = 0;
-    nam->nam_USBBufLen[0] = 0;
-    nam->nam_USBBufLen[1] = 0;
 
     nam->nam_MasterVol = 0x00010000;
     nam->nam_ChannelVol[0] = 0x00010000;
@@ -3286,122 +3494,81 @@ ULONG (subLibAllocAudio)(struct TagItem * tags asm("a1"), struct AHIAudioCtrlDrv
     nam->nam_PlayerInt.is_Node.ln_Name = "Player Interrupt";
     nam->nam_PlayerInt.is_Node.ln_Pri  = 0;
     nam->nam_PlayerInt.is_Data = nam;
-    if(nam->nam_Unit->nch_AHIBase->lib_Version < 6)
+    if(nam->nam_IsInput)
     {
-        KPRINTF(10, ("Using V4 code\n"));
-        nam->nam_PlayerInt.is_Code = (VOID_FUNC) subLibPlayerIntV4;
+        /* nothing to play to: the timer is the clock from the start, as it
+           is for a sound card that was unplugged while it played */
+        nam->nam_FallbackTimer = TRUE;
+        nam->nam_PlayerInt.is_Code = (VOID_FUNC) subLibPlayerIntDummy;
+        audiomode = "Input-only";
     } else {
-        KPRINTF(10, ("Using V6 code\n"));
-        nam->nam_PlayerInt.is_Code = (VOID_FUNC) subLibPlayerIntV6;
-    }
-    nam->nam_SamConvHook.h_Data = nam->nam_AHIBuffer;
-
-    switch(nam->nam_NumChannels|(nam->nam_SampleSize<<8))
-    {
-        case 1|(1<<8): // 8 bit mono
-            nam->nam_SamConvHook.h_Entry = (APTR) nConv8BitMono;
-            break;
-
-        case 2|(1<<8): // 8 bit stereo
-            nam->nam_SamConvHook.h_Entry = (APTR) nConv8BitStereo;
-            break;
-
-        case 1|(2<<8): // 16 bit mono
-            nam->nam_SamConvHook.h_Entry = (APTR) nConv16BitMono;
-            break;
-
-        case 2|(2<<8): // 16 bit stereo
-            nam->nam_SamConvHook.h_Entry = (APTR) nConv16BitStereo;
-            break;
-
-        case 1|(3<<8): // 24 bit mono
-            nam->nam_SamConvHook.h_Entry = (APTR) nConv24BitMono;
-            break;
-
-        case 2|(3<<8): // 24 bit stereo
-            nam->nam_SamConvHook.h_Entry = (APTR) nConv24BitStereo;
-            break;
-
-        case 1|(4<<8): // 32 bit mono
-            nam->nam_SamConvHook.h_Entry = (APTR) nConv32BitMono;
-            break;
-
-        case 2|(4<<8): // 32 bit stereo
-            nam->nam_SamConvHook.h_Entry = (APTR) nConv32BitStereo;
-            break;
-
-        default:
-            KPRINTF(10, ("Unknown sample format\n"));
+        nam->nam_PlayBuffer[0] = psdAllocVec(nam->nam_MaxMixFrames * nam->nam_FrameSize);
+        nam->nam_PlayBuffer[1] = psdAllocVec(nam->nam_MaxMixFrames * nam->nam_FrameSize);
+        if(!(nam->nam_PlayBuffer[0] && nam->nam_PlayBuffer[1]))
+        {
             return AHISF_ERROR;
+        }
+
+        // make sure to play silence, if CPU is too slow on first frame
+        nam->nam_SendBuf = 1;
+        nam->nam_FillBuf = 0;
+        nam->nam_SendCarry = 0;
+        nam->nam_PlayerTimer = 0;
+        nam->nam_SendLeft = 0;
+        nam->nam_PlayLen[0] = 0;
+        nam->nam_PlayLen[1] = 0;
+
+        if(nam->nam_Unit->nch_AHIBase->lib_Version < 6)
+        {
+            KPRINTF(10, ("Using V4 code\n"));
+            nam->nam_PlayerInt.is_Code = (VOID_FUNC) subLibPlayerIntV4;
+        } else {
+            KPRINTF(10, ("Using V6 code\n"));
+            nam->nam_PlayerInt.is_Code = (VOID_FUNC) subLibPlayerIntV6;
+        }
+        nam->nam_SamConvHook.h_Data = nam->nam_MixBuffer;
+
+        if(!nConverter(nam, PlayConverters))
+        {
+            return AHISF_ERROR;
+        }
+        audiomode = nam->nam_RecStream ? "Full-Duplex" : "Output-only";
     }
 
-    if((sibnam = nam->nam_Sibling))
+    if((recnam = nRecMode(nam)))
     {
-        sibnam->nam_PsdBase = nam->nam_PsdBase;
-        sibnam->nam_AudioCtrl = audioctrl;
-        if(!(sibnam->nam_TaskMsgPort = CreateMsgPort()))
+        if(recnam != nam)
         {
-            return AHISF_ERROR;
-        }
-        if(!(sibnam->nam_EP0Pipe = psdAllocPipe(nch->nch_Device, sibnam->nam_TaskMsgPort, NULL)))
-        {
-            return AHISF_ERROR;
-        }
-        if(!(nSelectAudioMode(sibnam)))
-        {
-            return AHISF_ERROR;
-        }
-        sibnam->nam_AHIBuffer = psdAllocVec(audioctrl->ahiac_BuffSize);
-        sibnam->nam_USBBuffer[0] = psdAllocVec(audioctrl->ahiac_BuffSamples * sibnam->nam_FrameSize);
-        if(!(sibnam->nam_AHIBuffer && sibnam->nam_USBBuffer[0]))
-        {
-            return AHISF_ERROR;
-        }
-        sibnam->nam_SamConvHook.h_Data = sibnam->nam_USBBuffer[0];
-
-        switch(sibnam->nam_NumChannels|(sibnam->nam_SampleSize<<8))
-        {
-            case 1|(1<<8): // 8 bit mono
-                sibnam->nam_SamConvHook.h_Entry = (APTR) nRec8BitMono;
-                break;
-
-            case 2|(1<<8): // 8 bit stereo
-                sibnam->nam_SamConvHook.h_Entry = (APTR) nRec8BitStereo;
-                break;
-
-            case 1|(2<<8): // 16 bit mono
-                sibnam->nam_SamConvHook.h_Entry = (APTR) nRec16BitMono;
-                break;
-
-            case 2|(2<<8): // 16 bit stereo
-                sibnam->nam_SamConvHook.h_Entry = (APTR) nRec16BitStereo;
-                break;
-
-            case 1|(3<<8): // 24 bit mono
-                sibnam->nam_SamConvHook.h_Entry = (APTR) nRec24BitMono;
-                break;
-
-            case 2|(3<<8): // 24 bit stereo
-                sibnam->nam_SamConvHook.h_Entry = (APTR) nRec24BitStereo;
-                break;
-
-            case 1|(4<<8): // 32 bit mono
-                sibnam->nam_SamConvHook.h_Entry = (APTR) nRec32BitMono;
-                break;
-
-            case 2|(4<<8): // 32 bit stereo
-                sibnam->nam_SamConvHook.h_Entry = (APTR) nRec32BitStereo;
-                break;
-
-            default:
-                KPRINTF(10, ("Unknown sample format\n"));
+            recnam->nam_PsdBase = nam->nam_PsdBase;
+            recnam->nam_AudioCtrl = audioctrl;
+            if(!(recnam->nam_TaskMsgPort = CreateMsgPort()))
+            {
                 return AHISF_ERROR;
+            }
+            if(!(recnam->nam_EP0Pipe = psdAllocPipe(nch->nch_Device, recnam->nam_TaskMsgPort, NULL)))
+            {
+                return AHISF_ERROR;
+            }
+            if(!(nSelectAudioMode(recnam)))
+            {
+                return AHISF_ERROR;
+            }
+        }
+        /* two record blocks for AHI, and one service interval as it arrives */
+        recnam->nam_RecBuffer = psdAllocVec(2 * nRecBlockFrames(recnam) * REC_FRAME_WORDS * sizeof(WORD));
+        recnam->nam_PacketBuffer = psdAllocVec(recnam->nam_IntervalBytes);
+        if(!(recnam->nam_RecBuffer && recnam->nam_PacketBuffer))
+        {
+            return AHISF_ERROR;
+        }
+        recnam->nam_SamConvHook.h_Data = recnam->nam_PacketBuffer;
+
+        if(!nConverter(recnam, RecConverters))
+        {
+            return AHISF_ERROR;
         }
 
         flags |= AHISF_CANRECORD;
-        audiomode = "Full-Duplex";
-    } else {
-        audiomode = "Output-only";
     }
     psdAddErrorMsg(RETURN_OK, (STRPTR) libname, "Opening %s audio mode at %ld Hz with %ld channel%s and %ld bits each.",
                    audiomode,
@@ -3420,7 +3587,6 @@ void (subLibFreeAudio)(struct AHIAudioCtrlDrv * audioctrl asm("a2"), struct NepA
 {
 
     struct NepAudioMode *nam = (struct NepAudioMode *) audioctrl->ahiac_DriverData;
-    struct NepAudioMode *sibnam;
 
     KPRINTF(10, ("subLibFreeAudio(%08lx)\n", audioctrl));
     if(!nam)
@@ -3432,40 +3598,40 @@ void (subLibFreeAudio)(struct AHIAudioCtrlDrv * audioctrl asm("a2"), struct NepA
         return;
     }
     nam->nam_Unit->nch_CurrentMode = NULL;
-    if((sibnam = nam->nam_Sibling))
+    struct NepAudioMode *recnam = nam->nam_RecStream;
+
+    if(recnam)
     {
-        if(sibnam->nam_RTIso)
+        if(recnam->nam_RTIso)
         {
-            psdStopRTIso(sibnam->nam_RTIso);
-            psdFreeRTIsoHandler(sibnam->nam_RTIso);
-            sibnam->nam_RTIso = NULL;
+            psdStopRTIso(recnam->nam_RTIso);
+            psdFreeRTIsoHandler(recnam->nam_RTIso);
+            recnam->nam_RTIso = NULL;
         }
 
-        psdFreeVec(sibnam->nam_AHIBuffer);
-        sibnam->nam_AHIBuffer = NULL;
-        psdFreeVec(sibnam->nam_USBBuffer[0]);
-        sibnam->nam_USBBuffer[0] = NULL;
+        psdFreeVec(recnam->nam_RecBuffer);
+        recnam->nam_RecBuffer = NULL;
+        psdFreeVec(recnam->nam_PacketBuffer);
+        recnam->nam_PacketBuffer = NULL;
 
-        if(sibnam->nam_ZeroBWIF)
+        if(recnam->nam_ZeroBWIF)
         {
-            if(!(psdSetAltInterface(sibnam->nam_EP0Pipe, sibnam->nam_ZeroBWIF)))
+            if(!(psdSetAltInterface(recnam->nam_EP0Pipe, recnam->nam_ZeroBWIF)))
             {
                 psdAddErrorMsg(RETURN_ERROR, (STRPTR) libname, "Cannot restore zero bandwidth interface!");
             }
         }
-        if(sibnam->nam_EP0Pipe)
+        if(recnam->nam_EP0Pipe)
         {
-            psdFreePipe(sibnam->nam_EP0Pipe);
-            sibnam->nam_EP0Pipe = NULL;
+            psdFreePipe(recnam->nam_EP0Pipe);
+            recnam->nam_EP0Pipe = NULL;
         }
-        DeleteMsgPort(sibnam->nam_TaskMsgPort);
-        sibnam->nam_TaskMsgPort = NULL;
-        sibnam->nam_PsdBase = NULL;
+        DeleteMsgPort(recnam->nam_TaskMsgPort);
+        recnam->nam_TaskMsgPort = NULL;
+        recnam->nam_PsdBase = NULL;
     }
-    if(nam->nam_FallbackTimer)
+    if(nam->nam_FallbackTimer && nAbortTimer(nam))
     {
-        nam->nam_TimerMsgPort.mp_Flags = PA_IGNORE;
-        AbortIO((struct IORequest *) nam->nam_TimerIOReq);
         WaitIO((struct IORequest *) nam->nam_TimerIOReq);
     }
     if(nam->nam_RTIso)
@@ -3475,12 +3641,16 @@ void (subLibFreeAudio)(struct AHIAudioCtrlDrv * audioctrl asm("a2"), struct NepA
         nam->nam_RTIso = NULL;
     }
 
-    psdFreeVec(nam->nam_AHIBuffer);
-    nam->nam_AHIBuffer = NULL;
-    psdFreeVec(nam->nam_USBBuffer[0]);
-    nam->nam_USBBuffer[0] = NULL;
-    psdFreeVec(nam->nam_USBBuffer[1]);
-    nam->nam_USBBuffer[1] = NULL;
+    psdFreeVec(nam->nam_MixBuffer);
+    nam->nam_MixBuffer = NULL;
+    psdFreeVec(nam->nam_RecBuffer);
+    nam->nam_RecBuffer = NULL;
+    psdFreeVec(nam->nam_PlayBuffer[0]);
+    nam->nam_PlayBuffer[0] = NULL;
+    psdFreeVec(nam->nam_PlayBuffer[1]);
+    nam->nam_PlayBuffer[1] = NULL;
+    psdFreeVec(nam->nam_PacketBuffer);
+    nam->nam_PacketBuffer = NULL;
 
     if(nam->nam_ZeroBWIF)
     {
@@ -3525,6 +3695,10 @@ void (subLibEnable)(struct AHIAudioCtrlDrv * audioctrl asm("a2"), struct NepAudi
 }
 /* \\\ */
 
+/* the timer of the mode: opened when AHI allocated it */
+#undef  TimerBase
+#define TimerBase nam->nam_TimerIOReq->tr_node.io_Device
+
 /* /// "subLibStart()" */
 ULONG (subLibStart)(ULONG flags asm("d0"), struct AHIAudioCtrlDrv * audioctrl asm("a2"), struct NepAudioSubLibBase * nas asm("a6"))
 {
@@ -3552,9 +3726,12 @@ ULONG (subLibStart)(ULONG flags asm("d0"), struct AHIAudioCtrlDrv * audioctrl as
         }
         nam->nam_PlayerFrac = (1000UL<<20) / (nam->nam_AudioCtrl->ahiac_PlayerFreq>>12);
         KPRINTF(10, ("Player Frac = %08lx\n", nam->nam_PlayerFrac));
-        nam->nam_SampleFrac = (((audioctrl->ahiac_MixFreq<<16)) / 1000) * nam->nam_Interval;
+        nam->nam_FramesPerMS = (audioctrl->ahiac_MixFreq<<16) / 1000;
+        nam->nam_Playing = TRUE;
         if(nam->nam_FallbackTimer)
         {
+            /* AHI may start what runs already: the request is not sent twice */
+            nAbortTimer(nam);
             nam->nam_TimerMsgPort.mp_Flags = PA_SOFTINT;
             Cause(&nam->nam_PlayerInt);
         } else {
@@ -3564,11 +3741,16 @@ ULONG (subLibStart)(ULONG flags asm("d0"), struct AHIAudioCtrlDrv * audioctrl as
     }
     if(flags & AHISF_RECORD)
     {
-        struct NepAudioMode *sibnam = nam->nam_Sibling;
-        if(sibnam)
+        struct NepAudioMode *recnam = nRecMode(nam);
+        if(recnam)
         {
-            sibnam->nam_SampleFrac = ((audioctrl->ahiac_MixFreq<<16) / 1000) * sibnam->nam_Interval;
-            psdStartRTIso(sibnam->nam_RTIso);
+            // target format is always 16 bit stereo; the first block is empty
+            recnam->nam_RecMsg.ahirm_Type = AHIST_S16S;
+            recnam->nam_RecMsg.ahirm_Buffer = recnam->nam_RecBuffer;
+            recnam->nam_RecMsg.ahirm_Length = 0;
+            recnam->nam_RecFrames = 0;
+            GetSysTime(&recnam->nam_RecStart);
+            psdStartRTIso(recnam->nam_RTIso);
             res = AHIE_OK;
         } else {
             res = AHIE_UNKNOWN;
@@ -3613,17 +3795,35 @@ ULONG (subLibStop)(ULONG flags asm("d0"), struct AHIAudioCtrlDrv * audioctrl asm
     }
     if(flags & AHISF_PLAY)
     {
+        nam->nam_Playing = FALSE;
         if(nam->nam_FallbackTimer)
         {
-            nam->nam_TimerMsgPort.mp_Flags = PA_IGNORE;
-            AbortIO((struct IORequest *) nam->nam_TimerIOReq);
+            nAbortTimer(nam);
         } else {
             psdStopRTIso(nam->nam_RTIso);
         }
     }
-    if((flags & AHISF_RECORD) && nam->nam_Sibling)
+    struct NepAudioMode *recnam = nRecMode(nam);
+    if((flags & AHISF_RECORD) && recnam)
     {
-        psdStopRTIso(nam->nam_Sibling->nam_RTIso);
+        psdStopRTIso(recnam->nam_RTIso);
+        if(recnam->nam_RecStart.tv_secs)
+        {
+            /* measurement of the recording path: what arrived
+               against what the rate should have brought in that time. Lost
+               intervals show here, as too few frames. */
+            struct timeval now;
+
+            GetSysTime(&now);
+            ULONG ms = (now.tv_secs - recnam->nam_RecStart.tv_secs) * 1000 +
+                       ((LONG) now.tv_micro - (LONG) recnam->nam_RecStart.tv_micro) / 1000;
+            ULONG freq = audioctrl->ahiac_MixFreq;
+            psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
+                           "Recording ended: %ld frames in %ld ms; %ld Hz would make %ld.",
+                           recnam->nam_RecFrames, ms, freq,
+                           (ms / 1000) * freq + ((ms % 1000) * freq) / 1000);
+            recnam->nam_RecStart.tv_secs = 0;
+        }
     }
     return AHIE_OK;
     
@@ -3678,6 +3878,7 @@ IPTR (subLibGetAttr)(ULONG attr asm("d0"), LONG arg asm("d1"), LONG defvalue asm
 
     UWORD cnt;
     struct NepAudioMode *nam = (struct NepAudioMode *) GetTagData(AHIDB_NepAudioMode, (IPTR) NULL, tags);
+    struct NepAudioMode *recnam;
     struct NepAudioUnit *nau;
 
     KPRINTF(10, ("subLibGetAttr(%08lx, %08lx, %ld, %ld)\n", audioctrl, attr, arg, defvalue));
@@ -3745,27 +3946,27 @@ IPTR (subLibGetAttr)(ULONG attr asm("d0"), LONG arg asm("d1"), LONG defvalue asm
             return (IPTR) "Bye...";
 
         case AHIDB_Record:
-            return nam->nam_IsInput || nam->nam_Sibling;
-
-        case AHIDB_FullDuplex:
-            return nam->nam_Sibling ? TRUE : FALSE;
+        case AHIDB_FullDuplex: /* what plays on a mode that only records disturbs nothing */
+            return nRecMode(nam) ? TRUE : FALSE;
 
         case AHIDB_Realtime:
             return TRUE;
 
         case AHIDB_MinOutputVolume:
-            if(nam->nam_RootUnit->nau_VolumeControl)
+            nau = nGetOutputUnit(nam);
+            if(nau && nau->nau_VolumeControl)
             {
-                KPRINTF(10, ("MinOutputVolume %08lx\n", nam->nam_RootUnit->nau_VolumeUnit->nau_MinVolume));
-                return nam->nam_RootUnit->nau_VolumeUnit->nau_MinVolume;
+                KPRINTF(10, ("MinOutputVolume %08lx\n", nau->nau_VolumeUnit->nau_MinVolume));
+                return nau->nau_VolumeUnit->nau_MinVolume;
             }
             return 0;
 
         case AHIDB_MaxOutputVolume:
-            if(nam->nam_RootUnit->nau_VolumeControl)
+            nau = nGetOutputUnit(nam);
+            if(nau && nau->nau_VolumeControl)
             {
-                KPRINTF(10, ("MaxOutputVolume %08lx\n", nam->nam_RootUnit->nau_VolumeUnit->nau_MaxVolume));
-                return nam->nam_RootUnit->nau_VolumeUnit->nau_MaxVolume;
+                KPRINTF(10, ("MaxOutputVolume %08lx\n", nau->nau_VolumeUnit->nau_MaxVolume));
+                return nau->nau_VolumeUnit->nau_MaxVolume;
             }
             return 0;
 
@@ -3818,30 +4019,42 @@ IPTR (subLibGetAttr)(ULONG attr asm("d0"), LONG arg asm("d1"), LONG defvalue asm
             return 0;
 
         case AHIDB_Inputs:
-            if(nam->nam_Sibling && nam->nam_Sibling->nam_RootUnit->nau_SelectorUnit)
+            recnam = nRecMode(nam);
+            if(recnam && recnam->nam_RootUnit->nau_SelectorUnit)
             {
-                return (IPTR) nam->nam_Sibling->nam_RootUnit->nau_SelectorUnit->nau_NumInputs;
+                return (IPTR) recnam->nam_RootUnit->nau_SelectorUnit->nau_NumInputs;
             }
             return 0;
 
         case AHIDB_Input:
-            if(nam->nam_Sibling && nam->nam_Sibling->nam_RootUnit->nau_SelectorUnit)
+            recnam = nRecMode(nam);
+            if(recnam && recnam->nam_RootUnit->nau_SelectorUnit)
             {
-                return (IPTR) nam->nam_Sibling->nam_RootUnit->nau_SelectorUnit->nau_InputUnit[arg]->nau_RootUnit->nau_Name;
+                return (IPTR) recnam->nam_RootUnit->nau_SelectorUnit->nau_InputUnit[arg]->nau_RootUnit->nau_Name;
             }
             return (IPTR) NULL;
 
         case AHIDB_Outputs:
-            if(nam->nam_RootUnit->nau_SelectorUnit)
+            nau = nGetOutputUnit(nam);
+            if(!nau)
             {
-                return (IPTR) nam->nam_RootUnit->nau_SelectorUnit->nau_NumInputs;
+                return 0;
+            }
+            if(nau->nau_SelectorUnit)
+            {
+                return (IPTR) nau->nau_SelectorUnit->nau_NumInputs;
             }
             return (IPTR) nam->nam_NumOutputs;
 
         case AHIDB_Output:
-            if(nam->nam_RootUnit->nau_SelectorUnit)
+            nau = nGetOutputUnit(nam);
+            if(!nau)
             {
-                return (IPTR) nam->nam_RootUnit->nau_SelectorUnit->nau_InputUnit[arg]->nau_RootUnit->nau_Name;
+                return (IPTR) NULL;
+            }
+            if(nau->nau_SelectorUnit)
+            {
+                return (IPTR) nau->nau_SelectorUnit->nau_InputUnit[arg]->nau_RootUnit->nau_Name;
             }
             return (IPTR) nam->nam_OutputNames[arg];
     }
