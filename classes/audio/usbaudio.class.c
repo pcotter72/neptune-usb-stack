@@ -202,6 +202,7 @@ BOOL nVerifyAudioStreamDevice(struct Library *ps, struct PsdInterface *pif)
                                               IFA_InterfaceNum, header->baInterfaceNr[cnt],
                                               IFA_Class, AUDIO_CLASSCODE,
                                               IFA_SubClass, AUDIO_STREAM_SUBCLASS,
+                                              IFA_Protocol, proto,
                                               TAG_END);
                     if(subpif)
                     {

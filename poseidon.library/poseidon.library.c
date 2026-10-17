@@ -2795,6 +2795,11 @@ static LONG pCtxDoOpOnDevice(struct PsdBase *ps, struct PsdDevice *pd, UWORD cmd
     return(ioerr);
 }
 
+/* SetAddress recovery (USB 2.0 9.2.6.3: 2 ms). The HCD's Address Device puts
+   SET_ADDRESS on the wire and completes right after its status stage; a device
+   need not answer at the new address before the interval is over. */
+#define CTX_SETADDRESS_RECOVERY_MS 10
+
 static LONG pContextAddressDevice(struct PsdBase *ps, struct PsdPipe *pp, struct UsbStdDevDesc *usdd)
 {
     struct PsdDevice *pd = pp->pp_Device;
@@ -2846,6 +2851,10 @@ static LONG pContextAddressDevice(struct PsdBase *ps, struct PsdPipe *pp, struct
     pd->pd_Ep0Token = cdo.cdo_Ep0Token;
     pd->pd_DevAddr = 0; /* no bus address on this backend */
     pd->pd_Flags |= PDFF_HASDEVADDR|PDFF_CONNECTED;
+
+    if(pd->pd_Hub) { /* root hubs are emulated: no SET_ADDRESS on a wire */
+        psdDelayMS(CTX_SETADDRESS_RECOVERY_MS);
+    }
 
     KPRINTF(1, ("Created device handle 0x%08lx, reading first 8 descriptor bytes...\n", pd->pd_Handle));
     psdPipeSetup(pp, URTF_IN|URTF_STANDARD|URTF_DEVICE, USR_GET_DESCRIPTOR, UDT_DEVICE<<8, 0);
@@ -5214,6 +5223,7 @@ BOOL (psdResetDevice)(struct PsdDevice * pd asm("a0"), struct PsdBase * ps asm("
                        psdNumToStr(NTS_IOERR, ioerr, "unknown"), ioerr);
         return FALSE;
     }
+    psdDelayMS(CTX_SETADDRESS_RECOVERY_MS); /* RESET_DEVICE re-addressed it on the wire */
 
     /* 3. restore the configuration */
     res = FALSE;
@@ -9607,6 +9617,21 @@ BOOL pGetDevConfig(struct PsdPipe *pp)
         memcpy(&uscd, tempbuf, 9);*/
         ioerr = psdDoPipe(pp, &uscd, 9);//sizeof(struct UsbStdCfgDesc));
         if(!ioerr) {
+            /* some firmware (Behringer UMC204HD) serves the same configuration for
+               every index; a second copy would get bound twice by the class scan,
+               on endpoints the HCD never configured */
+            struct PsdConfig *parsedpc = (struct PsdConfig *) pd->pd_Configs.lh_Head;
+            while(parsedpc->pc_Node.ln_Succ && (parsedpc->pc_CfgNum != uscd.bConfigurationValue)) {
+                parsedpc = (struct PsdConfig *) parsedpc->pc_Node.ln_Succ;
+            }
+            if(parsedpc->pc_Node.ln_Succ) {
+                psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
+                               "%s: configuration index %ld repeats configuration %ld, ignored.",
+                               pd->pd_ProductStr ? pd->pd_ProductStr : (STRPTR) "new device",
+                               (ULONG) curcfg, (ULONG) uscd.bConfigurationValue);
+                curcfg++;
+                continue;
+            }
             KPRINTF(1, ("Config type: %ld\n", (ULONG) uscd.bDescriptorType));
             len = (ULONG) AROS_LE2WORD(uscd.wTotalLength);
             KPRINTF(1, ("Configsize %ld, total size %ld\n", (ULONG) uscd.bLength, len));

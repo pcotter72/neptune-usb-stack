@@ -451,6 +451,8 @@ void nHidTask()
         sigmask = (1L<<nch->nch_TaskMsgPort->mp_SigBit)|SIGBREAKF_CTRL_C;
         buf = nch->nch_EPInBuf;
         psdSendPipe(nch->nch_EPInPipe, buf, 1024);
+        LONG lastioerr = 0;
+        ULONG errcount = 0;
         do
         {
             sigs = Wait(sigmask);
@@ -462,6 +464,25 @@ void nHidTask()
                     {
                         len = psdGetPipeActual(pp);
                         nParseMidi(nch, buf, len);
+                        lastioerr = 0;
+                    } else {
+                        /* a pipe that fails at once must not be resubmitted in a tight
+                           loop at subtask priority; a stall is cleared by the library */
+                        if(ioerr != lastioerr)
+                        {
+                            psdAddErrorMsg(RETURN_ERROR, (STRPTR) libname,
+                                           "MIDI IN pipe failed: %s (%ld)!",
+                                           psdNumToStr(NTS_IOERR, ioerr, "unknown"), ioerr);
+                            errcount = 0;
+                        }
+                        else if(++errcount > 20)
+                        {
+                            psdAddErrorMsg(RETURN_FAIL, (STRPTR) libname, PSD_GIVEUP_TXT);
+                            sigs |= SIGBREAKF_CTRL_C;
+                            break;
+                        }
+                        lastioerr = ioerr;
+                        psdDelayMS(50);
                     }
                     psdSendPipe(nch->nch_EPInPipe, buf, 1024);
                     break;
