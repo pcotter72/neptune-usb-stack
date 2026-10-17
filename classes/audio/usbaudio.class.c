@@ -511,41 +511,90 @@ static const ULONG commonFreqs[] =
     0
 };
 
-/*static UWORD volumeTableLog[256] =
+/* A feature unit's Volume Control works in 1/256 dB, 0x8001 (-127.9961 dB)
+   to 0x7FFF (+127.9961 dB) (UAC 1.0, 5.2.2.4.3.2); AHI's gains and volumes
+   are linear factors (Fixed). Integer conversions, the stack has no floating
+   point: */
+#define DB256_PER_LOG2         1541   /* 20 * log10(2) dB = one doubling, in 1/256 dB */
+#define LOG2_Q16_PER_DB256_Q10 43541  /* 1/256 dB in 16.16 doublings, times 1024 */
+#define VOLUME_DB256_MIN       (-32767) /* 0x8001, the lowest setting a Volume Control has */
+
+/* 2^(i/32) in 16.16, i = 0..32: the mantissa of a power of two, 1.0 to 2.0,
+   in 32 steps; values between two entries are interpolated linearly */
+static const ULONG Pow2Table[33] =
 {
-    0x0000, 0xFFE9, 0xFFD1, 0xFFBA, 0xFFA2, 0xFF8B, 0xFF72, 0xFF5A,
-    0xFF41, 0xFF28, 0xFF0F, 0xFEF5, 0xFEDB, 0xFEC1, 0xFEA7, 0xFE8C,
-    0xFE71, 0xFE56, 0xFE3A, 0xFE1E, 0xFE02, 0xFDE5, 0xFDC8, 0xFDAB,
-    0xFD8E, 0xFD70, 0xFD52, 0xFD33, 0xFD14, 0xFCF5, 0xFCD5, 0xFCB5,
-    0xFC95, 0xFC74, 0xFC53, 0xFC32, 0xFC10, 0xFBEE, 0xFBCC, 0xFBA9,
-    0xFB85, 0xFB62, 0xFB3E, 0xFB19, 0xFAF4, 0xFACF, 0xFAA9, 0xFA83,
-    0xFA5D, 0xFA36, 0xFA0E, 0xF9E6, 0xF9BE, 0xF995, 0xF96C, 0xF942,
-    0xF918, 0xF8ED, 0xF8C2, 0xF897, 0xF86B, 0xF83E, 0xF811, 0xF7E3,
-    0xF7B5, 0xF787, 0xF758, 0xF728, 0xF6F8, 0xF6C7, 0xF696, 0xF664,
-    0xF632, 0xF5FF, 0xF5CB, 0xF597, 0xF563, 0xF52D, 0xF4F8, 0xF4C1,
-    0xF48A, 0xF452, 0xF41A, 0xF3E1, 0xF3A8, 0xF36E, 0xF333, 0xF2F7,
-    0xF2BB, 0xF27E, 0xF241, 0xF203, 0xF1C4, 0xF184, 0xF144, 0xF103,
-    0xF0C1, 0xF07E, 0xF03B, 0xEFF7, 0xEFB3, 0xEF6D, 0xEF27, 0xEEE0,
-    0xEE98, 0xEE4F, 0xEE06, 0xEDBB, 0xED70, 0xED24, 0xECD7, 0xEC8A,
-    0xEC3B, 0xEBEC, 0xEB9C, 0xEB4A, 0xEAF8, 0xEAA5, 0xEA51, 0xE9FC,
-    0xE9A7, 0xE950, 0xE8F8, 0xE89F, 0xE845, 0xE7EB, 0xE78F, 0xE732,
-    0xE6D4, 0xE675, 0xE616, 0xE5B5, 0xE552, 0xE4EF, 0xE48B, 0xE426,
-    0xE3BF, 0xE357, 0xE2EF, 0xE285, 0xE219, 0xE1AD, 0xE13F, 0xE0D0,
-    0xE060, 0xDFEF, 0xDF7C, 0xDF09, 0xDE93, 0xDE1D, 0xDDA5, 0xDD2C,
-    0xDCB2, 0xDC36, 0xDBB8, 0xDB3A, 0xDABA, 0xDA38, 0xD9B5, 0xD931,
-    0xD8AB, 0xD824, 0xD79B, 0xD710, 0xD684, 0xD5F7, 0xD568, 0xD4D7,
-    0xD445, 0xD3B1, 0xD31B, 0xD284, 0xD1EB, 0xD150, 0xD0B4, 0xD016,
-    0xCF76, 0xCED4, 0xCE31, 0xCD8B, 0xCCE4, 0xCC3B, 0xCB90, 0xCAE3,
-    0xCA34, 0xC984, 0xC8D1, 0xC81C, 0xC765, 0xC6AD, 0xC5F2, 0xC535,
-    0xC476, 0xC3B5, 0xC2F1, 0xC22C, 0xC164, 0xC09A, 0xBFCE, 0xBF00,
-    0xBE2F, 0xBD5C, 0xBC86, 0xBBAE, 0xBAD4, 0xB9F7, 0xB918, 0xB836,
-    0xB752, 0xB66B, 0xB582, 0xB496, 0xB3A8, 0xB2B6, 0xB1C2, 0xB0CC,
-    0xAFD2, 0xAED6, 0xADD7, 0xACD5, 0xABD1, 0xAAC9, 0xA9BE, 0xA8B1,
-    0xA7A0, 0xA68C, 0xA576, 0xA45C, 0xA33F, 0xA21F, 0xA0FB, 0x9FD5,
-    0x9EAB, 0x9D7D, 0x9C4D, 0x9B19, 0x99E1, 0x98A6, 0x9768, 0x9626,
-    0x94E0, 0x9397, 0x924A, 0x90F9, 0x8FA5, 0x8E4D, 0x8CF1, 0x8B91,
-    0x8A2D, 0x88C5, 0x8759, 0x85E9, 0x8475, 0x82FD, 0x8180, 0x8000
-};*/
+     65536,  66971,  68438,  69936,  71468,  73032,  74632,  76266,
+     77936,  79642,  81386,  83169,  84990,  86851,  88752,  90696,
+     92682,  94711,  96785,  98905, 101070, 103283, 105545, 107856,
+    110218, 112631, 115098, 117618, 120194, 122825, 125515, 128263,
+    131072
+};
+#define POW2_STEP_SHIFT 11      /* a 16.16 fraction >> 11 = its table step (65536 / 32) */
+#define POW2_STEP_MASK  0x7ff   /* the part of a 16.16 fraction within its step */
+
+/* /// "nDbToFixed()" */
+/* A level in 1/256 dB as a linear factor, 10^(dB/20); Fixed holds -96 to
+   +90 dB, a level beyond that is cut to it */
+static Fixed nDbToFixed(LONG db256)
+{
+    /* dB to doublings (log2), 16.16; |db256| <= 32767 keeps the product in 32 bits */
+    LONG log2q16 = (db256 * LOG2_Q16_PER_DB256_Q10) >> 10;
+    /* whole doublings rounded down - also below zero - and a fraction 0..1 */
+    LONG whole = log2q16 >> 16;
+    ULONG frac = log2q16 & 0xffff;
+    /* 2^frac from the table: its step, and how far into the step */
+    ULONG idx = frac >> POW2_STEP_SHIFT;
+    ULONG rem = frac & POW2_STEP_MASK;
+    ULONG mant = Pow2Table[idx] + (((Pow2Table[idx + 1] - Pow2Table[idx]) * rem) >> POW2_STEP_SHIFT);
+
+    /* times 2^whole; mant < 2.0, so << 15 would pass 2^31 */
+    if(whole >= 15)
+    {
+        return 0x7fffffff;
+    }
+    if(whole >= 0)
+    {
+        return mant << whole;
+    }
+    /* below 2^-17 nothing of mant is left: the smallest factor, never 0 */
+    if(whole < -17)
+    {
+        return 1;
+    }
+    mant >>= -whole;
+    return mant ? mant : 1;
+}
+/* \\\ */
+
+/* /// "nFixedToDb()" */
+/* A linear factor as a level in 1/256 dB, 20 * log10(factor); 0 or less is
+   the lowest level a Volume Control has */
+static LONG nFixedToDb(Fixed gain)
+{
+    ULONG g = gain;
+    ULONG idx;
+
+    if(gain <= 0)
+    {
+        return VOLUME_DB256_MIN;
+    }
+    /* the highest set bit (bfffo from the 68020 on; g > 0 here): 16 is 1.0,
+       so bit - 16 whole doublings */
+    LONG bit = 31 - __builtin_clzl(g);
+    /* the mantissa, scaled to 1.0 .. 2.0 in 16.16 */
+    ULONG mant = (bit >= 16) ? (g >> (bit - 16)) : (g << (16 - bit));
+    /* its table step, and the fraction of a doubling interpolated within it */
+    for(idx = 0; mant >= Pow2Table[idx + 1]; idx++);
+
+    ULONG frac = (idx << POW2_STEP_SHIFT) +
+                 (((mant - Pow2Table[idx]) << POW2_STEP_SHIFT) / (Pow2Table[idx + 1] - Pow2Table[idx]));
+    /* doublings in 16.16 (a multiplication: bit - 16 may be negative) */
+    LONG log2q16 = (bit - 16) * 65536 + (LONG) frac;
+
+    /* doublings to 1/256 dB; |log2q16| <= 16 doublings keeps the product in 32 bits */
+    return (log2q16 * DB256_PER_LOG2) >> 16;
+}
+/* \\\ */
 
 /* /// "nRecMode()" */
 /* The recording half of an AHI mode, if it has one. A playback stream brings
@@ -616,6 +665,49 @@ struct NepAudioUnit * nGetInputUnit(struct NepAudioMode *nam)
 }
 /* \\\ */
 
+/* /// "nSetVolume()" */
+/* Set a feature unit's volume to AHI's gain, a linear factor: in the unit's
+   1/256 dB, within its range. The master Control is cascaded after the
+   channel Controls (UAC 1.0, 3.5.5): a unit that has one gets the level on
+   it and its channels at 0 dB, so they add nothing; one without gets the
+   level on each channel that has a Control. nau_VolCtrlMask has a bit per
+   channel number, bit 0 the master. */
+static void nSetVolume(struct NepClassAudio *nch, struct NepAudioUnit *nau, Fixed gain, STRPTR what)
+{
+    LONG db = nFixedToDb(gain);
+    BOOL hasmaster = nau->nau_VolCtrlMask & 1;
+
+    if(db < nau->nau_MinVolDb)
+    {
+        db = nau->nau_MinVolDb;
+    }
+    else if(db > nau->nau_MaxVolDb)
+    {
+        db = nau->nau_MaxVolDb;
+    }
+    KPRINTF(10, ("Setting %s %ld to %08lx (%04lx)\n", what, nau->nau_UnitID, gain, db));
+    for(UWORD chan = 0; chan < 3; chan++)
+    {
+        if(!(nau->nau_VolCtrlMask & (1<<chan)))
+        {
+            continue;
+        }
+        LONG level = (hasmaster && chan) ? 0 : db;
+        UBYTE buf[2] = { level, level>>8 };
+
+        psdPipeSetup(nch->nch_EP0Pipe, URTF_CLASS|URTF_INTERFACE, UAUDR_SET_CUR, (ULONG) (UAFUCS_VOLUME<<8)|chan, (nau->nau_UnitID<<8)|nch->nch_IfNum);
+        LONG ioerr = psdDoPipe(nch->nch_EP0Pipe, buf, 2);
+        if(ioerr)
+        {
+            psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
+                           "Could not set %s (%ld): %s (%ld)!",
+                           what, chan,
+                           psdNumToStr(NTS_IOERR, ioerr, "unknown"), ioerr);
+        }
+    }
+}
+/* \\\ */
+
 /* /// "nAudioTask()" */
 void nAudioTask()
 {
@@ -678,121 +770,16 @@ void nAudioTask()
                 }
                 if((nch->nch_UpdateFlags & UAF_MASTER_VOLUME) && outnau && outnau->nau_VolumeControl)
                 {
-                    struct NepAudioUnit *nau = outnau->nau_VolumeUnit;
-                    Fixed vol;
-                    UWORD cnt;
-
-                    vol = (nam->nam_MasterVol * (nau->nau_MaxVolDb - nau->nau_MinVolDb)>>16) + nau->nau_MinVolDb;
-                    if(vol < nau->nau_MinVolDb)
-                    {
-                        // we should rather MUTE this channel completely.
-                        vol = nau->nau_MinVolDb;
-                    }
-                    else if(vol > nau->nau_MaxVolDb)
-                    {
-                        vol = nau->nau_MaxVolDb;
-                    }
-                    KPRINTF(10, ("Setting master volume %ld to %08lx (%04lx)\n", nau->nau_UnitID, nam->nam_MasterVol, vol));
-                    buf[0] = vol;
-                    buf[1] = vol>>8;
-                    for(cnt = 0; cnt < 3; cnt++)
-                    {
-                        if(nau->nau_VolCtrlMask & (1<<cnt))
-                        {
-                            psdPipeSetup(nch->nch_EP0Pipe, URTF_CLASS|URTF_INTERFACE, UAUDR_SET_CUR, (ULONG) (UAFUCS_VOLUME<<8)|cnt, (nau->nau_UnitID<<8)|nch->nch_IfNum);
-                            ioerr = psdDoPipe(nch->nch_EP0Pipe, buf, 2);
-                            if(ioerr)
-                            {
-                                psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
-                                               "Could not set master volume (%ld): %s (%ld)!",
-                                               cnt,
-                                               psdNumToStr(NTS_IOERR, ioerr, "unknown"), ioerr);
-                            } else {
-                                KPRINTF(10, ("Chan %ld okay!\n", cnt));
-                            }
-                        } else {
-                            KPRINTF(10, ("Chan %ld ignored\n", cnt));
-                        }
-                    }
+                    nSetVolume(nch, outnau->nau_VolumeUnit, nam->nam_MasterVol, "master volume");
                 }
                 innau = nGetInputUnit(nam);
                 if((nch->nch_UpdateFlags & UAF_INPUT_GAIN) && innau && innau->nau_VolumeControl)
                 {
-                    struct NepAudioUnit *nau = innau->nau_VolumeUnit;
-                    Fixed vol;
-                    UWORD cnt;
-
-                    vol = (nam->nam_InputGain * (nau->nau_MaxVolDb - nau->nau_MinVolDb)>>16) + nau->nau_MinVolDb;
-                    if(vol < nau->nau_MinVolDb)
-                    {
-                        // we should rather MUTE this channel completely.
-                        vol = nau->nau_MinVolDb;
-                    }
-                    else if(vol > nau->nau_MaxVolDb)
-                    {
-                        vol = nau->nau_MaxVolDb;
-                    }
-                    KPRINTF(10, ("Setting input gain %ld to %08lx (%04lx)\n", nau->nau_UnitID, nam->nam_InputGain, vol));
-                    buf[0] = vol;
-                    buf[1] = vol>>8;
-                    for(cnt = 0; cnt < 3; cnt++)
-                    {
-                        if(nau->nau_VolCtrlMask & (1<<cnt))
-                        {
-                            psdPipeSetup(nch->nch_EP0Pipe, URTF_CLASS|URTF_INTERFACE, UAUDR_SET_CUR, (ULONG) (UAFUCS_VOLUME<<8)|cnt, (nau->nau_UnitID<<8)|nch->nch_IfNum);
-                            ioerr = psdDoPipe(nch->nch_EP0Pipe, buf, 2);
-                            if(ioerr)
-                            {
-                                psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
-                                               "Could not set input gain (%ld): %s (%ld)!",
-                                               cnt,
-                                               psdNumToStr(NTS_IOERR, ioerr, "unknown"), ioerr);
-                            } else {
-                                KPRINTF(10, ("Chan %ld okay!\n", cnt));
-                            }
-                        } else {
-                            KPRINTF(10, ("Chan %ld ignored\n", cnt));
-                        }
-                    }
+                    nSetVolume(nch, innau->nau_VolumeUnit, nam->nam_InputGain, "input gain");
                 }
                 if((nch->nch_UpdateFlags & UAF_MONITOR_VOLUME) && innau && innau->nau_Monitor)
                 {
-                    struct NepAudioUnit *nau = innau->nau_MonitorUnit;
-                    Fixed vol;
-                    UWORD cnt;
-
-                    vol = (nam->nam_MonitorVol * (nau->nau_MaxVolDb - nau->nau_MinVolDb)>>16) + nau->nau_MinVolDb;
-                    if(vol < nau->nau_MinVolDb)
-                    {
-                        // we should rather MUTE this channel completely.
-                        vol = nau->nau_MinVolDb;
-                    }
-                    else if(vol > nau->nau_MaxVolDb)
-                    {
-                        vol = nau->nau_MaxVolDb;
-                    }
-                    KPRINTF(10, ("Setting monitor %ld to %08lx (%04lx)\n", nau->nau_UnitID, nam->nam_MonitorVol, vol));
-                    buf[0] = vol;
-                    buf[1] = vol>>8;
-                    for(cnt = 0; cnt < 3; cnt++)
-                    {
-                        if(nau->nau_VolCtrlMask & (1<<cnt))
-                        {
-                            psdPipeSetup(nch->nch_EP0Pipe, URTF_CLASS|URTF_INTERFACE, UAUDR_SET_CUR, (ULONG) (UAFUCS_VOLUME<<8)|cnt, (nau->nau_UnitID<<8)|nch->nch_IfNum);
-                            ioerr = psdDoPipe(nch->nch_EP0Pipe, buf, 2);
-                            if(ioerr)
-                            {
-                                psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
-                                               "Could not set monitor volume (%ld): %s (%ld)!",
-                                               cnt,
-                                               psdNumToStr(NTS_IOERR, ioerr, "unknown"), ioerr);
-                            } else {
-                                KPRINTF(10, ("Chan %ld okay!\n", cnt));
-                            }
-                        } else {
-                            KPRINTF(10, ("Chan %ld ignored\n", cnt));
-                        }
-                    }
+                    nSetVolume(nch, innau->nau_MonitorUnit, nam->nam_MonitorVol, "monitor volume");
                 }
                 nch->nch_UpdateFlags = 0;
             }
@@ -1303,60 +1290,19 @@ void nExamineAudioDescriptors(struct NepClassAudio *nch)
 /* \\\ */
 
 /* /// "nFindLogVolume()" */
+/* The unit's volume range as AHI takes it, linear factors from the unit's
+   1/256 dB. A range reported upside down is turned round. */
 void nFindLogVolume(struct NepClassAudio *nch, struct NepAudioUnit *nau)
 {
-    /*WORD cnt;
-    WORD *tab = (WORD *) volumeTableLog;
-    if((nau->nau_MinVolDb < 0) && (nau->nau_MaxVolDb <= 0))
+    if(nau->nau_MinVolDb > nau->nau_MaxVolDb)
     {
-        KPRINTF(10, ("negative DB range\n"));
-        nau->nau_MinVolume = 0x10000;
-        for(cnt = 0; cnt < 256; cnt++)
-        {
-            if(nau->nau_MinVolDb > tab[cnt])
-            {
-                break;
-            }
-            nau->nau_MinVolume = (255 - cnt)<<8;
-        }
-        KPRINTF(10, ("Minimum volume linearized: %04lx\n", nau->nau_MinVolume));
-        for(cnt = 255; cnt >= 0; cnt--)
-        {
-            nau->nau_MaxVolume = (255 - cnt)<<8;
-            if(nau->nau_MaxVolDb < tab[cnt])
-            {
-                break;
-            }
-        }
-        KPRINTF(10, ("Maximum volume linearized: %04lx\n", nau->nau_MaxVolume));
+        WORD lowest = nau->nau_MaxVolDb;
+
+        nau->nau_MaxVolDb = nau->nau_MinVolDb;
+        nau->nau_MinVolDb = lowest;
     }
-    else if((nau->nau_MinVolDb >= 0) && (nau->nau_MaxVolDb > 0))
-    {
-        KPRINTF(10, ("positive DB range\n"));
-        nau->nau_MinVolume = 0x20000;
-        for(cnt = 255; cnt >= 0; cnt--)
-        {
-            if(-nau->nau_MinVolDb < tab[cnt])
-            {
-                break;
-            }
-            nau->nau_MinVolume = (cnt+256)<<8;
-        }
-        KPRINTF(10, ("Minimum volume linearized: %04lx\n", nau->nau_MinVolume));
-        for(cnt = 0; cnt < 256; cnt++)
-        {
-            nau->nau_MaxVolume = (cnt+256)<<8;
-            if(-nau->nau_MaxVolDb > tab[cnt])
-            {
-                break;
-            }
-        }
-        KPRINTF(10, ("Maximum volume linearized: %04lx\n", nau->nau_MaxVolume));
-    } else {
-        KPRINTF(10, ("unsupported DB range\n"));
-    }*/
-    nau->nau_MinVolume = 0;//(((Fixed) nau->nau_MinVolDb) + 0x8000)<<1;
-    nau->nau_MaxVolume = 0x10000;//(((Fixed) nau->nau_MaxVolDb) + 0x8000)<<1;
+    nau->nau_MinVolume = nDbToFixed(nau->nau_MinVolDb);
+    nau->nau_MaxVolume = nDbToFixed(nau->nau_MaxVolDb);
 }
 /* \\\ */
 
@@ -2991,8 +2937,9 @@ void nRec8BitMono(struct Hook * hook asm("a0"), WORD * tarptr asm("a2"), ULONG c
     BYTE *srcptr = hook->h_Data;
     do
     {
-        *tarptr++ = *srcptr;
-        *tarptr++ = *srcptr++;
+        WORD src = *srcptr++ * 256; /* the byte is the high half of AHI's 16 bits */
+        *tarptr++ = src;
+        *tarptr++ = src;
     } while(--cnt);
     
 }
@@ -3005,8 +2952,8 @@ void nRec8BitStereo(struct Hook * hook asm("a0"), WORD * tarptr asm("a2"), ULONG
     BYTE *srcptr = hook->h_Data;
     do
     {
-        *tarptr++ = *srcptr++;
-        *tarptr++ = *srcptr++;
+        *tarptr++ = *srcptr++ * 256; /* the byte is the high half of AHI's 16 bits */
+        *tarptr++ = *srcptr++ * 256;
     } while(--cnt);
     
 }
