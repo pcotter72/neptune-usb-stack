@@ -5,6 +5,23 @@
 
 #include <devices/usb_audio.h>
 
+/* MIDI 1.0 status bytes, named as in CAMD's <midi/mididefs.h> (same spelling, so including
+   both is harmless). A byte with MIDI_STATUSBIT set is a status byte, else a data byte. */
+#define MIDI_STATUSBIT 0x80
+#ifndef MIDI_MIDIDEFS_H
+#define MS_Prog       0xC0
+#define MS_ChanPress  0xD0
+#define MS_StatBits   0xF0
+#define MS_System     0xF0
+#define MS_SysEx      0xF0
+#define MS_QtrFrame   0xF1
+#define MS_SongPos    0xF2
+#define MS_SongSelect 0xF3
+#define MS_TuneReq    0xF6
+#define MS_EOX        0xF7
+#define MS_RealTime   0xF8
+#endif
+
 /* Return TRUE unless the interface's class-specific MS header says it is not MIDIStreaming
    1.0. A USB MIDI 2.0 device carries its 1.0 function on alternate setting 0 (bcdMSC 0x0100)
    and the Universal MIDI Packet one on alternate 1 (0x0200), which the MIDI 1.0 classes

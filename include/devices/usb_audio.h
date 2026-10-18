@@ -56,6 +56,31 @@
 /* MIDIStreaming class specific endpoint descriptor subtypes (USB MIDI 1.0, A.2) */
 #define UDST_AUDIO_MIDI_EP_GENERAL 0x01
 
+/* USB-MIDI event packet Code Index Numbers (USB MIDI 1.0 section 4, Table 4-1): low nibble
+   of the packet's first byte, the kind and length of the MIDI message it carries. */
+#define USBMIDI_CIN_MISC            0x0 /* reserved */
+#define USBMIDI_CIN_CABLE           0x1 /* reserved */
+#define USBMIDI_CIN_SYSCOM2         0x2 /* two-byte system common (F1, F3) */
+#define USBMIDI_CIN_SYSCOM3         0x3 /* three-byte system common (F2) */
+#define USBMIDI_CIN_SYSEX           0x4 /* SysEx starts or continues, three bytes */
+#define USBMIDI_CIN_SYSEX_END1      0x5 /* SysEx ends with one byte, or one-byte system common (F6) */
+#define USBMIDI_CIN_SYSEX_END2      0x6 /* SysEx ends with two bytes */
+#define USBMIDI_CIN_SYSEX_END3      0x7 /* SysEx ends with three bytes */
+#define USBMIDI_CIN_NOTEOFF         0x8 /* channel messages: CIN = high nibble of the status */
+#define USBMIDI_CIN_NOTEON          0x9
+#define USBMIDI_CIN_POLYPRESS       0xA
+#define USBMIDI_CIN_CTRL            0xB
+#define USBMIDI_CIN_PROG            0xC
+#define USBMIDI_CIN_CHANPRESS       0xD
+#define USBMIDI_CIN_PITCHBEND       0xE
+#define USBMIDI_CIN_SINGLEBYTE      0xF /* one byte, unparsed (used for realtime F8-FF) */
+
+/* First byte of an event packet: cable number (= virtual MIDI cable / port) in the high
+   nibble, Code Index Number in the low nibble. */
+#define USBMIDI_HEADER(cable, cin)  ((UBYTE) (((cable) << 4) | (cin)))
+#define USBMIDI_CABLE(hdr)          ((hdr) >> 4)
+#define USBMIDI_CIN_OF(hdr)         ((hdr) & 0x0f)
+
 /* Audio MIDI Jack-types */
 #define USBMIDI_JACK_TYPE_UNDEFINED 0x00
 #define USBMIDI_JACK_EMBEDDED       0x01

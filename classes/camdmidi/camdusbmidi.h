@@ -1,41 +1,59 @@
 #ifndef CAMDUSBMIDI_H
 #define CAMDUSBMIDI_H
 
-#include <intuition/intuition.h>
-#include <intuition/intuitionbase.h>
-#include <libraries/mui.h>
-#include <libraries/gadtools.h>
+#include <exec/types.h>
+#include <exec/libraries.h>
+#include <exec/lists.h>
+#include <utility/hooks.h>
+#include <midi/camddevices.h>   /* CAMDXmitFunc, CAMDRecvFunc */
 
-#define ID_ABOUT        0x55555555
-#define ID_STORE_CONFIG 0xaaaaaaaa
+/* Per-port state of the MIDI byte stream -> USB-MIDI event packet converter (nTxByte,
+ * camdusbmidi.class.c, which describes both formats). A packet holds one whole message, so
+ * the bytes of a message are held here until its last byte arrives. */
+#define USBMIDI_TX_UNKNOWN   0   /* no message in progress; data bytes are dropped */
+#define USBMIDI_TX_1PARAM    1   /* status held, one data byte completes the message */
+#define USBMIDI_TX_2PARAM_1  2   /* status held, two data bytes to come */
+#define USBMIDI_TX_2PARAM_2  3   /* status and first data byte held, one more to come */
+#define USBMIDI_TX_SYSEX_0   4   /* inside SysEx, no byte held */
+#define USBMIDI_TX_SYSEX_1   5   /* inside SysEx, one byte held (a packet takes three) */
+#define USBMIDI_TX_SYSEX_2   6   /* inside SysEx, two bytes held */
 
-struct ClsGlobalCfg
+struct UsbMidiTx
 {
-    ULONG cgc_ChunkID;
-    ULONG cgc_Length;
+    UBYTE               tx_State;      /* USBMIDI_TX_* */
+    UBYTE               tx_Status;     /* status byte of the message being assembled; kept
+                                          after a channel message for running status */
+    UBYTE               tx_Data[2];    /* data (or SysEx) bytes held until the packet is full */
 };
 
+/* Ports per CAMD device (MidiDeviceData.NPorts of the embedded driver). A USB-MIDI cable
+ * number is 4 bits, so 16 covers any device. */
+#define CAMD_MAX_PORTS 16
+
+/* One open CAMD port, allocated by usbCAMDOpenPort and freed by usbCAMDClosePort only, so
+ * the pointer the driver keeps stays valid across an unplug (which only detaches it). All
+ * open ports of all devices are on nh_Ports. The list and the class-owned fields change
+ * under Forbid(), and the class walks the list under Forbid(); the driver reads ca_SigTask
+ * under Forbid() (camd's senders are tasks, camd.intro) and owns ca_IsOpen/ca_TXActive and
+ * the two hooks. */
 struct CAMDAdapter
 {
-    APTR                ca_ActivateFunc;  /* activate function -- filled by CAMD Driver */
-    BOOL                ca_IsOpen;        /* TRUE if opened */
-    struct Hook         ca_CAMDRXFunc;    /* RX function in CAMD driver */
-    struct Interrupt    ca_CAMDTXFunc;    /* TX function in CAMD driver (internal) */
-    ULONG               ca_PortNum;       /* Port Number -- filled by OpenPort() */
-    APTR                ca_TXFunc;        /* TX Function -- filled by OpenPort() */
-    APTR                ca_RXFunc;        /* RX Function -- filled by OpenPort() */
-    APTR                ca_UserData;      /* Handler user data -- filled by OpenPort() */
-    UBYTE              *ca_TXBuffer;      /* Ringbuffer to send data (to USB) */
-    ULONG               ca_TXBufSize;     /* Size of ringbuffer */
-    ULONG               ca_TXWritePos;    /* Writing position */
-    ULONG               ca_TXReadPos;     /* Bytes already sent */
-    struct MsgPort     *ca_MsgPort;       /* Pointer to MsgPort to signal task for TX data ready */
-    BOOL                ca_SysExMode;     /* is in SysEx sending mode */
-    ULONG               ca_SysExData;     /* three bytes of sysex information */
-    UWORD               ca_SysExNum;      /* number of sysex bytes */
+    struct Node         ca_Node;       /* on nh_Ports */
+    struct NepClassMidi *ca_Binding;   /* owning binding; NULL = device gone */
+    UBYTE               ca_IsOpen;     /* driver side ready: hooks valid, camd functions callable */
+    UBYTE               ca_TXActive;   /* camd has output queued (ActivateXmit) until the end marker */
+    UBYTE               ca_PortNum;    /* CAMD port number = USB-MIDI cable number */
+    struct Task        *ca_SigTask;    /* class task woken by ActivateXmit; NULL once detached */
+    ULONG               ca_SigMask;
+    CAMDXmitFunc        ca_TXFunc;     /* camd's transmit function */
+    CAMDRecvFunc        ca_RXFunc;     /* camd's receive function */
+    APTR                ca_UserData;
+    struct Hook         ca_CAMDRXFunc; /* driver: deliver bytes to camd (a2 = bytes, a1 = count) */
+    struct Hook         ca_CAMDTXFunc; /* driver: pull bytes from camd (a2 = buffer, a1 = max) -> count */
+    struct UsbMidiTx    ca_TX;         /* USB-MIDI packetizer state (class side) */
 };
 
-struct NepHidBase
+struct NepMidiBase
 {
     struct Library      nh_Library;       /* standard */
     UWORD               nh_Flags;         /* various flags */
@@ -43,54 +61,32 @@ struct NepHidBase
     BPTR                nh_SegList;       /* load seglist (stored by the class skeleton) */
     struct Library     *nh_UtilityBase;   /* utility base */
     struct List         nh_Bindings;      /* List of bindings created */
-
-    struct Library     *nh_MUIBase;       /* MUI master base */
-    struct Library     *nh_PsdBase;       /* Poseidon base */
-    struct Library     *nh_IntBase;       /* Intuition base */
-    struct Task        *nh_GUITask;       /* GUI Task */
-
-    struct ClsGlobalCfg nh_CurrentCGC;
-    BOOL                nh_UsingDefaultCfg;
-
-    struct CAMDAdapter  nh_CAMDAdapters[16];
-
-    Object             *nh_App;
-    Object             *nh_MainWindow;
-    Object             *nh_UseObj;
-    Object             *nh_CloseObj;
-
-    Object             *nh_AboutMI;
-    Object             *nh_UseMI;
-    Object             *nh_MUIPrefsMI;
+    struct List         nh_Ports;         /* open CAMD ports (struct CAMDAdapter) */
 };
 
-struct NepClassHid
+struct NepClassMidi
 {
     struct Node         nch_Node;         /* Node linkage */
-    struct NepHidBase  *nch_ClsBase;      /* Up linkage */
+    struct NepMidiBase *nch_ClsBase;      /* Up linkage */
     struct Library     *nch_Base;         /* Poseidon base */
     struct PsdDevice   *nch_Device;       /* Up linkage */
     struct PsdConfig   *nch_Config;       /* Up linkage */
     struct PsdInterface *nch_Interface;   /* Up linkage */
-    struct PsdPipe     *nch_EP0Pipe;      /* Endpoint 0 pipe */
-    struct PsdEndpoint *nch_EPIn;         /* Endpoint 1 */
-    struct PsdPipe     *nch_EPInPipe;     /* Endpoint 1 pipe */
-    struct PsdEndpoint *nch_EPOut;        /* Endpoint 2 */
-    struct PsdPipe     *nch_EPOutPipe;    /* Endpoint 2 pipe */
-    UBYTE              *nch_EPInBuf;      /* Packet buffer for EP1 */
-    UBYTE              *nch_EPOutBuf;     /* Packet buffer for EP2 */
+    struct PsdEndpoint *nch_EPIn;         /* Bulk IN endpoint (MIDI data from the device) */
+    struct PsdPipe     *nch_EPInPipe;     /* its pipe */
+    struct PsdEndpoint *nch_EPOut;        /* Bulk OUT endpoint */
+    struct PsdPipe     *nch_EPOutPipe;    /* its pipe */
+    UBYTE              *nch_EPInBuf;      /* Packet buffer for bulk IN */
+    UBYTE              *nch_EPOutBuf;     /* Packet buffer for bulk OUT */
     struct Task        *nch_ReadySigTask; /* Task to send ready signal to */
     LONG                nch_ReadySignal;  /* Signal to send when ready */
     struct Task        *nch_Task;         /* Subtask */
     struct MsgPort     *nch_TaskMsgPort;  /* Message Port of Subtask */
     IPTR                nch_IfNum;        /* Interface Number */
+    UBYTE               nch_InCables;     /* embedded jacks on the IN endpoint (RX cables) */
+    UBYTE               nch_OutCables;    /* embedded jacks on the OUT endpoint (TX cables) */
+    UBYTE               nch_NumCables;    /* max of both = CAMD ports offered */
     UBYTE               nch_ShortID[32];  /* generated ID string for driver */
 };
-
-
-/* ROM-safe per-instance MUI base (GUI subtask tc_UserData) + the MUI_NewObject fix. */
-#define MUI_BASE_USERDATA struct NepHidBase
-#define MUI_BASE_FIELD    nh_MUIBase
-#include "mui_base.h"
 
 #endif /* CAMDUSBMIDI_H */

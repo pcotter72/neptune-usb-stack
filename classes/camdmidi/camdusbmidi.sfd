@@ -1,6 +1,6 @@
-==id $Id: camdusbmidi.sfd 6.0 $
+==id $Id: camdusbmidi.sfd 6.3 $
 * "camdusbmidi.class"
-==base _NepHidBase
+==base _NepMidiBase
 ==basetype struct Library *
 ==libname camdusbmidi.class
 ==bias 30
@@ -14,5 +14,5 @@ LONG usbSetAttrsA(ULONG type, APTR usbstruct, struct TagItem *taglist) (D0,A0,A1
 SIPTR usbDoMethodA(ULONG methodid, IPTR *methoddata) (D0,A1)
 ==reserve 7
 APTR usbCAMDOpenPort(APTR xmitfc, APTR recvfct, APTR userdata, STRPTR idstr, ULONG port) (A0,A1,A2,A3,D0)
-VOID usbCAMDClosePort(ULONG port, STRPTR idstr) (D0,A1)
+VOID usbCAMDClosePort(APTR adapter) (A0)
 ==end
