@@ -723,8 +723,9 @@ ULONG (psdBorrowLocksWait)(struct Task * task asm("a1"), ULONG signals asm("d0")
     struct List reclaims;
     BOOL moveowner;
 
-    XPRINTF(10, ("Borrowing locks from 0x%08lx (%s) to 0x%08lx (%s)!\n",
-                 thistask, thistask->tc_Node.ln_Name, task, task->tc_Node.ln_Name));
+    /* the target's name is not printed: a short-lived subtask may already be gone */
+    XPRINTF(10, ("Borrowing locks from 0x%08lx (%s) to 0x%08lx!\n",
+                 thistask, thistask->tc_Node.ln_Name, task));
 
     Forbid();
     psi = (struct PsdSemaInfo *) ps->ps_DeadlockDebug.lh_Head;
