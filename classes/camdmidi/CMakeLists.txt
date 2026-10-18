@@ -6,10 +6,10 @@ add_poseidon_class(camdusbmidi BASETYPE NepHidBase GUI DEFINES HAS_LIBOPEN)
 target_compile_definitions(camdusbmidi_class PRIVATE CLASS_VECTORS_HDR="camd_vectors.h")
 
 # ---------------------------------------------------------------------------------------------
-# The embedded CAMD MIDI driver, built from source (camd/poseidonusb.c) instead of a frozen blob.
+# The embedded CAMD MIDI driver, built from source (camd/camd_driver.c) instead of a frozen blob.
 #
 #   camdusbmidi.sfd --(sfdc)--> proto/camdusbmidi.h   (inline usbCAMD* stubs the driver calls)
-#   poseidonusb.c --(ld, ldscripts/module.lds)--> poseidonusb   (a CAMD-shaped HUNK exe: the doNotExecute
+#   camd_driver.c --(ld, ldscripts/module.lds)--> poseidonusb   (a CAMD-shaped HUNK exe: the doNotExecute
 #                                          entry stub@0, MidiDeviceData@4)
 #   poseidonusb --(gen_camddriver.py)--> CAMDDriver.c (ULONG[] + CAMDDriver_NAMEOFFSET)
 #   CAMDDriver.c is #included by camdusbmidi.class.c (the #if __mc68000__ path).
@@ -19,7 +19,7 @@ target_compile_definitions(camdusbmidi_class PRIVATE CLASS_VECTORS_HDR="camd_vec
 generate_sfd_headers(camdusbmidi CAMD_SFD_GEN)
 
 # (b) build the driver as a CAMD-driver-shaped HUNK exe (entry stub first, MidiDeviceData at +4)
-add_executable(camd_poseidonusb camd/poseidonusb.c)
+add_executable(camd_poseidonusb camd/camd_driver.c)
 add_dependencies(camd_poseidonusb camdusbmidi_sfd_headers)
 # -Os: this is never shipped as an executable - it is linked, turned into a ULONG[] by
 # gen_camddriver.py below and embedded inside camdusbmidi.class, so its size is class size.

@@ -5,7 +5,7 @@
  *     .skip 7
  *     APTR usbCAMDOpenPort(xmitfc,recvfct,userdata,idstr,port) (A0,A1,A2,A3,D0)   // LVO -90
  *     VOID usbCAMDClosePort(port,idstr)                        (D0,A1)            // LVO -96
- * so the embedded CAMD MIDI driver (camd/poseidonusb.c) can OpenLibrary the class and
+ * so the embedded CAMD MIDI driver (camd/camd_driver.c) can OpenLibrary the class and
  * call these two vectors. The 7 reserved slots map to LibNull (a harmless no-op).
  */
 /* Declared with the real signatures, not address-only placeholders: under LTO the compiler
