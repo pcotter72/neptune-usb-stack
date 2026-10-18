@@ -21,6 +21,12 @@
 /* A recorded frame as AHI gets it (AHIST_S16S): left and right WORD */
 #define REC_FRAME_WORDS  2
 
+/* Input and output names a mode keeps for AHI */
+#define MAX_PORT_NAMES   8
+
+/* How deep a walk through the unit graph goes (descriptors may wire a loop) */
+#define UNIT_DEPTH_MAX   32
+
 #define UAF_MASTER_VOLUME  0x0001
 #define UAF_INPUT_GAIN     0x0002
 #define UAF_MONITOR_VOLUME 0x0004
@@ -32,6 +38,15 @@ struct ClsGlobalCfg
     ULONG cgc_ChunkID;
     ULONG cgc_Length;
 };
+
+/* Feature Unit channel numbers (UAC 1.0, 5.2.2.4.3: wValue low byte; 0 = the master
+   Control) and their bits in nau_VolCtrlMask / nau_MuteCtrlMask. Only master, left and
+   right are used. */
+#define FU_CHAN_MASTER  0
+#define FU_CHAN_LEFT    1
+#define FU_CHAN_RIGHT   2
+#define FU_CHANNELS     3
+#define FU_CHANBIT(chan) (1 << (chan))
 
 struct NepAudioUnit
 {
@@ -54,12 +69,14 @@ struct NepAudioUnit
     // only for root
     struct NepAudioUnit *nau_VolumeUnit;  /* Volume control unit */
     struct NepAudioUnit *nau_MonitorUnit; /* Monitor Volume unit */
-    struct NepAudioUnit *nau_SelectorUnit; /* Input and output select unit */
+    struct NepAudioUnit *nau_SelectorUnit; /* Selector Unit feeding this recording stream: picks the
+                                              recorded input (AHI input); outputs have none */
     BOOL                nau_VolumeControl; /* Master volume control */
     BOOL                nau_Monitor;      /* Monitor volume control */
     BOOL                nau_Balance;      /* Balance Panning support */
 
-    UWORD               nau_VolCtrlMask;  /* Feature Mask (master, left, right) */
+    UWORD               nau_VolCtrlMask;  /* Volume Controls, FU_CHANBIT() per channel */
+    UWORD               nau_MuteCtrlMask; /* Mute Controls, FU_CHANBIT() per channel */
     UWORD               nau_VolCtrlCount; /* Number of channels */
 
     WORD                nau_MinVolDb;     /* Min Volume in 8.8 DB */
@@ -67,6 +84,15 @@ struct NepAudioUnit
 
     Fixed               nau_MinVolume;    /* Minimum volume for this unit */
     Fixed               nau_MaxVolume;    /* Maximum volume for this unit */
+};
+
+/* An output terminal a playback stream reaches, as an AHI output */
+struct NepAudioOutput
+{
+    STRPTR               nao_Name;        /* What AHI shows */
+    struct NepAudioUnit *nao_Terminal;    /* The output terminal */
+    struct NepAudioUnit *nao_Mute;        /* Feature Unit with a Mute Control on its own branch; NULL = none */
+    struct NepAudioUnit *nao_Volume;      /* Feature Unit with a Volume Control on its own branch; NULL = none */
 };
 
 struct NepAudioMode
@@ -117,9 +143,12 @@ struct NepAudioMode
     UWORD               nam_AHIFrameSize; /* Number of bytes per AHI Frame */
     struct NepAudioUnit *nam_RootUnit;    /* Root unit containing control information */
     ULONG               nam_NumInputs;    /* Number of Inputs */
-    STRPTR              nam_InputNames[8]; /* Names for the inputs */
+    STRPTR              nam_InputNames[MAX_PORT_NAMES]; /* Names for the inputs */
     ULONG               nam_NumOutputs;   /* Number of Outputs */
-    STRPTR              nam_OutputNames[8]; /* Names for the outputs */
+    struct NepAudioOutput nam_Outputs[MAX_PORT_NAMES]; /* The output terminals (nMapOutputs) */
+    struct NepAudioUnit *nam_OutVolume;   /* Feature Unit with a Volume Control upstream of every output;
+                                             NULL = each output's own nao_Volume */
+    BOOL                nam_OutputSwitch; /* Several outputs, each with its own Mute: AHI may choose one */
     UWORD               nam_CurrInput;    /* Current input */
     UWORD               nam_CurrOutput;   /* Current output */
     Fixed               nam_MasterVol;    /* Master volume for the unit */
