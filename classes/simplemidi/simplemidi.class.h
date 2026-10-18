@@ -14,6 +14,7 @@
 #include <libraries/gadtools.h>
 
 #include <devices/usb_audio.h>
+#include "usbmidi.h"
 
 #include <string.h>
 #include <stddef.h>

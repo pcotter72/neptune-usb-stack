@@ -53,6 +53,9 @@
 /* Audioclass specific endpoint descriptors subtypes */
 #define UDST_AUDIO_EP_GENERAL    0x01
 
+/* MIDIStreaming class specific endpoint descriptor subtypes (USB MIDI 1.0, A.2) */
+#define UDST_AUDIO_MIDI_EP_GENERAL 0x01
+
 /* Audio MIDI Jack-types */
 #define USBMIDI_JACK_TYPE_UNDEFINED 0x00
 #define USBMIDI_JACK_EMBEDDED       0x01
@@ -201,6 +204,27 @@
 #define UAFUCS_DELAY                0x08
 #define UAFUCS_BASS_BOOST           0x09
 #define UAFUCS_LOUDNESS             0x0a
+
+/* USB MIDI 1.0 stuff */
+struct UsbMIDIStreamingHeaderDesc   /* 6.1.2.1 Class-Specific MS Interface Header */
+{
+    UBYTE bLength;             /* Size of this descriptor (7) */
+    UBYTE bDescriptorType;     /* Descriptor Type (0x24) */
+    UBYTE bDescriptorSubType;  /* Subtype (0x01, MS_HEADER) */
+    UBYTE bcdMSC0;             /* Low byte of the MIDIStreaming release (0x00) */
+    UBYTE bcdMSC1;             /* High byte (0x01 = MIDI 1.0, 0x02 = USB MIDI 2.0) */
+    UBYTE wTotalLength0;       /* Total length of the class-specific MS descriptors (low byte) */
+    UBYTE wTotalLength1;       /* (high byte) */
+};
+
+struct UsbMIDIStreamingEndpointDesc /* 6.2.2 Class-Specific MS Bulk Data Endpoint */
+{
+    UBYTE bLength;             /* Size of this descriptor (4 + n) */
+    UBYTE bDescriptorType;     /* Descriptor Type (0x25) */
+    UBYTE bDescriptorSubType;  /* Subtype (0x01, MS_GENERAL) */
+    UBYTE bNumEmbMIDIJack;     /* Embedded MIDI jacks on this endpoint = cable numbers in use */
+    UBYTE baAssocJackID[1];    /* Their jack IDs */
+};
 
 /* USB Audio Spec 1.0 stuff */
 struct UsbAudioHeaderDesc10

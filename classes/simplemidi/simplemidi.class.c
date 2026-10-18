@@ -68,6 +68,7 @@ struct NepClassSimpleMidi * usbAttemptInterfaceBinding(struct NepSimpleMidiBase 
     IPTR ifclass;
     IPTR subclass;
     IPTR proto;
+    BOOL ismidi = FALSE;
 
     KPRINTF(1, ("nepSimpleMidiAttemptInterfaceBinding(%08lx)\n", pif));
     if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
@@ -77,13 +78,10 @@ struct NepClassSimpleMidi * usbAttemptInterfaceBinding(struct NepSimpleMidiBase 
                     IFA_SubClass, &subclass,
                     IFA_Protocol, &proto,
                     TAG_DONE);
+        ismidi = (ifclass == AUDIO_CLASSCODE) && (subclass == AUDIO_MIDI_SUBCLASS) && nIsMidi10(ps, pif, (STRPTR) libname);
         CloseLibrary(ps);
-        if((ifclass == AUDIO_CLASSCODE) && (subclass == AUDIO_MIDI_SUBCLASS))
-        {
-            return(usbForceInterfaceBinding(nh, pif));
-        }
     }
-    return(NULL);
+    return(ismidi ? usbForceInterfaceBinding(nh, pif) : NULL);
 }
 /* \\\ */
 
@@ -301,6 +299,7 @@ void nMidiTask()
     LONG ioerr;
     ULONG len;
 
+    nApplyInputTaskPriFloor();      /* feeds input.device: stay above the DOS handlers */
     if((nch = nAllocMidi()))
     {
         Forbid();
