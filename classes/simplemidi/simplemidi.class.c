@@ -369,24 +369,24 @@ void nParseMidi(struct NepClassSimpleMidi *nch, UBYTE *buf, ULONG len)
     while(len > 3)
     {
         KPRINTF(1, ("Msg: %02lx %02lx %02lx %02lx\n", buf[0], buf[1], buf[2], buf[3]));
-        /* the cable number (buf[0] >> 4) is ignored on purpose: every cable plays the keyboard */
-        cmd = buf[0] & 0x0f;
+        /* the cable number (USBMIDI_CABLE) is ignored on purpose: every cable plays the keyboard */
+        cmd = USBMIDI_CIN_OF(buf[0]);
         switch(cmd)
         {
-            case 0x0: // Miscellaneous function codes. Reserved for future extensions.
-            case 0x1: // Cable events. Reserved for future expansion.
-            case 0x2: // Two-byte System Common messages like MTC, SongSelect, etc.
-            case 0x3: // Three-byte System Common messages like SPP, etc.
-            case 0x4: // SysEx starts or continues
-            case 0x5: // Single-byte System Common Message or SysEx ends with following single byte.
-            case 0x6: // SysEx ends with following two bytes.
-            case 0x7: // SysEx ends with following three bytes.
+            case USBMIDI_CIN_MISC: // Miscellaneous function codes. Reserved for future extensions.
+            case USBMIDI_CIN_CABLE: // Cable events. Reserved for future expansion.
+            case USBMIDI_CIN_SYSCOM2: // Two-byte System Common messages like MTC, SongSelect, etc.
+            case USBMIDI_CIN_SYSCOM3: // Three-byte System Common messages like SPP, etc.
+            case USBMIDI_CIN_SYSEX: // SysEx starts or continues
+            case USBMIDI_CIN_SYSEX_END1: // Single-byte System Common Message or SysEx ends with following single byte.
+            case USBMIDI_CIN_SYSEX_END2: // SysEx ends with following two bytes.
+            case USBMIDI_CIN_SYSEX_END3: // SysEx ends with following three bytes.
                 break;
 
-            case 0x8: // Note-off
-            case 0x9: // Note-on
+            case USBMIDI_CIN_NOTEOFF: // Note-off
+            case USBMIDI_CIN_NOTEON: // Note-on
                 note = buf[2];
-                velocity = (cmd == 0x9) ? buf[3] : 0;   /* note-on with velocity 0 is a note-off too */
+                velocity = (cmd == USBMIDI_CIN_NOTEON) ? buf[3] : 0;   /* note-on with velocity 0 is a note-off too */
                 KPRINTF(1, ("Note %ld %s with speed %ld\n", (ULONG) note, velocity ? "down" : "up", (ULONG) velocity));
                 if(note < 12 * cgc->cgc_MidiMinOctave)
                 {
@@ -432,12 +432,12 @@ void nParseMidi(struct NepClassSimpleMidi *nch, UBYTE *buf, ULONG len)
                 }
                 break;
 
-            case 0xA: // Poly-KeyPress
-            case 0xB: // Control Change
-            case 0xC: // Program Change
-            case 0xD: // Channel Pressure
-            case 0xE: // PitchBend Change
-            case 0xF: // Single Byte
+            case USBMIDI_CIN_POLYPRESS: // Poly-KeyPress
+            case USBMIDI_CIN_CTRL: // Control Change
+            case USBMIDI_CIN_PROG: // Program Change
+            case USBMIDI_CIN_CHANPRESS: // Channel Pressure
+            case USBMIDI_CIN_PITCHBEND: // PitchBend Change
+            case USBMIDI_CIN_SINGLEBYTE: // Single Byte
                 break;
 
         }
