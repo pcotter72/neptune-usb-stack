@@ -55,10 +55,9 @@ struct NepClassSimpleMidi
     struct PsdDevice   *nch_Device;       /* Up linkage */
     struct PsdConfig   *nch_Config;       /* Up linkage */
     struct PsdInterface *nch_Interface;   /* Up linkage */
-    struct PsdPipe     *nch_EP0Pipe;      /* Endpoint 0 pipe */
-    struct PsdEndpoint *nch_EPIn;         /* Endpoint 1 */
-    struct PsdPipe     *nch_EPInPipe;     /* Endpoint 1 pipe */
-    UBYTE              *nch_EPInBuf;      /* Packet buffer for EP1 */
+    struct PsdEndpoint *nch_EPIn;         /* Bulk IN endpoint (MIDI data from the device) */
+    struct PsdPipe     *nch_EPInPipe;     /* its pipe */
+    UBYTE              *nch_EPInBuf;      /* Packet buffer for bulk IN */
     struct Task        *nch_ReadySigTask; /* Task to send ready signal to */
     LONG                nch_ReadySignal;  /* Signal to send when ready */
     struct Task        *nch_Task;         /* Subtask */

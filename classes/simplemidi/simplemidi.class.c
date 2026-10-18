@@ -284,6 +284,8 @@ static const UBYTE highoctave[] =
     0x17, 0x09, 0x18, 0x0a, 0x19, 0x1a, 0x0b, 0x1b, 0xff, 0xff, 0xff, 0xff  /* C-3 - F-3 */
 };
 
+#define INBUF_SIZE 512      /* bulk IN buffer: 128 event packets */
+
 #undef  ps
 #define ps nch->nch_Base
 
@@ -309,7 +311,7 @@ void nMidiTask()
         Permit();
         sigmask = (1L<<nch->nch_TaskMsgPort->mp_SigBit)|SIGBREAKF_CTRL_C;
         buf = nch->nch_EPInBuf;
-        psdSendPipe(nch->nch_EPInPipe, buf, 512);
+        psdSendPipe(nch->nch_EPInPipe, buf, INBUF_SIZE);
         do
         {
             sigs = Wait(sigmask);
@@ -325,7 +327,7 @@ void nMidiTask()
                         KPRINTF(1, ("Int Pipe failed %ld\n", ioerr));
                         psdDelayMS(200);
                     }
-                    psdSendPipe(nch->nch_EPInPipe, buf, 512);
+                    psdSendPipe(nch->nch_EPInPipe, buf, INBUF_SIZE);
                     break;
                 }
             }
@@ -358,7 +360,6 @@ void nSendKey(struct NepClassSimpleMidi *nch, UWORD code)
 void nParseMidi(struct NepClassSimpleMidi *nch, UBYTE *buf, ULONG len)
 {
     UWORD iecode = 0xff;
-    UWORD chan;
     UWORD note;
     UWORD velocity;
     UWORD octave;
@@ -369,8 +370,7 @@ void nParseMidi(struct NepClassSimpleMidi *nch, UBYTE *buf, ULONG len)
     while(len > 3)
     {
         KPRINTF(1, ("Msg: %02lx %02lx %02lx %02lx\n", buf[0], buf[1], buf[2], buf[3]));
-        chan = buf[0] >> 4;
-        (void)chan; /* FIXME: Why is 'chan' ignored? */
+        /* the cable number (buf[0] >> 4) is ignored on purpose: every cable plays the keyboard */
         cmd = buf[0] & 0x0f;
         switch(cmd)
         {
@@ -385,18 +385,10 @@ void nParseMidi(struct NepClassSimpleMidi *nch, UBYTE *buf, ULONG len)
                 break;
 
             case 0x8: // Note-off
-                KPRINTF(1, ("Note %ld up with speed %ld\n", note, velocity));
-                // fall through
-
             case 0x9: // Note-on
                 note = buf[2];
-                if(cmd == 0x9)
-                {
-                    KPRINTF(1, ("Note %ld down with speed %ld\n", note, velocity));
-                    velocity = buf[3];
-                } else {
-                    velocity = 0;
-                }
+                velocity = (cmd == 0x9) ? buf[3] : 0;   /* note-on with velocity 0 is a note-off too */
+                KPRINTF(1, ("Note %ld %s with speed %ld\n", (ULONG) note, velocity ? "down" : "up", (ULONG) velocity));
                 if(note < 12 * cgc->cgc_MidiMinOctave)
                 {
                     octave = 0;
@@ -514,23 +506,19 @@ struct NepClassSimpleMidi * nAllocMidi(void)
                     nch->nch_InputBase = (struct Library *) nch->nch_InpIOReq->io_Device;
                     if((nch->nch_TaskMsgPort = CreateMsgPort()))
                     {
-                        if((nch->nch_EP0Pipe = psdAllocPipe(nch->nch_Device, nch->nch_TaskMsgPort, NULL)))
+                        if((nch->nch_EPInPipe = psdAllocPipe(nch->nch_Device, nch->nch_TaskMsgPort, nch->nch_EPIn)))
                         {
-                            if((nch->nch_EPInPipe = psdAllocPipe(nch->nch_Device, nch->nch_TaskMsgPort, nch->nch_EPIn)))
-                            {
-                                psdSetAttrs(PGA_PIPE, nch->nch_EPInPipe,
-                                            PPA_NakTimeout, FALSE,
-                                            PPA_AllowRuntPackets, TRUE,
-                                            TAG_END);
+                            psdSetAttrs(PGA_PIPE, nch->nch_EPInPipe,
+                                        PPA_NakTimeout, FALSE,
+                                        PPA_AllowRuntPackets, TRUE,
+                                        TAG_END);
 
-                                if((nch->nch_EPInBuf = psdAllocVec(1024)))
-                                {
-                                    nch->nch_Task = thistask;
-                                    return(nch);
-                                }
-                                psdFreePipe(nch->nch_EPInPipe);
+                            if((nch->nch_EPInBuf = psdAllocVec(INBUF_SIZE)))
+                            {
+                                nch->nch_Task = thistask;
+                                return(nch);
                             }
-                            psdFreePipe(nch->nch_EP0Pipe);
+                            psdFreePipe(nch->nch_EPInPipe);
                         }
                         DeleteMsgPort(nch->nch_TaskMsgPort);
                     }
@@ -557,7 +545,6 @@ void nFreeMidi(struct NepClassSimpleMidi *nch)
 {
     psdFreeVec(nch->nch_EPInBuf);
     psdFreePipe(nch->nch_EPInPipe);
-    psdFreePipe(nch->nch_EP0Pipe);
     DeleteMsgPort(nch->nch_TaskMsgPort);
     CloseDevice((struct IORequest *) nch->nch_InpIOReq);
     DeleteIORequest((struct IORequest *) nch->nch_InpIOReq);
