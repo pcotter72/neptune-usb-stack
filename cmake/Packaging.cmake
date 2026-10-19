@@ -14,8 +14,8 @@
 #         WBStartup/USBEject  WBStartup/USBEject.info  (safe-eject Workbench menu, opt-in)
 #         Tools/<shellapps>                (optional group, opt-in at install)
 #         Catalogs/<lang>/System/Prefs/NeptuneUSB.catalog  Catalogs/<lang>/USBEject.catalog
-#         DEVS/DataTypes/PSD               PSD datatype descriptor  -> DEVS:DataTypes/
-#         Icons/def_PSD.info               preset-file deficon      -> ENV(ARC):SYS/
+#         DEVS/DataTypes/Neptune           settings-file datatype   -> DEVS:DataTypes/
+#         Icons/def_Neptune.info           settings-file deficon    -> ENV(ARC):SYS/
 
 # Distribution version = the project version (top-level CMakeLists), which is also what every
 # component reports in its $VER - so the archive name and the fleet can never disagree.
@@ -56,11 +56,12 @@ install(TARGETS NeptuneUSB RUNTIME DESTINATION Prefs)
 # Lands next to the NeptuneUSB executable; the Install script's `copyfiles Prefs (all)` carries it.
 install(FILES ${CMAKE_SOURCE_DIR}/dist/NeptuneUSB.info DESTINATION Prefs)
 
-# Poseidon prefs-file datatype + default icon. DefIcons (a standard 3.2 WBStartup component)
-# identifies FORM..PSLC config files via the PSD datatype and paints def_PSD.info on the ones
-# that lack their own icon. Descriptor -> DEVS:DataTypes/PSD ; def_PSD.info -> ENV(ARC):SYS/.
-install(FILES ${CMAKE_SOURCE_DIR}/dist/datatypes/PSD DESTINATION DEVS/DataTypes)
-install(FILES ${CMAKE_SOURCE_DIR}/dist/def_PSD.info DESTINATION Icons)
+# Settings-file datatype + default icon. DefIcons (a standard 3.2 WBStartup component)
+# identifies FORM..PSDC settings files via the Neptune datatype and paints def_Neptune.info on
+# the ones that lack their own icon. Descriptor -> DEVS:DataTypes/Neptune ;
+# def_Neptune.info -> ENV(ARC):SYS/.
+install(FILES ${CMAKE_SOURCE_DIR}/dist/datatypes/Neptune DESTINATION DEVS/DataTypes)
+install(FILES ${CMAKE_SOURCE_DIR}/dist/def_Neptune.info DESTINATION Icons)
 
 # Default USB attach/detach sounds → SYS:Prefs/Presets/Neptune/ (NEP_PRESETDRAWER, include/nep_paths.h:
 # the library's default Insert/Remove sound files). Capitalised to match the code's path (FFS is

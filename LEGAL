@@ -38,24 +38,27 @@ Third-party code
 Third-party artwork
 -------------------
 
-  trident/icons/Trident.png  (and the generated dist/Trident.info packaged as
-  Prefs/Trident.info) is taken from the AROS "Gorilla" icon set, which is
-  distributed under the terms of the GNU General Public License. That icon
-  file is therefore licensed under the GPL; the rest of this distribution
-  remains under the AROS Public License (aggregation of separate works).
+  dist/icons/NeptuneUSB.png and dist/icons/USBEject.png (and the generated
+  dist/NeptuneUSB.info and dist/USBEject.info, packaged as Prefs/NeptuneUSB.info
+  and WBStartup/USBEject.info) are the Trident icon from the AROS "Gorilla"
+  icon set, which is distributed under the terms of the GNU General Public
+  License. Those icon files are therefore licensed under the GPL; the rest of
+  this distribution remains under the AROS Public License (aggregation of
+  separate works).
   Source: https://github.com/aros-development-team/AROS
           images/IconSets/Gorilla/Icons/Medium/AROS/Prefs/Trident.png
 
-  trident/icons/def_PSD.png and trident/datatypes/PSD.dtd (and the generated
-  dist/def_PSD.info and dist/datatypes/PSD) originate in the Poseidon sources
-  (rom/usb/trident), under the AROS Public License as above.
+  dist/icons/def_Neptune.png and dist/datatypes/Neptune.dtd (and the generated
+  dist/def_Neptune.info and dist/datatypes/Neptune) are derived from def_PSD.png
+  and PSD.dtd in the Poseidon sources (rom/usb/trident), under the AROS Public
+  License as above.
 
 ----------------------------------------------------------------------------
 
 Runtime dependency (not redistributed)
 --------------------------------------
 
-  The Trident preferences program and the per-class configuration dialogs use
+  The Neptune USB preferences program and the per-class configuration dialogs use
   Magic User Interface (MUI). MUI is required at run time but is NOT part of
   this distribution. MUI is (C) Copyright 1992-2006 Stefan Stuntz and
   (C) Copyright 2006 onwards the MUI developers (Thore Boeckelmann, Jens Maus).

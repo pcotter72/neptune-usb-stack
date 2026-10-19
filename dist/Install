@@ -1,4 +1,4 @@
-; Poseidon for AmigaOS - Installer
+; Neptune - Installer
 ; Commodore Installer script. Run from a Shell:  Installer Install
 ;
 ; Installs (into the running system):
@@ -11,12 +11,19 @@
 ;   the localized catalogs        -> LOCALE:Catalogs/   (if LOCALE: exists)
 ; and optionally wires the startup commands into S:User-Startup.
 
-(set #poseidon "Poseidon for AmigaOS")
+(set #product "Neptune")
 
-; The S:User-Startup block marker. It must NEVER change: (startup) matches the existing
-; ";BEGIN <name>"/";END <name>" pair by this string, so renaming it would leave the old
-; block in place and append a second one - running the stack commands twice on every boot.
-(set #startupname "Poseidon USB Stack")
+; The S:User-Startup block marker. (startup) finds the existing ";BEGIN <name>"/";END <name>"
+; pair by this string and rewrites it, so it stays the same from release to release; a new
+; marker leaves the old block in place and appends a second one. 6.0-6.2, published as
+; "Poseidon for AmigaOS", used the old marker; that block is disabled below.
+(set #startupname "Neptune USB Stack")
+(set #oldstartupname "Poseidon USB Stack")
+
+; 1 when LIBS: holds poseidon.library 6.x, i.e. a 6.0-6.2 release is installed. getversion
+; packs the version in the high 16 bits (6 << 16 = 393216) and returns 0 for a missing file.
+; A classic (4.x) Poseidon reports less and is never touched.
+(set #oldrelease (>= (getversion "LIBS:poseidon.library") 393216))
 
 ;==========================================================================
 ; Installer version gate.
@@ -28,14 +35,17 @@
 ;   is a ">= 43" test and not an equality one.
 ;==========================================================================
 (if (< @installer-version 2818048)
-    (abort (#poseidon " needs Installer 43.3 or newer; this one is older.\n\n"
+    (abort (#product " needs Installer 43.3 or newer; this one is older.\n\n"
             "Installer 43.3 is freely distributable and is on Aminet as "
             "util/misc/Installer-43_3.lha. Copy it over C:Installer (or run it from "
             "wherever you unpack it) and start this script again.\n\n"
             "Nothing has been installed."))
 )
 
-(welcome ("Welcome to the installation of " #poseidon ", the USB stack for AmigaOS 3.1 and newer.\n\n"
+(welcome ("Welcome to the installation of " #product ", the USB stack for AmigaOS 3.1 and newer.\n\n"
+          "Neptune is an incompatible fork of the Poseidon USB stack: Poseidon's classes, "
+          "tools and V3 host-controller drivers do not work with it, and Neptune's "
+          "classes and tools do not work with Poseidon.\n\n"
           "This installs neptune.library, the USB device classes, the Neptune USB "
           "control panel and the command-line tools.\n\n"
           "Note: it does NOT install a USB host-controller driver - that ships "
@@ -60,7 +70,6 @@
 ;   newer version is kept. Driven off the drawer's contents, so new classes need no edit.
 ;==========================================================================
 (complete 20)
-(makedir "SYS:Classes"     (prompt "Creating SYS:Classes")     (help @makedir-help))
 (makedir "DEVS:USBClasses" (prompt "Creating DEVS:USBClasses") (help @makedir-help))
 (foreach "DEVS/USBClasses" "#?.class"
     (copylib
@@ -99,6 +108,21 @@
 ; the sound presets have no version, so they ride along with copyfiles (~(NeptuneUSB) = all but it).
 ;==========================================================================
 (complete 55)
+; The settings import rewrites sound paths under SYS:Prefs/Presets/Poseidon/ to
+; SYS:Prefs/Presets/Neptune/, so sounds the user added there are carried across first. The
+; bundled defaults are copied after them and replace their old copies.
+(if (= (exists "SYS:Prefs/Presets/Poseidon" (noreq)) 2)
+    (
+        (makedir "SYS:Prefs/Presets/Neptune" (prompt "Creating SYS:Prefs/Presets/Neptune") (help @makedir-help))
+        (copyfiles
+            (prompt "Copying your USB sounds from SYS:Prefs/Presets/Poseidon/ to SYS:Prefs/Presets/Neptune/")
+            (help @copyfiles-help)
+            (source "SYS:Prefs/Presets/Poseidon")
+            (dest "SYS:Prefs/Presets/Neptune")
+            (all)
+            (optional "nofail"))
+    )
+)
 (copylib
     (prompt "Installing Neptune USB (the control panel) into SYS:Prefs/")
     (help ("Neptune USB is the control panel for the USB stack.\n\n" @copylib-help))
@@ -133,25 +157,25 @@
 )
 
 ;==========================================================================
-; Poseidon prefs-file datatype + default icon (DefIcons)
-;   DEVS/DataTypes/PSD  -> DEVS:DataTypes/PSD          (datatypes identifies FORM..PSLC files)
-;   Icons/def_PSD.info  -> ENVARC:SYS/ + ENV:SYS/      (the icon Workbench paints on them)
+; Settings-file datatype + default icon (DefIcons)
+;   DEVS/DataTypes/Neptune  -> DEVS:DataTypes/Neptune     (datatypes identifies FORM..PSDC files)
+;   Icons/def_Neptune.info  -> ENVARC:SYS/ + ENV:SYS/     (the icon Workbench paints on them)
 ;==========================================================================
 (complete 70)
 (if (askbool
-        (prompt ("Install the Poseidon preset-file icon?\n\n"
-                 "This adds a 'PSD' datatype and a default Workbench icon, so your saved "
-                 "Poseidon preferences files show a nice icon instead of none. It relies on "
+        (prompt ("Install the Neptune settings-file icon?\n\n"
+                 "This adds a 'Neptune' datatype and a default Workbench icon, so your saved "
+                 "USB settings files show an icon instead of none. It relies on "
                  "the DefIcons component, which is standard from AmigaOS 3.5 onwards; on 3.1 "
                  "it is a separate install, and without it this is simply inert."))
-        (help ("Installs DEVS:DataTypes/PSD (so datatypes.library recognises Poseidon's "
-               "FORM...PSLC preference files) and ENVARC:SYS/def_PSD.info (the default icon "
+        (help ("Installs DEVS:DataTypes/Neptune (so datatypes.library recognises Neptune's "
+               "FORM...PSDC settings files) and ENVARC:SYS/def_Neptune.info (the default icon "
                "DefIcons shows for them). Purely cosmetic; safe to decline."))
         (default 1))
     (
         (makedir "DEVS:DataTypes" (prompt "Creating DEVS:DataTypes") (help @makedir-help))
         (copyfiles
-            (prompt "Installing the PSD datatype into DEVS:DataTypes/")
+            (prompt "Installing the Neptune datatype into DEVS:DataTypes/")
             (help @copyfiles-help)
             (source "DEVS/DataTypes")
             (dest "DEVS:DataTypes")
@@ -253,6 +277,80 @@
 )
 
 ;==========================================================================
+; Superseded 6.0-6.2 releases (published as "Poseidon for AmigaOS")
+;   Their S:User-Startup block is reduced to a comment, so the old stack is not started next
+;   to Neptune and the boot does not stop on a removed command. Search returns 0 only when
+;   the marker is present; without the test (startup) would add an empty block of that name.
+;   Then the old files are removed on request. Files with a version are removed only if they
+;   report 6 or newer; the unversioned ones (catalogs, sounds, datatype, icon) only when the
+;   6.x library is installed. poseidon.prefs is kept: Neptune imports it.
+;==========================================================================
+(complete 82)
+(if (= 0 (run (cat "C:Search >NIL: S:User-Startup \";BEGIN " #oldstartupname "\"") (safe)))
+    (startup #oldstartupname
+        (prompt ("Disable the Poseidon for AmigaOS 6.x start command in S:User-Startup?\n\n"
+                 "Neptune replaces it. Left in place, it starts the old stack as well."))
+        (help @startup-help)
+        (command "; Disabled by the Neptune installer.\n"))
+)
+
+; P_delv6 - delete a file if it reports version 6 or newer (a 6.x release file).
+(procedure P_delv6 #dv_file
+    (if (>= (getversion #dv_file) 393216)
+        (delete #dv_file (optional "force" "nofail")))
+)
+
+; P_del - delete a file or an empty drawer, if present (a drawer that is not empty stays).
+(procedure P_del #dl_file
+    (if (exists #dl_file (noreq))
+        (delete #dl_file (optional "force" "nofail")))
+)
+
+(if #oldrelease
+    (if (askbool
+            (prompt ("Remove the files of Poseidon for AmigaOS 6.x?\n\n"
+                     "Neptune replaces releases 6.0 to 6.2, which were published as "
+                     "'Poseidon for AmigaOS'. Their files are no longer used:\n\n"
+                     "  LIBS:poseidon.library\n"
+                     "  the classes in SYS:Classes/USB/\n"
+                     "  C:PsdStackLoader, PsdDevLister, PsdErrorlog\n"
+                     "  SYS:Prefs/Trident and its catalogs\n"
+                     "  the PSD datatype, its icon and the old sounds\n\n"
+                     "Your settings in ENVARC:Sys/poseidon.prefs are kept."))
+            (help ("Only files of the 6.x releases are removed: anything that reports a "
+                   "version below 6, such as a classic Poseidon, is left alone. Neptune "
+                   "does not use any of these files, and it imports poseidon.prefs on "
+                   "first start."))
+            (default 1))
+        (
+            (P_delv6 "LIBS:poseidon.library")
+            ; Driven off the archive's class list (a superset of every 6.x class), so the
+            ; drawer being emptied is not also the one being scanned.
+            (foreach "DEVS/USBClasses" "#?.class"
+                (P_delv6 (tackon "SYS:Classes/USB" @each-name)))
+            (P_del "SYS:Classes/USB")
+            (P_delv6 "C:PsdStackLoader")
+            (P_delv6 "C:PsdDevLister")
+            (P_delv6 "C:PsdErrorlog")
+            (if (>= (getversion "SYS:Prefs/Trident") 393216)
+                (
+                    (P_delv6 "SYS:Prefs/Trident")
+                    (P_del "SYS:Prefs/Trident.info")
+                )
+            )
+            (foreach "Catalogs" "#?"
+                (P_del (tackon "LOCALE:Catalogs" (tackon @each-name "System/Prefs/Trident.catalog"))))
+            (P_del "SYS:Prefs/Presets/Poseidon/Connect.iff")
+            (P_del "SYS:Prefs/Presets/Poseidon/Disconnect.iff")
+            (P_del "SYS:Prefs/Presets/Poseidon")
+            (P_del "DEVS:DataTypes/PSD")
+            (P_del "ENVARC:SYS/def_PSD.info")
+            (P_del "ENV:SYS/def_PSD.info")
+        )
+    )
+)
+
+;==========================================================================
 ; Auto-start
 ;==========================================================================
 (complete 85)
@@ -285,13 +383,11 @@
                        "controllers and want a specific one."))
                 (default 0)))
         (startup #startupname
-            (prompt "Add the Poseidon startup command to S:User-Startup?")
+            (prompt "Add the Neptune startup command to S:User-Startup?")
             (help @startup-help)
             ; One command starts the stack. The device and unit are its fallback for a
             ; machine with no saved settings; once Neptune USB has saved a controller, or on
-            ; a ROM-started stack, they are not used. An older three-line block
-            ; (USBStart / AddUSBHardware / AddUSBClasses) is replaced by this one,
-            ; because (startup) rewrites the block it finds under #startupname.
+            ; a ROM-started stack, they are not used.
             ; >NIL: keeps the boot quiet. AmigaDOS takes the redirection only straight
             ; after the command name, so it goes before the arguments.
             (command (cat "C:USBStart >NIL: " #hcd " " #unit "\n")))
@@ -299,7 +395,7 @@
 )
 
 (complete 100)
-(message (#poseidon " has been installed.\n\n"
+(message (#product " has been installed.\n\n"
           (if (= #startmode 0)
               "Reboot to start the USB stack, then open Neptune USB from SYS:Prefs/ to see your devices."
               "Start the stack with USBStart <device> <unit>, then open Neptune USB from SYS:Prefs/."))

@@ -1,8 +1,20 @@
-Poseidon for AmigaOS @NEPTUNE_PKG_VERSION@
-========================
+Neptune @NEPTUNE_PKG_VERSION@
+===========
 
-@BUILD_NOTICE@The Poseidon USB stack for AmigaOS 3.1 and newer, with the Trident preferences
-editor and the full set of USB device classes.
+@BUILD_NOTICE@Neptune - an incompatible fork of the Poseidon USB stack. A USB stack for
+AmigaOS 3.1 and newer, with the Neptune USB preferences editor and the full set
+of USB device classes.
+
+Neptune is not Poseidon and is not compatible with it:
+
+  - Poseidon's classes and tools do not run on Neptune, and Neptune's do not
+    run on Poseidon.
+  - Host-controller drivers written for Poseidon's V3 interface are not
+    supported. Neptune drives a controller through the classic interface or
+    through its own context interface, which is not Poseidon's.
+
+Releases 6.0 to 6.2 were published as "Poseidon for AmigaOS"; the Installer
+replaces them and imports their settings.
 
 Every component in this archive reports the same version.
 The classes and tools require neptune.library 6 or newer.
@@ -12,7 +24,7 @@ REQUIREMENTS
 ------------
 
 Kickstart and Workbench 3.1 or newer, a 68020 or better, and MUI 3.8 or newer
-for Trident and the per-class settings windows (the stack itself runs without
+for Neptune USB and the per-class settings windows (the stack itself runs without
 MUI). You also need a USB host-controller driver - none ships here.
 
 The Install script needs Installer 43.3 or newer, which is freely
@@ -34,7 +46,7 @@ Three archives are released, one per CPU - -020, -040 and -060. Take the one
 that matches your machine.
 
 No variant needs an FPU. The stack itself - neptune.library, the classes,
-Trident and USBEject - contains no floating point at all. The only floating
+Neptune USB and USBEject - contains no floating point at all. The only floating
 point in the distribution is the gamma table computed by the two optional
 camera tools, PencamTool and SonixcamTool; in the -020 archive that is
 soft-float, and in the -040/-060 archives 68040.library/68060.library cover
@@ -44,7 +56,7 @@ Every component here reports its CPU in its version string, so you can always
 check what is installed:
 
   Version LIBS:neptune.library
-  -> neptune.library @NEPTUNE_PKG_VERSION@ (...) Poseidon for AmigaOS @M68K_CPU@
+  -> neptune.library @NEPTUNE_PKG_VERSION@ (...) Neptune @M68K_CPU@
 
 
 BUILD VARIANT
