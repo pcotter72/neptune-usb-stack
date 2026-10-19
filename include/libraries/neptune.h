@@ -150,7 +150,7 @@
 #define DA_IsMultiTT         (DA_Dummy + 0x45)
 #define DA_HasContainerId    (DA_Dummy + 0x46)
 #define DA_ContainerId       (DA_Dummy + 0x47) /* UBYTE * (16 bytes) or NULL */
-#define DA_HubHdrDecLat      (DA_Dummy + 0x48) /* SS hubs: bHubHdrDecLat (0.1µs units), for the HCD's link-power exit-latency math */
+#define DA_HubHdrDecLat      (DA_Dummy + 0x48) /* SS hubs: bHubHdrDecLat (0.1 us units), for the HCD's link-power exit-latency math */
 #define DA_HubDelay          (DA_Dummy + 0x49) /* SS hubs: wHubDelay (ns) */
 #define DA_LinkPowerOverride (DA_Dummy + 0x4a) /* POCL_*: per-device link power management policy */
 #define DA_NoAutoSuspend     (DA_Dummy + 0x4b) /* never suspend this device from the idle sweep */

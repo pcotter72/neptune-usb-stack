@@ -2,6 +2,7 @@ TABLE OF CONTENTS
 
 neptune.library/--background--
 neptune.library/psdAbortPipe
+neptune.library/psdAddCfgEntry
 neptune.library/psdAddClass
 neptune.library/psdAddErrorMsg
 neptune.library/psdAddHardware
@@ -15,22 +16,30 @@ neptune.library/psdDelayMS
 neptune.library/psdDoPipe
 neptune.library/psdEnumerateDevice
 neptune.library/psdEnumerateHardware
+neptune.library/psdFindCfgForm
 neptune.library/psdFindDevice
 neptune.library/psdFreeDevice
 neptune.library/psdFreePipe
 neptune.library/psdFreeVec
 neptune.library/psdGetAttrs
+neptune.library/psdGetCfgChunk
+neptune.library/psdGetClsCfg
 neptune.library/psdGetNextDevice
 neptune.library/psdGetPipeActual
 neptune.library/psdGetPipeError
 neptune.library/psdGetStringDescriptor
+neptune.library/psdGetUsbDevCfg
 neptune.library/psdLockReadDevice
 neptune.library/psdLockReadPBase
 neptune.library/psdLockWriteDevice
 neptune.library/psdLockWritePBase
+neptune.library/psdNextCfgForm
 neptune.library/psdNumToStr
 neptune.library/psdPipeSetup
+neptune.library/psdReadCfg
 neptune.library/psdReleaseAppBinding
+neptune.library/psdRemCfgChunk
+neptune.library/psdRemCfgForm
 neptune.library/psdRemClass
 neptune.library/psdRemErrorMsg
 neptune.library/psdRemHardware
@@ -38,46 +47,50 @@ neptune.library/psdSafeRawDoFmt
 neptune.library/psdSendPipe
 neptune.library/psdSetAltInterface
 neptune.library/psdSetAttrs
+neptune.library/psdSetClsCfg
 neptune.library/psdSetDeviceConfig
+neptune.library/psdSetUsbDevCfg
 neptune.library/psdSpawnSubTask
 neptune.library/psdUnlockDevice
 neptune.library/psdUnlockPBase
 neptune.library/psdWaitPipe
+neptune.library/psdWriteCfg
 
-Need to be added:
+Not described in this document; see libraries/neptune.h and
+neptune.library-architecture.md:
+
 psdAddEventHandler
 psdRemEventHandler
 psdSendEvent
 
 psdReleaseDevBinding
 psdReleaseIfBinding
+psdHubClassScan
+psdHubClaimAppBinding
+psdHubReleaseDevBinding
+psdHubReleaseIfBinding
+psdDoHubMethod
 
-psdReadCfg
-psdWriteCfg
-psdFindCfgForm
-psdNextCfgForm
-psdRemCfgForm
-
-psdAddCfgEntry
-psdRemCfgChunk
-psdGetCfgChunk
 psdParseCfg
 psdUnbindAll
-
-psdSetClsCfg
-psdGetClsCfg
-psdSetUsbDevCfg
-psdGetUsbDevCfg
+psdAllocCfgForm
+psdAddStringChunk
+psdMatchStringChunk
+psdGetStringChunk
+psdLoadCfgFromDisk
+psdSaveCfgToDisk
 
 psdFindInterface
 psdFindEndpoint
+psdFindDescriptor
 psdCopyStrFmt
 psdSetForcedBinding
 psdGetForcedBinding
 
 psdCheckPipe
-
-/* V3 */
+psdCalculatePower
+psdDebugSemaphores
+psdBorrowLocksWait
 
 psdOpenStreamA
 psdCloseStream
@@ -86,9 +99,20 @@ psdStreamWrite
 psdStreamFlush
 psdGetStreamError
 
-psdCalculatePower
-psdLoadCfgFromDisk
-psdSaveCfgToDisk
+psdAllocRTIsoHandler
+psdFreeRTIsoHandler
+psdStartRTIso
+psdStopRTIso
+
+psdSuspendDevice
+psdResumeDevice
+psdSuspendBindings
+psdResumeBindings
+
+Added by Neptune:
+psdResetDevice
+psdSafeEjectDevice
+psdClearEndpointHalt
 
 
 neptune.library/psdReadCfg                       neptune.library/psdReadCfg
@@ -239,7 +263,7 @@ psdSaveCfgToDisk
                  or NULL, if no additional form could be retrieved.
 
    SEE ALSO
-        psdNextCfgForm(), psdRemCfgForm(), psdGetCfgChunk()
+        psdFindCfgForm(), psdRemCfgForm(), psdGetCfgChunk()
 
 
 neptune.library/psdRemCfgForm                 neptune.library/psdRemCfgForm
@@ -309,7 +333,8 @@ psdSaveCfgToDisk
                  or NULL, if the form or chunk could not be added.
 
    SEE ALSO
-        psdAddCfgForm(), psdRemCfgForm(), psdGetCfgChunk(), psdRemCfgChunk()
+        psdAllocCfgForm(), psdRemCfgForm(), psdGetCfgChunk(),
+        psdRemCfgChunk()
 
 
 neptune.library/psdRemCfgChunk               neptune.library/psdRemCfgChunk
@@ -345,13 +370,13 @@ psdSaveCfgToDisk
         success - TRUE, if the chunk was found and removed, FALSE otherwise.
 
    SEE ALSO
-        psdAddCfgForm(), psdRemCfgForm(), psdGetCfgChunk()
+        psdAddCfgEntry(), psdRemCfgForm(), psdGetCfgChunk()
 
 
 neptune.library/psdGetCfgChunk               neptune.library/psdGetCfgChunk
 
    NAME
-        psdGetCfgChunk -- convert an IFF context into a serialized IFF form
+        psdGetCfgChunk -- get a copy of a chunk from an IFF context
 
    SYNOPSIS
         chunk = psdGetCfgChunk(pic, chunkid);
@@ -387,7 +412,7 @@ psdSaveCfgToDisk
 
    SEE ALSO
         psdWriteCfg(), psdFindCfgForm(), psdRemCfgForm(), psdAddCfgEntry(),
-        psdGetCfgChunk()
+        psdRemCfgChunk()
 
 
 neptune.library/psdSetClsCfg                   neptune.library/psdSetClsCfg
@@ -410,9 +435,10 @@ psdSaveCfgToDisk
         to it). The form parameter has to be a pointer to a valid IFF-FORM
         with FORM-ID IFFFORM_CLASSDATA (see neptune.h).
 
-        If the form pointer is NULL, an existing configuration form will be
-        deleted. In any other case, any previously existing data will be
-        overwritten by the given form.
+        If the form pointer is NULL, an existing configuration form is
+        emptied, or an empty one is created if there is none. In any other
+        case, any previously existing data will be overwritten by the given
+        form.
 
         After successfully calling psdSetClsCfg(), psdGetClsCfg() will return
         a pointer to the IFF structure for you to parse (or return as a
@@ -421,8 +447,8 @@ psdSaveCfgToDisk
         psdReadCfg() functions.
 
         psdSetClsCfg() does not store the config to disk. User interaction is
-        normally required for this (Trident, PoPo, or a call to
-        psdSaveCfgToDisk()).
+        normally required for this (Neptune USB, the device notifier,
+        or a call to psdSaveCfgToDisk()).
 
    INPUTS
         owner - unique name string of the owner, usually the class name.
@@ -508,9 +534,10 @@ psdSaveCfgToDisk
         NULL or IFFFORM_IFCLSDATA, if ifid is not NULL. Otherwise, the call
         to this function will fail.
 
-        If the form pointer is NULL, an existing configuration form will be
-        deleted. In any other case, any previously existing data will be
-        overwritten by the given form.
+        If the form pointer is NULL, an existing configuration form is
+        emptied, or an empty one is created if there is none. In any other
+        case, any previously existing data will be overwritten by the given
+        form.
 
         After successfully calling psdSetUsbDevCfg(), psdGetUsbDevCfg() will
         return a pointer to the IFF structure for you to parse (or return as
@@ -519,8 +546,8 @@ psdSaveCfgToDisk
         psdAddCfgEntry() or psdReadCfg() functions.
 
         psdSetUsbDevCfg() does not store the config to disk. User interaction
-        is normally required for this (Trident, PoPo, or a call to
-        psdSaveCfgToDisk()).
+        is normally required for this (Neptune USB, the device notifier,
+        or a call to psdSaveCfgToDisk()).
 
    INPUTS
         owner - unique name string of the owner, usually the class name.
@@ -564,7 +591,7 @@ psdSaveCfgToDisk
         returned. If there is at least a minimal configuration structure,
         a pointer to this internal IFF context will be returned (this is not
         a pointer to a FORM memory region!). This minimal configuration can
-        be generated using psdSetClsCfg(owner, NULL);
+        be generated using psdSetUsbDevCfg(owner, devid, ifid, NULL);
 
    INPUTS
         owner - unique name string of the owner, usually the class name.
@@ -578,7 +605,7 @@ psdSaveCfgToDisk
               access the data behind it.
 
    SEE ALSO
-        psdGetClsCfg(), psdSetClsCfg(), psdGetUsbDevCfg(), psdAddCfgEntry(),
+        psdGetClsCfg(), psdSetClsCfg(), psdSetUsbDevCfg(), psdAddCfgEntry(),
         psdGetCfgChunk(), psdFindCfgForm(), psdWriteCfg()
 
 
@@ -591,10 +618,11 @@ psdSaveCfgToDisk
         (usbhardware.device) and the class drivers.
 
    OVERVIEW
-        Neptune itself is a library. It has no own tasks except for the
-        tasks spawned for each hardware device mounted. The library functions
-        are fully re-entrant and all important structures are protected (or
-        can be protected), when access is to be shared.
+        Neptune itself is a library. Its only tasks are one for each
+        hardware device mounted, the event broadcast task and, when enabled,
+        the device notifier. The library functions are fully re-entrant and
+        all important structures are protected (or can be protected), when
+        access is to be shared.
 
         Neptune uses the following levels of abstraction:
 
@@ -617,7 +645,8 @@ psdSaveCfgToDisk
 
         PsdInterface  - Description of the interfaces the device supports in
         (pif)           the chosen configuration. Each interface can have
-                        0 to 15 endpoints (endpoint 0 is always available).
+                        up to 30 endpoints, 15 IN and 15 OUT (endpoint 0
+                        is always available and not counted).
 
                         Each interface can have an Interface<->Class binding,
                         if no Device<->Class binding already exists.
@@ -673,7 +702,32 @@ psdSaveCfgToDisk
    FILES
         The neptune.library itself resides in LIBS:, the USB hardware
         devices should be in DEVS:USBHardware, and all class drivers should
-        be stored in SYS:Classes/USB.
+        be stored in DEVS:USBClasses.
+
+   NEPTUNE
+        This document is Chris Hodges' poseidon.library autodoc (dated
+        28-Mar-02), as carried in the AROS sources, with the names changed
+        to Neptune's: class drivers live in DEVS:USBClasses (was
+        SYS:Classes/USB), and the prefs editor and popups are Neptune USB
+        and the device notifier (were Trident and PoPo). Its BUGS section,
+        about the state of development at the time, is left out. Sections
+        headed NEPTUNE mark where Neptune differs.
+
+        - The library is neptune.library (NEPTUNENAME), version 6 or newer.
+          Its functions, tags and structures keep Poseidon's psd* names.
+        - Host controller drivers use the classic interface described in
+          usbhardware.doc, or Neptune's own context interface
+          (neptune-context-hcd-abi.md). Poseidon's V3 host-controller
+          interface is not implemented, so a V3 driver does not work.
+        - Neptune adds psdResetDevice(), psdSafeEjectDevice() and
+          psdClearEndpointHalt(). psdSaveCfgToDisk() takes only a file name
+          (NULL saves to both ENVARC: and ENV:). These are described in
+          neptune.library-architecture.md, not here.
+        - When a bulk or interrupt transfer ends with UHIOERR_STALL (or
+          BABBLE, XACTERROR or SPLITERROR), the library clears the endpoint
+          halt itself. The transfer still returns its error.
+        - The tags Neptune adds are listed under psdGetAttrs().
+
 
 neptune.library/psdAbortPipe                   neptune.library/psdAbortPipe
 
@@ -725,16 +779,21 @@ psdSaveCfgToDisk
         compatible usb classes, else a crash is very probable.
 
         If opening the library succeeds, the class will be added to the
-        class list.
+        class list. A class whose library is already in the list is refused.
 
-        Usually class libraries will be stored in SYS:Classes/USB.
+        If the library cannot be opened by the name given, the leading parts
+        of the path are dropped one at a time, ending with the bare file
+        name.
+
+        Usually class libraries will be stored in DEVS:USBClasses.
 
    INPUTS
         name - (file)name of the class to add.
         version - version of library to request.
 
    RESULT
-        puc - pointer to the library base, or NULL if opening failed.
+        puc - pointer to the class structure (private), or NULL if opening
+              failed or the class is already installed.
 
    SEE ALSO
         psdRemClass(), psdClassScan()
@@ -763,7 +822,7 @@ psdSaveCfgToDisk
 
    NOTE
         psdAddErrorMsg() uses a Forbid()/Permit() arbitration. The strings
-        can safely be of any length, but will be truncated at 256 characters.
+        can be of any length.
 
    INPUTS
         level - error level, either RETURN_OK (0) for information messages,
@@ -774,8 +833,9 @@ psdSaveCfgToDisk
         fmtdata - format parameters
 
    RESULT
-        pem - pointer to an error message structure (private) or NULL on
-              failure.
+        pem - pointer to an error message structure (private), or NULL on
+              failure or if messages of this level are switched off in the
+              settings.
 
    SEE ALSO
         psdRemErrorMsg(), psdSafeRawDoFmt(), RawDoFmt()
@@ -804,16 +864,18 @@ psdSaveCfgToDisk
         Moreover, the hardware is linked to the list of known hardware
         devices and will be closed on the expunge of the library.
 
-        The same device and unit cannot be added twice: if an entry for them
-        already exists, the call is refused and NULL returned, exactly as
-        psdAddClass() does for a class that is already installed. Without that
-        a second call would build a second hardware entry, a second device
-        task and a second root hub for the one controller. Names are matched
-        on the trailing path component and case-insensitively.
-
         This function returns NULL, if the hardware device could not be
-        opened, if it was already added, or if some other error occured. The
-        user will find the reason in the list of error messages.
+        opened or some other error occured. The user will find the reason in
+        the list of error messages.
+
+   NEPTUNE
+        The name is stored without its path. A driver already in memory is
+        opened by that bare name, any other from DEVS:USBHardware.
+
+        The same device and unit cannot be added twice: the second call is
+        refused and returns NULL, as psdAddClass() does for a class that is
+        already installed. Names are matched on the file part, without
+        regard to case.
 
    INPUTS
         devname - pointer to usb hardware device name string
@@ -1006,6 +1068,8 @@ psdSaveCfgToDisk
             THIS TAG IS MANDATORY!
         ABA_UserData (ULONG) - pointer to auxillary data for your private
             use.
+        ABA_ForceRelease (BOOL) - if TRUE, any class binding to the device
+            or its interfaces is released first.
 
    RESULT
         pab - pointer to the internal AppBinding structure, if the binding
@@ -1191,6 +1255,14 @@ psdSaveCfgToDisk
         The next step then is just to call psdClassScan() which will do the
         rest.
 
+        For a USB 3 controller, the SuperSpeed root hub is enumerated first
+        and returned. The USB 2.0 root hub is enumerated as well when the
+        driver reports a second root hub.
+
+   NEPTUNE
+        Only a context-interface driver gets the SuperSpeed root hub. A
+        classic-interface driver always has a single root hub.
+
    INPUTS
         phw - pointer to a previously allocated hardware.
 
@@ -1199,7 +1271,7 @@ psdSaveCfgToDisk
              failed.
 
    SEE ALSO
-        psdAllocHardware(), psdFreeHardware(), psdClassScan()
+        psdAddHardware(), psdRemHardware(), psdClassScan()
 
 
 neptune.library/psdFindDevice                 neptune.library/psdFindDevice
@@ -1248,7 +1320,8 @@ psdSaveCfgToDisk
             use interface class codes instead of device class codes.
         DA_SubClass (UWORD) - Subclass code to match.
         DA_Protocol (UWORD) - Protocol code to match.
-        DA_VendorID (UWORD) - Vendor ID number. This is a 
+        DA_VendorID (UWORD) - Vendor ID number. Only valid, if
+            DA_HasDevDesc is TRUE.
         DA_ProductID (UWORD) - Vendor specific product ID. Only valid, if
             DA_HasDevDesc is TRUE.
         DA_Version (UWORD) - BCD number of device/product version. Only
@@ -1261,8 +1334,14 @@ psdSaveCfgToDisk
             name could be read from the device, Neptune will generate one
             out of the class, the vendor and the product ID. Be sure to
             handle a NULL pointer. Only valid, if DA_HasDevDesc is TRUE.
+        DA_SerialNumber (STRPTR) - serial number string.
+        DA_IDString (STRPTR) - the unique device ID string, as used for the
+            device's settings.
         DA_Binding (APTR) - normally used with an NULL pointer to ensure the
             device has no binding already.
+        DA_HubDevice (APTR) - the hub the device is connected to.
+
+        Strings must match exactly, including case.
 
    RESULT
         pd - pointer to the device found in the list, or NULL if there was no
@@ -1371,10 +1450,10 @@ psdSaveCfgToDisk
         the tag list, ti_Tag identifies the attribute and ti_Data is a
         pointer to the IPTR variable where you wish the result to be stored.
 
-        There are currently a number of ten different system structures which
-        can be accessed in this way. To avoid adding multiple functions with
-        the same semantics, psdGetAttrs() requires the type of the structure
-        passed.
+        There are currently fifteen different system structures which can
+        be accessed in this way; this document describes ten of them. To
+        avoid adding multiple functions with the same semantics,
+        psdGetAttrs() requires the type of the structure passed.
 
    INPUTS
         type - describes the type of the structure passed.
@@ -1434,7 +1513,7 @@ psdSaveCfgToDisk
         DA_Protocol (UWORD) - Protocol code. Only valid, if DA_HasDevDesc is
             TRUE.
         DA_VendorID (UWORD) - Vendor ID number. Can be converted into a
-            string using PsdNumToStr(). Only valid, if DA_HasDevDesc is TRUE.
+            string using psdNumToStr(). Only valid, if DA_HasDevDesc is TRUE.
         DA_ProductID (UWORD) - Vendor specific product ID. Only valid, if
             DA_HasDevDesc is TRUE.
         DA_Version (UWORD) - BCD number of device/product version. Only
@@ -1456,7 +1535,7 @@ psdSaveCfgToDisk
         DA_CurrLangID (UWORD) - ID of the language the device is using
             currently. The stack will try to set a sensible value here
             during enumeration. This value can also be modified, but will
-            only effect future calls to PsdGetStringDescriptor(), not prior
+            only effect future calls to psdGetStringDescriptor(), not prior
             ones.
         DA_Binding (APTR) - pointer to class private binding structure which
             currently has a binding to the device or NULL, if no class
@@ -1547,9 +1626,10 @@ psdSaveCfgToDisk
             USEAF_ISOCHRONOUS, USEAF_BULK or USAEF_INTERRUPT
             (see devices/usb.h).
         EA_MaxPktSize (UWORD) - returns the MaxPktSize for this endpoint.
-        EA_Interval (UWORD) - for interrupt endpoints, this field will
-            contain the interval in milliseconds before the request should be
-            retried.
+        EA_Interval (UWORD) - the polling interval of an interrupt or
+            isochronous endpoint: in frames (1 ms) on low- and full-speed
+            devices, in microframes (125 us) on high-speed and SuperSpeed
+            devices, with the descriptor's exponent already decoded.
         EA_Interface (APTR) - uplinking pointer to the interface the endpoint
             is attached to.
         EA_IsIn (BOOL) - returns TRUE for IN (device to host) endpoints or
@@ -1571,7 +1651,7 @@ psdSaveCfgToDisk
             pipe transfer.
         PPA_MaxPktSize (UWORD) - returns the number of bytes allowed for one
             packet. Can be changed (for good reasons only).
-        PPA_IORequest (struct UsbHWIOReq *) - pointer to the IO request used
+        PPA_IORequest (struct IOUsbHWReq *) - pointer to the IO request used
             by the pipe. Note that you will probably never wish to read or
             change fields in this IORequest yourself. Use the tags instead.
         PPA_NakTimeout (BOOL) - if set to TRUE, the pipe will be retired
@@ -1605,6 +1685,48 @@ psdSaveCfgToDisk
             binding. Do not change this while running.
         ABA_UserData (ULONG) - pointer to auxillary data for your private
             use.
+
+   NEPTUNE
+        Neptune adds these tags:
+
+        PGA_HARDWARE: (read-only)
+        HA_ContextBackend (BOOL) - TRUE, if the driver is run through the
+            context interface.
+        HA_StreamsSupported (BOOL) - TRUE, if the driver supports USB 3
+            bulk streams.
+        HA_DMAAlignment (UWORD) - DMA buffer alignment in bytes recommended
+            by the driver, or 0 for none.
+
+        PGA_DEVICE:
+        DA_HasContainerId (BOOL) - TRUE, if the device reported a Container
+            ID. Read-only.
+        DA_ContainerId (UBYTE *) - pointer to the 16-byte Container ID, or
+            NULL. Read-only.
+        DA_HubNumPorts (UWORD) - number of downstream ports, set by the hub
+            classes once the hub descriptor has been read.
+        DA_HubHdrDecLat (UWORD), DA_HubDelay (UWORD) - SuperSpeed hub
+            timing from the hub descriptor, for link power management. Set
+            by the hub class.
+        DA_LinkPowerOverride (UWORD) - link power policy for this device:
+            POCL_INHERIT, POCL_DISABLE or POCL_ENABLE.
+        DA_NoAutoSuspend (BOOL) - if TRUE, the device is never suspended
+            for being idle.
+        DA_CanSafeEject (BOOL) - TRUE, if a class bound to the device
+            supports safe eject. Read-only.
+        DA_CanSuspend (BOOL) - TRUE, if psdSuspendDevice() would not refuse
+            the device outright. Read-only.
+
+        PGA_ENDPOINT: (read-only)
+        EA_StreamsAlloc (UWORD) - number of bulk streams the driver holds
+            rings for, or 0.
+
+        PGA_PIPE:
+        PPA_StreamID (UWORD) - USB 3 bulk stream the pipe uses, or 0 for
+            none.
+
+        With a context-interface driver, the request returned for
+        PPA_IORequest is not sent to the driver: Neptune builds each
+        transfer from it when the pipe is sent.
 
    RESULT
         num - number of tags actually read or -1, if the request was not
@@ -1658,7 +1780,7 @@ psdSaveCfgToDisk
         psdGetPipeActual() is used to determine the amount of data
         transferred during the last pipe transfer. This will be neccessary if
         you allowed the reception of runt packets enabled with the
-        PPA_ALLOWRUNTPACKETS tag.
+        PPA_AllowRuntPackets tag.
 
    NOTE
         You can also use psdGetAttrs() to read the actual length.
@@ -1705,7 +1827,7 @@ psdSaveCfgToDisk
         psdGetPipeActual(), psdSendPipe(), psdAbortPipe(), psdGetAttrs()
 
 
-neptune.library/psdGetStringDescriptor seidon.library/psdGetStringDescriptor
+neptune.library/psdGetStringDescriptor neptune.library/psdGetStringDescriptor
 
    NAME
         psdGetStringDescriptor -- try to get a device string descriptor
@@ -1714,7 +1836,7 @@ psdSaveCfgToDisk
         str = psdGetStringDescriptor(pp, idx);
         D0                           A1  D0
 
-        STRPTR psdAddClass(APTR, UWORD);
+        STRPTR psdGetStringDescriptor(APTR, UWORD);
 
    FUNCTION
         Tries to read out a device string descriptor with the given index.
@@ -1823,9 +1945,9 @@ psdSaveCfgToDisk
         This will only be neccessary if you change some linkages and
         structures inside the device, which you will probably never do.
 
-        Note that for some neptune.library calls like psdEnumerateDevice(), the
-        locking and unlocking is done automatically. Refer to the docs for
-        that call.
+        Note that for some neptune.library calls like psdEnumerateDevice(),
+        the locking and unlocking is done automatically. Refer to the docs
+        for that call.
 
         psdLockWriteDevice() calls nest.
 
@@ -1861,8 +1983,9 @@ psdSaveCfgToDisk
         going to add or remove internal nodes, link or unlike system
         components.
 
-        Note that for some neptune.library calls like psdAllocDevice(), the locking
-        and unlocking is done automatically. Refer to the docs for that call.
+        Note that for some neptune.library calls like psdAllocDevice(), the
+        locking and unlocking is done automatically. Refer to the docs for
+        that call.
 
         psdLockWritePBase() calls nest.
 
@@ -1898,7 +2021,8 @@ psdSaveCfgToDisk
         codes of known type into a readable string.
 
    NOTE
-        This function adds about 36 KB to the library :)
+        The string tables, mostly the vendor list, add about 60 KB to the
+        library.
 
    INPUTS
         type - code/value type. Currently this is one of these:
@@ -1906,7 +2030,12 @@ psdSaveCfgToDisk
                NTS_LANGID - for USB language IDs
                NTS_TRANSTYPE - for transfer types
                NTS_VENDORID - for the USB vendor IDs
-               NTS_CLASSCODE - for known class codes.
+               NTS_CLASSCODE - for known class codes
+               NTS_DESCRIPTOR - for descriptor types
+               NTS_SYNCTYPE - for isochronous synchronisation types
+               NTS_USAGETYPE - for isochronous usage types
+               NTS_COMBOCLASS - for class, subclass and protocol together
+                   (see the NTSCCF_* flags in libraries/neptune.h).
         idx - ID, number or code to convert.
         defstr - if no string is found in the database, this string will
                  be returned instead.
@@ -2020,7 +2149,7 @@ psdSaveCfgToDisk
         psdRemClass(puc);
                     A1
 
-        void psdRemClass(struct Library *);
+        void psdRemClass(APTR);
 
    FUNCTION
         psdRemClass() removes an class library from the stack. The puc
@@ -2028,11 +2157,15 @@ psdSaveCfgToDisk
 
    NOTE
         If any bindings to interfaces or devices still exist, this call will
-        try to remove all these bindings. If it does not succeed for
-        impossible reasons, this call will go into Wait(0L) state.
+        try to remove all these bindings.
+
+   NEPTUNE
+        If a binding cannot be released, the class library is left open and
+        a failure is logged; the call does not wait. The class leaves the
+        class list either way.
 
    INPUTS
-        puc - pointer to previously opened usb class.
+        puc - pointer to a class added with psdAddClass().
 
    SEE ALSO
         psdAddClass(), psdClassScan()
@@ -2051,7 +2184,7 @@ psdSaveCfgToDisk
 
    FUNCTION
         This function may be used to close down a previously allocated USB
-        hardware using psdAllocHardware(). As all devices connected to the
+        hardware using psdAddHardware(). As all devices connected to the
         hardware will be closed down aswell, none of these devices may still
         have bindings. These bindings will be terminated aswell. For this
         reason, this call might take some time to complete.
@@ -2061,14 +2194,22 @@ psdSaveCfgToDisk
 
         The phw hardware pointer becomes invalid right after.
 
+        A removed device whose pipes are still allocated is waited for for
+        about 30 seconds.
+
+   NEPTUNE
         A pointer that is no longer on the hardware list is ignored: the call
         logs a warning and returns instead of following it.
+
+        A device whose pipes are still allocated after the wait is abandoned,
+        with an error in the log, instead of being freed while those pipes
+        still use it.
 
    INPUTS
         phw - internal usb hardware pointer.
 
    SEE ALSO
-        psdRemHardware(), psdEnumerateHardware()
+        psdAddHardware(), psdEnumerateHardware()
 
 
 neptune.library/psdRemErrorMsg               neptune.library/psdRemErrorMsg
@@ -2091,7 +2232,7 @@ psdSaveCfgToDisk
         psdGetAttrs(), but is only valid inside a Forbid()/Permit() clause.
 
    INPUTS
-        pen - pointer to error message to deallocate.
+        pem - pointer to error message to deallocate.
 
    SEE ALSO
         psdAddErrorMsg()
@@ -2100,7 +2241,7 @@ psdSaveCfgToDisk
 neptune.library/psdSafeRawDoFmt             neptune.library/psdSafeRawDoFmt
 
    NAME
-        psdSafeRawDoFmtA -- add an error or information message for the user
+        psdSafeRawDoFmtA -- format a string into a buffer of limited size
         psdSafeRawDoFmt -- varargs stub for psdSafeRawDoFmtA
 
    SYNOPSIS
@@ -2111,11 +2252,12 @@ psdSaveCfgToDisk
 
         psdSafeRawDoFmt(buf, len, fmtstr, ...);
 
-        APTR psdSafeRawDoFmt(STRPTR, ULONG, STRPTR, ...);
+        void psdSafeRawDoFmt(STRPTR, ULONG, STRPTR, ...);
 
    FUNCTION
         Just like sprintf(), but avoid buffer overruns by truncating the
-        string to the maximum buffer size.
+        string to the maximum buffer size. The result is always
+        null-terminated.
 
    INPUTS
         buf - pointer to a buffer to store the formatted string in.
@@ -2197,7 +2339,7 @@ psdSaveCfgToDisk
         between them. psdSetAltInterface() changes the interface to its
         alternate setting. These interfaces are not stored directly in the
         list of interfaces but in a sublist for the active one. See
-        psdGetAttrs() for the IFA_AlterateIfList tag.
+        psdGetAttrs() for the IFA_AlternateIfList tag.
 
         This function does some internal magic for the given alternative
         interface to become the active one.
@@ -2244,10 +2386,10 @@ psdSaveCfgToDisk
         each entry in the tag list, ti_Tag identifies the attribute and
         ti_Data is the long data you wish to change the value to.
 
-        There are currently a number of ten different system structures
-        which can be accessed in this way. To avoid adding multiple functions
-        with the same semantics, psdSetAttrs() requires the type of the
-        structure passed.
+        There are currently fifteen different system structures which can
+        be accessed in this way. To avoid adding multiple functions with the
+        same semantics, psdSetAttrs() requires the type of the structure
+        passed.
 
    INPUTS
         type - describes the type of the structure passed.
@@ -2260,7 +2402,7 @@ psdSaveCfgToDisk
         See psdGetAttrs() for the tags which can be changed.
 
    RESULT
-        num - number of tags actually read or -1, if the request was not
+        num - number of tags actually changed or -1, if the request was not
               supported somehow.
 
    SEE ALSO
@@ -2313,16 +2455,20 @@ psdSaveCfgToDisk
 
    FUNCTION
         Simple function to lauch a subtask. The name will be copied and
-        automatically freed at the termination of the task, as will the 32KB
-        of stack allocated. That is a MUI-sized stack: PoPo and the class
-        GUIs are MUI applications running on it.
+        automatically freed at the termination of the task, as will the
+        stack allocated.
 
-        The task will use a default priority of 5.
+        The task will use the stack's subtask priority setting, 5 by
+        default.
 
    NOTE
         If these parameters don't suit you, just write your own code. Note
         that this creates a DOS Process when dos.library is available, and
         a plain Task when it is not, as during the ROM coldstart.
+
+   NEPTUNE
+        The stack is 32 KB, because the device notifier and the class GUIs
+        run MUI on it.
 
    INPUTS
         name - name of the task
@@ -2413,7 +2559,7 @@ psdSaveCfgToDisk
         ioerr - zero, if everthing went okay, else the IO error code.
 
    SEE ALSO
-        psdPipeSetup(), psdDoPipe(), psdAbortPipe(), psdWaitPipe(),
+        psdPipeSetup(), psdDoPipe(), psdAbortPipe(), psdSendPipe(),
         psdGetPipeError(), psdGetPipeActual()
 
 

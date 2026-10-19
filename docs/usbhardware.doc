@@ -139,6 +139,43 @@ usbhardware.device/UHCMD_USBSUSPEND
        Also notice, that iouh_MaxPktSize does not have to be a power of
        two for interrupt or iso endpoints for your arithmetics.
 
+   NEPTUNE
+       This document is Chris Hodges' description of the classic host
+       controller interface, as carried in the AROS sources. Neptune's
+       legacy backend speaks it as written - the V1 and V2 request layouts
+       and the command numbers are unchanged - so read "Poseidon" as
+       Neptune. Differences, and what Neptune adds:
+
+       - Neptune does not use Poseidon's V3 host-controller interface;
+         Neptune's devices/usbhardware.h defines no V3 fields or flags.
+       - A driver that reports UHCF_CONTEXT in UHA_Capabilities and
+         implements the mandatory context commands is driven through
+         Neptune's own context interface instead
+         (docs/neptune-context-hcd-abi.md); this document does not apply
+         to it apart from the error codes and UHCMD_USBRESET.
+       - Commands Neptune sends: UHCMD_QUERYDEVICE, UHCMD_USBRESET, the four
+         transfer commands, CMD_FLUSH, NSCMD_DEVICEQUERY, and the real-time
+         iso commands UHCMD_ADDISOHANDLER, UHCMD_REMISOHANDLER,
+         UHCMD_STARTRTISO and UHCMD_STOPRTISO (devices/usbhardware.h; not
+         described here). It never sends CMD_RESET, UHCMD_USBOPER,
+         UHCMD_USBSUSPEND or UHCMD_USBRESUME: devices are suspended through
+         their hub ports.
+       - UHA_Capabilities decides what the library uses: UHCF_ISO and
+         UHCF_RT_ISO enable isochronous and real-time iso transfers, and
+         with UHCF_QUICKIO transfers are started with BeginIO() and
+         IOF_QUICK in the caller's task.
+       - Endpoint halts: after UHIOERR_STALL or UHIOERR_BABBLE (or the two
+         codes below) on a bulk or interrupt transfer, the library itself
+         sends ClearFeature(Endpoint_Halt) as an ordinary control transfer,
+         so the toggle reset described under DATA SEQUENCE TOGGLES is what
+         lets the endpoint run again.
+       - Error codes 14-16 (devices/usbhcd_common.h) are Neptune's:
+         UHIOERR_NO_BANDWIDTH for the context interface, and
+         UHIOERR_XACTERROR and UHIOERR_SPLITERROR for a failed transaction
+         (directly, or behind a transaction translator). The library
+         accepts the latter two from any driver and counts them like
+         UHIOERR_CRCERROR towards a dead device.
+
 
 usbhardware.device/CMD_FLUSH                     usbhardware.device/CMD_FLUSH
 
@@ -187,6 +224,9 @@ usbhardware.device/UHCMD_USBSUSPEND
         io_Error     - either 0, if everything went okay or
                        UHIOERR_HOSTERROR, if bus was not in operational state
                        after the bus reset.
+   NEPTUNE
+        Not sent by Neptune.
+
    SEE ALSO
         UHCMD_USBRESET
 
@@ -536,6 +576,16 @@ usbhardware.device/UHCMD_USBSUSPEND
         UHA_DriverVersion (UWORD) - BCD encoded version number of the
                                     IORequest structure. Currently, only
                                     0x100 and 0x200 are valid.
+        UHA_Capabilities (ULONG) - UHCF_* bits, see devices/usbhardware.h.
+
+   NEPTUNE
+        Neptune also asks for UHA_DMAAlignment (ULONG): the buffer alignment
+        in bytes the driver can DMA from directly (a power of two; 0 or
+        unanswered = no constraint) and passes it on to classes as
+        HA_DMAAlignment, so they can choose their buffers to suit.
+        UHA_NumRootHubs belongs to the context
+        interface. UHCF_CONTEXT (bit 5) in UHA_Capabilities selects the
+        context interface.
 
    INPUTS
         mn_ReplyPort - pointer to message port that receives I/O request
@@ -581,6 +631,9 @@ usbhardware.device/UHCMD_USBSUSPEND
         io_Error     - either 0, if everything went okay or
                        UHIOERR_HOSTERROR, if bus was not in operational state
                        after this command.
+
+   NEPTUNE
+        Not sent by Neptune.
 
    SEE ALSO
         UHCMD_USBSUSPEND, UHCMD_USBRESUME, UHCMD_USBRESET
@@ -640,6 +693,9 @@ usbhardware.device/UHCMD_USBSUSPEND
                        UHIOERR_HOSTERROR, if bus was not in operational state
                        after the resume command.
 
+   NEPTUNE
+        Not sent by Neptune.
+
    SEE ALSO
         UHCMD_USBSUSPEND, UHCMD_USBOPER, UHCMD_USBRESET
 
@@ -667,6 +723,9 @@ usbhardware.device/UHCMD_USBSUSPEND
         iouh_State   - current status of bus.
         io_Error     - either 0, if everything went okay or
                        UHIOERR_HOSTERROR, if bus could not be suspended.
+
+   NEPTUNE
+        Not sent by Neptune.
 
    SEE ALSO
         UHCMD_USBRESUME, UHCMD_USBRESET, UHCMD_USBOPER
