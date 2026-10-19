@@ -1023,10 +1023,6 @@ struct NepClassEth * nAllocEth(void)
                             DA_Config, best_cfg,
                             TAG_END);
             }
-
-            psdSetAttrs(PGA_INTERFACE, best_if,
-                        IFA_AlternateNum, altifnum,
-                        TAG_END);
         }
 
         if(!(ncp->ncp_Interface && ncp->ncp_EPIn && ncp->ncp_EPOut))
@@ -1064,7 +1060,12 @@ struct NepClassEth * nAllocEth(void)
         {
             if((ncp->ncp_EP0Pipe = psdAllocPipe(ncp->ncp_Device, ncp->ncp_TaskMsgPort, NULL)))
             {
-                if((ncp->ncp_EPOutPipe = psdAllocPipe(ncp->ncp_Device, ncp->ncp_TaskMsgPort, ncp->ncp_EPOut)))
+                if(!psdSetAltInterface(ncp->ncp_EP0Pipe, ncp->ncp_Interface))
+                {
+                    psdAddErrorMsg(RETURN_FAIL, (STRPTR) libname,
+                                   "Could not select data interface alternate setting!");
+                }
+                else if((ncp->ncp_EPOutPipe = psdAllocPipe(ncp->ncp_Device, ncp->ncp_TaskMsgPort, ncp->ncp_EPOut)))
                 {
                     /* Allow continuous retries without aborting on NAK timeouts. */
                     psdSetAttrs(PGA_PIPE, ncp->ncp_EPOutPipe,
@@ -1334,7 +1335,6 @@ static UWORD cdceth_build_packet_filter(struct NepClassEth *ncp)
 static BOOL cdceth_set_packet_filter(struct NepClassEth *ncp, UWORD filter)
 {
     IPTR ifnum = 0;
-    UBYTE filter_payload[2];
     LONG ioerr;
 
     if(!(ncp->ncp_EP0Pipe && ncp->ncp_ControlInterface))
@@ -1347,11 +1347,7 @@ static BOOL cdceth_set_packet_filter(struct NepClassEth *ncp, UWORD filter)
                 IFA_InterfaceNum, &ifnum,
                 TAG_END);
 
-    /* CDC SET_ETHERNET_PACKET_FILTER expects a two-byte payload. */
-    filter_payload[0] = (UBYTE) (filter & 0xff);
-    filter_payload[1] = (UBYTE) (filter >> 8);
-
-    KPRINTF(5, ("SET_ETHERNET_PACKET_FILTER bmReqType=0x%02lx bReq=0x%02lx wValue=0x%04lx wIndex=%ld len=2\n",
+    KPRINTF(5, ("SET_ETHERNET_PACKET_FILTER bmReqType=0x%02lx bReq=0x%02lx wValue=0x%04lx wIndex=%ld len=0\n",
                 (ULONG) (URTF_CLASS|URTF_INTERFACE), (ULONG) UCDC_SET_ETHERNET_PACKET_FILTER,
                 (ULONG) filter, (long) ifnum));
 
@@ -1367,7 +1363,7 @@ static BOOL cdceth_set_packet_filter(struct NepClassEth *ncp, UWORD filter)
                  (ULONG) filter,
                  (ULONG) ifnum);
 
-    ioerr = psdDoPipe(ncp->ncp_EP0Pipe, filter_payload, sizeof(filter_payload));
+    ioerr = psdDoPipe(ncp->ncp_EP0Pipe, NULL, 0);
     if(ioerr)
     {
         psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
@@ -1528,16 +1524,8 @@ void nDoEvent(struct NepClassEth *ncp, ULONG events)
 /* \\\ */
 
 /* /// "support routines" */
-static
-inline void *callcopy(void *routine,
-                      void *from,
-                      void *to,
-                      ULONG len)
-{
-  void * (*call) (APTR, APTR, ULONG) = routine;
-
-  return (*call) (from, to, len);
-}
+/* SANA-II buffer management functions take their arguments in a0/a1/d0 */
+typedef BOOL (*S2CopyBuffFunc)(APTR to asm("a0"), APTR from asm("a1"), ULONG len asm("d0"));
 
 #define callfilter CallHookPkt
 /* \\\ */
@@ -1597,7 +1585,8 @@ BOOL nWritePacket(struct NepClassEth *ncp, struct IOSana2Req *ioreq)
     }
 
     /* Dma not available, fallback to regular copy */
-    if(callcopy(bufman->bm_CopyFromBuf, copydest, ioreq->ios2_Data, ioreq->ios2_DataLength) == NULL)
+    S2CopyBuffFunc CopyFromBuff = (S2CopyBuffFunc) bufman->bm_CopyFromBuf;
+    if(!CopyFromBuff(copydest, ioreq->ios2_Data, ioreq->ios2_DataLength))
     {
         KPRINTF(10, ("writepacket: copyfrom returned failure!\n"));
 
@@ -1713,8 +1702,8 @@ UWORD nReadIOReq(struct NepClassEth *ncp, struct EtherPacketHeader *eph, UWORD d
     }
 
     /* Finally copy the packet data! */
-    if(callcopy(((struct BufMan *) ioreq->ios2_BufferManagement)->bm_CopyToBuf,
-               ioreq->ios2_Data, copyfrom, ioreq->ios2_DataLength))
+    S2CopyBuffFunc CopyToBuff = (S2CopyBuffFunc) ((struct BufMan *) ioreq->ios2_BufferManagement)->bm_CopyToBuf;
+    if(CopyToBuff(ioreq->ios2_Data, copyfrom, ioreq->ios2_DataLength))
     {
         DB(
         KPRINTF(5, ("readioreq: copytobuffed packet ior 0x%08lx, %04lx%08lx < %04lx%08lx, type %lu, %lu bytes, %s%s%s\n",
@@ -1781,7 +1770,7 @@ BOOL nReadPacket(struct NepClassEth *ncp, UBYTE *pktptr, ULONG pktlen)
     datasize = pktlen - sizeof(struct EtherPacketHeader);
 
     /* Is the packet datasize valid? */
-    if((pktlen >= ETHER_MIN_LEN) && (pktlen <= ETHER_MAX_LEN))
+    if(pktlen <= ETHER_MAX_LEN)
     {
         /* Update the packet statistics */
         if(stats)
