@@ -152,7 +152,7 @@ flowchart TD
     NCH --> AHIREQ["nch_AHIReq - opens ahi.device per binding"]
     MODES --> NAM["NepAudioMode - one AHI mode (playback or record)"]
     AUNITS --> NAU["NepAudioUnit - one AC topology node"]
-    NAM -->|nam_Sibling| NAM2["sibling NepAudioMode (full-duplex pair)"]
+    NAM -->|"nam_RecStream / nam_PartOf"| NAM2["record NepAudioMode (full-duplex pair, or a record-only mode's alternate)"]
     NAM -->|nam_RootUnit| NAU
     NAM -.->|"registered into"| AHIDB["AHI mode DB (AHIDB_NepAudioMode back-pointer)"]
 ```
@@ -164,7 +164,8 @@ flowchart TD
 * **`NepAudioMode`** = one **AHI mode** = one usable streaming format (one streaming alt-setting).
   Carries the USB realization state (alt-interface, iso endpoint, RT-ISO handler), the format
   (resolution/channels/frame size), the supported-frequency list, the double-buffers and clock
-  fields, and `nam_Sibling` linking a playback mode to its record mode for full-duplex.
+  fields, and two links: `nam_RecStream` from a playback mode to the record stream that goes
+  with it (full duplex), `nam_PartOf` from a record stream to the AHI mode it belongs to.
 * **`NepAudioUnit`** = one **USB-Audio topology node** (Input/Output Terminal, Feature, Selector,
   Mixer, …) with graph adjacency (`nau_InputUnit[]`/`nau_OutputUnit[]`) and the discovered
   control info (`nau_VolumeUnit`, `nau_VolCtrlMask`, min/max dB).
@@ -247,9 +248,9 @@ links the two.
 
 Walks each AudioStreaming alt-setting's class-specific descriptors:
 `UDST_AUDIO_STREAM_GENERAL` (format tag, `bTerminalLink`) and `UDST_AUDIO_STREAM_FMT_TYPE`
-(Type-I PCM only). For each usable format it allocates a `NepAudioMode` and fills:
-`nam_NumChannels`×`nam_Resolution` → `nam_SampleType` (`AHIST_M8S/M16S/M32S/S8S/S16S/S32S`;
-24-bit has no AHI representation), `nam_FrameSize`/`nam_SampleSize` from the format descriptor,
+(Type-I PCM only). A usable format is mono or stereo of 8, 16 or 17 to 32 bits; for each it
+allocates a `NepAudioMode` and fills: `nam_NumChannels`, `nam_Resolution`,
+`nam_FrameSize`/`nam_SampleSize` from the format descriptor,
 freq/pitch-control flags from the endpoint descriptor, and the supported-frequency list
 (`nam_FreqArray[64]`) - discrete from `bSamFreqType`, or a continuous range intersected with a
 common-rates table, **clamped to ≤64 kHz** because AHI represents frequency in 16 bits.
@@ -275,10 +276,18 @@ processing, extension), in five stages:
 5. **Control discovery** - for each Feature Unit, decode the per-channel control bitmaps and
    classify by graph position: rooted at a USB *input* stream → **master volume**; flows to a USB
    stream → **input gain**; otherwise → **monitor**. Build `nau_VolCtrlMask` (master/left/right)
-   and query the dB range over EP0 (`GET_MIN`/`GET_MAX` on the feature unit). Selector units attach
+   and query the dB range over EP0 (`GET_MIN`/`GET_MAX` on the feature unit); `nFindLogVolume`
+   turns it into the linear range AHI is told (`nau_MinVolume`/`nau_MaxVolume`, see §10). Selector units attach
    to their chain's sink (`nau_SelectorUnit`). Finally, **record↔playback modes are paired** by
-   matching resolution/channels/frame-size/frequency and cross-linked via `nam_Sibling`
-   (enabling full-duplex).
+   matching resolution/channels/frame-size/frequency and linked both ways: the playback
+   mode's `nam_RecStream`, the record mode's `nam_PartOf` (enabling full-duplex). The modes outlive a binding, so what is paired stays paired at a
+   replug. A record mode that no playback mode matches - every mode of a device that only
+   records, a camera's microphone for one - becomes an AHI mode of its own (§7.1). Such modes
+   of one interface that differ in nothing but the alternate setting are **one** mode: a
+   camera has an alternate setting per sample rate. The first of them takes the rates of all
+   into its list, and the others point to it with `nam_PartOf` - which for a record mode
+   therefore always means "the AHI mode this one belongs to", a playback mode or the record
+   mode that leads its group; NULL means it is an AHI mode itself. `nAltForFreq()` finds the alternate that carries a rate.
 
 ```mermaid
 flowchart LR
@@ -296,7 +305,7 @@ flowchart LR
     end
     IT1 -.->|nau_RootUnit| MP["NepAudioMode playback, nam_IsInput false"]
     OT2 -.->|nau_RootUnit| MR["NepAudioMode record, nam_IsInput true"]
-    MP -. nam_Sibling .- MR
+    MP -. "nam_RecStream / nam_PartOf" .- MR
 ```
 
 ---
@@ -308,9 +317,14 @@ realization** when an application actually opens a mode.
 
 ### 7.1 Registration - `nAddAudioModes` (`:1902`, at attach)
 
-Called from `nAllocAudio`. For each **playback** mode (record is exposed via the full-duplex
-sibling, not as its own AHI mode) it builds an AHI mode name and a tag list and calls
-`AHI_AddAudioMode`:
+Called from `nAllocAudio`. For each **playback** mode (its record stream comes along, not
+as an AHI mode of its own) and for each **record mode that is part of none** (`nam_PartOf`
+NULL) it builds an AHI
+mode name and a tag list and calls `AHI_AddAudioMode`. A record-only mode is named
+"DevName: Rec 16 bit stereo (4 bpf)" and lists the rates of all its alternate settings
+(§6.2). `nRecMode()` gives the recording half of a mode
+whichever kind it is, `nGetOutputUnit()` the unit with its playback controls - none for a
+mode that only records, so it reports no output volume and no outputs.
 
 | Tag | Value |
 |---|---|
@@ -369,10 +383,10 @@ device reserves no USB isochronous bandwidth.
 
 | Vector | AHI meaning | What it does here |
 |---|---|---|
-| `subLibAllocAudio` | claim hardware for a mode | recover `nam`, open poseidon/timer/EP0, `nSelectAudioMode`, size buffers, install player int + conversion hook; set `AHISF_MIXING\|KNOWSTEREO\|KNOWHIFI` (+`CANRECORD` if a record sibling) |
+| `subLibAllocAudio` | claim hardware for a mode | recover `nam`, open poseidon/timer/EP0, `nSelectAudioMode`, size buffers, install player int + conversion hook; set `AHISF_MIXING\|KNOWSTEREO\|KNOWHIFI` (+`CANRECORD` if it has a record stream) |
 | `subLibFreeAudio` | release hardware | stop+free RT-ISO, free buffers, **revert to zero-bandwidth alt-interface**, close everything |
 | `subLibDisable` / `subLibEnable` | bracket the audio interrupt | **no-ops** (the data path runs on the RT-ISO/USB interrupt + a soft-int, not a driver-owned IRQ) |
-| `subLibStart` | begin streaming | `psdStartRTIso` (or `Cause` the fallback player); start the record sibling on `AHISF_RECORD` |
+| `subLibStart` | begin streaming | `psdStartRTIso` (or `Cause` the fallback player); start the record stream on `AHISF_RECORD` |
 | `subLibUpdate` | player frequency changed | recompute `nam_PlayerFrac` |
 | `subLibStop` | halt streaming | `psdStopRTIso` (or abort the fallback timer) |
 | `subLibSetVol`/`SetFreq`/`SetSound`/`SetEffect`/`LoadSound`/`UnloadSound` | per-channel mixing ops | **stubs** returning `AHIS_UNKNOWN` - AHI does the mixing; this driver only consumes the finished buffer |
@@ -417,60 +431,105 @@ sequenceDiagram
     participant PI as player softint, subLibPlayerIntV4 or V6
     participant AHI as AHI mixer
     participant CONV as nam_SamConvHook
-    participant BUF as nam_USBBuffer 0 and 1
+    participant BUF as nam_PlayBuffer 0 and 1
 
     HCD->>OUT: per iso frame, IOUsbHWBufferReq
     note over OUT: decrement nam_PlayerTimer by nam_Interval
     alt player tick due
         OUT->>PI: Cause nam_PlayerInt, deferred soft-int
-        PI->>AHI: ahiac_PlayerFunc then ahiac_MixerFunc into nam_AHIBuffer
-        PI->>CONV: convert ahiac_BuffSamples into the write buffer
-        PI->>BUF: flip, nam_NextBufR = written, nam_NextBufW = other
+        PI->>AHI: ahiac_PlayerFunc then ahiac_MixerFunc into nam_MixBuffer
+        PI->>CONV: convert ahiac_BuffSamples into play buffer nam_FillBuf
+        PI->>BUF: flip, nam_SendBuf = written, nam_FillBuf = other
     end
-    note over OUT: if read buffer drained, latch nam_USBBuffer read index into ubr_Buffer
-    note over OUT: advance 16.16 nam_BufferCount by nam_SampleFrac,<br/>ubr_Length = whole samples times nam_FrameSize
+    note over OUT: if nam_SendLeft is used up, latch nam_PlayBuffer of nam_SendBuf into ubr_Buffer
+    note over OUT: advance 16.16 nam_SendCarry by nam_FramesPerMS times nam_Interval,<br/>ubr_Length = whole frames times nam_FrameSize
     OUT-->>HCD: ubr_Buffer and ubr_Length for this frame
 ```
 
 The split is deliberate: `nOutReqHook` runs in **iso-interrupt context** and only *schedules*
 mixing via `Cause()`; the heavy AHI mix runs in the lower-priority **player soft-int**
-(`subLibPlayerIntV4`/`V6`), which calls `ahiac_PlayerFunc` + `ahiac_MixerFunc` into the native
-`nam_AHIBuffer`, runs `nam_SamConvHook` to convert into the *write* USB buffer, then **flips** the
-ping-pong indices. The interrupt hook then feeds the *read* buffer to the wire.
+(`subLibPlayerIntV4`/`V6`), which calls `ahiac_PlayerFunc`, then `nMixAndConvert`:
+`ahiac_MixerFunc` into `nam_MixBuffer`, `nam_SamConvHook` to convert into the play buffer
+`nam_FillBuf` names, and the **flip** of the two indices. The interrupt hook then feeds the
+play buffer `nam_SendBuf` names to the wire.
 
-* **Double-buffering is playback-only** (`nam_USBBuffer[2]`); record reuses one buffer.
-* **Sample-rate matching** uses a **16.16 fractional accumulator**: `nam_SampleFrac` is
-  samples-per-iso-interval at the mix rate; each frame `nam_BufferCount += nam_SampleFrac` and the
-  whole part × `nam_FrameSize` is that frame's `ubr_Length`, with the fractional remainder carried
-  across frames *and* buffer flips. This reconciles the fixed USB frame cadence with an arbitrary
-  AHI mix rate without drift.
+* **Double-buffering is playback-only** (`nam_PlayBuffer[2]`); record has one
+  `nam_PacketBuffer`.
+* **Sample-rate matching** uses a **16.16 fractional accumulator**: `nam_FramesPerMS` is
+  frames per millisecond at the mix rate; each frame `nam_SendCarry += nam_FramesPerMS ×
+  nam_Interval` and the whole part × `nam_FrameSize` is that frame's `ubr_Length`, with the
+  fractional remainder carried across frames *and* buffer flips (`nam_PlayCarry[]`). This
+  reconciles the fixed USB frame cadence with an arbitrary AHI mix rate without drift.
+* **What one player pass mixes** comes from `nPlayerTick`, shared with the timer clock: the
+  milliseconds to the next player call (`nam_PlayerMS`, from `nam_PlayerFrac` with the part of a
+  millisecond carried) × `nam_FramesPerMS`, whole and part frames kept apart so a slow player at
+  a high rate cannot overflow 16.16. It is capped at `nam_MaxMixFrames`, which `nam_MixBuffer`
+  and the play buffers hold: `nMaxMixFrames` sizes them at `subLibAllocAudio` for the slowest
+  player rate the program gave AHI (its rate or its minimum), at least 100 ms per millisecond of
+  interval. `ahi.doc` allows a pass up to 65535 frames; the cap only acts on a program that goes
+  below the minimum it declared.
 
 ### 9.3 Record
 
 Simpler and clock-driven by the callbacks (no soft-int): `nInReqHook` hands the HCD the fixed
-`nam_USBBuffer[0]`; after the frame arrives `nInDoneHook` converts the received bytes (a `nRec*`
-hook) into `nam_AHIBuffer` as **16-bit stereo** and delivers them to AHI via `ahiac_SamplerFunc`
-with a persistent `AHIRecordMessage` (`AHIST_S16S`). The record node is the `nam_Sibling` of a
-playback node.
+`nam_PacketBuffer`, which holds one service interval - `nam_IntervalBytes`, set in
+`nSelectAudioMode` from the endpoint (max packet size × transactions per microframe; the
+companion's bytes per interval at SuperSpeed) - and cuts `ubr_Length` to that. After the
+interval arrives `nInDoneHook` converts the received bytes (a `nRec*` hook) into
+`nam_RecBuffer` as **16-bit stereo**. Each of its two blocks has room for `REC_BLOCK_FRAMES`
+and one service interval more (`nRecBlockFrames`), so the interval that fills a block up
+arrives whole. AHI gets them via `ahiac_SamplerFunc` with a
+persistent `AHIRecordMessage` (`AHIST_S16S`) **in blocks of `REC_BLOCK_FRAMES` (1024) frames,
+from two buffers in turn**, not interval by interval: the block handed over stays as it is
+until the next one goes. AHI's other drivers hand over blocks of that size; the few frames a
+millisecond brings, each time in the same buffer, sounded robotic in a recording; in blocks the same recording is clean. The record message itself keeps the block being filled and its fill
+count. When a recording is stopped the class logs the frames that arrived against what the
+rate should have brought in that time - the one measurement of this path; lost intervals
+show there as too few frames. The record node is the `nam_RecStream` of a
+playback node, or the mode itself if it only records. That is why the record buffer is not
+`nam_MixBuffer`: a mode that only records needs both, the one AHI mixes into (and nobody
+hears) and the one the recorded samples are handed over in.
 
 ### 9.4 Sample conversion table
 
-One `nam_SamConvHook` whose entry is chosen by `nam_NumChannels | (nam_SampleSize << 8)`:
+One `nam_SamConvHook` whose entry `nConverter` takes from a table by `nam_SampleSize` (1-4) and
+`nam_NumChannels` (1-2), `PlayConverters` or `RecConverters`:
 
 * **Playback** `nConv{8,16,24,32}Bit{Mono,Stereo}` - AHI native (16/32-bit) → little-endian USB
   wire format.
 * **Record** `nRec{8,16,24,32}Bit{Mono,Stereo}` - USB wire → AHI, always widened to 16-bit
-  stereo (`AHIST_S16S`).
+  stereo (`AHIST_S16S`): an 8-bit sample becomes the high byte (until 6.3 it went in as the low
+  byte, 48 dB too quiet), 24/32-bit keep their top 16 bits.
 
 ### 9.5 Player clock and the fallback timer
 
 Normally the **USB SOF is the clock** (the iso `nOutReqHook` drives the player soft-int). If the
 device is **unplugged mid-stream**, `nReleaseHook` stops the RT-ISO stream - the USB clock is gone
 - but AHI must keep being serviced until the application stops. So it swaps the player int's code
-to `subLibPlayerIntDummy`, sets `nam_FallbackTimer`, and arms a `timer.device` loop whose reply
-port is a `PA_SOFTINT` port targeting the player int. Each timer reply re-triggers the soft-int,
-which mixes and **discards** the output - a self-sustaining timer→soft-int→timer loop that drains
-AHI to silence rather than hanging.
+to `subLibPlayerIntDummy`, sets `nam_FallbackTimer`, and - if AHI is playing (`nam_Playing`;
+otherwise `subLibStart` does it) - arms a `timer.device` loop whose reply port is a
+`PA_SOFTINT` port targeting the player int. Each timer reply re-triggers the soft-int, which
+mixes and **discards** the output - a self-sustaining timer→soft-int→timer loop that drains AHI
+to silence rather than hanging.
+
+**A mode that only records has the timer for its clock from the start** (`subLibAllocAudio`
+sets `nam_FallbackTimer` and the dummy player): AHI's player and mixer have to be called
+whether or not anything is heard, or a program that plays on such a mode would wait for
+ever. Two things follow, and hold for the unplugged sound card as well:
+
+* The soft-int takes the timer request off the port (`GetMsg`), works out the next player pass
+  with `nPlayerTick` (its part frame carried in `nam_SendCarry`, which nothing sends on the timer
+  clock), sends the request for `nam_PlayerMS` at once - before mixing, so the mix does not
+  stretch the interval - and then mixes that many frames.
+* `nAbortTimer()` is the one way the timer is stopped. A record-only mode has the timer for a
+  clock before it was ever started, and `AbortIO()` is only for a request that was sent
+  (NDK `exec.doc`): the request counts as sent once the soft-int has put its command into
+  it. `subLibStart` aborts before it starts, because AHI may start what already runs.
+  timer.device's `AbortIO()` runs in the caller's context (NDK `timer.doc`), so the request is
+  back in the port when it returns; `WaitIO()` in `subLibFreeAudio` and the restart in
+  `subLibStart` depend on that, since this port has no task or signal to wait on.
+  `subLibStop` aborts and leaves the reply in the port; `subLibFreeAudio` aborts and collects
+  it with `WaitIO()` - one removal, never two.
 
 ---
 
@@ -482,11 +541,28 @@ in `nch_UpdateFlags`, and `Signal`s the binding's subtask. `nAudioTask`'s servic
 wakes, and for the current mode issues the corresponding **USB Audio class `SET_CUR` request on
 the EP0 pipe**:
 
-* `UAF_MASTER_VOLUME` → scale into the `nau_VolumeUnit`'s dB range, `SET_CUR(VOLUME)` per channel
-  in `nau_VolCtrlMask`.
-* `UAF_INPUT_GAIN` / `UAF_MONITOR_VOLUME` → same on the input/monitor unit located via
-  `nGetInputUnit`.
-* `UAF_SELECT_INPUT` / `UAF_SELECT_OUTPUT` → `SET_CUR` on the selector unit.
+* `UAF_MASTER_VOLUME` / `UAF_INPUT_GAIN` / `UAF_MONITOR_VOLUME` → `nSetVolume` on the mode's
+  output volume unit(s) (`nam_OutVolume`, else every output's own `nao_Volume`, see
+  "Several outputs" in §14), or the input's volume or monitor unit (via `nGetInputUnit`):
+  `SET_CUR(VOLUME)` per channel in `nau_VolCtrlMask` (bit 0 the master). A master Control is
+  cascaded after the channel Controls (UAC 1.0 §3.5.5), so a unit with one gets the level on the
+  master and its channels at 0 dB; a unit without gets the level on each channel. Until 6.3 every
+  Control got the level, and a unit with both applied it twice.
+
+**Units.** AHI's gains and volumes are linear factors (`Fixed`, 1.0 = unchanged); a Volume
+Control works in 1/256 dB, 0x8001 (-127.9961 dB) to 0x7FFF (+127.9961 dB), 0x8000 being silence
+for `CUR` only (UAC 1.0 §5.2.2.4.3.2). `nFindLogVolume` reports the unit's range to AHI as factors
+(`nDbToFixed`: 10^(dB/20)), so a slider spans exactly what the device can do; `nSetVolume`
+converts AHI's factor back (`nFixedToDb`: 20·log10) and clamps it to the unit's range - 6 dB per
+halving of the factor. Both are integer (the stack has no floating point): one table of
+2^(i/32) with linear interpolation, within 0.03 dB wherever 16.16 resolves it (above about
+-48 dB); `Fixed` itself holds -96 to +90 dB, and a range beyond that is cut to it. Until 6.3 the
+range was reported as 0..1.0 and the factor spread evenly over the dB range, so a factor of 0.5
+landed halfway down it: the slider lost most of the level in its first steps.
+* `UAF_SELECT_INPUT` → `SET_CUR` on the recording path's selector unit.
+* `UAF_SELECT_OUTPUT` → `nSetMute` on each output's own Mute (`nao_Mute`): all unmuted for
+  "All outputs", else every output but the chosen one muted. Set only for a mode whose outputs
+  can be switched (`nam_OutputSwitch`).
 
 This keeps all blocking USB control traffic in the subtask, out of AHI's (and the iso interrupt's)
 context.
@@ -567,6 +643,7 @@ stateDiagram-v2
     Stopped --> Streaming: subLibStart, psdStartRTIso
     Streaming --> Stopped: subLibStop, psdStopRTIso
     Streaming --> Fallback: nReleaseHook, device removed mid-stream
+    Stopped --> Fallback: subLibStart after the device was removed
     note right of Streaming
       USB SOF drives nOutReqHook,
       which Causes the player soft-int
@@ -580,9 +657,9 @@ stateDiagram-v2
     Stopped --> [*]: subLibFreeAudio
 ```
 
-The **double-buffer ping-pong** (`nam_NextBufW`/`nam_NextBufR`, flipped in the player soft-int and
+The **double-buffer ping-pong** (`nam_FillBuf`/`nam_SendBuf`, flipped in the player soft-int and
 consumed in `nOutReqHook`) is a third, implicit state carried by those two indices plus the signed
-`nam_USBCount` drain counter.
+`nam_SendLeft` drain counter.
 
 ---
 
@@ -606,11 +683,46 @@ consumed in `nOutReqHook`) is a third, implicit state carried by those two indic
   only `Cause()` the player; the actual mix runs in the soft-int.
 * **Fallback timer clock** keeps AHI serviced after device removal - `nReleaseHook` swaps the player
   int to `subLibPlayerIntDummy` and drives it from `timer.device`. Removing this re-introduces a
-  hang on unplug-during-playback.
+  hang on unplug-during-playback. It is also the only clock a record-only mode has (§9.5).
+* **Intervals are milliseconds here.** The library reports the interval of a high speed or
+  SuperSpeed endpoint in microframes; `nSelectAudioMode()` turns it into milliseconds. An
+  endpoint served more often than once a millisecond is taken for one that is not: it would
+  record, and play at the wrong pace. (Before, a high speed UAC 1.0 device - in practice a
+  webcam's microphone - had every interval taken eight times too long.)
+* **The rate is chosen before the alternate setting** in `subLibAllocAudio`, because for a
+  record-only mode the rate decides which alternate setting is selected. The sampling
+  frequency request therefore carries the rate AHI really gets, not the one it asked for.
+* **Inputs and outputs AHI is offered** come from `nInputName` / `nOutputName`. Inputs: the
+  recording path's selector unit's inputs, else the input terminals that flow to that recording
+  stream (`nau_SinkUnit`) - a webcam reports its one "Microphone". Outputs: the output terminals
+  the playback stream flows to (`nau_SourceUnit`). `nModeTerminal` decides which terminals a
+  mode's stream reaches (never USB streaming terminals); `nInputNames` and `nOutputTerminals`
+  collect them per mode (at most `MAX_PORT_NAMES`). If the flow tagging found none, every
+  terminal of that kind, so a mode keeps names (outputs: `nMapOutputs`, below). The same
+  count bounds `AHIDB_Input` / `AHIDB_Output` (NULL beyond it) and `AHIC_Input` / `AHIC_Output`
+  (FALSE for an index never offered).
+* **Several outputs.** UAC 1.0 has no unit that routes a stream to one of several outputs: a unit
+  has one Output Pin (§3.5), a Selector Unit chooses between sources (§3.5.4) and is attached to
+  its USB streaming sink, so it only ever chooses what is recorded; a stream that fans out to a
+  speaker and headphones plays both. A device makes them switchable with a Feature Unit with a
+  Mute Control (§5.2.2.4.3.1) on each output's own branch. `nMapOutputs` finds per playback mode
+  the output terminals the stream reaches (`nam_Outputs`, `nOutputTerminals`), on each one's own branch - the units
+  between it and the first unit that also feeds another of them - its first Mute (`nao_Mute`) and
+  Volume (`nao_Volume`, `nOutputBranch`), and the last Feature Unit with volume upstream of every
+  output (`nam_OutVolume`, `nSharedVolume`, the one the class always took on a single path). `nIsUpstream` walks the
+  graph no deeper than `UNIT_DEPTH_MAX`, as descriptors may wire a loop. AHI is offered: one
+  output by its name; several as "All outputs" (number 0, what the device does by itself),
+  followed by each of them if every one has its own Mute (`nam_OutputSwitch`) - choosing one
+  mutes the others (`nSetMute`); a record-only mode none. The output volume goes to
+  `nam_OutVolume`, else to every `nao_Volume`, muted ones included, so switching needs no new
+  volume; AHI is told the range of the first of them (`nOutVolumeUnit`). Until 6.3 every mode
+  listed every terminal of the device, a device without a selector reported no inputs, an index
+  from AHI was used unchecked, an output "switch" set a flag nothing acted on, and the output
+  volume went to whichever Feature Unit with volume came last in the descriptors.
 * **USB Audio 1.0 only.** `bcdADC` must be `0x0100`; 2.0 is declined. Adding 2.0 is a real project,
   not a tweak (different descriptor layout, clock model, and feature-unit control encodings).
-* **24-bit has no AHI sample type** - such formats parse but yield no AHI representation on the mix
-  side (conversion still handles 24-bit on the wire).
+* **24-bit** modes mix in AHI's HiFi format (32 bit) and are converted to 24 bits on the wire;
+  recording keeps the top 16 bits, the only format AHI records in.
 * **Frequencies clamped to ≤64 kHz** because AHI stores frequency in 16 bits.
 
 ---
@@ -627,13 +739,15 @@ consumed in `nOutReqHook`) is a third, implicit state carried by those two indic
 * **Per-binding subtask:** `nAudioTask`, `nAllocAudio`, `nFreeAudio`.
 * **Topology parsing:** `nExamineAudioDescriptors`, `nExamineAudioUnits`, `nFindAudioUnit`,
   `nFindAndConnectAudioUnit`, `nFlowUp` / `nFlowDown`, `nFlowUpToUSBSource` /
-  `nFlowDownToUSBSink`, `nGetInputUnit`, `nFindLogVolume`.
+  `nFlowDownToUSBSink`, `nGetInputUnit`, `nFindLogVolume` (with `nDbToFixed` / `nFixedToDb`),
+  `nSetVolume`.
 * **AHI mode registration / realization:** `nAddAudioModes`, `nSelectAudioMode`.
 * **AHI sub-driver ABI:** `subLibAllocAudio` / `subLibFreeAudio`, `subLibEnable` /
   `subLibDisable`, `subLibStart` / `subLibUpdate` / `subLibStop`, `subLibGetAttr`,
   `subLibHardwareControl`, and the `subLibSet*` / `subLib*Sound` stubs.
 * **Data path:** `nOutReqHook`, `nInReqHook`, `nInDoneHook`, `nReleaseHook`,
-  `subLibPlayerIntV4` / `V6` / `Dummy`, `nConv*` (playback) / `nRec*` (record) conversion hooks.
+  `subLibPlayerIntV4` / `V6` / `Dummy`, `nMixAndConvert`, `nConv*` (playback) / `nRec*` (record)
+  conversion hooks, chosen by `nConverter`.
 * **GUI / config:** `nOpenCfgWindow`, `nGUITask`, `nGUITaskCleanup`, `nLoadClassConfig`.
 
 ### 15.2 Key structures (in `usbaudio.h`)
@@ -643,8 +757,9 @@ consumed in `nOutReqHook`) is a third, implicit state carried by those two indic
 | `NepAudioBase` | `usbaudio.class` library base; `nh_SubLibBase`, `nh_Units`, GUI/MUI state |
 | `NepAudioSubLibBase` | the `usbaudio.audio` AHI sub-driver base; `nas_ClsBase` |
 | `NepClassAudio` | one binding = one AHI unit; subtask, EP0 pipe, AHI handle, mode/unit lists, `nch_UpdateFlags` |
-| `NepAudioMode` | one AHI mode; USB realization, format, frequency list, double-buffers, player clock, `nam_Sibling` |
-| `NepAudioUnit` | one USB-Audio topology node; graph edges, control discovery (volume/gain/monitor) |
+| `NepAudioMode` | one AHI mode; USB realization, format, frequency list, double-buffers, player clock, `nam_RecStream` / `nam_PartOf`, its outputs (`nam_Outputs`, `nam_OutVolume`, `nam_OutputSwitch`) |
+| `NepAudioOutput` | one output terminal of a playback mode, as an AHI output: name, terminal, its own Mute and Volume Feature Units |
+| `NepAudioUnit` | one USB-Audio topology node; graph edges, control discovery (volume/gain/monitor, `nau_MuteCtrlMask`) |
 
 ### 15.3 File map
 

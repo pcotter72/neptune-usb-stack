@@ -8,67 +8,71 @@ for.
 
 ## USB cameras
 
-A new class, `usbvideo.class`, drives webcams that follow the USB Video Class standard
-(UVC 1.0, 1.1 and 1.5). Each camera becomes a unit of `usbvideo.device`, from which programs
-fetch their pictures. It needs `xhci.device` 6.4 from the Emu68 driver stack on a Pi 4 or
-CM4. Tested with a Logitech C930e, up to 1920x1080 at 30 frames a second.
+The new `usbvideo.class` drives webcams that follow the USB Video Class standard (UVC 1.0,
+1.1 and 1.5). It needs `xhci.device` 6.4 from the Emu68 driver stack on a Pi 4 or CM4.
+Tested with a Logitech C930e, up to 1920x1080 at 30 frames a second.
 
 * **Formats:** Motion-JPEG and uncompressed (YUY2, NV12 and others) in every size and rate
-  the camera offers; H.264 from cameras that carry it inside Motion-JPEG, such as the C930e.
-  The H.264 and VP8 formats of UVC 1.5, frame-based formats and cameras that send over bulk
-  transfers are supported but not tested.
-* **A VHI driver, `usbvideo.vhi`,** for cAMIra and other VHI programs; the Installer offers
-  to put it into `LIBS:VHI/`. Each camera is one input; the program's own size setting picks
-  the camera's nearest size.
-* **A settings window per camera** in Trident: brightness, exposure, focus, white balance and
-  the other standard controls, acting at once. Save keeps them for that camera; the Mode
-  page sets the picture size and rate for programs that ask for none.
-* **`UVCTool`**, among the optional tools: `UVCTool` lists the camera's modes,
-  `UVCTool TO=RAM:shot` saves a picture, `UVCTool WIDTH=1280 HEIGHT=720 FRAMES=10 TO=RAM:cam`
-  ten. `FORMAT=H264 ... TO=RAM:cam` saves `RAM:cam.h264`; `BITRATE=` and `KEYFRAME=` set the
-  encoder.
-* **The camera's microphone** is an AHI recording mode (see below), and an idle camera is
-  suspended with power saving on.
+  the camera offers, and H.264 from cameras that carry it inside Motion-JPEG, such as the
+  C930e. Other H.264 and VP8 cameras and bulk-transfer cameras should work but are untested.
+* **cAMIra and other VHI programs:** the Installer offers to put `usbvideo.vhi` into
+  `LIBS:VHI/`. Each camera is one input.
+* **Camera settings** in Trident: brightness, exposure, focus, white balance and the other
+  standard controls, applied at once and saved per camera.
+* **`UVCTool`** (optional tools) lists a camera's modes and saves pictures or H.264 video,
+  e.g. `UVCTool TO=RAM:shot`.
+* **The camera's microphone** shows up as an AHI recording mode, and an idle camera is
+  suspended when power saving is on.
 
-Not in this release: choosing the frame rate from a VHI program, still images, and the
-makers' own controls in the settings window.
+Not yet supported: choosing the frame rate from a VHI program, still images, and
+maker-specific controls.
 
-For programmers: `<devices/usbvideodevice.h>`. Besides the pictures it gives the controls by
-name (`NSCMD_UV_NEXTCONTROL`, `NSCMD_UV_GETCONTROL`, `NSCMD_UV_SETCONTROL`) and raw
-(`NSCMD_UV_GETTOPOLOGY`, `NSCMD_UV_REQUEST`), and what the camera reports by itself
-(`NSCMD_UV_WAITEVENT`). `psdAllocRTIsoHandler()` has a new tag, `RTA_ReportInErrors`, for
-classes that must know about isochronous intervals lost without data.
+Programmers: see `<devices/usbvideodevice.h>`.
 
-## USB audio: devices that only record
+## USB audio
 
-A device with a microphone and no loudspeaker, such as a webcam, now gets AHI modes of its
-own, named "Rec" with their format. Recorded sound reaches AHI in blocks of 1024 samples, as
-from AHI's other drivers.
+* **Record-only devices** such as webcam microphones now get their own AHI modes, named
+  "Rec".
+* **Devices with several outputs** (loudspeaker and headphones, say): AHI's output choice
+  now works - "All outputs", or a single output by name if the device can mute each one.
+* **Volume and gain sliders** now follow the device's range evenly instead of losing most of
+  the level in the first steps, and the volume no longer lands on the wrong control.
+* **Fixed:** 24 bit mono recording, 8 bit recordings that were far too quiet, timing on high
+  speed devices, and the sample rate set on the device.
+
+Only the USB Audio 1.0 standard is supported.
+
+## USB MIDI
+
+* **Plugging in a MIDI interface no longer crashes the machine.**
+* **Sending and receiving MIDI now work**, including System Exclusive of any length.
+* **One CAMD device per interface**, with as many ports as the interface really has, so the
+  MIDI Ports editor shows the right number. Two identical interfaces each get their own name,
+  and every port can be used at once.
+* **USB MIDI 2.0 devices** are used in their MIDI 1.0 mode.
+* The settings window is gone - it had nothing to set. Name ports in the MIDI Ports editor.
+
+**Upgrading:** the new CAMD driver is written to `DEVS:Midi/` the first time you plug the
+interface in. Quit your CAMD programs and reboot, then, with camd.library 37, add the
+interface once in the MIDI Ports editor.
 
 ## USB in ROM
 
 * The custom Kickstart holds 1.5 MB of modules instead of 1 MB.
-* The build script is now Python: `python3 ROM/build-kickstart.py`, same arguments.
+* The build script is now `python3 ROM/build-kickstart.py`, with the same arguments.
 
 ## Bug fixes
 
-* **Rare crashes and freezes under load:** the library's memory pool was not guarded against
-  two tasks at once.
-* **USB audio:** 24 bit mono recording delivered a quarter of the samples; high speed devices
-  of the 1.0 audio standard had their timing taken eight times too long; the device is now
-  set to the sample rate AHI really uses, not the one the program first asked for.
-* **NTFS and exFAT** filesystems get 64 KB of stack instead of 8 KB (mounting NTFS crashed);
-  the stack is now a setting per filesystem in the mass storage settings.
-* **A device in use is no longer logged as a failed suspend** - once, as a warning, that
-  the class declined.
-* **Disk-change notification with several partitions** read its list unprotected.
-* **A failed switch of an interface's alternate setting is taken back**, so the host
-  controller and the library no longer disagree about the endpoints ("Adding RT Iso Handler
-  failed", no sound).
-* **Unplugging a device could leave its hub deaf** to new devices until a reboot, when a
-  class was resetting the device's port at that moment.
-* **Unloading a class driver could crash** when a program still had its device open.
-* **A bus error on a UAS disk's endpoint** is now cleared on the disk as well.
+* Rare crashes and freezes under heavy load.
+* **Behringer UMC204HD** now works, and its MIDI port appears once instead of twice.
+* **NTFS and exFAT:** The filesystem stack size is now a setting in the mass storage settings.
+* A busy device is no longer logged as a failed suspend.
+* No more "Adding RT Iso Handler failed" and silent audio after a device refused a setting
+  change.
+* A hub could stop seeing new devices after one was unplugged, until a reboot.
+* Possible crash when a class driver was unloaded while still in use.
+* Better recovery from errors on UAS disks.
+* Possible crash on disk change with several partitions.
 
 # Release notes - Poseidon for AmigaOS 6.2
 

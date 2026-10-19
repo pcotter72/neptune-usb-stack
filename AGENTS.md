@@ -53,7 +53,7 @@ The CPU/FPU pair defaults to `68040`/`hard`; the release sweeps 68020-soft, 6804
 |---|---|---|
 | Hot path | `poseidon.library`, all 30 `*.class` | `-O3 -ffreestanding` |
 | GUI | `Trident` | `-O2` |
-| Cold | `c/` shell commands, `tools/` gadget tools, the embedded `poseidonusb` CAMD blob | `-Os` |
+| Cold | `c/` shell commands, `tools/` gadget tools, the embedded `camd_driver` CAMD blob | `-Os` |
 
 `-ffreestanding` must stay a **compile** option - as a link-only flag it is silently inert.
 

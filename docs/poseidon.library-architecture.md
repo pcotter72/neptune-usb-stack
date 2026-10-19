@@ -128,6 +128,14 @@ headers are generated from `poseidon.sfd` by `sfdc`.
   `struct Library ps_Library`. It holds every global list, both memory pools, the two custom
   locks, the timer request, the IFF config root, the PoPo (GUI) state, and the event-handler
   task state.
+* **The general pool is guarded by a semaphore.** `psdAllocVec()` / `psdFreeVec()` are called
+  from every task of the stack, and exec does not arbitrate a pool: one that several tasks
+  use must be semaphore protected, and `Forbid()` is not enough (NDK `exec.doc`,
+  `AllocPooled`). AROS asks for that with `MEMF_SEM_PROTECTED`; AmigaOS has no such flag, so
+  the library holds `ps_MemPoolSem` around the two pool calls. It is a leaf: nothing else is
+  taken while it is held. Debug builds add a guard to every block: a pattern behind it that
+  is checked at the free, and a refusal of a second free, both reported with size and task.
+  (`ps_SemaMemPool`, the lock records' pool, is only ever used under `Forbid()`.)
 * **Register-args ABI.** Every LVO is written in plain C with bebbo-gcc register
   annotations, e.g. `APTR (psdAllocVec)(ULONG size asm("d0"), struct PsdBase *ps asm("a6"))`.
   The function name is **parenthesised** in the definition so the inline call-macros don't
@@ -235,8 +243,11 @@ Field roles that matter for refactoring:
 * **`PsdInterface`** - alternates are modelled specially: `pc_Interfaces` holds only the
   *currently active* alternate for each interface number; the inactive ones hang off the
   active one's `pif_AlterIfs` with `pif_ParentIf` pointing back. `psdSetAltInterface`
-  surgically swaps which one is "in the main list". `pif_IfBinding`/`pif_ClsBinding` are the
-  interface-level binding.
+  surgically swaps which one is "in the main list". It first has the HCD backend exchange the
+  endpoint sets (`hop_SetInterface(curif, pif)`), then sends SET_INTERFACE and checks with
+  GET_INTERFACE; if either fails the list is left alone and the backend is called with the two
+  alternates swapped, so the controller and the model never disagree on which endpoints
+  exist. `pif_IfBinding`/`pif_ClsBinding` are the interface-level binding.
 * **`PsdDescriptor`** - `pd_Descriptors` is a **flat** list of *every* descriptor seen, each
   carrying optional up-links (`pdd_Config`/`pdd_Interface`/`pdd_Endpoint`) that locate it in
   the tree, plus raw bytes for class-specific descriptors.
@@ -406,12 +417,15 @@ cleared cannot trap the task - and sends the clear through a transient EP0 pipe 
 lock, lifetime via `psdAllocPipe`'s `pd_UseCnt`). The class still sees `UHIOERR_STALL`
 unchanged. A halt the *host controller* raised is marked the same way: on a bulk/interrupt
 endpoint of a context HCD, `UHIOERR_BABBLE`, `UHIOERR_XACTERROR` and `UHIOERR_SPLITERROR`
-(usbhcd_common.h) mean one - the device's endpoint runs, but its data toggle no longer matches the one the HCD reset, and the
-clear resyncs it. Those three skip stream pipes (`pp_StreamID`): a clear resets every stream's
-sequence state, and UAS recovers per tag. A clear that fails with `UHIOERR_TIMEOUT` is not
+(usbhcd_common.h) mean one - the device's endpoint runs, but its data toggle or sequence number
+no longer matches the one the HCD reset, and the clear resyncs it. Stream pipes are no
+exception: an error halts the pipe and every stream on it, and the halt is removed the same way
+(USB 3.2 4.4.6.4); a context HCD sends nothing on the endpoint until the clear has completed
+(poseidon-context-hcd-abi.md §11), so it never lands under traffic. A clear that fails with `UHIOERR_TIMEOUT` is not
 logged - a controller-raised halt is often the first sign of an unplug. EP0 protocol stalls, iso endpoints, root hubs and suspended/dead devices are
 excluded (a suspended device's marks are dropped: a resubmit after resume re-stalls and
-re-marks). A class that clears a halt itself - through the new
+re-marks; a context HCD lets that resubmit through once its 2 second wait for the clear has
+lapsed). A class that clears a halt itself - through the new
 `psdClearEndpointHalt(ep0pipe, epaddr)` LVO, or any raw EP0 clear - cancels the pending
 recovery via the `pSubmitPipe` snoop, so exactly one clear reaches the wire per stall and a
 late duplicate can never reset the device's data toggle under resumed traffic.
@@ -420,7 +434,10 @@ late duplicate can never reset the device's data toggle under resumed traffic.
 interrupt endpoints, 1 otherwise - so a permanently pending interrupt listener (hid, hub EP1) is
 not "busy IO" and the transfer path stays branch-free. RT-ISO adds one deliberate exception on
 top: `psdStartRTIso`/`psdStopRTIso` raise and release a raw hold on `pd_IOBusyCount` that spans
-the whole lifetime of a running stream, separate from the per-command pair.
+the whole lifetime of a running stream, separate from the per-command pair. A handler's
+`RTA_ReportInErrors` tag (6.3) is carried to a context HCD as `UHCD_IHF_IN_ERRORS` in the hook
+block (ABI document, section 10.3): the IN hooks are then also called for an interval that
+failed or was missed and brought no data. `usbvideo.class` sets it; a classic HCD never sees it.
 `pp_Msg.mn_Node.ln_Type` is the pipe's little state machine:
 `NT_FREEMSG → NT_MESSAGE (in flight) → NT_REPLYMSG (done) → NT_FREEMSG`.
 
