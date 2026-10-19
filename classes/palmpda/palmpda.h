@@ -173,7 +173,7 @@ struct NepSerialBase
     struct List         nh_Units;         /* List of units available */
 
     struct Library     *nh_MUIBase;       /* MUI master base */
-    struct Library     *nh_PsdBase;       /* Poseidon base */
+    struct Library     *nh_PsdBase;       /* neptune.library base */
     struct Library     *nh_IntBase;       /* Intuition base */
     struct Task        *nh_GUITask;       /* GUI Task */
 
@@ -209,7 +209,7 @@ struct NepClassSerial
     struct Unit         ncp_Unit;         /* Unit structure */
     ULONG               ncp_UnitNo;       /* Unit number */
     struct NepSerDevBase *ncp_DevBase;    /* Device base */
-    struct Library     *ncp_Base;         /* Poseidon base */
+    struct Library     *ncp_Base;         /* neptune.library base */
     struct PsdDevice   *ncp_Device;       /* Up linkage */
     struct PsdConfig   *ncp_Config;       /* Up linkage */
     struct PsdInterface *ncp_Interface;   /* Up linkage */

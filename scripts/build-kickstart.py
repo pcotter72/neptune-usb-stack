@@ -6,7 +6,7 @@ menu, and booting from a USB or NVMe drive.
 This is an advanced, entirely optional path. It does not replace, and does not touch,
 the normal filesystem installation - see ROM-ReadMe.md.
 
-The seven Poseidon ROM modules are found automatically - from the archive this script
+The seven Neptune ROM modules are found automatically - from the archive this script
 ships in (the ROM/ drawer of Neptune-<ver>-<cpu>.lha, beside LIBS/ and Classes/), or
 from the build tree when run out of a source checkout. Anything else is passed on the
 command line, so this stays driver-agnostic: on PiStorm/Emu68 that is normally
@@ -312,8 +312,8 @@ class Bank:
         return rom.read_bytes()
 
 
-def poseidon_modules(build_dir):
-    """Where the Poseidon ROM modules are: (library and classes, startup resident,
+def neptune_modules(build_dir):
+    """Where the Neptune ROM modules are: (library and classes, startup resident,
     output directory, what to do if one is missing).
 
     The resident sitting next to this script is what tells the two layouts apart: the
@@ -322,18 +322,18 @@ def poseidon_modules(build_dir):
     here = Path(__file__).resolve().parent
     if (here / "usbromstart").is_file():
         kit = here.parent
-        library = kit / "LIBS" / "poseidon.library"
+        library = kit / "LIBS" / "neptune.library"
         classes = [kit / "Classes" / "USB" / f"{c}.class" for c in ROM_CLASSES]
         romstart = here / "usbromstart"
         out_dir = Path.cwd()
         hint = "the archive is incomplete; unpack Neptune-<ver>-<cpu>.lha again"
     else:
         build = Path(build_dir) if build_dir else here.parent / "build"
-        library = build / "poseidon.library" / "poseidon.library"
+        library = build / "neptune.library" / "neptune.library"
         classes = [build / "classes" / c / f"{c}.class" for c in ROM_CLASSES]
         romstart = build / "romstartup" / "usbromstart"
         out_dir = build
-        hint = f"Poseidon modules come from {build} - run ./build.sh --build"
+        hint = f"Neptune modules come from {build} - run ./build.sh --build"
 
     return [library, *classes], romstart, out_dir, hint
 
@@ -351,7 +351,7 @@ def parse_args():
                              "--hcd myhci.device. Patches the name into a copy of the "
                              "resident, so a different controller needs no rebuild of the "
                              "distribution; without it the compiled-in default (cmake "
-                             "-DROMSTART_HCD) is used. It must name a real Poseidon host "
+                             "-DROMSTART_HCD) is used. It must name a real host "
                              "controller that is in the image: the resident opens it "
                              "before DOS exists and waits on it with no timeout, so a "
                              "name that opens something which is *not* a host controller "
@@ -360,7 +360,7 @@ def parse_args():
                         help="output image (default ./kick-usb-2m.rom from the archive, "
                              "<build dir>/kick-usb-2m.rom from a source tree)")
     parser.add_argument("--build-dir", metavar="DIR",
-                        help="source tree only: build tree to take the Poseidon modules "
+                        help="source tree only: build tree to take the Neptune modules "
                              "from (default <repo>/build)")
     return parser.parse_args()
 
@@ -371,11 +371,11 @@ def main():
     if romtool is None:
         die("romtool not found. Install amitools: pipx install amitools")
 
-    poseidon, romstart, out_dir, missing_hint = poseidon_modules(args.build_dir)
+    neptune, romstart, out_dir, missing_hint = neptune_modules(args.build_dir)
     # In descending romtag priority, so the list at the end reads like the init
     # sequence. Priorities live in the romtags, not in this order.
-    #   -44 poseidon.library   -45 the classes   -46 ROM startup
-    modules = [*poseidon, romstart, *args.extra]
+    #   -44 neptune.library   -45 the classes   -46 ROM startup
+    modules = [*neptune, romstart, *args.extra]
     out = args.output or out_dir / "kick-usb-2m.rom"
 
     megabyte = Bank(0xA80000, 2 * CHUNK)  # Emu68 chunks 1+2

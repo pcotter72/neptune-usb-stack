@@ -6,10 +6,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <exec/exec.h>
-#include <libraries/poseidon.h>
+#include <libraries/neptune.h>
 #include <dos/dos.h>
 
-#include <proto/poseidon.h>
+#include <proto/neptune.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
 #include <neptune_version.h>
@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
         fail("Wrong arguments!\n");
     }
     
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         pd = NULL;
         mp = CreateMsgPort();
@@ -643,7 +643,7 @@ int main(int argc, char *argv[])
         DeleteMsgPort(mp);
         CloseLibrary(ps);
     } else {
-        errmsg = "Unable to open poseidon.library\n";
+        errmsg = "Unable to open neptune.library\n";
     }
 
     fail(errmsg);

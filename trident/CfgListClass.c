@@ -9,7 +9,7 @@
 #include <proto/muimaster.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
-#include <proto/poseidon.h>
+#include <proto/neptune.h>
 #include <proto/intuition.h>
 #include <proto/graphics.h>
 #include <proto/usbclass.h>

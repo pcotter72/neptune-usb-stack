@@ -5,7 +5,7 @@ Poseidon for AmigaOS @NEPTUNE_PKG_VERSION@
 editor and the full set of USB device classes.
 
 Every component in this archive reports the same version.
-The classes and tools require poseidon.library 6 or newer.
+The classes and tools require neptune.library 6 or newer.
 
 
 REQUIREMENTS
@@ -33,7 +33,7 @@ CPU VARIANT
 Three archives are released, one per CPU - -020, -040 and -060. Take the one
 that matches your machine.
 
-No variant needs an FPU. The stack itself - poseidon.library, the classes,
+No variant needs an FPU. The stack itself - neptune.library, the classes,
 Trident and USBEject - contains no floating point at all. The only floating
 point in the distribution is the gamma table computed by the two optional
 camera tools, PencamTool and SonixcamTool; in the -020 archive that is
@@ -43,8 +43,8 @@ it on a part without an FPU.
 Every component here reports its CPU in its version string, so you can always
 check what is installed:
 
-  Version LIBS:poseidon.library
-  -> poseidon.library @NEPTUNE_PKG_VERSION@ (...) Poseidon for AmigaOS @M68K_CPU@
+  Version LIBS:neptune.library
+  -> neptune.library @NEPTUNE_PKG_VERSION@ (...) Poseidon for AmigaOS @M68K_CPU@
 
 
 BUILD VARIANT
@@ -63,7 +63,7 @@ INSTALLATION
 
   Double-click the Install icon, or run `Installer Install` from a Shell,
   and follow the prompts. A reboot is recommended afterwards so the freshly
-  installed poseidon.library and USB classes are picked up.
+  installed neptune.library and USB classes are picked up.
 
 USB IN ROM (PiStorm/Emu68, optional)
 ------------------------------------

@@ -117,7 +117,7 @@ LONG nOpenBindingCfgWindow(struct NepVideoBase *nh, struct NepClassVideo *ncv)
     struct Library *ps;
 
     KPRINTF(10, ("Opening GUI...\n"));
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return FALSE;
     }
@@ -785,7 +785,7 @@ void nGUITask()
 
     if(!(ncv->ncv_MUIBase = OpenLibrary(MUIMASTER_NAME, MUIMASTER_VMIN)) ||
        !(IntuitionBase = OpenLibrary("intuition.library", 39)) ||
-       !(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)) ||
+       !(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)) ||
        !(gui->ug_ReqPort = CreateMsgPort()) ||
        !(gui->ug_EventPort = CreateMsgPort()))
     {

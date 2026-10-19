@@ -1,5 +1,5 @@
-#ifndef POSEIDON_CLASSDIR_H
-#define POSEIDON_CLASSDIR_H
+#ifndef NEPTUNE_CLASSDIR_H
+#define NEPTUNE_CLASSDIR_H
 /*
  * One definition of "load every class driver in the class drawer", shared by
  * PsdStackLoader, AddUSBClasses and Trident.
@@ -9,8 +9,8 @@
  * It only loads: binding the new classes to devices is the caller's
  * psdClassScan() (or psdParseCfg(), which ends in one).
  *
- * The includer provides exec, dos and poseidon protos; `ps` is the
- * poseidon.library base (POSEIDON_BASE_NAME is `ps` tree-wide).
+ * The includer provides exec, dos and neptune.library protos; `ps` is the
+ * neptune.library base (NEPTUNE_BASE_NAME is `ps` tree-wide).
  */
 
 #include <exec/types.h>
@@ -19,15 +19,15 @@
 #include <string.h>
 
 /* The one drawer class drivers are loaded from. */
-#define PSD_CLASSDRAWER  "SYS:Classes/USB"
-#define PSD_CLASSNAMEMAX 128
+#define NEP_CLASSDRAWER  "SYS:Classes/USB"
+#define NEP_CLASSNAMEMAX 128
 
 /* Returns FALSE if the drawer could not be read. `verbose` prints one line
    per file, as AddUSBClasses does. */
 static inline BOOL psdAddClassDir(struct Library *ps, BOOL verbose)
 {
     UBYTE buf[1024];
-    UBYTE sbuf[PSD_CLASSNAMEMAX];
+    UBYTE sbuf[NEP_CLASSNAMEMAX];
     struct ExAllControl *exall;
     struct ExAllData *exdata;
     struct List *puclist;
@@ -42,7 +42,7 @@ static inline BOOL psdAddClassDir(struct Library *ps, BOOL verbose)
     {
         return(FALSE);
     }
-    if(!(lock = Lock(PSD_CLASSDRAWER, ACCESS_READ)))
+    if(!(lock = Lock(NEP_CLASSDRAWER, ACCESS_READ)))
     {
         FreeDosObject(DOS_EXALLCONTROL, exall);
         return(FALSE);
@@ -58,7 +58,7 @@ static inline BOOL psdAddClassDir(struct Library *ps, BOOL verbose)
         ents = exall->eac_Entries;
         for(; ents--; exdata = exdata->ed_Next)
         {
-            psdSafeRawDoFmt(sbuf, PSD_CLASSNAMEMAX, PSD_CLASSDRAWER "/%s", exdata->ed_Name);
+            psdSafeRawDoFmt(sbuf, NEP_CLASSNAMEMAX, NEP_CLASSDRAWER "/%s", exdata->ed_Name);
             namelen = strlen(sbuf);
             if(((namelen > 4) && (!strcmp(&sbuf[namelen-4], ".dbg"))) ||
                ((namelen > 5) && (!strcmp(&sbuf[namelen-5], ".info"))))
@@ -116,4 +116,4 @@ static inline BOOL psdAddClassDir(struct Library *ps, BOOL verbose)
     return(TRUE);
 }
 
-#endif /* POSEIDON_CLASSDIR_H */
+#endif /* NEPTUNE_CLASSDIR_H */

@@ -1,6 +1,6 @@
 /*
  *----------------------------------------------------------------------------
- *                     Power Management Tool for Poseidon
+ *                     Power Management Tool for Neptune
  *----------------------------------------------------------------------------
  *                   By Chris Hodges <chrisly@platon42.de>
  */
@@ -11,7 +11,7 @@
 
 #include <proto/dos.h>
 #include <proto/exec.h>
-#include <proto/poseidon.h>
+#include <proto/neptune.h>
 
 #include "PowManTool.h"
 #include <string.h>
@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
             return(RETURN_ERROR);
         }
     }
-    ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION);
+    ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION);
     if(!ps)
     {
         FreeArgs(ArgsHook);

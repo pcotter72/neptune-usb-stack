@@ -26,7 +26,7 @@ void mounter_log(const char *fmt, ...)
 #ifdef DEBUG
     va_list args;
     va_start(args, fmt);
-    RawDoFmt((CONST_STRPTR) fmt, (APTR) args, (APTR) psd_putch, NULL);
+    RawDoFmt((CONST_STRPTR) fmt, (APTR) args, (APTR) nep_putch, NULL);
     va_end(args);
 #else
     (void) fmt;
@@ -260,7 +260,7 @@ BOOL nMountDrive(struct NepClassMS *ncm, struct MountResult *stats)
        nothing to add. */
     ncm->ncm_MountDeferred = (result.deferred != 0);
 
-    /* The caller logs the outcome: neither the poseidon base nor libname is in
+    /* The caller logs the outcome: neither the neptune.library base nor libname is in
        scope this early in the file, and the removable task has both. */
     if(stats)
     {
@@ -490,7 +490,7 @@ struct NepClassMS * usbAttemptInterfaceBinding(struct NepMSBase *nh, struct PsdI
     BOOL preferuas = FALSE;
 
     KPRINTF(1, ("nepMSAttemptInterfaceBinding(%08lx)\n", pif));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_INTERFACE, pif,
                     IFA_Class, &ifclass,
@@ -665,7 +665,7 @@ struct NepClassMS * usbForceInterfaceBinding(struct NepMSBase *nh, struct PsdInt
     {
         return(NULL);
     }
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_INTERFACE, pif,
                     IFA_Class, &ifclass,
@@ -725,7 +725,7 @@ struct NepClassMS * usbForceInterfaceBinding(struct NepMSBase *nh, struct PsdInt
             if(!unitfound)
             {
                 /* as units are freed in the expunge-vector, the memory is
-                   outside the scope of the poseidon library */
+                   outside the scope of neptune.library */
                 if(!(ncm = AllocVec(sizeof(struct NepClassMS), MEMF_PUBLIC|MEMF_CLEAR)))
                 {
                     Permit();
@@ -1018,7 +1018,7 @@ void usbReleaseInterfaceBinding(struct NepMSBase *nh, struct NepClassMS *ncm)
     struct NepClassMS *ncmhead;
 
     KPRINTF(1, ("nepMSReleaseInterfaceBinding(%08lx)\n", ncm));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         Forbid();
         if(ncm->ncm_GUITask)
@@ -1236,7 +1236,7 @@ BOOL nLoadClassConfig(struct NepMSBase *nh)
     {
         return(FALSE);
     }
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -1332,7 +1332,7 @@ BOOL nLoadBindingConfig(struct NepClassMS *ncm, BOOL announce)
     ncm->ncm_CUC->cuc_ChunkID = AROS_LONG2BE(MAKE_ID('L','U','N','0')+ncm->ncm_UnitLUN);
     ncm->ncm_UsingDefaultCfg = TRUE;
 
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -1391,7 +1391,7 @@ void nReapplyConfig(struct NepMSBase *nh)
 /* \\\ */
 
 /* /// "nStoreConfig()" */
-/* ps is the caller's own poseidon base: bind, the unit task and the GUI task
+/* ps is the caller's own neptune.library base: bind, the unit task and the GUI task
    all store through here. */
 BOOL nStoreConfig(struct Library *ps, struct NepClassMS *ncm)
 {
@@ -1446,7 +1446,7 @@ BOOL nStoreConfig(struct Library *ps, struct NepClassMS *ncm)
    nApplyFallback(). With PFF_NO_FALLBACK the change is refused and the log
    names the switch the device seems to want instead. name is the switch's GUI
    label. The hard-coded per-model quirks are not learned and do not come
-   through here (see nVendorQuirks). ps is the caller's own poseidon base. */
+   through here (see nVendorQuirks). ps is the caller's own neptune.library base. */
 BOOL nTryFallback(struct Library *ps, struct NepClassMS *ncm, ULONG flag,
                   CONST_STRPTR name, BOOL enable, LONG rc)
 {
@@ -1482,7 +1482,7 @@ LONG nOpenBindingCfgWindow(struct NepMSBase *nh, struct NepClassMS *ncm)
 {
     struct Library *ps;
     KPRINTF(10, ("Opening GUI...\n"));
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -2006,7 +2006,7 @@ struct NepClassMS * nAllocMS(void)
     ncm->ncm_UasQueueDepth = 0;
     do
     {
-        if(!(ncm->ncm_Base = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+        if(!(ncm->ncm_Base = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
         {
             Alert(AG_OpenLib | AO_Unknown);
             break;
@@ -4180,7 +4180,7 @@ void nUnlockXFer(struct NepClassMS *ncm)
 
 /* /// "nApplyFallback()" */
 /* nTryFallback(), and remember the change in the device's record. For the
-   unit task: it goes through the task's own poseidon base. */
+   unit task: it goes through the task's own neptune.library base. */
 BOOL nApplyFallback(struct NepClassMS *ncm, ULONG flag, CONST_STRPTR name,
                     BOOL enable, LONG rc)
 {
@@ -5067,9 +5067,9 @@ void nGUITask()
         nGUITaskCleanup(ncm);
         return;
     }
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
-        KPRINTF(10, ("Couldn't open poseidon.library.\n"));
+        KPRINTF(10, ("Couldn't open neptune.library.\n"));
         nGUITaskCleanup(ncm);
         return;
     }

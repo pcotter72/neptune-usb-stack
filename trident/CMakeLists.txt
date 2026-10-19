@@ -1,5 +1,5 @@
 # Trident - the Poseidon MUI control panel. A CRT *program* (not a library): default
-# CRT link, client base-var (POSEIDON_BASE_NAME=ps, no __NOLIBBASE__), plain global
+# CRT link, client base-var (NEPTUNE_BASE_NAME=ps, no __NOLIBBASE__), plain global
 # MUIMasterBase. 4 MUI custom classes + embedded logo/icon data + localized catalogs.
 
 find_program(FLEXCAT_EXECUTABLE NAMES flexcat HINTS $ENV{HOME}/.local/bin /opt/m68k-amigaos/bin REQUIRED)
@@ -47,10 +47,10 @@ add_executable(Trident
     neptune8logo.c
     ${MASON_ICONS})
 
-add_dependencies(Trident poseidon_sfd_headers usbclass_sfd_headers trident_strings)
+add_dependencies(Trident neptune_sfd_headers usbclass_sfd_headers trident_strings)
 
 target_compile_options(Trident PRIVATE
-    -O2 -DPOSEIDON_BASE_NAME=ps
+    -O2 -DNEPTUNE_BASE_NAME=ps
     "SHELL:-include ${CMAKE_SOURCE_DIR}/include/mui_compat.h")  # broken SDK MUI_NewObject + the MUI 3.8 floor
 
 target_include_directories(Trident PRIVATE
@@ -59,7 +59,7 @@ target_include_directories(Trident PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}/generated)   # the flexcat-generated strings.h
 
 target_link_libraries(Trident PRIVATE
-    poseidon_headers
+    neptune_headers
     usbclass_headers
     mui_headers
     -lamiga)        # DoMethod / DoSuperMethodA / MUI vararg macros

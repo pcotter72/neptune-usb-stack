@@ -193,9 +193,9 @@ void nGUITask()
         nGUITaskCleanup(nch);
         return;
     }
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
-        KPRINTF(10, ("Couldn't open poseidon.library.\n"));
+        KPRINTF(10, ("Couldn't open neptune.library.\n"));
         nGUITaskCleanup(nch);
         return;
     }

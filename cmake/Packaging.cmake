@@ -6,7 +6,7 @@
 #   make package  ->  <build>/Neptune-<ver>-<cpu>[-<backend>].lha
 #       Neptune-<ver>-<cpu>[-<backend>]/
 #         Install  Install.info            the Installer script (dist/)
-#         LIBS/poseidon.library
+#         LIBS/neptune.library
 #         LIBS/VHI/usbvideo.vhi            VHI driver for USB cameras -> LIBS:VHI/ (opt-in)
 #         Classes/USB/*.class
 #         C/PsdStackLoader AddUSBHardware AddUSBClasses PsdDevLister PsdErrorlog
@@ -28,7 +28,7 @@ if(NOT NEPTUNE_PKG_VERSION)
 endif()
 
 # --- the built artifacts, into the distribution drawer layout ------------------
-install(TARGETS poseidon_library RUNTIME DESTINATION LIBS)
+install(TARGETS neptune_library RUNTIME DESTINATION LIBS)
 
 # Every USB class - the full fleet, gathered from the global list add_neptune_class()
 # appends to (CMakeLists.txt). No hand-maintained roster: add a class, it ships.
@@ -62,7 +62,7 @@ install(FILES ${CMAKE_SOURCE_DIR}/dist/Trident.info DESTINATION Prefs)
 install(FILES ${CMAKE_SOURCE_DIR}/dist/datatypes/PSD DESTINATION DEVS/DataTypes)
 install(FILES ${CMAKE_SOURCE_DIR}/dist/def_PSD.info DESTINATION Icons)
 
-# Default USB attach/detach sounds → SYS:Prefs/Presets/Poseidon/ (poseidon.library.c:198-199 points
+# Default USB attach/detach sounds → SYS:Prefs/Presets/Poseidon/ (neptune.library.c:198-199 points
 # its default Insert/Remove sound files here). Capitalised to match the code's path (FFS is
 # case-insensitive, but keep it tidy).
 install(FILES ${CMAKE_SOURCE_DIR}/presets/Poseidon/connect.iff

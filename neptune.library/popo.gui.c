@@ -5,7 +5,7 @@
 #define EXEC_BASE_NAME (*(struct ExecBase **)4UL)
 
 #include "debug.h"
-#include "poseidon.library.h"
+#include "neptune.library.h"
 
 #include <libraries/mui.h>
 #include <intuition/intuition.h>
@@ -111,7 +111,7 @@ void pPoPoGUITask()
     }
     /* 19 = MUI 3.8, 20 = MUI 4.0, 21 = MUI 5.x. The fleet runs on all three; this is
        the only place that says which one is actually underneath. */
-    KPRINTF(10, ("muimaster.library is version %ld.\n", (ULONG) psd_MUIVersion()));
+    KPRINTF(10, ("muimaster.library is version %ld.\n", (ULONG) nep_MUIVersion()));
 
     if(!(DataTypesBase = OpenLibrary("datatypes.library", 39)))
     {

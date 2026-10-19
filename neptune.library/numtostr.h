@@ -10,7 +10,7 @@
 
 #include <exec/types.h>
 
-#include "poseidon_intern.h"
+#include "neptune_intern.h"
 
 #include <devices/usb.h>
 #include <devices/usb_hub.h>

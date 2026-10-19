@@ -23,16 +23,16 @@
 
 /*
  *----------------------------------------------------------------------------
- *                  Internal includes for poseidon.library
+ *                  Internal includes for neptune.library
  *----------------------------------------------------------------------------
  *                   By Chris Hodges <chrisly@platon42.de>
  *
  */
 
-#ifndef _LIBRARIES_POSEIDON_H
-#define _LIBRARIES_POSEIDON_H
+#ifndef _LIBRARIES_NEPTUNE_H
+#define _LIBRARIES_NEPTUNE_H
 
-#include <libraries/poseidon.h>
+#include <libraries/neptune.h>
 #include <devices/usbhcd_context.h>    /* the context HCD ABI (lifecycle ops) */
 #include <hwmatch.h>                   /* pFindHardware()'s notion of "same controller" */
 
@@ -40,7 +40,7 @@
  * from project(VERSION) in the top-level CMakeLists.txt, the one place it is written. */
 #include <neptune_version.h>
 #ifndef VERSION_STRING
-#define VERSION_STRING   NEP_VER("poseidon.library")
+#define VERSION_STRING   NEP_VER("neptune.library")
 #endif
 
 /* Configuration stuff */
@@ -699,4 +699,4 @@ struct PsdBosCaps
     UBYTE  containerId[16];        /* BOS Container ID GUID */
 };
 
-#endif /* _LIBRARIES_POSEIDON_H */
+#endif /* _LIBRARIES_NEPTUNE_H */

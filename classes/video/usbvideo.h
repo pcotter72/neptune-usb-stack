@@ -16,7 +16,7 @@
  * uvc_desc.c, never modified afterwards, freed with the binding. It is one
  * allocation; the variable-length parts - source lists, control bitmaps,
  * frame intervals, GUIDs - are not copied but point into the descriptors
- * poseidon.library keeps for as long as the device exists.
+ * neptune.library keeps for as long as the device exists.
  */
 
 /* One row of the payload-format table: all the class knows about a format */
@@ -191,7 +191,7 @@ struct UvcStatus
 struct NepClassVideo
 {
     struct NepVideoBase *ncv_ClsBase;     /* Up linkage */
-    struct Library     *ncv_Base;         /* Poseidon base */
+    struct Library     *ncv_Base;         /* neptune.library base */
     struct PsdDevice   *ncv_Device;       /* Up linkage */
     struct PsdInterface *ncv_Interface;   /* The VideoControl interface */
     struct Task        *ncv_ReadySigTask; /* Task to send ready signal to */

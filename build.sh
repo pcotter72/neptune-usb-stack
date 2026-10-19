@@ -144,7 +144,7 @@ cpu_setup "$CPU"
 
 # Deploy table - "<source under build/>|<Amiga destination>".  Mirrors dist/Install:
 CORE=(
-    "poseidon.library/poseidon.library|LIBS:poseidon.library"
+    "neptune.library/neptune.library|LIBS:neptune.library"
     "c/PsdStackLoader|C:PsdStackLoader"
     "c/AddUSBHardware|C:AddUSBHardware"
     "c/AddUSBClasses|C:AddUSBClasses"
@@ -306,7 +306,7 @@ if (( DO_UPLOAD )); then
         echo "dry run - nothing copied."
     else
         echo "done: $ok copied, $fail failed."
-        echo "Note: poseidon.library / *.class are loaded into memory at boot - reboot"
+        echo "Note: neptune.library / *.class are loaded into memory at boot - reboot"
         echo "      (or unload the stack and re-run PsdStackLoader / AddUSBClasses) to pick up changes."
     fi
 fi

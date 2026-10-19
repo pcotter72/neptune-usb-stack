@@ -1,7 +1,7 @@
-#ifndef POSEIDON_AROS_COMPAT_H
-#define POSEIDON_AROS_COMPAT_H
+#ifndef NEPTUNE_AROS_COMPAT_H
+#define NEPTUNE_AROS_COMPAT_H
 /*
- * Minimal AROS-compatibility shim for building the Poseidon stack against the
+ * Minimal AROS-compatibility shim for building the Neptune stack against the
  * AmigaOS NDK with bebbo gcc (freestanding, no amiga.lib).  Force-included into
  * every TU (see CMake).
  */
@@ -105,4 +105,4 @@ static inline int strnicmp(const char *a, const char *b, ULONG n)
 
 #endif /* !__ASSEMBLER__ */
 
-#endif /* POSEIDON_AROS_COMPAT_H */
+#endif /* NEPTUNE_AROS_COMPAT_H */

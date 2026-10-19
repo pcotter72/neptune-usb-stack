@@ -1,10 +1,10 @@
 /*
- * poseidon.library - library skeleton (romtag, init/open/close/expunge, LVO
+ * neptune.library - library skeleton (romtag, init/open/close/expunge, LVO
  * funcTable). Hand-written replacement for AROS genmodule. Bebbo gcc, freestanding.
  *
- * The real init/open/expunge logic lives in poseidon.library.c (libInit/libOpen/
+ * The real init/open/expunge logic lives in neptune.library.c (libInit/libOpen/
  * libExpunge); this file only wraps them in the standard Exec library vectors and
- * publishes the 97-entry jump table in poseidon.conf/poseidon.sfd order.
+ * publishes the 97-entry jump table in neptune.sfd order.
  */
 
 #include <exec/types.h>
@@ -16,14 +16,14 @@
 #define EXEC_BASE_NAME (*(struct ExecBase **)4UL)
 #include <proto/exec.h>
 
-#include "poseidon_intern.h"          /* struct PsdBase */
+#include "neptune_intern.h"          /* struct PsdBase */
 
 #define LIBRARY_PRIORITY (-44)
 
-extern const char libname[];          /* "poseidon.library", in poseidon.library.c */
+extern const char libname[];          /* "neptune.library", in neptune.library.c */
 static const char libIdString[] = VERSION_STRING;
 
-/* the real hooks (in poseidon.library.c) */
+/* the real hooks (in neptune.library.c) */
 extern int libInit(struct PsdBase *ps);
 extern int libOpen(struct PsdBase *ps);
 extern int libExpunge(struct PsdBase *ps);
@@ -91,7 +91,7 @@ BPTR LibClose(struct PsdBase *base asm("a6"))
 
 ULONG LibNull(void) { return 0; }
 
-/* The LVO jump table lives in poseidon.library.c, below the psd* definitions - see the
+/* The LVO jump table lives in neptune.library.c, below the psd* definitions - see the
    comment there.  The four std vectors above are exported for it. */
 extern const APTR psdFuncTable[];
 

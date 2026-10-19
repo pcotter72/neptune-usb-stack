@@ -126,7 +126,7 @@ struct NepClassSTIr4200 * usbAttemptDeviceBinding(struct NepSTIr4200Base *nh, st
     IPTR vendid;
     KPRINTF(1, ("nepSTIr4200AttemptDeviceBinding(%08lx)\n", pd));
 
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_DEVICE, pd,
                     DA_VendorID, &vendid,
@@ -160,7 +160,7 @@ struct NepClassSTIr4200 * usbForceDeviceBinding(struct NepSTIr4200Base *nh, stru
 
     KPRINTF(1, ("nepSTIr4200ForceDeviceBinding(%08lx)\n", pd));
 
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_DEVICE, pd,
                     DA_ProductID, &prodid,
@@ -185,7 +185,7 @@ struct NepClassSTIr4200 * usbForceDeviceBinding(struct NepSTIr4200Base *nh, stru
         if(!unitfound)
         {
             /* as units are freed in the expunge-vector, the memory is
-               outside the scope of the poseidon library */
+               outside the scope of neptune.library */
             if(!(ncp = AllocVec(sizeof(struct NepClassSTIr4200), MEMF_PUBLIC|MEMF_CLEAR)))
             {
                 Permit();
@@ -275,7 +275,7 @@ void usbReleaseDeviceBinding(struct NepSTIr4200Base *nh, struct NepClassSTIr4200
     STRPTR devname;
 
     KPRINTF(1, ("nepSTIr4200ReleaseDeviceBinding(%08lx)\n", ncp));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         Forbid();
         ncp->ncp_ReadySignal = SIGB_SINGLE;
@@ -419,7 +419,7 @@ BOOL nLoadClassConfig(struct NepSTIr4200Base *nh)
     {
         return(FALSE);
     }
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -469,7 +469,7 @@ BOOL nLoadBindingConfig(struct NepClassSTIr4200 *ncp)
     *ncp->ncp_CDC = *nh->nh_DummyNCP.ncp_CDC;
     ncp->ncp_UsingDefaultCfg = TRUE;
 
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -498,7 +498,7 @@ LONG nOpenBindingCfgWindow(struct NepSTIr4200Base *nh, struct NepClassSTIr4200 *
 {
     struct Library *ps;
     KPRINTF(10, ("Opening GUI...\n"));
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -1295,7 +1295,7 @@ struct NepClassSTIr4200 * nAllocSTIr4200(void)
     do
     {
         ncp = thistask->tc_UserData;
-        if(!(ncp->ncp_Base = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+        if(!(ncp->ncp_Base = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
         {
             Alert(AG_OpenLib);
             break;
@@ -1496,9 +1496,9 @@ void nGUITask()
         nGUITaskCleanup(ncp);
         return;
     }
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
-        KPRINTF(10, ("Couldn't open poseidon.library.\n"));
+        KPRINTF(10, ("Couldn't open neptune.library.\n"));
         nGUITaskCleanup(ncp);
         return;
     }

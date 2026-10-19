@@ -181,7 +181,7 @@ struct NepClassSerial * usbAttemptDeviceBinding(struct NepSerialBase *nh, struct
     IPTR vendid;
 
     KPRINTF(1, ("nepSerialAttemptDeviceBinding(%08lx)\n", pd));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_DEVICE, pd,
                     DA_VendorID, &vendid,
@@ -215,7 +215,7 @@ struct NepClassSerial * usbForceDeviceBinding(struct NepSerialBase *nh, struct P
     struct Task *tmptask;
 
     KPRINTF(1, ("nepSerialForceDeviceBinding(%08lx)\n", pd));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_DEVICE, pd,
                     DA_ProductID, &prodid,
@@ -253,7 +253,7 @@ struct NepClassSerial * usbForceDeviceBinding(struct NepSerialBase *nh, struct P
         if(!unitfound)
         {
             /* as units are freed in the expunge-vector, the memory is
-               outside the scope of the poseidon library */
+               outside the scope of neptune.library */
             if(!(ncp = AllocVec(sizeof(struct NepClassSerial), MEMF_PUBLIC|MEMF_CLEAR)))
             {
                 Permit();
@@ -314,7 +314,7 @@ void usbReleaseDeviceBinding(struct NepSerialBase *nh, struct NepClassSerial *nc
     STRPTR devname;
 
     KPRINTF(1, ("nepSerialReleaseDeviceBinding(%08lx)\n", ncp));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         Forbid();
         ncp->ncp_ReadySignal = SIGB_SINGLE;
@@ -445,7 +445,7 @@ BOOL nLoadClassConfig(struct NepSerialBase *nh)
     {
         return(FALSE);
     }
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -478,7 +478,7 @@ LONG nOpenCfgWindow(struct NepSerialBase *nh)
 {
     struct Library *ps;
     KPRINTF(10, ("Opening GUI...\n"));
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -782,7 +782,7 @@ struct NepClassSerial * nAllocSerial(void)
     ncp = thistask->tc_UserData;
     do
     {
-        if(!(ncp->ncp_Base = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+        if(!(ncp->ncp_Base = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
         {
             Alert(AG_OpenLib);
             break;
@@ -1022,9 +1022,9 @@ void nGUITask()
         nGUITaskCleanup(nh);
         return;
     }
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
-        KPRINTF(10, ("Couldn't open poseidon.library.\n"));
+        KPRINTF(10, ("Couldn't open neptune.library.\n"));
         nGUITaskCleanup(nh);
         return;
     }

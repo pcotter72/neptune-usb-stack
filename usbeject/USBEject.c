@@ -1,9 +1,9 @@
 /*
-** USBEject -- Workbench "safely remove hardware" for Poseidon
+** USBEject -- Workbench "safely remove hardware" for Neptune
 **
 ** Resident WBStartup daemon: publishes one "Eject <device>" menu item per
 ** attached device that can be ejected (DA_CanSafeEject), kept current via
-** Poseidon events. Selecting one runs psdSafeEjectDevice(), which has the
+** Neptune events. Selecting one runs psdSafeEjectDevice(), which has the
 ** bound classes flush and cleanly unmount their volumes - a volume with open
 ** files vetoes the whole eject - and then takes the device off the bus,
 ** whereupon we tell the user it is safe to unplug.
@@ -23,14 +23,14 @@
 #include <intuition/intuition.h>
 #include <workbench/workbench.h>
 #include <devices/timer.h>
-#include <libraries/poseidon.h>
+#include <libraries/neptune.h>
 #include <libraries/usbclass.h>
 
 #include <proto/exec.h>
 #include <proto/intuition.h>
 #include <proto/wb.h>
 #include <proto/locale.h>
-#include <proto/poseidon.h>
+#include <proto/neptune.h>
 #include <proto/usbclass.h>
 
 #include <neptune_version.h>
@@ -40,7 +40,7 @@
 static const char version[] __attribute__((used)) = NEP_VER("USBEject");
 
 #define PORTNAME       "USBEject"
-#define LOGNAME        ((STRPTR) "USBEject")   /* originator in the Poseidon error log */
+#define LOGNAME        ((STRPTR) "USBEject")   /* originator in the Neptune error log */
 #define RETRY_SECS     5   /* AddAppMenuItem() fails while Workbench is not up yet */
 #define DETACH_SECS    5   /* how long to wait for the device to drop off the bus */
 
@@ -57,7 +57,7 @@ struct Library *ps = NULL;
 struct EjectDev
 {
     struct Node         ed_Node;
-    APTR                ed_Device;   /* poseidon pd - a key only, always revalidated */
+    APTR                ed_Device;   /* Neptune pd - a key only, always revalidated */
     ULONG               ed_Id;       /* AppMenuItem id cookie, matched against am_ID */
     struct AppMenuItem *ed_Item;
     char                ed_Name[48];  /* the device, for the requesters */
@@ -67,7 +67,7 @@ struct EjectDev
 
 static struct MsgPort *appport = NULL;      /* AppMessages; public port doubling as the single-instance guard */
 static BOOL portadded = FALSE;              /* ...but only once AddPort() ran */
-static struct MsgPort *eventport = NULL;    /* Poseidon event notes */
+static struct MsgPort *eventport = NULL;    /* Neptune event notes */
 static struct MsgPort *timerport = NULL;
 static struct timerequest *timerreq = NULL;
 static BOOL timeropen = FALSE;
@@ -415,7 +415,7 @@ int main(int argc, char *argv[])
        and we hang the eject items flat in the Tools menu -- so 36 is the honest floor. */
     WorkbenchBase = OpenLibrary("workbench.library", 36);
     LocaleBase    = (struct LocaleBase *) OpenLibrary("locale.library", 38);
-    ps            = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION);
+    ps            = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION);
     if((!IntuitionBase) || (!WorkbenchBase) || (!ps))
     {
         Cleanup();

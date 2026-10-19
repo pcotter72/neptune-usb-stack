@@ -1,6 +1,6 @@
 /*
  *----------------------------------------------------------------------------
- *                          UVC Tool for Poseidon
+ *                          UVC Tool for Neptune
  *----------------------------------------------------------------------------
  * usbvideo.device command-line client: prints camera info and the mode
  * table, captures frames to files.

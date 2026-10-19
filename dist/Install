@@ -2,7 +2,7 @@
 ; Commodore Installer script. Run from a Shell:  Installer Install
 ;
 ; Installs (into the running system):
-;   poseidon.library              -> LIBS:
+;   neptune.library              -> LIBS:
 ;   the USB device classes        -> SYS:Classes/USB/
 ;   the CLI tools                 -> C:
 ;   Trident (the control panel)   -> SYS:Prefs/
@@ -36,20 +36,20 @@
 )
 
 (welcome ("Welcome to the installation of " #poseidon ", the USB stack for AmigaOS 3.1 and newer.\n\n"
-          "This installs poseidon.library, the USB device classes, the Trident "
+          "This installs neptune.library, the USB device classes, the Trident "
           "control panel and the command-line tools.\n\n"
           "Note: it does NOT install a USB host-controller driver - that ships "
           "separately (e.g. xhci.device from the Emu68 driver stack). You will be "
           "asked for its name if you choose to auto-start the stack."))
 
 ;==========================================================================
-; poseidon.library -> LIBS:
+; neptune.library -> LIBS:
 ;==========================================================================
 (complete 5)
 (copylib
-    (prompt "Installing poseidon.library into LIBS:")
+    (prompt "Installing neptune.library into LIBS:")
     (help @copylib-help)
-    (source "LIBS/poseidon.library")
+    (source "LIBS/neptune.library")
     (dest "LIBS:")
     (confirm "expert")
 )

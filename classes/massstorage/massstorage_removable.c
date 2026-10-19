@@ -26,7 +26,7 @@ extern const STRPTR libname;
  * In order:
  *
  *   1. Task spawn             nStartRemovableTask (before the ps macro:
- *                             its parameter is the poseidon base itself)
+ *                             its parameter is the neptune.library base itself)
  *   2. Setup and teardown     nAllocRT, nFreeRT
  *   3. Small helpers          pre-DOS predicate, auto-unmount
  *   4. Media state machine    one TEST UNIT READY and its two outcomes
@@ -100,7 +100,7 @@ struct NepMSBase * nAllocRT(void)
             Alert(AG_OpenLib | AO_ExpansionLib);
             break;
         }
-        if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+        if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
         {
             Alert(AG_OpenLib | AO_Unknown);
             break;

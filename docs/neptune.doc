@@ -1,48 +1,48 @@
 TABLE OF CONTENTS
 
-poseidon.library/--background--
-poseidon.library/psdAbortPipe
-poseidon.library/psdAddClass
-poseidon.library/psdAddErrorMsg
-poseidon.library/psdAddHardware
-poseidon.library/psdAllocDevice
-poseidon.library/psdAllocPipe
-poseidon.library/psdAllocVec
-poseidon.library/psdClaimAppBinding
-poseidon.library/psdClassScan
-poseidon.library/psdCopyStr
-poseidon.library/psdDelayMS
-poseidon.library/psdDoPipe
-poseidon.library/psdEnumerateDevice
-poseidon.library/psdEnumerateHardware
-poseidon.library/psdFindDevice
-poseidon.library/psdFreeDevice
-poseidon.library/psdFreePipe
-poseidon.library/psdFreeVec
-poseidon.library/psdGetAttrs
-poseidon.library/psdGetNextDevice
-poseidon.library/psdGetPipeActual
-poseidon.library/psdGetPipeError
-poseidon.library/psdGetStringDescriptor
-poseidon.library/psdLockReadDevice
-poseidon.library/psdLockReadPBase
-poseidon.library/psdLockWriteDevice
-poseidon.library/psdLockWritePBase
-poseidon.library/psdNumToStr
-poseidon.library/psdPipeSetup
-poseidon.library/psdReleaseAppBinding
-poseidon.library/psdRemClass
-poseidon.library/psdRemErrorMsg
-poseidon.library/psdRemHardware
-poseidon.library/psdSafeRawDoFmt
-poseidon.library/psdSendPipe
-poseidon.library/psdSetAltInterface
-poseidon.library/psdSetAttrs
-poseidon.library/psdSetDeviceConfig
-poseidon.library/psdSpawnSubTask
-poseidon.library/psdUnlockDevice
-poseidon.library/psdUnlockPBase
-poseidon.library/psdWaitPipe
+neptune.library/--background--
+neptune.library/psdAbortPipe
+neptune.library/psdAddClass
+neptune.library/psdAddErrorMsg
+neptune.library/psdAddHardware
+neptune.library/psdAllocDevice
+neptune.library/psdAllocPipe
+neptune.library/psdAllocVec
+neptune.library/psdClaimAppBinding
+neptune.library/psdClassScan
+neptune.library/psdCopyStr
+neptune.library/psdDelayMS
+neptune.library/psdDoPipe
+neptune.library/psdEnumerateDevice
+neptune.library/psdEnumerateHardware
+neptune.library/psdFindDevice
+neptune.library/psdFreeDevice
+neptune.library/psdFreePipe
+neptune.library/psdFreeVec
+neptune.library/psdGetAttrs
+neptune.library/psdGetNextDevice
+neptune.library/psdGetPipeActual
+neptune.library/psdGetPipeError
+neptune.library/psdGetStringDescriptor
+neptune.library/psdLockReadDevice
+neptune.library/psdLockReadPBase
+neptune.library/psdLockWriteDevice
+neptune.library/psdLockWritePBase
+neptune.library/psdNumToStr
+neptune.library/psdPipeSetup
+neptune.library/psdReleaseAppBinding
+neptune.library/psdRemClass
+neptune.library/psdRemErrorMsg
+neptune.library/psdRemHardware
+neptune.library/psdSafeRawDoFmt
+neptune.library/psdSendPipe
+neptune.library/psdSetAltInterface
+neptune.library/psdSetAttrs
+neptune.library/psdSetDeviceConfig
+neptune.library/psdSpawnSubTask
+neptune.library/psdUnlockDevice
+neptune.library/psdUnlockPBase
+neptune.library/psdWaitPipe
 
 Need to be added:
 psdAddEventHandler
@@ -91,7 +91,7 @@ psdLoadCfgFromDisk
 psdSaveCfgToDisk
 
 
-poseidon.library/psdReadCfg                       poseidon.library/psdReadCfg
+neptune.library/psdReadCfg                       neptune.library/psdReadCfg
 
    NAME
         psdReadCfg -- read in a given form into an existing IFF context
@@ -104,7 +104,7 @@ psdSaveCfgToDisk
 
    FUNCTION
         Stores the given IFF form in the internal prefs structure at the
-        given Poseidon IFF context.
+        given Neptune IFF context.
 
         The data given in the form must be of the same type (same ID) as the
         IFF context, otherwise this function will fail.
@@ -112,13 +112,13 @@ psdSaveCfgToDisk
         It will replace the previous contents of the form completely with
         the new one.
 
-        The pic parameter points to an internal Poseidon IFF context
+        The pic parameter points to an internal Neptune IFF context
         structure. If pic is set to NULL, the root context is used.
 
         This function is considered to be semi-private, use with care.
 
    INPUTS
-        pic - pointer to a Poseidon IFF context structure or NULL for the
+        pic - pointer to a Neptune IFF context structure or NULL for the
               root context. This structure is private.
         form - pointer to a valid IFF FORM. May not be NULL.
 
@@ -130,7 +130,7 @@ psdSaveCfgToDisk
         psdWriteCfg(), psdFindCfgForm(), psdRemCfgForm(), psdAddCfgEntry()
 
 
-poseidon.library/psdWriteCfg                     poseidon.library/psdWriteCfg
+neptune.library/psdWriteCfg                     neptune.library/psdWriteCfg
 
    NAME
         psdWriteCfg -- convert an IFF context into a serialized IFF form
@@ -142,14 +142,14 @@ psdSaveCfgToDisk
         APTR psdWriteCfg(APTR);
 
    FUNCTION
-        psdWriteCfg() takes the given Poseidon IFF context and generates a
+        psdWriteCfg() takes the given Neptune IFF context and generates a
         serialized IFF form out of it. The returned pointer is a buffer to
         the IFF form data of the contexted given (including all subforms and
         chunks).
 
         If the context is NULL, a complete configuration memory dump is
         created, starting from the root context. The returned pointer then
-        contains the complete Poseidon prefs data.
+        contains the complete Neptune prefs data.
 
         The buffer is allocated automatically and has to be freed using the
         psdFreeVec() call after it is no longer required.
@@ -161,7 +161,7 @@ psdSaveCfgToDisk
         function.
 
    INPUTS
-        pic - pointer to a Poseidon IFF context structure or NULL for the
+        pic - pointer to a Neptune IFF context structure or NULL for the
               root context. This structure is private.
 
    RESULT
@@ -173,7 +173,7 @@ psdSaveCfgToDisk
         psdGetCfgChunk()
 
 
-poseidon.library/psdFindCfgForm               poseidon.library/psdFindCfgForm
+neptune.library/psdFindCfgForm               neptune.library/psdFindCfgForm
 
    NAME
         psdFindCfgForm -- search for a specific config form
@@ -186,9 +186,9 @@ psdSaveCfgToDisk
 
    FUNCTION
         This function searches the internal configuration space given by the
-        Poseidon IFF context for a certain IFF FORM as given by the form ID.
+        Neptune IFF context for a certain IFF FORM as given by the form ID.
 
-        The result is a pointer to Poseidon IFF context representing the
+        The result is a pointer to Neptune IFF context representing the
         form found, or NULL, if no such IFF FORM could be discovered.
 
         As there may be any number of IFF forms with the same ID, the
@@ -196,19 +196,19 @@ psdSaveCfgToDisk
         the same ID.
 
    INPUTS
-        pic - pointer to a Poseidon IFF context structure or NULL for the
+        pic - pointer to a Neptune IFF context structure or NULL for the
               root context. This structure is private.
         formid - longword containing the ID of the form to search.
 
    RESULT
-        subpic - pointer to the first Poseidon IFF context structure found,
+        subpic - pointer to the first Neptune IFF context structure found,
                  or NULL, if no such form was found.
 
    SEE ALSO
         psdNextCfgForm(), psdRemCfgForm(), psdGetCfgChunk()
 
 
-poseidon.library/psdNextCfgForm               poseidon.library/psdNextCfgForm
+neptune.library/psdNextCfgForm               neptune.library/psdNextCfgForm
 
    NAME
         psdNextCfgForm -- continue search for a specific config form
@@ -221,28 +221,28 @@ psdSaveCfgToDisk
 
    FUNCTION
         psdNextCfgForm() searches for addition IFF FORMs within the same
-        parent Poseidon IFF context.
+        parent Neptune IFF context.
 
         The parameter pic given to psdNextCfgForm() should be the one
         returned by psdFindCfgForm(). There is no need to supply the form ID
         anymore, because the context already contains this.
 
-        If another IFF form with the same ID is found, the Poseidon IFF
+        If another IFF form with the same ID is found, the Neptune IFF
         context pointer for it will be returned. Otherwise, nextpic will
         contain NULL.
 
    INPUTS
-        pic - pointer to a Poseidon IFF context structure.
+        pic - pointer to a Neptune IFF context structure.
 
    RESULT
-        nextpic - pointer to the next Poseidon IFF context structure found,
+        nextpic - pointer to the next Neptune IFF context structure found,
                  or NULL, if no additional form could be retrieved.
 
    SEE ALSO
         psdNextCfgForm(), psdRemCfgForm(), psdGetCfgChunk()
 
 
-poseidon.library/psdRemCfgForm                 poseidon.library/psdRemCfgForm
+neptune.library/psdRemCfgForm                 neptune.library/psdRemCfgForm
 
    NAME
         psdRemCfgForm -- remove a configuration form
@@ -254,13 +254,13 @@ psdSaveCfgToDisk
         VOID psdRemCfgForm(APTR);
 
    FUNCTION
-        Removes the given Poseidon IFF context, including all its chunks and
+        Removes the given Neptune IFF context, including all its chunks and
         subforms.
 
         To remove single chunks, use the psdRemCfgChunk() instead.
 
    INPUTS
-        pic - pointer to a Poseidon IFF context structure, or NULL for the
+        pic - pointer to a Neptune IFF context structure, or NULL for the
               root context (for normal applications, DO NOT USE the NULL
               pointer).
 
@@ -268,7 +268,7 @@ psdSaveCfgToDisk
         psdFindCfgForm(), psdNextCfgForm(), psdRemCfgChunk()
 
 
-poseidon.library/psdAddCfgEntry               poseidon.library/psdAddCfgEntry
+neptune.library/psdAddCfgEntry               neptune.library/psdAddCfgEntry
 
    NAME
         psdAddCfgEntry -- add a chunk or a whole form to an IFF context
@@ -281,13 +281,13 @@ psdSaveCfgToDisk
 
    FUNCTION
         Using this function you can add an IFF chunk or a complete FORM to
-        the given Poseidon IFF context.
+        the given Neptune IFF context.
 
         If the form parameter points to an IFF form buffer (NOT context), the
         function performs the following:
             - Adds the given form to the context. If such an form already
               existed, it will still be added behind the existing one.
-            - Returns a pointer to the newly created Poseidon IFF context.
+            - Returns a pointer to the newly created Neptune IFF context.
 
         If the form parameter points to an IFF chunk only, psdAddCfgEntry
         does the following:
@@ -300,19 +300,19 @@ psdSaveCfgToDisk
         corrupt IFF FORM).
 
    INPUTS
-        pic - pointer to a Poseidon IFF context structure or NULL for the
+        pic - pointer to a Neptune IFF context structure or NULL for the
               root context. This structure is private.
         form - a pointer to a buffer containing the IFF FORM or chunk data.
 
    RESULT
-        subpic - pointer to the Poseidon IFF context structure (see above)
+        subpic - pointer to the Neptune IFF context structure (see above)
                  or NULL, if the form or chunk could not be added.
 
    SEE ALSO
         psdAddCfgForm(), psdRemCfgForm(), psdGetCfgChunk(), psdRemCfgChunk()
 
 
-poseidon.library/psdRemCfgChunk               poseidon.library/psdRemCfgChunk
+neptune.library/psdRemCfgChunk               neptune.library/psdRemCfgChunk
 
    NAME
         psdRemCfgChunk -- remove a chunk for a given context
@@ -324,7 +324,7 @@ psdSaveCfgToDisk
         BOOL psdRemCfgChunk(APTR, ULONG);
 
    FUNCTION
-        psdRemCfgChunk() tries to remove a chunk from the given Poseidon IFF
+        psdRemCfgChunk() tries to remove a chunk from the given Neptune IFF
         context, which has the ID stored in parameter chunkid.
 
         If no chunk with that ID existed, it will return FALSE, otherwise the
@@ -336,7 +336,7 @@ psdSaveCfgToDisk
         not delete the context itself.
 
    INPUTS
-        pic - pointer to a Poseidon IFF context structure or NULL for the
+        pic - pointer to a Neptune IFF context structure or NULL for the
               root context. This structure is private.
         chunkid - the longword containing the ID of the chunk to remove,
                   or 0, to remove all chunks AND subforms.
@@ -348,7 +348,7 @@ psdSaveCfgToDisk
         psdAddCfgForm(), psdRemCfgForm(), psdGetCfgChunk()
 
 
-poseidon.library/psdGetCfgChunk               poseidon.library/psdGetCfgChunk
+neptune.library/psdGetCfgChunk               neptune.library/psdGetCfgChunk
 
    NAME
         psdGetCfgChunk -- convert an IFF context into a serialized IFF form
@@ -361,7 +361,7 @@ psdSaveCfgToDisk
 
    FUNCTION
         psdGetCfgChunk() searches and returns the chunk with the given ID
-        in chunkid inside the Poseidon IFF context pic. The returned pointer
+        in chunkid inside the Neptune IFF context pic. The returned pointer
         is a buffer to the IFF chunk data.
 
         If the context is NULL, the root context is used.
@@ -377,7 +377,7 @@ psdSaveCfgToDisk
         chunk, use the psdWriteCfg() function.
 
    INPUTS
-        pic - pointer to a Poseidon IFF context structure or NULL for the
+        pic - pointer to a Neptune IFF context structure or NULL for the
               root context. This structure is private.
         chunkid - IFF id of the chunk to search.
 
@@ -390,7 +390,7 @@ psdSaveCfgToDisk
         psdGetCfgChunk()
 
 
-poseidon.library/psdSetClsCfg                   poseidon.library/psdSetClsCfg
+neptune.library/psdSetClsCfg                   neptune.library/psdSetClsCfg
 
    NAME
         psdSetClsCfg -- store the class configuration in the prefs
@@ -408,7 +408,7 @@ psdSaveCfgToDisk
 
         The owner parameter is usually the name of the class (but not limited
         to it). The form parameter has to be a pointer to a valid IFF-FORM
-        with FORM-ID IFFFORM_CLASSDATA (see poseidon.h).
+        with FORM-ID IFFFORM_CLASSDATA (see neptune.h).
 
         If the form pointer is NULL, an existing configuration form will be
         deleted. In any other case, any previously existing data will be
@@ -438,7 +438,7 @@ psdSaveCfgToDisk
         psdGetClsCfg(), psdSetUsbDevCfg(), psdGetUsbDevCfg(), psdAddCfgEntry()
 
 
-poseidon.library/psdGetClsCfg                   poseidon.library/psdGetClsCfg
+neptune.library/psdGetClsCfg                   neptune.library/psdGetClsCfg
 
    NAME
         psdGetClsCfg -- obtain the class configuration from the prefs
@@ -466,8 +466,8 @@ psdSaveCfgToDisk
         owner - unique name string of the owner, usually the class name.
 
    RESULT
-        pic - pointer to a Poseidon IFF context structure. This structure is
-              private. Use the Poseidon configuration management functions to
+        pic - pointer to a Neptune IFF context structure. This structure is
+              private. Use the Neptune configuration management functions to
               access the data behind it.
 
    SEE ALSO
@@ -475,7 +475,7 @@ psdSaveCfgToDisk
         psdAddCfgEntry(), psdGetCfgChunk(), psdFindCfgForm(), psdWriteCfg()
 
 
-poseidon.library/psdSetUsbDevCfg             poseidon.library/psdSetUsbDevCfg
+neptune.library/psdSetUsbDevCfg             neptune.library/psdSetUsbDevCfg
 
    NAME
         psdSetUsbDevCfg -- store usb device specific settings in the prefs
@@ -539,7 +539,7 @@ psdSaveCfgToDisk
         psdSetClsCfg(), psdGetClsCfg(), psdGetUsbDevCfg(), psdAddCfgEntry()
 
 
-poseidon.library/psdGetUsbDevCfg             poseidon.library/psdGetUsbDevCfg
+neptune.library/psdGetUsbDevCfg             neptune.library/psdGetUsbDevCfg
 
    NAME
         psdGetUsbDevCfg -- obtain the device specific settings from the prefs
@@ -573,8 +573,8 @@ psdSaveCfgToDisk
                to be obtained for the whole device.
 
    RESULT
-        pic - pointer to a Poseidon IFF context structure. This structure is
-              private. Use the Poseidon configuration management functions to
+        pic - pointer to a Neptune IFF context structure. This structure is
+              private. Use the Neptune configuration management functions to
               access the data behind it.
 
    SEE ALSO
@@ -583,22 +583,20 @@ psdSaveCfgToDisk
 
 
 
-poseidon.library/--background--               poseidon.library/--background--
+neptune.library/--background--               neptune.library/--background--
 
    PURPOSE
-        Poseidon is a USB protocol stack for the Amiga. It serves as a
+        Neptune is a USB protocol stack for the Amiga. It serves as a
         manager and interface between the USB host controller drivers
         (usbhardware.device) and the class drivers.
 
-        This document is dated 28-Mar-02 19:53:03
-
    OVERVIEW
-        Poseidon itself is a library. It has no own tasks except for the
+        Neptune itself is a library. It has no own tasks except for the
         tasks spawned for each hardware device mounted. The library functions
         are fully re-entrant and all important structures are protected (or
         can be protected), when access is to be shared.
 
-        Poseidon uses the following levels of abstraction:
+        Neptune uses the following levels of abstraction:
 
         PsdHardware   - The usb hardware interface the devices are physically
         (phw)           connected to. There is no limit to the amount and
@@ -673,26 +671,11 @@ psdSaveCfgToDisk
         as well.
 
    FILES
-        The poseidon.library itself resides in LIBS:, the USB hardware
+        The neptune.library itself resides in LIBS:, the USB hardware
         devices should be in DEVS:USBHardware, and all class drivers should
         be stored in SYS:Classes/USB.
 
-   BUGS
-        The stack is not finished yet. Some features never have been tested.
-        There will be a lot of bugs hiding in all places. An event handler
-        (mainly for use by the GUI) is going to be added, as well as some
-        configuration and GUI hooks for the classes.
-
-        This version is meant to be a working frame for developers to test
-        and add their hardware or for application programmers to add class
-        drivers. Be sure that some things WILL change, be sure to keep
-        contact to me, Chris Hodges <chrisly@platon42.de>.
-
-        Also, bug reports, errors, feature requests are welcome and REQUIRED
-        for Poseidon to be a good product.
-
-
-poseidon.library/psdAbortPipe                   poseidon.library/psdAbortPipe
+neptune.library/psdAbortPipe                   neptune.library/psdAbortPipe
 
    NAME
         psdAbortPipe -- attempt to abort a pipe transaction
@@ -724,7 +707,7 @@ psdSaveCfgToDisk
         psdSendPipe(), psdWaitPipe(), psdGetPipeError(), psdGetPipeActual()
 
 
-poseidon.library/psdAddClass                     poseidon.library/psdAddClass
+neptune.library/psdAddClass                     neptune.library/psdAddClass
 
    NAME
         psdAddClass -- add a usb class library to the stack
@@ -738,7 +721,7 @@ psdSaveCfgToDisk
    FUNCTION
 
         psdAddClass() tries to open and add a usb class driver to the stack.
-        Be sure only to add libraries to the stack which are really Poseidon
+        Be sure only to add libraries to the stack which are really Neptune
         compatible usb classes, else a crash is very probable.
 
         If opening the library succeeds, the class will be added to the
@@ -757,7 +740,7 @@ psdSaveCfgToDisk
         psdRemClass(), psdClassScan()
 
 
-poseidon.library/psdAddErrorMsg               poseidon.library/psdAddErrorMsg
+neptune.library/psdAddErrorMsg               neptune.library/psdAddErrorMsg
 
    NAME
         psdAddErrorMsgA -- add an error or information message for the user
@@ -798,7 +781,7 @@ psdSaveCfgToDisk
         psdRemErrorMsg(), psdSafeRawDoFmt(), RawDoFmt()
 
 
-poseidon.library/psdAddHardware               poseidon.library/psdAddHardware
+neptune.library/psdAddHardware               neptune.library/psdAddHardware
 
    NAME
         psdAddHardware -- open and link a new usb hardware into the stack
@@ -811,7 +794,7 @@ psdSaveCfgToDisk
 
    FUNCTION
         psdAddHardware() is used for the stack manager to add a new hardware
-        device to the Poseidon USB stack. The hardware is initialized, but no
+        device to the Neptune USB stack. The hardware is initialized, but no
         devices attached to the root hub are enumerated. To do this, just
         call psdEnumerateHardware().
 
@@ -844,7 +827,7 @@ psdSaveCfgToDisk
         psdRemHardware(), psdEnumerateHardware()
 
 
-poseidon.library/psdAllocDevice               poseidon.library/psdAllocDevice
+neptune.library/psdAllocDevice               neptune.library/psdAllocDevice
 
    NAME
         psdAllocDevice -- allocate a device structure
@@ -877,7 +860,7 @@ psdSaveCfgToDisk
         psdFreeDevice(), psdEnumerateDevice()
 
 
-poseidon.library/psdAllocPipe                   poseidon.library/psdAllocPipe
+neptune.library/psdAllocPipe                   neptune.library/psdAllocPipe
 
    NAME
         psdAllocPipe -- allocate a pipe for transfer requests
@@ -921,10 +904,10 @@ psdSaveCfgToDisk
         psdFreePipe(), psdDoPipe(), psdSendPipe()
 
 
-poseidon.library/psdAllocVec                     poseidon.library/psdAllocVec
+neptune.library/psdAllocVec                     neptune.library/psdAllocVec
 
    NAME
-        psdAllocVec -- allocate memory for Poseidon system structures.
+        psdAllocVec -- allocate memory for Neptune system structures.
 
    SYNOPSIS
         memptr = psdAllocVec(size);
@@ -933,9 +916,9 @@ psdSaveCfgToDisk
         APTR psdAllocVec(ULONG);
 
    FUNCTION
-        Allocates memory from the internal memory pool for Poseidon system
+        Allocates memory from the internal memory pool for Neptune system
         structures. The memory is of MEMF_PUBLIC|MEMF_CLEAR type. The memory
-        will be freed automatically on exit of Poseidon (or if linked to a
+        will be freed automatically on exit of Neptune (or if linked to a
         system structure, when the structure gets freed), so be sure that
         this memory will not be needed somewhere else. Especially this memory
         is NOT for internal use in your task! Use your own calls to the exec
@@ -955,7 +938,7 @@ psdSaveCfgToDisk
         psdFreeVec()
 
 
-poseidon.library/psdClaimAppBinding       poseidon.library/psdClaimAppBinding
+neptune.library/psdClaimAppBinding       neptune.library/psdClaimAppBinding
 
    NAME
         psdClaimAppBindingA -- try to establish a binding to a usb device
@@ -1034,7 +1017,7 @@ psdSaveCfgToDisk
         psdFindDevice()
 
 
-poseidon.library/psdClassScan                   poseidon.library/psdClassScan
+neptune.library/psdClassScan                   neptune.library/psdClassScan
 
    NAME
         psdClassScan -- bind devices and interface to available classes
@@ -1053,7 +1036,7 @@ psdSaveCfgToDisk
         psdAddClass(), psdRemClass()
 
 
-poseidon.library/psdCopyStr                       poseidon.library/psdCopyStr
+neptune.library/psdCopyStr                       neptune.library/psdCopyStr
 
    NAME
         psdCopyStr -- allocate memory for and copy a given string
@@ -1072,7 +1055,7 @@ psdSaveCfgToDisk
         The memory will be allocated from the internal memory pool and must
         be freed using psdFreeVec(). DO NOT allocate memory this way if
         you're not going to free the memory while you've got the
-        poseidon.library open. This memory CAN and WILL go away whenever the
+        neptune.library open. This memory CAN and WILL go away whenever the
         library is expunged.
 
         This function returns NULL, if something went wrong.
@@ -1088,7 +1071,7 @@ psdSaveCfgToDisk
         psdFreeVec()
 
 
-poseidon.library/psdDelayMS                       poseidon.library/psdDelayMS
+neptune.library/psdDelayMS                       neptune.library/psdDelayMS
 
    NAME
         psdDelayMS -- wait for a given amount of milliseconds
@@ -1109,7 +1092,7 @@ psdSaveCfgToDisk
         milli - number of milliseconds to wait.
 
 
-poseidon.library/psdDoPipe                         poseidon.library/psdDoPipe
+neptune.library/psdDoPipe                         neptune.library/psdDoPipe
 
    NAME
         psdDoPipe -- synchronous transfer to endpoint
@@ -1155,7 +1138,7 @@ psdSaveCfgToDisk
         psdPipeSetup(), psdSendPipe(), psdAbortPipe(), psdWaitPipe()
 
 
-poseidon.library/psdEnumerateDevice       poseidon.library/psdEnumerateDevice
+neptune.library/psdEnumerateDevice       neptune.library/psdEnumerateDevice
 
    NAME
         psdEnumerateDevice -- start the enumeration process for a new device
@@ -1188,7 +1171,7 @@ psdSaveCfgToDisk
         psdAllocPipe()
 
 
-poseidon.library/psdEnumerateHardware   poseidon.library/psdEnumerateHardware
+neptune.library/psdEnumerateHardware   neptune.library/psdEnumerateHardware
 
    NAME
         psdEnumerateHardware -- start enumeration of the root hub
@@ -1219,7 +1202,7 @@ psdSaveCfgToDisk
         psdAllocHardware(), psdFreeHardware(), psdClassScan()
 
 
-poseidon.library/psdFindDevice                 poseidon.library/psdFindDevice
+neptune.library/psdFindDevice                 neptune.library/psdFindDevice
 
    NAME
         psdFindDeviceA -- find a specific device in the device list
@@ -1271,11 +1254,11 @@ psdSaveCfgToDisk
         DA_Version (UWORD) - BCD number of device/product version. Only
             valid, if DA_HasDevDesc is TRUE.
         DA_Manufacturer (STRPTR) - pointer to a manufacturer string. If no
-            manufacturer string could be read from the device, Poseidon
+            manufacturer string could be read from the device, Neptune
             will generate a string out of the vendor ID. Be sure to handle
             a NULL pointer. Only valid, if DA_HasDevDesc is TRUE.
         DA_ProductName (STRPTR) - pointer to the product name. If no product
-            name could be read from the device, Poseidon will generate one
+            name could be read from the device, Neptune will generate one
             out of the class, the vendor and the product ID. Be sure to
             handle a NULL pointer. Only valid, if DA_HasDevDesc is TRUE.
         DA_Binding (APTR) - normally used with an NULL pointer to ensure the
@@ -1290,7 +1273,7 @@ psdSaveCfgToDisk
         psdClaimAppBinding(), psdReleaseAppBinding()
 
 
-poseidon.library/psdFreeDevice                 poseidon.library/psdFreeDevice
+neptune.library/psdFreeDevice                 neptune.library/psdFreeDevice
 
    NAME
         psdFreeDevice -- deallocate a device and free all bindings
@@ -1316,7 +1299,7 @@ psdSaveCfgToDisk
         psdAllocDevice()
 
 
-poseidon.library/psdFreePipe                     poseidon.library/psdFreePipe
+neptune.library/psdFreePipe                     neptune.library/psdFreePipe
 
    NAME
         psdFreePipe -- free a previously allocated pipe
@@ -1342,7 +1325,7 @@ psdSaveCfgToDisk
         psdAllocPipe(), psdSendPipe(), psdAbortPipe(), psdWaitPipe()
 
 
-poseidon.library/psdFreeVec                       poseidon.library/psdFreeVec
+neptune.library/psdFreeVec                       neptune.library/psdFreeVec
 
    NAME
         psdFreeVec -- free memory allocated by psdAllocVec()
@@ -1366,7 +1349,7 @@ psdSaveCfgToDisk
         psdAllocVec()
 
 
-poseidon.library/psdGetAttrs                     poseidon.library/psdGetAttrs
+neptune.library/psdGetAttrs                     neptune.library/psdGetAttrs
 
    NAME
         psdGetAttrsA -- get information from an internal stack structure
@@ -1395,7 +1378,7 @@ psdSaveCfgToDisk
 
    INPUTS
         type - describes the type of the structure passed.
-               See libraries/poseidon.h for details.
+               See libraries/neptune.h for details.
         psdstruct - pointer to the system structure on which information
                     should be gathered. Can be NULL only for PGA_STACK.
         taglist - pointer to TagItem list, terminated by TAG_END.
@@ -1457,11 +1440,11 @@ psdSaveCfgToDisk
         DA_Version (UWORD) - BCD number of device/product version. Only
             valid, if DA_HasDevDesc is TRUE.
         DA_Manufacturer (STRPTR) - pointer to a manufacturer string. If no
-            manufacturer string could be read from the device, Poseidon will
+            manufacturer string could be read from the device, Neptune will
             generate a string out of the vendor ID. Be sure to handle a NULL
             pointer. Only valid, if DA_HasDevDesc is TRUE.
         DA_ProductName (STRPTR) - pointer to the product name. If no product
-            name could be read from the device, Poseidon will generate one
+            name could be read from the device, Neptune will generate one
             out of the class, the vendor and the product ID. Be sure to
             handle a NULL pointer. Only valid, if DA_HasDevDesc is TRUE.
         DA_Hardware (APTR) - uplinking pointer to the hardware structure the
@@ -1510,7 +1493,7 @@ psdSaveCfgToDisk
         CA_ConfigNum (UWORD) - returns the internal number of the config
             given. Can be used to set the config with psdSetDeviceConfig().
         CA_ConfigName (STRPTR) - gives back a name for the config. If no
-            specific name could be read out from the device, Poseidon
+            specific name could be read out from the device, Neptune
             will generate a default string.
         CA_MaxPower (UWORD) - returns the maximum power in mA the device
             will use in this configuration.
@@ -1532,7 +1515,7 @@ psdSaveCfgToDisk
         IFA_AlternateNum (UWORD) - if the interface has alternative settings,
             this will be its number, otherwise just zero.
         IFA_InterfaceName (STRPTR) - pointer to a string describing the
-            interface. Poseidon will generate a default string if no specific
+            interface. Neptune will generate a default string if no specific
             name could be read from the device.
         IFA_Class (UWORD) - class code of the interface. See devices/usb.h
             for the list of known classes. psdNumToStr() may be used to
@@ -1631,7 +1614,7 @@ psdSaveCfgToDisk
         psdSetAttrs(), psdNumToStr()
 
 
-poseidon.library/psdGetNextDevice           poseidon.library/psdGetNextDevice
+neptune.library/psdGetNextDevice           neptune.library/psdGetNextDevice
 
    NAME
         psdGetNextDevice -- traverse the device list
@@ -1660,7 +1643,7 @@ psdSaveCfgToDisk
         psdLockReadPBase(), psdUnlockPBase(), psdFindDevice()
 
 
-poseidon.library/psdGetPipeActual           poseidon.library/psdGetPipeActual
+neptune.library/psdGetPipeActual           neptune.library/psdGetPipeActual
 
    NAME
         psdGetPipeActual -- get amount of bytes transferred with a pipe
@@ -1690,7 +1673,7 @@ psdSaveCfgToDisk
         psdGetPipeError(), psdSendPipe(), psdAbortPipe(), psdGetAttrs()
 
 
-poseidon.library/psdGetPipeError             poseidon.library/psdGetPipeError
+neptune.library/psdGetPipeError             neptune.library/psdGetPipeError
 
    NAME
         psdGetPipeError -- get last IO error from a pipe
@@ -1722,7 +1705,7 @@ psdSaveCfgToDisk
         psdGetPipeActual(), psdSendPipe(), psdAbortPipe(), psdGetAttrs()
 
 
-poseidon.library/psdGetStringDescriptor seidon.library/psdGetStringDescriptor
+neptune.library/psdGetStringDescriptor seidon.library/psdGetStringDescriptor
 
    NAME
         psdGetStringDescriptor -- try to get a device string descriptor
@@ -1757,7 +1740,7 @@ psdSaveCfgToDisk
         psdFreeVec()
 
 
-poseidon.library/psdLockReadDevice         poseidon.library/psdLockReadDevice
+neptune.library/psdLockReadDevice         neptune.library/psdLockReadDevice
 
    NAME
         psdLockReadDevice -- lock device for reading
@@ -1791,7 +1774,7 @@ psdSaveCfgToDisk
         psdUnlockDevice(), psdLockWriteDevice(), psdGetNextDevice()
 
 
-poseidon.library/psdLockReadPBase           poseidon.library/psdLockReadPBase
+neptune.library/psdLockReadPBase           neptune.library/psdLockReadPBase
 
    NAME
         psdLockReadPBase -- lock access to internal data structures
@@ -1824,7 +1807,7 @@ psdSaveCfgToDisk
         psdUnlockPBase(), psdLockWritePBase(), psdGetNextDevice()
 
 
-poseidon.library/psdLockWriteDevice       poseidon.library/psdLockWriteDevice
+neptune.library/psdLockWriteDevice       neptune.library/psdLockWriteDevice
 
    NAME
         psdLockWriteDevice -- lock access for changing device structures
@@ -1840,7 +1823,7 @@ psdSaveCfgToDisk
         This will only be neccessary if you change some linkages and
         structures inside the device, which you will probably never do.
 
-        Note that for some poseidon calls like psdEnumerateDevice(), the
+        Note that for some neptune.library calls like psdEnumerateDevice(), the
         locking and unlocking is done automatically. Refer to the docs for
         that call.
 
@@ -1862,7 +1845,7 @@ psdSaveCfgToDisk
         psdUnlockDevice(), psdLockReadDevice(), psdEnumerateDevice()
 
 
-poseidon.library/psdLockWritePBase         poseidon.library/psdLockWritePBase
+neptune.library/psdLockWritePBase         neptune.library/psdLockWritePBase
 
    NAME
         psdLockWritePBase -- lock access for changing structures
@@ -1878,7 +1861,7 @@ psdSaveCfgToDisk
         going to add or remove internal nodes, link or unlike system
         components.
 
-        Note that for some poseidon calls like psdAllocDevice(), the locking
+        Note that for some neptune.library calls like psdAllocDevice(), the locking
         and unlocking is done automatically. Refer to the docs for that call.
 
         psdLockWritePBase() calls nest.
@@ -1899,7 +1882,7 @@ psdSaveCfgToDisk
         psdUnlockPBase(), psdLockReadPBase(), psdGetNextDevice()
 
 
-poseidon.library/psdNumToStr                     poseidon.library/psdNumToStr
+neptune.library/psdNumToStr                     neptune.library/psdNumToStr
 
    NAME
         psdNumToStr -- convert a value of certain meaning into a string
@@ -1933,7 +1916,7 @@ psdSaveCfgToDisk
               the code is unknown.
 
 
-poseidon.library/psdPipeSetup                   poseidon.library/psdPipeSetup
+neptune.library/psdPipeSetup                   neptune.library/psdPipeSetup
 
    NAME
         psdPipeSetup -- set request data for control pipes
@@ -1983,7 +1966,7 @@ psdSaveCfgToDisk
         psdDoPipe(), psdSendPipe()
 
 
-poseidon.library/psdReleaseAppBinding   poseidon.library/psdReleaseAppBinding
+neptune.library/psdReleaseAppBinding   neptune.library/psdReleaseAppBinding
 
    NAME
         psdReleaseAppBinding -- release an application binding again
@@ -2028,7 +2011,7 @@ psdSaveCfgToDisk
         psdClaimAppBinding(), psdFindDevice()
 
 
-poseidon.library/psdRemClass                     poseidon.library/psdRemClass
+neptune.library/psdRemClass                     neptune.library/psdRemClass
 
    NAME
         psdRemClass -- remove an usb class library from the stack
@@ -2055,7 +2038,7 @@ psdSaveCfgToDisk
         psdAddClass(), psdClassScan()
 
 
-poseidon.library/psdRemHardware               poseidon.library/psdRemHardware
+neptune.library/psdRemHardware               neptune.library/psdRemHardware
 
    NAME
         psdRemHardware -- close down an usb hardware
@@ -2088,7 +2071,7 @@ psdSaveCfgToDisk
         psdRemHardware(), psdEnumerateHardware()
 
 
-poseidon.library/psdRemErrorMsg               poseidon.library/psdRemErrorMsg
+neptune.library/psdRemErrorMsg               neptune.library/psdRemErrorMsg
 
    NAME
         psdRemErrorMsg -- free an error message
@@ -2114,7 +2097,7 @@ psdSaveCfgToDisk
         psdAddErrorMsg()
 
 
-poseidon.library/psdSafeRawDoFmt             poseidon.library/psdSafeRawDoFmt
+neptune.library/psdSafeRawDoFmt             neptune.library/psdSafeRawDoFmt
 
    NAME
         psdSafeRawDoFmtA -- add an error or information message for the user
@@ -2144,7 +2127,7 @@ psdSaveCfgToDisk
         RawDoFmt()
 
 
-poseidon.library/psdSendPipe                     poseidon.library/psdSendPipe
+neptune.library/psdSendPipe                     neptune.library/psdSendPipe
 
    NAME
         psdSendPipe -- initiate asynchronous pipe transfer
@@ -2196,7 +2179,7 @@ psdSaveCfgToDisk
         psdGetPipeError(), psdGetPipeActual()
 
 
-poseidon.library/psdSetAltInterface       poseidon.library/psdSetAltInterface
+neptune.library/psdSetAltInterface       neptune.library/psdSetAltInterface
 
    NAME
         psdSetAltInterface -- change an interface to an alternate setting
@@ -2239,7 +2222,7 @@ psdSaveCfgToDisk
         psdGetAttrs()
 
 
-poseidon.library/psdSetAttrs                     poseidon.library/psdSetAttrs
+neptune.library/psdSetAttrs                     neptune.library/psdSetAttrs
 
    NAME
         psdSetAttrsA -- change fields of an internal stack structure
@@ -2268,7 +2251,7 @@ psdSaveCfgToDisk
 
    INPUTS
         type - describes the type of the structure passed.
-               See libraries/poseidon.h for details.
+               See libraries/neptune.h for details.
         psdstruct - pointer to the system structure on which information
                     should be changed. Can be NULL only for PGA_STACK.
         taglist - pointer to TagItem list, terminated by TAG_END.
@@ -2284,7 +2267,7 @@ psdSaveCfgToDisk
         psdGetAttrs()
 
 
-poseidon.library/psdSetDeviceConfig       poseidon.library/psdSetDeviceConfig
+neptune.library/psdSetDeviceConfig       neptune.library/psdSetDeviceConfig
 
    NAME
         psdSetDeviceConfig -- change the config of a device
@@ -2317,7 +2300,7 @@ psdSaveCfgToDisk
         psdGetAttrs()
 
 
-poseidon.library/psdSpawnSubTask             poseidon.library/psdSpawnSubTask
+neptune.library/psdSpawnSubTask             neptune.library/psdSpawnSubTask
 
    NAME
         psdSpawnSubTask -- launch a subtask
@@ -2356,7 +2339,7 @@ psdSaveCfgToDisk
         Should really use taglists.
 
 
-poseidon.library/psdUnlockDevice             poseidon.library/psdUnlockDevice
+neptune.library/psdUnlockDevice             neptune.library/psdUnlockDevice
 
    NAME
         psdUnlockDevice -- unlock access to a device
@@ -2378,7 +2361,7 @@ psdSaveCfgToDisk
         psdLockReadDevice(), psdLockWriteDevice()
 
 
-poseidon.library/psdUnlockPBase               poseidon.library/psdUnlockPBase
+neptune.library/psdUnlockPBase               neptune.library/psdUnlockPBase
 
    NAME
         psdUnlockPBase -- unlock access to internal data structures
@@ -2400,7 +2383,7 @@ psdSaveCfgToDisk
         psdLockReadPBase(), psdLockWritePBase(), psdGetNextDevice()
 
 
-poseidon.library/psdWaitPipe                     poseidon.library/psdWaitPipe
+neptune.library/psdWaitPipe                     neptune.library/psdWaitPipe
 
    NAME
         psdWaitPipe -- wait for the completion of a pipe transfer

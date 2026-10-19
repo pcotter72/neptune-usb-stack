@@ -17,7 +17,7 @@
  *
  * The CPU tail is the one thing that distinguishes the release archives from each other:
  * they all carry the same version numbers (those are the library/romtag ABI), so a
- * `Version LIBS:poseidon.library` on the running machine would otherwise not say which
+ * `Version LIBS:neptune.library` on the running machine would otherwise not say which
  * of the 68020/68040/68060 builds is installed.
  *
  * _NEP_STR is the two-level "stringify a macro's value" idiom: # does not expand its

@@ -322,7 +322,7 @@ struct NepClassEth
     ULONG               ncp_OpenFlags;    /* Flags used to open the device */
     struct NepEthBase  *ncp_ClsBase;      /* Up linkage */
     struct NepEthDevBase *ncp_DevBase;    /* Device base */
-    struct Library     *ncp_Base;         /* Poseidon base */
+    struct Library     *ncp_Base;         /* neptune.library base */
     struct PsdDevice   *ncp_Device;       /* Up linkage */
     struct PsdConfig   *ncp_Config;       /* Up linkage */
     struct PsdInterface *ncp_Interface;   /* Up linkage */
@@ -382,7 +382,7 @@ struct NepClassEth
     struct ClsDevCfg   *ncp_CDC;
 
     struct Library     *ncp_MUIBase;      /* MUI master base */
-    struct Library     *ncp_PsdBase;      /* Poseidon base */
+    struct Library     *ncp_PsdBase;      /* neptune.library base */
     struct Library     *ncp_IntBase;      /* Intuition base */
     struct Task        *ncp_GUITask;      /* GUI Task */
     struct NepClassHid *ncp_GUIBinding;   /* Window of binding that's open */

@@ -1,7 +1,7 @@
-/* common.h - shared include aggregator for all Poseidon USB class drivers.
+/* common.h - shared include aggregator for all Neptune USB class drivers.
  *
  * Every class compiles the shared classes/class_main.c skeleton and pulls in
- * this header for the common NDK/Poseidon includes. Per-class identity comes
+ * this header for the common NDK/Neptune includes. Per-class identity comes
  * from the class's CMakeLists via -D: the source uses CLASS_NAME directly, plus
  * VERSION_STRING - the $VER cookie built from it and the distribution version.
  */
@@ -42,7 +42,7 @@
 #include <proto/dos.h>
 #include <proto/commodities.h>
 #include <proto/intuition.h>
-#include <proto/poseidon.h>
+#include <proto/neptune.h>
 #include <proto/utility.h>
 #include <proto/keymap.h>
 #include <proto/layers.h>
@@ -76,7 +76,7 @@ static inline void nApplyInputTaskPriFloor(void)
 }
 
 /* Plain wordings shared by every class driver, for psdTxt() (see
- * <libraries/poseidon.h>). Each class keeps its own traditional wording at its
+ * <libraries/neptune.h>). Each class keeps its own traditional wording at its
  * own call site and passes it in as `flavour`; only the boring half is common.
  * The plain text is lan78xx.class's, which was already written this way.
  *

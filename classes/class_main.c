@@ -1,10 +1,10 @@
 /*
  * Shared class-driver library skeleton (romtag + LVO funcTable + Lib vectors),
- * reused by every Poseidon *.class. Hand-written replacement for AROS genmodule.
+ * reused by every Neptune *.class. Hand-written replacement for AROS genmodule.
  *
  * Parameterised per class via -D (see each class's CMakeLists):
  *   CLASS_NAME           "hub.class"            -- the resident/library name
- *   CLASS_PRI            -45                     -- romtag rt_Pri (PSD_CLASS_PRI)
+ *   CLASS_PRI            -45                     -- romtag rt_Pri (NEP_CLASS_PRI)
  *   CLASS_BASETYPE_NAME  NepHubBase              -- struct tag of the libbase
  *   CLASS_INCLUDE        "hub.h"                 -- header defining that struct
  *   HAS_LIBOPEN          (defined if the class has a libOpen hook)

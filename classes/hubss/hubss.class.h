@@ -1,14 +1,14 @@
 /*
     Copyright (C) 2014-2025, The AROS Development Team. All rights reserved.
 
-    Desc: SuperSpeed USB3.0 hub for Poseidon (based upon hub.h by Chris Hodges <chrisly@platon42.de>)
+    Desc: SuperSpeed USB3.0 hub for Neptune (based upon hub.h by Chris Hodges <chrisly@platon42.de>)
 */
 
 #ifndef HUBSS_CLASS_H
 #define HUBSS_CLASS_H
 
 #include <exec/exec.h>
-#include <libraries/poseidon.h>
+#include <libraries/neptune.h>
 
 #include <devices/usb_hub.h>
 
@@ -25,7 +25,7 @@ struct NepHubSSBase {
 struct NepClassHubSS {
     struct Node             nch_Node;         /* Node linkage */
     struct NepHubSSBase     *nch_HubBase;      /* hubss.class base */
-    struct Library          *nch_Base;         /* Poseidon base */
+    struct Library          *nch_Base;         /* neptune.library base */
     struct PsdHardware      *nch_Hardware;     /* Up linkage */
     struct PsdDevice        *nch_Device;       /* Up linkage */
     struct PsdConfig        *nch_Config;       /* Up linkage */

@@ -1,9 +1,9 @@
-#ifndef POSEIDON_LIBRARY_H
-#define POSEIDON_LIBRARY_H
+#ifndef NEPTUNE_LIBRARY_H
+#define NEPTUNE_LIBRARY_H
 
 /*
  *----------------------------------------------------------------------------
- *                         Includes for poseidon.library
+ *                         Includes for neptune.library
  *----------------------------------------------------------------------------
  *                   By Chris Hodges <chrisly@platon42.de>
  */
@@ -47,7 +47,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "poseidon_intern.h"
+#include "neptune_intern.h"
 
 #include <devices/usb.h>
 #include <devices/usb_hub.h>
@@ -60,10 +60,10 @@
 /* Internal calls to our own LVO functions go through the inline stubs with the
    libbase = the in-scope `ps` parameter (every LVO function has it in a6). The
    LVO function DEFINITIONS are parenthesised so these macros don't expand there. */
-#define POSEIDON_BASE_NAME ps
-/* Use the inline stubs (call macros) only - NOT <proto/poseidon.h>, whose plain
+#define NEPTUNE_BASE_NAME ps
+/* Use the inline stubs (call macros) only - NOT <proto/neptune.h>, whose plain
    clib prototypes would conflict with our register-arg LVO definitions. */
-#include <inline/poseidon.h>
+#include <inline/neptune.h>
 
 struct PsdRawDoFmt
 {
@@ -135,7 +135,7 @@ void pGetTTInfo(struct PsdDevice *pd, UWORD *ttHubAddr, UWORD *ttHubPort, UWORD 
 #define psdAddErrorMsg0(level, origin, fmtstr) psdAddErrorMsgA(level, origin, fmtstr, NULL)
 
 /* Inside the library the flag is one dereference away, so skip the LVO round
-   trip the public psdTxt() in <libraries/poseidon.h> would take on every logged
+   trip the public psdTxt() in <libraries/neptune.h> would take on every logged
    string. Same in-scope `ps` requirement as psdAddErrorMsg0 above, so this
    constrains nothing new. The prefix rule on the format specifiers documented
    at the public macro applies here just the same. */
@@ -151,4 +151,4 @@ void pPutChar(char ch asm("d0"), struct PsdRawDoFmt * rdf asm("a3"));
 
 void pRawFmtLength(char ch asm("d0"), ULONG * len asm("a3"));
 
-#endif /* POSEIDON_LIBRARY_H */
+#endif /* NEPTUNE_LIBRARY_H */

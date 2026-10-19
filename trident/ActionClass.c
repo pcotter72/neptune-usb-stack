@@ -8,7 +8,7 @@
 #include <proto/muimaster.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
-#include <proto/poseidon.h>
+#include <proto/neptune.h>
 #include <proto/intuition.h>
 #include <proto/graphics.h>
 #include <proto/usbclass.h>
@@ -2303,7 +2303,7 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
                     StringFrame,
                     MUIA_CycleChain, 1,
                     MUIA_String_AdvanceOnCR, TRUE,
-                    MUIA_String_Contents, PSD_CLASSDRAWER "/",
+                    MUIA_String_Contents, NEP_CLASSDRAWER "/",
                     End,
                 MUIA_Popstring_Button, PopButton(MUII_PopFile),
                 ASLFR_TitleText, __(MSG_PANEL_CLASSES_SELECT),
@@ -3006,14 +3006,14 @@ IPTR Action_HW_Del(struct IClass *cl, Object *obj, Msg msg)
 
 /* /// "SetHWDevGadget()" */
 /* Entries hold the bare driver name (<hwmatch.h>); the Device field shows it in
-   PSD_HWDRAWER, where the library loads it from. That is also all Popasl's
+   NEP_HWDRAWER, where the library loads it from. That is also all Popasl's
    default path/file split needs to open the requester in the right drawer.
    Action_HW_Update() strips the path again. */
 static void SetHWDevGadget(struct ActionData *data, struct HWListEntry *hlnode)
 {
     char path[108];
 
-    psdSafeRawDoFmt(path, sizeof(path), PSD_HWDRAWER "/%s",
+    psdSafeRawDoFmt(path, sizeof(path), NEP_HWDRAWER "/%s",
                     hlnode->devname ? hlnode->devname : (STRPTR) "");
     nnset(data->hwdevobj, MUIA_String_Contents, path);
 }

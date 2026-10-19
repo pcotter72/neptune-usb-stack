@@ -5,11 +5,11 @@
  * distribution's (NEPTUNE_VERSION/REVISION, injected globally by the top-level
  * CMakeLists) - the class fleet ships in lockstep, so no class states its own.
  */
-#ifndef POSEIDON_CLASS_VERSION_H
-#define POSEIDON_CLASS_VERSION_H
+#ifndef NEPTUNE_CLASS_VERSION_H
+#define NEPTUNE_CLASS_VERSION_H
 
 #include <neptune_version.h>
 
 #define VERSION_STRING  NEP_VER(CLASS_NAME)
 
-#endif /* POSEIDON_CLASS_VERSION_H */
+#endif /* NEPTUNE_CLASS_VERSION_H */

@@ -455,10 +455,10 @@ typedef LONG (*UhcdAbortFunc)(APTR hcd, APTR ep_token, APTR cookie);
  *
  *   CallHookPkt(hook, uih_Object, &buffer_request)
  *
- * where buffer_request is the classic 12-byte iso buffer block (Poseidon's
+ * where buffer_request is the classic 12-byte iso buffer block (Neptune's
  * struct IOUsbHWBufferReq == the driver's struct USBBufferRequest - this
  * header deliberately names neither: {u8 *data; u32 length; u16 frame;
- * u16 flags}).  uih_Object is caller-chosen (Poseidon passes the classic
+ * u16 flags}).  uih_Object is caller-chosen (Neptune passes the classic
  * IOUsbHWRTIso block so existing class hooks run unchanged).  The hooks
  * must be non-blocking.  uih_ReleaseHook (may be NULL) fires once, with a
  * NULL message, when the stream dies without a client STOP - endpoint

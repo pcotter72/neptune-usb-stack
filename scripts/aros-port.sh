@@ -57,21 +57,35 @@ git diff --cached --quiet || die "the index already has staged changes; commit o
 # first entry it falls under.
 map=(
     "rom/usb/poseidon/shellcommands  c"
-    "rom/usb/poseidon                poseidon.library"
+    "rom/usb/poseidon                neptune.library"
     "rom/usb/shellapps               tools"
     "rom/usb/classes                 classes"
     "rom/usb/trident                 trident"
 )
 
+# Upstream basename -> ours, for files renamed here (applied after the directory map).
+renamed=(
+    "poseidon.library.c  neptune.library.c"
+    "poseidon.library.h  neptune.library.h"
+    "poseidon_intern.h   neptune_intern.h"
+)
+
 # Our path for an upstream file, or nothing if we have no place for it.
 ours_for() {
-    local entry prefix dir
+    local entry prefix dir path base from to
     for entry in "${map[@]}"; do
         read -r prefix dir <<<"$entry"
         case "$1" in
-            "$prefix"/*) echo "$dir/${1#"$prefix"/}"; return ;;
+            "$prefix"/*) path="$dir/${1#"$prefix"/}"; break ;;
         esac
     done
+    [ -n "${path:-}" ] || return 0
+    base=${path##*/}
+    for entry in "${renamed[@]}"; do
+        read -r from to <<<"$entry"
+        [ "$base" = "$from" ] && { path="${path%/*}/$to"; break; }
+    done
+    echo "$path"
 }
 
 tmp=$(mktemp -d)
@@ -100,6 +114,10 @@ while IFS=$'\t' read -r status file; do
 
     patch="$tmp/patch"
     git -C "$aros" diff --full-index --no-renames "$parent" "$sha" -- "$file" > "$patch"
+    # A file renamed here: point the patch headers at our basename.
+    if [ "${file##*/}" != "${target##*/}" ]; then
+        sed -i -E "/^(diff --git|---|\+\+\+) /s#/${file##*/}( |\$)#/${target##*/}\1#g" "$patch"
+    fi
 
     # The three-way merge needs the pre-image blob.  Import it if we lack it; nothing
     # else of AROS's history enters this repository.
@@ -111,8 +129,7 @@ while IFS=$'\t' read -r status file; do
     fi
 
     # Re-root the upstream path at ours: strip a/ and every directory, then prepend
-    # our directory.  (The basename is unchanged - a file renamed here was caught as
-    # "absent" above.)
+    # our directory.  (A renamed basename was rewritten in the headers above.)
     strip=$(( $(printf '%s' "$file" | tr -cd / | wc -c) + 1 ))
     args=(--3way --index "-p$strip" "--directory=$(dirname "$target")")
 

@@ -24,14 +24,14 @@
 
 /*
  *----------------------------------------------------------------------------
- *                         Includes for poseidon.library
+ *                         Includes for neptune.library
  *----------------------------------------------------------------------------
  *                   By Chris Hodges <chrisly@platon42.de>
  *
  */
 
-#ifndef LIBRARIES_POSEIDON_H
-#define LIBRARIES_POSEIDON_H
+#ifndef LIBRARIES_NEPTUNE_H
+#define LIBRARIES_NEPTUNE_H
 
 #include <devices/usbhardware.h>
 #include <devices/timer.h>
@@ -44,9 +44,11 @@
 #include <utility/pack.h>
 #include <libraries/iffparse.h>
 
-/* Minimum poseidon.library exec version this header's LVO set requires.
- * Bump ONLY when poseidon.sfd gains functions - never merely because a release ships. */
-#define POSEIDON_LIB_MIN_VERSION 6
+#define NEPTUNENAME "neptune.library"
+
+/* Minimum neptune.library exec version this header's LVO set requires.
+ * Bump ONLY when neptune.sfd gains functions - never merely because a release ships. */
+#define NEPTUNE_LIB_MIN_VERSION 6
 
 /* Types for psdGetAttrs() and psdSetAttrs() */
 #define PGA_STACK      0x01
@@ -420,7 +422,7 @@
 #define IFFCHNK_REMOVESND  MAKE_ID('R','M','S','F')
 
 /* Public definitions to Private interfaces */
-#if !defined(_LIBRARIES_POSEIDON_H)
+#if !defined(_LIBRARIES_NEPTUNE_H)
 struct PsdBase
 {
     struct Library      ps_Library;       /* standard */
@@ -500,7 +502,7 @@ struct PsdRTIsoHandler
 {
     struct Node         prt_Node;         /* Node linkage */
 };
-#endif /* !_LIBRARIES_POSEIDON_H */
+#endif /* !_LIBRARIES_NEPTUNE_H */
 
 #if defined(__GNUC__)
 # pragma pack(2)
@@ -576,4 +578,4 @@ struct PsdPoPoCfg
 # pragma pack()
 #endif
 
-#endif /* LIBRARIES_POSEIDON_H */
+#endif /* LIBRARIES_NEPTUNE_H */

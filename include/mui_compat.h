@@ -28,15 +28,15 @@
  * binds to whatever MUIMASTER_BASE_NAME is at that point (the global MUIMasterBase for
  * Trident, the per-instance task accessor for the classes and popo).
  */
-#ifndef PSD_MUI_COMPAT_H
-#define PSD_MUI_COMPAT_H
+#ifndef NEP_MUI_COMPAT_H
+#define NEP_MUI_COMPAT_H
 
 #include <proto/muimaster.h>     /* MUI_NewObjectA + the (broken) __inline MUI_NewObject */
 #include <libraries/mui.h>       /* the XxxObject macros, and the SDK's MUIMASTER_VMIN */
-#include <exec/libraries.h>      /* struct Library, for psd_MUIVersion() */
+#include <exec/libraries.h>      /* struct Library, for nep_MUIVersion() */
 #include <stdarg.h>
 
-static __inline Object *psd_MUI_NewObject(CONST_STRPTR cl, ...)
+static __inline Object *nep_MUI_NewObject(CONST_STRPTR cl, ...)
 {
     Object *o;
     va_list va;
@@ -47,7 +47,7 @@ static __inline Object *psd_MUI_NewObject(CONST_STRPTR cl, ...)
 }
 
 #undef MUI_NewObject
-#define MUI_NewObject psd_MUI_NewObject
+#define MUI_NewObject nep_MUI_NewObject
 
 #undef MUIMASTER_VMIN
 #define MUIMASTER_VMIN 19        /* 19 = MUI 3.8, 20 = MUI 4.0, 21 = MUI 5.x */
@@ -55,10 +55,10 @@ static __inline Object *psd_MUI_NewObject(CONST_STRPTR cl, ...)
 /* The running muimaster version, from the base this TU already resolves. ROM-clean: no
  * state of its own, and no library call - MUIMASTER_BASE_NAME is either the global or an
  * inlined tc_UserData read. */
-static __inline UWORD psd_MUIVersion(void)
+static __inline UWORD nep_MUIVersion(void)
 {
     return ((struct Library *) (MUIMASTER_BASE_NAME))->lib_Version;
 }
 
-#endif /* PSD_MUI_COMPAT_H */
+#endif /* NEP_MUI_COMPAT_H */
  

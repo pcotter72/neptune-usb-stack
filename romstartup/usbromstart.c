@@ -1,5 +1,5 @@
 /*
- * usbromstart.c - the Poseidon Kickstart-ROM startup resident.
+ * usbromstart.c - the Neptune Kickstart-ROM startup resident.
  *
  * A plain NT_TASK RTF_COLDSTART resident with no library of its own: exec calls
  * rt_Init once during the coldstart chain and that is the module's whole life.  It
@@ -38,8 +38,8 @@
 
 #include <string.h>
 
-#include <libraries/poseidon.h>
-#include <proto/poseidon.h>
+#include <libraries/neptune.h>
+#include <proto/neptune.h>
 
 /* Inline LVO macros only, for both of these: the base is a local (TimerBase,
    UsbClsBase - the names the inlines default to), because a ROM module may not
@@ -241,7 +241,7 @@ static ULONG classCount(struct Library *UsbClsBase, ULONG method)
 }
 
 /* The class base is what carries usbDoMethodA(); psdAddClass() gave us the
-   Poseidon-side object. */
+   Neptune-side object. */
 static struct Library *classBase(struct Library *ps, APTR puc)
 {
     struct Library *base = NULL;
@@ -430,12 +430,12 @@ static ULONG initUsbRom(ULONG            dummy   asm("d0"),
 
     (void)dummy; (void)seglist; (void)sysbase;
 
-    KPRINTF(10, ("usbromstart: opening poseidon.library\n"));
+    KPRINTF(10, ("usbromstart: opening neptune.library\n"));
 
-    struct Library *ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION);
+    struct Library *ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION);
     if(!ps)
     {
-        KPRINTF(20, ("usbromstart: poseidon.library not available\n"));
+        KPRINTF(20, ("usbromstart: neptune.library not available\n"));
         return 0;
     }
 

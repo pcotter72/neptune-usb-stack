@@ -1,5 +1,5 @@
 /* usbmidi.h - USB MIDI 1.0 helpers shared by the MIDIStreaming classes (camdusbmidi,
- * simplemidi). Include after common.h: the helpers call poseidon.library through `ps`. */
+ * simplemidi). Include after common.h: the helpers call neptune.library through `ps`. */
 #ifndef USBMIDI_H
 #define USBMIDI_H
 

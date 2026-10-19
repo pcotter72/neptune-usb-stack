@@ -11,7 +11,7 @@
 #include <proto/muimaster.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
-#include <proto/poseidon.h>
+#include <proto/neptune.h>
 #include <proto/intuition.h>
 #include <proto/graphics.h>
 #include <proto/usbclass.h>
@@ -331,10 +331,10 @@ int main(int argc, char *argv[])
 
     Locale_Initialize();
 
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
-        fail("Failed to open version " _NEP_STR(POSEIDON_LIB_MIN_VERSION)
-             " of poseidon.library.\n");
+        fail("Failed to open version " _NEP_STR(NEPTUNE_LIB_MIN_VERSION)
+             " of neptune.library.\n");
     }
 
     if(ArgsArray[ARGS_NOGUI])

@@ -121,7 +121,7 @@ void SendBulk( struct PsdDevice *pd,UBYTE *cmd,ULONG len)
     struct PsdEndpoint *EPOut;
     IPTR EPnum=0,IFnum=0,IFEPnum=0;
 
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         KPRINTF(10, ("SendBulk: FindInterface..."));
         if( ( DataIf = psdFindInterface( pd , DataIf , TAG_END ) ) ){
@@ -185,7 +185,7 @@ struct NepClassSerial * usbAttemptInterfaceBinding(struct NepSerialBase *nh, str
     struct MsgPort *mp;
 
     KPRINTF(1, ("nepSerialAttemptInterfaceBinding(%08lx)\n", pif));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
 
         psdGetAttrs(PGA_INTERFACE, pif,
@@ -379,7 +379,7 @@ struct NepClassSerial * usbForceInterfaceBinding(struct NepSerialBase *nh, struc
     struct Task *tmptask;
 
     KPRINTF(1, ("nepSerialForceInterfaceBinding(%08lx)\n", pif));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_INTERFACE, pif,
                     IFA_InterfaceNum, &ifnum,
@@ -425,7 +425,7 @@ struct NepClassSerial * usbForceInterfaceBinding(struct NepSerialBase *nh, struc
         if(!unitfound)
         {
             /* as units are freed in the expunge-vector, the memory is
-               outside the scope of the poseidon library */
+               outside the scope of neptune.library */
             if(!(ncp = AllocVec(sizeof(struct NepClassSerial), MEMF_PUBLIC|MEMF_CLEAR)))
             {
                 Permit();
@@ -505,7 +505,7 @@ void usbReleaseInterfaceBinding(struct NepSerialBase *nh, struct NepClassSerial 
         return;
     }
 
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         Forbid();
         ncp->ncp_ReadySignal = SIGB_SINGLE;
@@ -975,7 +975,7 @@ struct NepClassSerial * nAllocSerial(void)
     ncp = thistask->tc_UserData;
     do
     {
-        if(!(ncp->ncp_Base = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+        if(!(ncp->ncp_Base = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
         {
             Alert(AG_OpenLib);
             break;

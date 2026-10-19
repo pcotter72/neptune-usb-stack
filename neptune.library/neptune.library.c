@@ -23,7 +23,7 @@
 
 /*
  *----------------------------------------------------------------------------
- *                          Poseidon main library
+ *                          Neptune main library
  *----------------------------------------------------------------------------
  *                   By Chris Hodges <chrisly@platon42.de>
  */
@@ -32,7 +32,7 @@
 
 #include "debug.h"
 
-#include "poseidon.library.h"
+#include "neptune.library.h"
 
 #include "numtostr.h"
 
@@ -51,7 +51,7 @@ extern VOID BeginIO(struct IORequest *ioReq);
 
 #define NewList(list) NEWLIST(list)
 
-#define MOD_NAME_STRING "poseidon.library"
+#define MOD_NAME_STRING NEPTUNENAME
 
 #define min(x,y) (((x) < (y)) ? (x) : (y))
 #define max(x,y) (((x) > (y)) ? (x) : (y))
@@ -62,9 +62,6 @@ extern const struct PsdULStringMap usbdesctypestr[];
 extern const struct PsdWStringMap usbhwioerrstr[];
 extern const struct PsdUWStringMap usblangids[];
 extern const struct PsdUWStringMap usbvendorids[];
-
-// Define the following to disable "legacy" driver support.
-//#define POSEIDON_NOLEGACYDRIVERS
 
 /* Static data */
 const char libname[]     = MOD_NAME_STRING;
@@ -178,7 +175,7 @@ int libOpen(struct PsdBase * ps)
                 ps->ps_PoPo.po_InsertSndFile = psdCopyStr("SYS:Prefs/Presets/Poseidon/Connect.iff");
                 ps->ps_PoPo.po_RemoveSndFile = psdCopyStr("SYS:Prefs/Presets/Poseidon/Disconnect.iff");
 
-                /* VERSION_STRING is the $VER cookie ("$VER: poseidon.library <ver> (date) ...");
+                /* VERSION_STRING is the $VER cookie ("$VER: neptune.library <ver> (date) ...");
                  * skip the 6-char "$VER: " tag for the welcome banner. */
                 psdAddErrorMsg(RETURN_OK, (STRPTR) libname, psdTxt("Started %s (0x%08lx).",
                                "Welcome to %s (0x%08lx)!"),
@@ -292,10 +289,10 @@ struct psdMemHeader
    the block is freed, and a block that is freed twice is refused. Both are
    reported with the block's size and the task that frees it. */
 #ifdef DEBUG
-#define PSD_MEM_TAIL        16
-#define PSD_MEM_TAILBYTE(n) ((UBYTE) (0xa5 ^ (n)))
+#define NEP_MEM_TAIL        16
+#define NEP_MEM_TAILBYTE(n) ((UBYTE) (0xa5 ^ (n)))
 #else
-#define PSD_MEM_TAIL        0
+#define NEP_MEM_TAIL        0
 #endif
 /* /// "psdAllocVec()" */
 APTR (psdAllocVec)(ULONG size asm("d0"), struct PsdBase * ps asm("a6"))
@@ -311,7 +308,7 @@ APTR (psdAllocVec)(ULONG size asm("d0"), struct PsdBase * ps asm("a6"))
     KPRINTF(1, ("psdAllocVec(%ld)\n", size));
 
     /* Space = requested size + header + alignment slop + the debug tail */
-    alloc_size = size + sizeof(struct psdMemHeader) + (AROS_WORSTALIGN - 1) + PSD_MEM_TAIL;
+    alloc_size = size + sizeof(struct psdMemHeader) + (AROS_WORSTALIGN - 1) + NEP_MEM_TAIL;
 
     ObtainSemaphore(&ps->ps_MemPoolSem);
     raw = AllocPooled(ps->ps_MemPool, alloc_size);
@@ -333,9 +330,9 @@ APTR (psdAllocVec)(ULONG size asm("d0"), struct PsdBase * ps asm("a6"))
         hdr->size     = size;
 
 #ifdef DEBUG
-        for (ULONG cnt = 0; cnt < PSD_MEM_TAIL; cnt++)
+        for (ULONG cnt = 0; cnt < NEP_MEM_TAIL; cnt++)
         {
-            aligned[size + cnt] = PSD_MEM_TAILBYTE(cnt);
+            aligned[size + cnt] = NEP_MEM_TAILBYTE(cnt);
         }
 #endif
 
@@ -372,9 +369,9 @@ void (psdFreeVec)(APTR pmem asm("a1"), struct PsdBase * ps asm("a6"))
                           pmem, size, taskname ? taskname : (STRPTR) "?"));
             return;
         }
-        for (ULONG cnt = 0; cnt < PSD_MEM_TAIL; cnt++)
+        for (ULONG cnt = 0; cnt < NEP_MEM_TAIL; cnt++)
         {
-            if (((UBYTE *)pmem)[size + cnt] != PSD_MEM_TAILBYTE(cnt))
+            if (((UBYTE *)pmem)[size + cnt] != NEP_MEM_TAILBYTE(cnt))
             {
                 KPRINTF(200, ("memory: 0x%08lx (%ld bytes) was written past its end (byte +%ld), freed by %s\n",
                               pmem, size, cnt, taskname ? taskname : (STRPTR) "?"));
@@ -384,7 +381,7 @@ void (psdFreeVec)(APTR pmem asm("a1"), struct PsdBase * ps asm("a6"))
         hdr->pmem_raw = NULL;
 #endif
 
-        alloc_size = size + sizeof(struct psdMemHeader) + (AROS_WORSTALIGN - 1) + PSD_MEM_TAIL;
+        alloc_size = size + sizeof(struct psdMemHeader) + (AROS_WORSTALIGN - 1) + NEP_MEM_TAIL;
 
         /* Free using the original pointer from AllocPooled() and the original size */
         ObtainSemaphore(&ps->ps_MemPoolSem);
@@ -2334,7 +2331,7 @@ static void pLogPipe(struct PsdPipe *pp)
 }
 
 /*
- * Map BOS-derived capabilities into poseidons device structure.
+ * Map BOS-derived capabilities into Neptune's device structure.
   */
 static void
 pApplyDeviceBosCapabilities(struct PsdDevice *pd, const struct PsdBosCaps *caps)
@@ -3740,7 +3737,7 @@ static void pAddEjectBinding(struct EjectBindings *eb, APTR binding, struct PsdU
     eb->eb_Count++;
 }
 
-/* A class can sit at either of Poseidon's two binding levels (§7.2): one
+/* A class can sit at either of Neptune's two binding levels (§7.2): one
    binding for the whole device, or one per interface of the current config -
    which is the level massstorage binds at.  Both are asked, exactly as
    psdSuspendBindings() does. */
@@ -9220,7 +9217,7 @@ STRPTR (psdGetStringChunk)(struct PsdIFFContext * pic asm("a0"), ULONG chunkid a
  * walking upwards); *ttPort gets the TT hub port its FS/LS subtree hangs off.
  * Returns NULL when no TT is involved (HS/SS devices, FS/LS on a FS root).
  * Only FS/LS devices behind HS hubs need a TT; PDFF_NEEDSSPLIT already encodes
- * this in Poseidon's logic, but this helper intentionally does not rely on
+ * this in Neptune's logic, but this helper intentionally does not rely on
  * that flag. */
 struct PsdDevice * pFindTTHub(struct PsdDevice *pd, UWORD *ttPort)
 {
@@ -10456,12 +10453,12 @@ void pDeviceTask()
     ULONG  dmaalign = 0;
     ULONG cnt;
 
-    if(!(ps = (struct PsdBase *) OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION))) {
+    if(!(ps = (struct PsdBase *) OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION))) {
         Alert(AG_OpenLib);
         return;
     }
 
-//    KPrintF("[poseidon] %s: poseidon @ 0x%08lx\n", __func__, ps);
+//    KPrintF("[neptune] %s: neptune.library @ 0x%08lx\n", __func__, ps);
 
     thistask = FindTask(NULL);
     SetTaskPri(thistask, 21);
@@ -10475,7 +10472,7 @@ void pDeviceTask()
     phw->phw_TaskMsgPort.mp_SigBit = AllocSignal(-1L);
     NewList(&phw->phw_TaskMsgPort.mp_MsgList);
 
-//    KPrintF("[poseidon] %s: Task port @ 0x%08lx\n ", __func__, &phw->phw_TaskMsgPort);
+//    KPrintF("[neptune] %s: Task port @ 0x%08lx\n ", __func__, &phw->phw_TaskMsgPort);
 
     memset(&phw->phw_DevMsgPort, 0, sizeof(phw->phw_DevMsgPort));
     phw->phw_DevMsgPort.mp_Node.ln_Type = NT_MSGPORT;
@@ -10485,10 +10482,10 @@ void pDeviceTask()
     phw->phw_DevMsgPort.mp_SigBit = AllocSignal(-1L);
     NewList(&phw->phw_DevMsgPort.mp_MsgList);
 
-//    KPrintF("[poseidon] %s: Task port @ 0x%08lx\n", __func__, &phw->phw_DevMsgPort);
+//    KPrintF("[neptune] %s: Task port @ 0x%08lx\n", __func__, &phw->phw_DevMsgPort);
 
     if((phw->phw_RootIOReq = (struct IOUsbHWReq *) CreateIORequest(&phw->phw_DevMsgPort, sizeof(struct IOUsbHWReq)))) {
-//        KPrintF("[poseidon] %s: ioreq @ 0x%08lx\n", __func__, phw->phw_RootIOReq);
+//        KPrintF("[neptune] %s: ioreq @ 0x%08lx\n", __func__, phw->phw_RootIOReq);
         /* phw_DevName is always the bare driver name (psdAddHardware() strips
            paths). In memory -- Kickstart/Emu68 resident, or already open -- it is
            opened by that name; anything else is loaded from the one drawer HCDs
@@ -10501,12 +10498,12 @@ void pDeviceTask()
         BOOL inmem = (FindName(&EXEC_BASE_NAME->DeviceList, devname) != NULL);
         Permit();
         if(!inmem) {
-            psdSafeRawDoFmt(path, sizeof(path), PSD_HWDRAWER "/%s", devname);
+            psdSafeRawDoFmt(path, sizeof(path), NEP_HWDRAWER "/%s", devname);
             devname = path;
         }
         ioerr = OpenDevice(devname, phw->phw_Unit, (struct IORequest *) phw->phw_RootIOReq, 0);
 
-//        KPrintF("[poseidon] %s: device @ 0x%08lx\n", __func__, phw->phw_RootIOReq->iouh_Req.io_Device);
+//        KPrintF("[neptune] %s: device @ 0x%08lx\n", __func__, phw->phw_RootIOReq->iouh_Req.io_Device);
 
         if(!ioerr) {
             phw->phw_Node.ln_Name = phw->phw_RootIOReq->iouh_Req.io_Device->dd_Library.lib_Node.ln_Name;
@@ -10546,7 +10543,7 @@ void pDeviceTask()
             phw->phw_RootIOReq->iouh_Req.io_Command = UHCMD_QUERYDEVICE;
             DoIO((struct IORequest *) phw->phw_RootIOReq);
 
-//            KPrintF("[poseidon] %s: device queried\n", __func__);
+//            KPrintF("[neptune] %s: device queried\n", __func__);
 
             phw->phw_ProductName = psdCopyStr(prodname ? prodname : (STRPTR) "n/a");
             phw->phw_Manufacturer = psdCopyStr(manufacturer ? manufacturer : (STRPTR) "n/a");
@@ -10596,13 +10593,13 @@ void pDeviceTask()
             KPRINTF(10, ("%s ready!\n", thistask->tc_Node.ln_Name));
             phw->phw_Task = thistask;
 
-//            KPrintF("[poseidon] %s: registering in posedion..\n", __func__);
+//            KPrintF("[neptune] %s: registering in neptune.library..\n", __func__);
 
             psdLockWritePBase();
             AddTail(&ps->ps_Hardware, &phw->phw_Node);
             psdUnlockPBase();
 
-//            KPrintF("[poseidon] %s: sending ready signal\n", __func__);
+//            KPrintF("[neptune] %s: sending ready signal\n", __func__);
 
             Forbid();
             if(phw->phw_ReadySigTask) {
@@ -11214,14 +11211,14 @@ static const ULONG * const PsdPTArray[] = {
 /* --- LVO jump table ------------------------------------------------------------------- *\
  *
  * Deliberately here, at the end of the TU that DEFINES every psd* function, rather than
- * next to the romtag in poseidon_main.c: there it needed <clib/poseidon_protos.h> for the
+ * next to the romtag in neptune_main.c: there it needed <clib/neptune_protos.h> for the
  * addresses, and those public prototypes omit the a6 libbase that every implementation
  * takes (APTR psdAllocVec(ULONG) vs APTR psdAllocVec(ULONG asm("d0"), struct PsdBase * asm("a6"))).
  * Pre-LTO the two never met; with LTO the compiler sees both TUs and it is
- * -Wlto-type-mismatch on all 100 of them -- the same conflict poseidon.library.h warns
- * about for <proto/poseidon.h>.  Below the definitions, no declarations are needed at all.
+ * -Wlto-type-mismatch on all 100 of them -- the same conflict neptune.library.h warns
+ * about for <proto/neptune.h>.  Below the definitions, no declarations are needed at all.
  *
- * Order IS the ABI: 4 std vectors, then poseidon.sfd order (poseidon_funcs.inc -- hand
+ * Order IS the ABI: 4 std vectors, then neptune.sfd order (neptune_funcs.inc -- hand
  * maintained, so a new LVO must be appended to BOTH or clients' calls land on the
  * terminator), then the -1 terminator.
  */
@@ -11235,7 +11232,7 @@ const APTR psdFuncTable[] = {
     (APTR)LibClose,
     (APTR)LibExpunge,
     (APTR)LibNull,
-#include "poseidon_funcs.inc"
+#include "neptune_funcs.inc"
     (APTR)-1
 };
 /* \\\ */

@@ -86,18 +86,18 @@ endfunction()
 # and a writable section that reaches a ROM faults at boot with no diagnostic.
 #
 # The romtag priority follows from the same rule, so it is a default rather than a
-# per-class decision: PSD_CLASS_PRI (-45) is the one slot in the Kickstart ROM band
-# that works for a class - under poseidon.library (-44) and above both startup
+# per-class decision: NEP_CLASS_PRI (-45) is the one slot in the Kickstart ROM band
+# that works for a class - under neptune.library (-44) and above both startup
 # residents (-46/-47), which psdAddClass() us and must find us already initialised.
 # Pass PRI only to opt a class *out* of ever being ROM-able - see classes/audio.
 #
 # Options:  GUI       links mui_headers + -lamiga (config dialog: MUI + BOOPSI DoMethod)
 #           AMIGALIB  links -lamiga without MUI (a non-GUI class that still uses amiga.lib stubs)
-# One-val:  BASETYPE (required); INCLUDE (default "<name>.h"); PRI (default PSD_CLASS_PRI)
+# One-val:  BASETYPE (required); INCLUDE (default "<name>.h"); PRI (default NEP_CLASS_PRI)
 # Multi:    SOURCES   extra .c beyond <name>.class.c + the skeleton
 #           DEFINES   extra -D (HAS_LIBOPEN, HAS_LIBCLOSE, DISKLABELS, …)
 #           DEPS      extra link targets (e.g. sana2_headers for the ethernet family)
-set(PSD_CLASS_PRI -45)
+set(NEP_CLASS_PRI -45)
 
 function(add_neptune_class name)
     cmake_parse_arguments(PC "GUI;AMIGALIB" "BASETYPE;PRI;INCLUDE" "SOURCES;DEFINES;DEPS" ${ARGN})
@@ -105,7 +105,7 @@ function(add_neptune_class name)
         set(PC_INCLUDE "${name}.h")
     endif()
     if(NOT DEFINED PC_PRI)
-        set(PC_PRI ${PSD_CLASS_PRI})
+        set(PC_PRI ${NEP_CLASS_PRI})
     endif()
     set(tgt ${name}_class)
 
@@ -117,7 +117,7 @@ function(add_neptune_class name)
         ${name}.class.c ${PC_SOURCES}
         ${CMAKE_SOURCE_DIR}/classes/class_main.c
         )
-    add_dependencies(${tgt} poseidon_sfd_headers)
+    add_dependencies(${tgt} neptune_sfd_headers)
 
     # Hot path (the whole USB datapath runs through these): -O3. -ffreestanding must be a
     # COMPILE option - as a link-only flag it is silently inert. The shared flags come from
@@ -126,7 +126,7 @@ function(add_neptune_class name)
 
     target_compile_definitions(${tgt} PRIVATE
         __NOLIBBASE__
-        POSEIDON_BASE_NAME=ps
+        NEPTUNE_BASE_NAME=ps
         CLASS_NAME="${name}.class"             # MOD_NAME_STRING/VERSION_STRING derive from it (common.h)
         CLASS_INCLUDE="${PC_INCLUDE}"
         CLASS_BASETYPE_NAME=${PC_BASETYPE}
@@ -142,7 +142,7 @@ function(add_neptune_class name)
     if(PC_GUI OR PC_AMIGALIB)
         set(_amiga -lamiga)                    # BOOPSI DoMethod / NewObject stubs
     endif()
-    set(_libs poseidon_headers ${PC_DEPS})
+    set(_libs neptune_headers ${PC_DEPS})
     if(PC_GUI)
         list(APPEND _libs mui_headers)
     endif()
@@ -192,9 +192,9 @@ include(cmake/NeptuneModuleLayout.cmake)
 # Link-time optimization, opted in per target.
 include(cmake/NeptuneLto.cmake)
 
-# --- Components (usbclass first: poseidon + the classes consume its headers) ---
+# --- Components (usbclass first: neptune.library + the classes consume its headers) ---
 add_subdirectory(usbclass.library)
-add_subdirectory(poseidon.library)
+add_subdirectory(neptune.library)
 add_subdirectory(romstartup)
 add_subdirectory(c)
 add_subdirectory(tools)

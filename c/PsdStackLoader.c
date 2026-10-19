@@ -11,8 +11,8 @@
 #include <exec/exec.h>
 #include <dos/dos.h>
 #include <dos/rdargs.h>
-#include <libraries/poseidon.h>
-#include <proto/poseidon.h>
+#include <libraries/neptune.h>
+#include <proto/neptune.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
 #include <neptune_version.h>
@@ -23,7 +23,7 @@
 #define ARGS_SIZEOF   2
 
 static const char *template = "DEVICE,UNIT/N";
-const char *psd_version = NEP_VER("PsdStackLoader") ", by Chris Hodges <chrisly@platon42.de>";
+const char *nep_version = NEP_VER("PsdStackLoader") ", by Chris Hodges <chrisly@platon42.de>";
 
 /* TRUE if no host controller is attached to the stack. */
 static BOOL noHardware(struct Library *ps)
@@ -52,7 +52,7 @@ int main(void)
         return(RETURN_FAIL);
     }
 
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         /* No prefs file is not an error: the defaults below cover it. */
         psdLoadCfgFromDisk(NULL);
@@ -67,7 +67,7 @@ int main(void)
         {
             if(!psdAddClassDir(ps, FALSE))
             {
-                PutStr("Failed to lock " PSD_CLASSDRAWER ".\n");
+                PutStr("Failed to lock " NEP_CLASSDRAWER ".\n");
                 ret = RETURN_WARN;
             }
         }
@@ -101,7 +101,7 @@ int main(void)
 
         CloseLibrary(ps);
     } else {
-        PutStr("Unable to open poseidon.library\n");
+        PutStr("Unable to open neptune.library\n");
         ret = RETURN_FAIL;
     }
 

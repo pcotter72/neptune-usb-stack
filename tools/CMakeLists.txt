@@ -1,4 +1,4 @@
-# Poseidon shellapps - per-gadget CLI tools (USB radio, cameras, UPS, rocket launcher)
+# Neptune shellapps - per-gadget CLI tools (USB radio, cameras, UPS, rocket launcher)
 
 # UVCTool is the usbvideo.device client for users; UVCTest is the test bench of the class,
 # built here but not shipped (cmake/Packaging.cmake leaves it out).
@@ -6,14 +6,14 @@ set(SHELLAPPS DRadioTool PencamTool PowManTool RocketTool SonixcamTool UPSTool U
 
 foreach(t ${SHELLAPPS})
     add_executable(${t} ${t}.c)
-    add_dependencies(${t} poseidon_sfd_headers)
+    add_dependencies(${t} neptune_sfd_headers)
     target_compile_options(${t} PRIVATE
         -Os                            # cold shell commands: size over speed
-        -DPOSEIDON_BASE_NAME=ps)
+        -DNEPTUNE_BASE_NAME=ps)
     target_include_directories(${t} PRIVATE
         ${CMAKE_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR})        # local <Tool>.h
-    target_link_libraries(${t} PRIVATE poseidon_headers -lm)  # -lm: pow/atof (camera tools)
+    target_link_libraries(${t} PRIVATE neptune_headers -lm)  # -lm: pow/atof (camera tools)
     nep_debug_finalize(${t})   # links -ldebug only for the serial backend (tools have no log sites)
 endforeach()
 

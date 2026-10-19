@@ -35,13 +35,13 @@ endforeach()
 add_custom_target(usbeject_catalogs ALL DEPENDS ${_catalogs})
 
 add_executable(USBEject USBEject.c locale.c)
-add_dependencies(USBEject poseidon_sfd_headers usbclass_sfd_headers usbeject_strings)
+add_dependencies(USBEject neptune_sfd_headers usbclass_sfd_headers usbeject_strings)
 target_compile_options(USBEject PRIVATE
     -Os                            # cold resident daemon: size over speed
-    -DPOSEIDON_BASE_NAME=ps)       # client base-var = the program's own `ps`
+    -DNEPTUNE_BASE_NAME=ps)       # client base-var = the program's own `ps`
 target_include_directories(USBEject PRIVATE
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}/generated)   # the flexcat-generated strings.h
-target_link_libraries(USBEject PRIVATE poseidon_headers usbclass_headers -lamiga)
+target_link_libraries(USBEject PRIVATE neptune_headers usbclass_headers -lamiga)
 nep_debug_finalize(USBEject)

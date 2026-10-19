@@ -319,7 +319,7 @@ struct NepClassPTP
 {
     struct Node         nch_Node;         /* Node linkage */
     struct NepPTPBase  *nch_ClsBase;      /* Up linkage */
-    struct Library     *nch_Base;         /* Poseidon base */
+    struct Library     *nch_Base;         /* neptune.library base */
     struct Library     *nch_DOSBase;      /* DOS Base */
     struct PsdDevice   *nch_Device;       /* Up linkage */
     struct PsdConfig   *nch_Config;       /* Up linkage */
@@ -368,7 +368,7 @@ struct NepClassPTP
     struct ClsDevCfg   *nch_CDC;
 
     struct Library     *nch_MUIBase;      /* MUI master base */
-    struct Library     *nch_PsdBase;      /* Poseidon base */
+    struct Library     *nch_PsdBase;      /* neptune.library base */
     struct Library     *nch_IntBase;      /* Intuition base */
     struct Task        *nch_GUITask;      /* GUI Task */
     struct NepClassPTP *nch_GUIBinding;   /* Window of binding that's open */

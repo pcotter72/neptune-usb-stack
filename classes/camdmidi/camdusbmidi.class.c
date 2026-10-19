@@ -78,7 +78,7 @@ struct NepClassMidi * usbAttemptInterfaceBinding(struct NepMidiBase *nh, struct 
     BOOL ismidi = FALSE;
 
     KPRINTF(1, ("nepMidiAttemptInterfaceBinding(%08lx)\n", pif));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_INTERFACE, pif,
                     IFA_Class, &ifclass,
@@ -122,7 +122,7 @@ struct NepClassMidi * usbForceInterfaceBinding(struct NepMidiBase *nh, struct Ps
     struct Task *tmptask;
 
     KPRINTF(1, ("nepMidiForceInterfaceBinding(%08lx)\n", pif));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         if((nch = psdAllocVec(sizeof(struct NepClassMidi))))
         {
@@ -217,7 +217,7 @@ void usbReleaseInterfaceBinding(struct NepMidiBase *nh, struct NepClassMidi *nch
     STRPTR devname;
 
     KPRINTF(1, ("nepMidiReleaseInterfaceBinding(%08lx)\n", nch));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         Forbid();
         Remove(&nch->nch_Node);
@@ -716,7 +716,7 @@ struct NepClassMidi * nAllocMidi(void)
     nch = thistask->tc_UserData;
     do
     {
-        if(!(nch->nch_Base = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+        if(!(nch->nch_Base = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
         {
             Alert(AG_OpenLib);
             break;

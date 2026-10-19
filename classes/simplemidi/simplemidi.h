@@ -27,7 +27,7 @@ struct NepSimpleMidiBase
     struct Library     *nh_UtilityBase;   /* utility base */
 
     struct Library     *nh_MUIBase;       /* MUI master base */
-    struct Library     *nh_PsdBase;       /* Poseidon base */
+    struct Library     *nh_PsdBase;       /* neptune.library base */
     struct Library     *nh_IntBase;       /* Intuition base */
     struct Task        *nh_GUITask;       /* GUI Task */
 
@@ -51,7 +51,7 @@ struct NepClassSimpleMidi
 {
     struct Node         nch_Node;         /* Node linkage */
     struct NepSimpleMidiBase  *nch_ClsBase;      /* Up linkage */
-    struct Library     *nch_Base;         /* Poseidon base */
+    struct Library     *nch_Base;         /* neptune.library base */
     struct PsdDevice   *nch_Device;       /* Up linkage */
     struct PsdConfig   *nch_Config;       /* Up linkage */
     struct PsdInterface *nch_Interface;   /* Up linkage */

@@ -15,13 +15,13 @@ set(ROMSTART_HCD "xhci.device" CACHE STRING
 add_executable(usbromstart
     usbromstart.c
     )
-add_dependencies(usbromstart poseidon_sfd_headers usbclass_sfd_headers)
+add_dependencies(usbromstart neptune_sfd_headers usbclass_sfd_headers)
 
 target_compile_options(usbromstart PRIVATE -Os -ffreestanding)
 
 target_compile_definitions(usbromstart PRIVATE
     __NOLIBBASE__
-    POSEIDON_BASE_NAME=ps
+    NEPTUNE_BASE_NAME=ps
     ROMSTART_HCD_NAME="${ROMSTART_HCD}")
 
 target_include_directories(usbromstart PRIVATE
@@ -30,7 +30,7 @@ target_include_directories(usbromstart PRIVATE
 
 # usbclass_headers: the resident asks massstorage.class directly whether a medium is
 # still coming up (UCM_MediaPending, inline LVO macros).
-target_link_libraries(usbromstart PRIVATE poseidon_headers usbclass_headers
+target_link_libraries(usbromstart PRIVATE neptune_headers usbclass_headers
     -Wl,--start-group -lc -lgcc -Wl,--end-group)
 
 # Linker entry point: a resident module is data to the loader, never a program.

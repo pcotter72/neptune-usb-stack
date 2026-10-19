@@ -12,7 +12,7 @@
 **  them is ever defined twice.
 **
 **  VENDORED HEADER - the source of truth is
-**  poseidon-backport/include/devices/usbhcd_common.h; the copy in
+**  neptune/include/devices/usbhcd_common.h; the copy in
 **  emu68-xhci-driver/xhci.device/include/devices/ must stay identical.
 */
 
@@ -113,7 +113,7 @@
 
 /* ------------------------------------------------------------------------ */
 /* Iso buffer-block flag pool (ubr_Flags of the 12-byte iso buffer block -
- * Poseidon's struct IOUsbHWBufferReq == the driver's struct USBBufferRequest).
+ * Neptune's struct IOUsbHWBufferReq == the driver's struct USBBufferRequest).
  * Bit 0 (CONTBUFFER) is the classic scatter/gather flag; bit 14 (XFER_ERROR)
  * is set by the HCD on a *_done call when the interval failed on the wire. */
 #define UBFB_CONTBUFFER         0       /* more buffer to copy (scatter/gather) */

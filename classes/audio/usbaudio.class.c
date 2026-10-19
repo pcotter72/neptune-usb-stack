@@ -225,7 +225,7 @@ struct NepClassAudio * usbAttemptInterfaceBinding(struct NepAudioBase *nh, struc
     BOOL isaudio;
 
     KPRINTF(1, ("nepAudioAttemptInterfaceBinding(%08lx)\n", pif));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         isaudio = nVerifyAudioStreamDevice(ps, pif);
         CloseLibrary(ps);
@@ -257,7 +257,7 @@ struct NepClassAudio * usbForceInterfaceBinding(struct NepAudioBase *nh, struct 
     struct Task *tmptask;
 
     KPRINTF(1, ("nepAudioAttemptInterfaceBinding(%08lx)\n", pif));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_INTERFACE, pif,
                     IFA_InterfaceNum, &ifnum,
@@ -301,7 +301,7 @@ struct NepClassAudio * usbForceInterfaceBinding(struct NepAudioBase *nh, struct 
         if(!unitfound)
         {
             /* as units are freed in the expunge-vector, the memory is
-               outside the scope of the poseidon library */
+               outside the scope of neptune.library */
             if(!(nch = AllocVec(sizeof(struct NepClassAudio), MEMF_PUBLIC|MEMF_CLEAR)))
             {
                 Permit();
@@ -358,7 +358,7 @@ void usbReleaseInterfaceBinding(struct NepAudioBase *nh, struct NepClassAudio *n
     STRPTR devname;
 
     KPRINTF(1, ("nepAudioReleaseInterfaceBinding(%08lx)\n", nch));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         Forbid();
         nch->nch_DenyRequests = TRUE;
@@ -2326,7 +2326,7 @@ struct NepClassAudio * nAllocAudio(void)
     nch = thistask->tc_UserData;
     do
     {
-        if(!(nch->nch_Base = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+        if(!(nch->nch_Base = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
         {
             Alert(AG_OpenLib);
             break;
@@ -2460,7 +2460,7 @@ BOOL nLoadClassConfig(struct NepAudioBase *nh)
     struct PsdIFFContext *pic;
 
     KPRINTF(10, ("Loading Class Config...\n"));
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -2487,7 +2487,7 @@ LONG nOpenCfgWindow(struct NepAudioBase *nh)
 {
     struct Library *ps;
     KPRINTF(10, ("Opening GUI...\n"));
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -2537,9 +2537,9 @@ void nGUITask()
         nGUITaskCleanup(nh);
         return;
     }
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
-        KPRINTF(10, ("Couldn't open poseidon.library.\n"));
+        KPRINTF(10, ("Couldn't open neptune.library.\n"));
         nGUITaskCleanup(nh);
         return;
     }
@@ -3626,7 +3626,7 @@ ULONG (subLibAllocAudio)(struct TagItem * tags asm("a1"), struct AHIAudioCtrlDrv
     }
     audioctrl->ahiac_DriverData = nam;
     nam->nam_AudioCtrl = audioctrl;
-    if(!(nam->nam_PsdBase = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(nam->nam_PsdBase = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return AHISF_ERROR;
     }

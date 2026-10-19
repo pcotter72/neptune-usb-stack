@@ -1,6 +1,6 @@
 /*
  *----------------------------------------------------------------------------
- *                          UVC Test for Poseidon
+ *                          UVC Test for Neptune
  *----------------------------------------------------------------------------
  * Test bench for usbvideo.class via usbvideo.device: mode negotiation,
  * capture with per-frame validation, controls, status events and the VHI
@@ -43,7 +43,7 @@
  *                                  The driver delivers JPEG, or YUY2 if the
  *                                  camera has no MJPG; YUY2 is not saved
  *
- * Device API only, no poseidon.library calls.
+ * Device API only, no neptune.library calls.
  */
 
 #include <proto/dos.h>
