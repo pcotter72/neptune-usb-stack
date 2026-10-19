@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         massstorage class for poseidon
+ *                         massstorage class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon massstorage class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -26,7 +26,7 @@ void mounter_log(const char *fmt, ...)
 #ifdef DEBUG
     va_list args;
     va_start(args, fmt);
-    RawDoFmt((CONST_STRPTR) fmt, (APTR) args, (APTR) psd_putch, NULL);
+    RawDoFmt((CONST_STRPTR) fmt, (APTR) args, (APTR) nep_putch, NULL);
     va_end(args);
 #else
     (void) fmt;
@@ -260,7 +260,7 @@ BOOL nMountDrive(struct NepClassMS *ncm, struct MountResult *stats)
        nothing to add. */
     ncm->ncm_MountDeferred = (result.deferred != 0);
 
-    /* The caller logs the outcome: neither the poseidon base nor libname is in
+    /* The caller logs the outcome: neither the neptune.library base nor libname is in
        scope this early in the file, and the removable task has both. */
     if(stats)
     {
@@ -490,7 +490,7 @@ struct NepClassMS * usbAttemptInterfaceBinding(struct NepMSBase *nh, struct PsdI
     BOOL preferuas = FALSE;
 
     KPRINTF(1, ("nepMSAttemptInterfaceBinding(%08lx)\n", pif));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_INTERFACE, pif,
                     IFA_Class, &ifclass,
@@ -665,7 +665,7 @@ struct NepClassMS * usbForceInterfaceBinding(struct NepMSBase *nh, struct PsdInt
     {
         return(NULL);
     }
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_INTERFACE, pif,
                     IFA_Class, &ifclass,
@@ -725,7 +725,7 @@ struct NepClassMS * usbForceInterfaceBinding(struct NepMSBase *nh, struct PsdInt
             if(!unitfound)
             {
                 /* as units are freed in the expunge-vector, the memory is
-                   outside the scope of the poseidon library */
+                   outside the scope of neptune.library */
                 if(!(ncm = AllocVec(sizeof(struct NepClassMS), MEMF_PUBLIC|MEMF_CLEAR)))
                 {
                     Permit();
@@ -981,8 +981,7 @@ struct NepClassMS * usbForceInterfaceBinding(struct NepMSBase *nh, struct PsdInt
                     //ncm->ncm_ReadySigTask = NULL;
                     //FreeSignal(ncm->ncm_ReadySignal);
                     psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                                   psdTxt("Mounted '%s' LUN %ld as %s unit %ld.",
-                                   "MSD '%s' LUN %ld available through %s unit %ld!"),
+                                   "Mounted '%s' LUN %ld as %s unit %ld.",
                                    devname, lunnum, nh->nh_DevBase->np_Library.lib_Node.ln_Name,
                                    ncm->ncm_UnitNo);
                     //lunnum++;
@@ -1018,7 +1017,7 @@ void usbReleaseInterfaceBinding(struct NepMSBase *nh, struct NepClassMS *ncm)
     struct NepClassMS *ncmhead;
 
     KPRINTF(1, ("nepMSReleaseInterfaceBinding(%08lx)\n", ncm));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         Forbid();
         if(ncm->ncm_GUITask)
@@ -1051,7 +1050,7 @@ void usbReleaseInterfaceBinding(struct NepMSBase *nh, struct NepClassMS *ncm)
             }
         }
         psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                       PSD_RELEASED_TXT("'%s' retreated, pitiful coward."),
+                       NEP_RELEASED_TXT,
                        devname);
         CloseLibrary(ps);
     }
@@ -1236,7 +1235,7 @@ BOOL nLoadClassConfig(struct NepMSBase *nh)
     {
         return(FALSE);
     }
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -1332,7 +1331,7 @@ BOOL nLoadBindingConfig(struct NepClassMS *ncm, BOOL announce)
     ncm->ncm_CUC->cuc_ChunkID = AROS_LONG2BE(MAKE_ID('L','U','N','0')+ncm->ncm_UnitLUN);
     ncm->ncm_UsingDefaultCfg = TRUE;
 
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -1391,7 +1390,7 @@ void nReapplyConfig(struct NepMSBase *nh)
 /* \\\ */
 
 /* /// "nStoreConfig()" */
-/* ps is the caller's own poseidon base: bind, the unit task and the GUI task
+/* ps is the caller's own neptune.library base: bind, the unit task and the GUI task
    all store through here. */
 BOOL nStoreConfig(struct Library *ps, struct NepClassMS *ncm)
 {
@@ -1404,7 +1403,7 @@ BOOL nStoreConfig(struct Library *ps, struct NepClassMS *ncm)
            freeze those into a per-device record that shadows the real class
            defaults from then on. psdReadCfg() usually discards it when the
            prefs arrive, but on a machine that never loads them the next
-           Trident Save would commit it for good. */
+           NeptuneUSB Save would commit it for good. */
         IPTR cfgread = FALSE;
         psdGetAttrs(PGA_STACK, NULL, PA_ConfigRead, &cfgread, TAG_END);
         if(!cfgread)
@@ -1446,7 +1445,7 @@ BOOL nStoreConfig(struct Library *ps, struct NepClassMS *ncm)
    nApplyFallback(). With PFF_NO_FALLBACK the change is refused and the log
    names the switch the device seems to want instead. name is the switch's GUI
    label. The hard-coded per-model quirks are not learned and do not come
-   through here (see nVendorQuirks). ps is the caller's own poseidon base. */
+   through here (see nVendorQuirks). ps is the caller's own neptune.library base. */
 BOOL nTryFallback(struct Library *ps, struct NepClassMS *ncm, ULONG flag,
                   CONST_STRPTR name, BOOL enable, LONG rc)
 {
@@ -1482,7 +1481,7 @@ LONG nOpenBindingCfgWindow(struct NepMSBase *nh, struct NepClassMS *ncm)
 {
     struct Library *ps;
     KPRINTF(10, ("Opening GUI...\n"));
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -2006,7 +2005,7 @@ struct NepClassMS * nAllocMS(void)
     ncm->ncm_UasQueueDepth = 0;
     do
     {
-        if(!(ncm->ncm_Base = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+        if(!(ncm->ncm_Base = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
         {
             Alert(AG_OpenLib | AO_Unknown);
             break;
@@ -4180,7 +4179,7 @@ void nUnlockXFer(struct NepClassMS *ncm)
 
 /* /// "nApplyFallback()" */
 /* nTryFallback(), and remember the change in the device's record. For the
-   unit task: it goes through the task's own poseidon base. */
+   unit task: it goes through the task's own neptune.library base. */
 BOOL nApplyFallback(struct NepClassMS *ncm, ULONG flag, CONST_STRPTR name,
                     BOOL enable, LONG rc)
 {
@@ -5067,9 +5066,9 @@ void nGUITask()
         nGUITaskCleanup(ncm);
         return;
     }
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
-        KPRINTF(10, ("Couldn't open poseidon.library.\n"));
+        KPRINTF(10, ("Couldn't open neptune.library.\n"));
         nGUITaskCleanup(ncm);
         return;
     }
@@ -5089,7 +5088,7 @@ void nGUITask()
         MUIA_Application_Author     , (IPTR) "Chris Hodges <chrisly@platon42.de>",
         MUIA_Application_Description, (IPTR) "Settings for the massstorage.class",
         MUIA_Application_Base       , (IPTR) "MASSSTORAGE",
-        MUIA_Application_HelpFile   , (IPTR) "HELP:Poseidon.guide",
+        MUIA_Application_HelpFile   , (IPTR) "HELP:Neptune.guide",
         MUIA_Application_Menustrip  , (IPTR) MenustripObject,
             Child, (IPTR) MenuObjectT((IPTR) "Project"),
                 Child, (IPTR) (ncm->ncm_AboutMI = (APTR) MenuitemObject,
@@ -5714,13 +5713,14 @@ void nGUITask()
                 }
 
                 case ID_ABOUT:
-                    MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, PSD_OK_TXT("Blimey!"), VERSION_STRING "\n\nAutomounting by the a4091.device mounter,\n(c) Toni Wilen and contributors.\nSee LEGAL for full attribution.", NULL);
+                    NEP_CLASS_ABOUT_EXTRA(ncm->ncm_App, ncm->ncm_MainWindow,
+                                          "\n\nAutomounting by a fork of the a4091.device mounter,\n(c) Toni Wilen and contributors.\nSee LEGAL for full attribution.");
                     break;
 
                 case ID_FORGET_CONFIG:
                     /* Drop this class's record for the device so the class
                        defaults govern it again. Only our own payload goes:
-                       Trident's data for the device (custom name, forced
+                       NeptuneUSB's data for the device (custom name, forced
                        binding) stays. The live units follow through
                        ConfigChangedEvent -> nReapplyConfig(), which runs once
                        this window is gone (it skips units with a window open). */
@@ -5791,13 +5791,13 @@ void AutoDetectMaxTransfer(struct NepClassMS *cncm)
     }
     if(!cncm->ncm_UnitReady)
     {
-        MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, PSD_OK_TXT("Argh!"), "No disk/media in drive!", NULL);
+        MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "No disk/media in drive!", NULL);
         return;
     }
     memory = (UBYTE *) AllocVec(memsize, MEMF_CLEAR);
     if(!memory)
     {
-        MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, PSD_OK_TXT("Argh!"), "Sorry, out of memory!", NULL);
+        MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "Sorry, out of memory!", NULL);
         return;
     }
     mp = CreateMsgPort();
@@ -5833,7 +5833,7 @@ void AutoDetectMaxTransfer(struct NepClassMS *cncm)
                         ioerr = DoIO((struct IORequest *) ioreq);
                         if(ioerr)
                         {
-                            MUI_Request(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, ">:-{", "Error %ld while reading block %ld!\nAborting process...", ioerr, block);
+                            MUI_Request(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "Error %ld while reading block %ld!\nAborting process...", ioerr, block);
                             bail = TRUE;
                             break;
                         }
@@ -5851,7 +5851,7 @@ void AutoDetectMaxTransfer(struct NepClassMS *cncm)
                             {
                                 if(!memcmp(&orgbuffer[block * maxtrans], &orgbuffer[(block + 1) * maxtrans], (size_t) maxtrans))
                                 {
-                                    res = MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "Continue|Abort", "Sorry, media contents do not\nseem to be diversive enough!\nResults might be wrong!", NULL);
+                                    res = MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "Continue|Abort", "Medium contents are too uniform\nfor a reliable test.\nResults might be wrong.", NULL);
                                     if(!res)
                                     {
                                         bail = TRUE;
@@ -5884,13 +5884,13 @@ void AutoDetectMaxTransfer(struct NepClassMS *cncm)
                             ioerr = DoIO((struct IORequest *) ioreq);
                             if(ioerr)
                             {
-                                MUI_Request(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, ">:-{", "Error %ld while reading at offset %ld!\nAborting process...", ioerr, &ioreq->io_Offset);
+                                MUI_Request(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "Error %ld while reading at offset %ld!\nAborting process...", ioerr, &ioreq->io_Offset);
                                 bail = TRUE;
                                 break;
                             }
                             if(memcmp(&orgbuffer[ioreq->io_Offset], &cmpbuffer[ioreq->io_Offset], (size_t) maxtrans))
                             {
-                                MUI_Request(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "Hmpf!", "Reading failed at MaxTrans = %08lx", maxtrans-1);
+                                MUI_Request(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "Reading failed at MaxTrans = %08lx", maxtrans-1);
                                 if(ncm->ncm_CDC->cdc_MaxTransfer)
                                 {
                                     ncm->ncm_CDC->cdc_MaxTransfer--;
@@ -5900,7 +5900,7 @@ void AutoDetectMaxTransfer(struct NepClassMS *cncm)
                             }
                         }
                         if(bail) break;
-                        //MUI_Request(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, PSD_OK_TXT("Wow!"), "Test with %ld (%ld) succeeded!", maxtrans, numblocks);
+                        //MUI_Request(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "Test with %ld (%ld) succeeded!", maxtrans, numblocks);
                         if(ncm->ncm_CDC->cdc_MaxTransfer < 7)
                         {
                             ncm->ncm_CDC->cdc_MaxTransfer++;
@@ -5910,20 +5910,20 @@ void AutoDetectMaxTransfer(struct NepClassMS *cncm)
                     } while(TRUE);
                     if(!bail)
                     {
-                        MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, PSD_OK_TXT("Wow!"), "Test succeeded, setting MaxTrans to maximum value!", NULL);
+                        MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "Test succeeded, setting MaxTrans to maximum value!", NULL);
                     }
                 } while(FALSE);
                 CloseDevice((struct IORequest *) ioreq);
             } else {
-                MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, PSD_OK_TXT("Argh!"), "Couldn't open device!", NULL);
+                MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "Couldn't open device!", NULL);
             }
             DeleteIORequest((struct IORequest *) ioreq);
         } else {
-            MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, PSD_OK_TXT("Argh!"), "No IOReq!", NULL);
+            MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "No IOReq!", NULL);
         }
         DeleteMsgPort(mp);
     } else {
-        MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, PSD_OK_TXT("Argh!"), "No MsgPort!", NULL);
+        MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "No MsgPort!", NULL);
     }
     FreeVec(memory);
 }

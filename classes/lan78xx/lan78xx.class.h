@@ -92,7 +92,7 @@ struct NepClassHid;
 
 /*
  * Bulk-IN queue depth: overlap the BULK_IN_DLY holds instead of paying
- * one transfer per hold period. Poseidon serialises within a pipe, so
+ * one transfer per hold period. Neptune serialises within a pipe, so
  * each slot needs its own.
  */
 #define LAN78XX_RX_QUEUE 4

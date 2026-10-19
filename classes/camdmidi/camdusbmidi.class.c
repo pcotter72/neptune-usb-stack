@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         camdusbmidi class for poseidon
+ *                         camdusbmidi class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon camdusbmidi class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -78,7 +78,7 @@ struct NepClassMidi * usbAttemptInterfaceBinding(struct NepMidiBase *nh, struct 
     BOOL ismidi = FALSE;
 
     KPRINTF(1, ("nepMidiAttemptInterfaceBinding(%08lx)\n", pif));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_INTERFACE, pif,
                     IFA_Class, &ifclass,
@@ -122,7 +122,7 @@ struct NepClassMidi * usbForceInterfaceBinding(struct NepMidiBase *nh, struct Ps
     struct Task *tmptask;
 
     KPRINTF(1, ("nepMidiForceInterfaceBinding(%08lx)\n", pif));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         if((nch = psdAllocVec(sizeof(struct NepClassMidi))))
         {
@@ -193,7 +193,7 @@ struct NepClassMidi * usbForceInterfaceBinding(struct NepMidiBase *nh, struct Ps
                     Permit();
 
                     psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                                   PSD_BOUND1_TXT("Play it again, '%s'!"),
+                                   NEP_BOUND1_TXT,
                                    devname);
                     CloseLibrary(ps);
                     return(nch);
@@ -217,7 +217,7 @@ void usbReleaseInterfaceBinding(struct NepMidiBase *nh, struct NepClassMidi *nch
     STRPTR devname;
 
     KPRINTF(1, ("nepMidiReleaseInterfaceBinding(%08lx)\n", nch));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         Forbid();
         Remove(&nch->nch_Node);
@@ -236,7 +236,7 @@ void usbReleaseInterfaceBinding(struct NepMidiBase *nh, struct NepClassMidi *nch
         psdGetAttrs(PGA_CONFIG, pc, CA_Device, &pd, TAG_END);
         psdGetAttrs(PGA_DEVICE, pd, DA_ProductName, &devname, TAG_END);
         psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                       PSD_RELEASED_TXT("'%s' fell silent!"),
+                       NEP_RELEASED_TXT,
                        devname);
         psdFreeVec(nch);
         CloseLibrary(ps);
@@ -716,7 +716,7 @@ struct NepClassMidi * nAllocMidi(void)
     nch = thistask->tc_UserData;
     do
     {
-        if(!(nch->nch_Base = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+        if(!(nch->nch_Base = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
         {
             Alert(AG_OpenLib);
             break;

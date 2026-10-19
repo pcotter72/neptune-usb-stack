@@ -45,7 +45,7 @@
 /* The "%s (%ld)" tail every transport uses to report an ioerr. A format
    FRAGMENT plus its two arguments rather than a helper function: string
    literal concatenation happens at translation time, so the emitted format
-   string - and therefore the message the user reads in Trident - is
+   string - and therefore the message the user reads in NeptuneUSB - is
    byte-identical to the hand-written form at every call site, while the
    psdNumToStr() boilerplate is spelled once.
    psdAddErrorMsg() carries no format attribute (the sfd cannot express one),

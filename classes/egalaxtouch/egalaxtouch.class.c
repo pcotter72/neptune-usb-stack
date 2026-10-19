@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         egalaxtouch class for poseidon
+ *                         egalaxtouch class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon egalaxtouch class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -99,7 +99,7 @@ struct NepClassHid * usbAttemptDeviceBinding(struct NepHidBase *nh, struct PsdDe
     IPTR vendid;
 
     KPRINTF(1, ("nepHidAttemptDeviceBinding(%08lx)\n", pd));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_DEVICE, pd,
                     DA_VendorID, &vendid,
@@ -131,7 +131,7 @@ struct NepClassHid * usbForceDeviceBinding(struct NepHidBase *nh, struct PsdDevi
     struct Task *tmptask;
 
     KPRINTF(1, ("nepHidForceDeviceBinding(%08lx)\n", pd));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_DEVICE, pd,
                     DA_ProductName, &devname,
@@ -166,7 +166,7 @@ struct NepClassHid * usbForceDeviceBinding(struct NepHidBase *nh, struct PsdDevi
                     nch->nch_ReadySigTask = NULL;
                     //FreeSignal(nch->nch_ReadySignal);
                     psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                                   PSD_BOUND1_TXT("Touching the sky with '%s'!"),
+                                   NEP_BOUND1_TXT,
                                    devname);
 
                     Forbid();
@@ -194,7 +194,7 @@ void usbReleaseDeviceBinding(struct NepHidBase *nh, struct NepClassHid *nch)
     STRPTR devname;
 
     KPRINTF(1, ("nepHidReleaseDeviceBinding(%08lx)\n", nch));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         Forbid();
         nch->nch_ReadySignal = SIGB_SINGLE;
@@ -222,7 +222,7 @@ void usbReleaseDeviceBinding(struct NepHidBase *nh, struct NepClassHid *nch)
         //FreeSignal(nch->nch_ReadySignal);
         psdGetAttrs(PGA_DEVICE, nch->nch_Device, DA_ProductName, &devname, TAG_END);
         psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                       PSD_RELEASED_TXT("Couldn't keep in touch with '%s'!"),
+                       NEP_RELEASED_TXT,
                        devname);
         Forbid();
         Remove(&nch->nch_Node);
@@ -349,7 +349,7 @@ BOOL nLoadClassConfig(struct NepHidBase *nh)
     struct PsdIFFContext *pic;
 
     KPRINTF(10, ("Loading Class Config...\n"));
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -401,7 +401,7 @@ BOOL nLoadBindingConfig(struct NepClassHid *nch)
     *nch->nch_CDC = *nh->nh_DummyNCH.nch_CDC;
     nch->nch_UsingDefaultCfg = TRUE;
 
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -430,7 +430,7 @@ LONG nOpenBindingCfgWindow(struct NepHidBase *nh, struct NepClassHid *nch)
 {
     struct Library *ps;
     KPRINTF(10, ("Opening GUI...\n"));
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -541,18 +541,18 @@ void nHidTask()
                                     KPRINTF(2, ("Raw Coords %ld, %ld, %02lx, %ld\n", xpos, ypos, packet[0], nch->nch_RMBState));
                                     switch(nch->nch_CDC->cdc_Rotate)
                                     {
-                                        case 1: // 90°
+                                        case 1: // 90 degrees
                                             tmp = ypos;
                                             ypos = xpos;
                                             xpos = 2047 - tmp;
                                             break;
 
-                                        case 2: // 180°
+                                        case 2: // 180 degrees
                                             ypos = 2047 - ypos;
                                             xpos = 2047 - xpos;
                                             break;
 
-                                        case 3: // 270°
+                                        case 3: // 270 degrees
                                             tmp = xpos;
                                             xpos = ypos;
                                             ypos = 2047 - tmp;
@@ -772,7 +772,7 @@ struct NepClassHid * nAllocHid(void)
     nch = thistask->tc_UserData;
     do
     {
-        if(!(nch->nch_Base = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+        if(!(nch->nch_Base = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
         {
             Alert(AG_OpenLib);
             break;
@@ -946,9 +946,9 @@ void nGUITask()
         nGUITaskCleanup(nch);
         return;
     }
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
-        KPRINTF(10, ("Couldn't open poseidon.library.\n"));
+        KPRINTF(10, ("Couldn't open neptune.library.\n"));
         nGUITaskCleanup(nch);
         return;
     }
@@ -960,7 +960,7 @@ void nGUITask()
         MUIA_Application_Author     , (IPTR)"Chris Hodges <chrisly@platon42.de>",
         MUIA_Application_Description, (IPTR)"Settings for the egalaxtouch.class",
         MUIA_Application_Base       , (IPTR)"EGALAXTOUCH",
-        MUIA_Application_HelpFile   , (IPTR)"HELP:Poseidon.guide",
+        MUIA_Application_HelpFile   , (IPTR)"HELP:Neptune.guide",
         MUIA_Application_Menustrip  , (IPTR)MenustripObject,
             Child, (IPTR)MenuObjectT((IPTR)"Project"),
                 Child, (IPTR)(nch->nch_AboutMI = MenuitemObject,
@@ -1275,7 +1275,7 @@ void nGUITask()
                     break;
 
                 case ID_ABOUT:
-                    MUI_RequestA(nch->nch_App, nch->nch_MainWindow, 0, NULL, PSD_OK_TXT("Blimey!"), VERSION_STRING, NULL);
+                    NEP_CLASS_ABOUT(nch->nch_App, nch->nch_MainWindow);
                     break;
             }
             if(nch->nch_TrackDims)

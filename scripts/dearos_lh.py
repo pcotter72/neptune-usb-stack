@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 dearos_lh.py - rewrite AROS genmodule calling-convention macros to plain bebbo-C
-register-argument functions. Reused for poseidon, usbclass and the 30 classes.
+register-argument functions. Reused for neptune.library, usbclass and the 30 classes.
 
   AROS_LH2(STRPTR, psdCopyStrFmtA,
            AROS_LHA(CONST_STRPTR, fmtstr, A0),
@@ -67,7 +67,7 @@ def transform(text, libbasetype):
             basevar = toks[2+n+1]
             args.append(f'{libbasetype} {basevar} asm("a6")')
             # Parenthesise the LVO function name so it does NOT expand the
-            # same-named inline macro (from <proto/poseidon.h>) that the library
+            # same-named inline macro (from <proto/neptune.h>) that the library
             # uses for INTERNAL calls. `<ret> (name)(args)` still defines `name`.
             name = f"({name})"
         sig = f'{ret} {name}(' + ", ".join(args) + ")"

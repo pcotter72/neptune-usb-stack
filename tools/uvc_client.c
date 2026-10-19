@@ -3,7 +3,7 @@
  *              UVC tools: usbvideo.device client helpers
  *----------------------------------------------------------------------------
  * Implements uvc_client.h, in the same section order. Device API only, no
- * poseidon.library calls.
+ * neptune.library calls.
  */
 
 #include <proto/dos.h>

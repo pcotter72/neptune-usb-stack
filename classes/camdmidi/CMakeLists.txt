@@ -4,7 +4,7 @@
 # that driver opens this class back and calls its two EXTRA library vectors usbCAMDOpenPort@-90 /
 # usbCAMDClosePort@-96, and the two sides share one struct CAMDAdapter per open port (camdusbmidi.h) with
 # an RX and a TX hook. camd_vectors.h injects the vectors into the shared skeleton's funcTable.
-add_poseidon_class(camdusbmidi BASETYPE NepMidiBase AMIGALIB)    # amiga.lib: CallHookA
+add_neptune_class(camdusbmidi BASETYPE NepMidiBase AMIGALIB)    # amiga.lib: CallHookA
 target_compile_definitions(camdusbmidi_class PRIVATE CLASS_VECTORS_HDR="camd_vectors.h")
 
 # ---------------------------------------------------------------------------------------------
@@ -39,7 +39,7 @@ target_link_options(camd_driver PRIVATE
 )
 
 # WRITABLE: camd.library LoadSeg()s this blob, so unlike a ROM module it may carry .data/.bss.
-psd_module_layout(camd_driver WRITABLE)
+nep_module_layout(camd_driver WRITABLE)
 set_target_properties(camd_driver PROPERTIES SUFFIX "")
 
 # (c) codegen the embedded ULONG[] + recompile-safe name offset from the linked driver

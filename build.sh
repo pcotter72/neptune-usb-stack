@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# build.sh - build the Poseidon backport (in the shared GHCR toolchain container),
+# build.sh - build Neptune (in the shared GHCR toolchain container),
 # package it as an installable .lha, and/or push the built binaries to a live Amiga
 # over Cloanto Amiga Explorer (AE.exe).
 #
@@ -19,9 +19,9 @@
 # Usage
 #   ./build.sh [--build] [--package] [--upload] [--tools] [--all-cpus] [--dry-run]
 #     --build     build the stack in the toolchain container (debug backend/level below)
-#     --package   build, then create <build dir>/Poseidon-<ver>-<cpu>[-<backend>]-<stamp>.lha
+#     --package   build, then create <build dir>/Neptune-<ver>-<cpu>[-<backend>]-<stamp>.lha
 #     --upload    push the built binaries to the Amiga: the library, the classes, the
-#                 commands, Trident, USBEject and the VHI driver (to LIBS:VHI/)
+#                 commands, NeptuneUSB, USBEject and the VHI driver (to LIBS:VHI/)
 #     (none of --build/--package/--upload => --build --upload)
 #     --tools     also upload the optional per-gadget tools to SYS:Tools/, and the test
 #                 tools that no archive has (UVCTest)
@@ -41,11 +41,11 @@
 #     FPU=<soft|hard>               FPU code generation (default: soft for 68020, hard otherwise)
 #     LTO=<on|off>                  link-time optimization (default on); off is for bisecting a
 #                                   suspected miscompile, not for releases
-#     POSEIDON_CONFIGURE_ARGS=...   extra -D flags, appended last so they win
+#     NEPTUNE_CONFIGURE_ARGS=...   extra -D flags, appended last so they win
 #
 # Build stamp: every build made here is a local build and is marked as one. Each run
 # computes one stamp, dev-<YYYYMMDD>-<HHMMSS>-g<hash>[-dirty] (-dirty = uncommitted
-# changes to tracked files), and passes it as POSEIDON_BUILD_STAMP; it ends up at the
+# changes to tracked files), and passes it as NEPTUNE_BUILD_STAMP; it ends up at the
 # tail of every binary's $VER (`Version <file> full` shows it), in the .lha name and in
 # the packaged ReadMe. Releases are built only by the tag-triggered CI workflow
 # (.github/workflows/release.yml), which never sets it.
@@ -59,10 +59,13 @@ AE="${AE:-/mnt/c/Program Files/Cloanto/Amiga Explorer/Windows/AE.exe}"
 DEBUG_LEVEL="${DEBUG:-1}"
 DEBUG_BACKEND="${BACKEND:-pistorm}"
 LTO="${LTO:-on}"
+# The caller's extra -D flags, captured once: build_one exports NEPTUNE_CONFIGURE_ARGS, so
+# reading it back there would carry one CPU's flags into the next --all-cpus pass.
+USER_CONFIGURE_ARGS="${NEPTUNE_CONFIGURE_ARGS:-}"
 
 # The local-build stamp (see the header). One per run, so an --all-cpus run and the
 # separate package configure all carry the same one. Untracked files do not make a tree
-# dirty (as in Linux's setlocalversion); no git => date and time only.
+# dirty; no git => date and time only.
 build_stamp() {
     local stamp hash
     stamp="dev-$(date +%Y%m%d-%H%M%S)"
@@ -141,13 +144,13 @@ cpu_setup "$CPU"
 
 # Deploy table - "<source under build/>|<Amiga destination>".  Mirrors dist/Install:
 CORE=(
-    "poseidon.library/poseidon.library|LIBS:poseidon.library"
-    "c/PsdStackLoader|C:PsdStackLoader"
+    "neptune.library/neptune.library|LIBS:neptune.library"
+    "c/USBStart|C:USBStart"
     "c/AddUSBHardware|C:AddUSBHardware"
     "c/AddUSBClasses|C:AddUSBClasses"
-    "c/PsdDevLister|C:PsdDevLister"
-    "c/PsdErrorlog|C:PsdErrorlog"
-    "trident/Trident|SYS:Prefs/Trident"
+    "c/USBList|C:USBList"
+    "c/USBErrorlog|C:USBErrorlog"
+    "neptuneusb/NeptuneUSB|SYS:Prefs/NeptuneUSB"
     "usbeject/USBEject|SYS:WBStartup/USBEject"
     "vhi/usbvideo.vhi|LIBS:VHI/usbvideo.vhi"
 )
@@ -196,8 +199,8 @@ copy_one() {                               # copy_one <src-under-build> <amiga-d
 
 deploy_group() { local e; for e in "$@"; do copy_one "${e%%|*}" "${e#*|}"; done; }
 
-# Every built class under build/classes/*/*.class -> SYS:Classes/USB/<file> (output names
-# differ from dir names - pegasus.class, dm9601eth.class, usbaudio.class, … - so glob the
+# Every built class under build/classes/*/*.class -> DEVS:USBClasses/<file> (output names
+# differ from dir names - pegasus.class, dm9601eth.class, usbaudio.class, ... - so glob the
 # actual artifacts rather than the source-dir names).
 deploy_classes() {
     local f rel; local -a list
@@ -208,7 +211,7 @@ deploy_classes() {
     fi
     for f in "${list[@]}"; do
         rel="${f#"$BUILD_DIR"/}"
-        copy_one "$rel" "SYS:Classes/USB/$(basename "$f")"
+        copy_one "$rel" "DEVS:USBClasses/$(basename "$f")"
     done
 }
 
@@ -223,14 +226,14 @@ build_one() {
         *) echo "BUILD_DIR must live under the repo ($ROOT) for the container build." >&2; exit 1 ;;
     esac
     local lto_arg; case "${LTO,,}" in
-        on|yes|1)  lto_arg="-DPOSEIDON_LTO=ON" ;;
-        off|no|0)  lto_arg="-DPOSEIDON_LTO=OFF" ;;
+        on|yes|1)  lto_arg="-DNEPTUNE_LTO=ON" ;;
+        off|no|0)  lto_arg="-DNEPTUNE_LTO=OFF" ;;
         *) echo "LTO must be on or off (got '$LTO')" >&2; exit 2 ;;
     esac
     # The caller's own -D flags go last so they override ours.
-    export POSEIDON_CONFIGURE_ARGS="-DPOSEIDON_DEBUG_BACKEND=$DEBUG_BACKEND -DPOSEIDON_DEBUG_LEVEL=$DEBUG_LEVEL -DM68K_CPU=$CPU -DM68K_FPU=$CPU_FPU $lto_arg -DPOSEIDON_BUILD_STAMP=$BUILD_STAMP ${POSEIDON_CONFIGURE_ARGS:-}"
-    export POSEIDON_BUILD_DIR="$build_rel"
-    [[ -n "$BUILD_IMAGE" ]] && export POSEIDON_BUILD_IMAGE="$BUILD_IMAGE"
+    export NEPTUNE_CONFIGURE_ARGS="-DNEPTUNE_DEBUG_BACKEND=$DEBUG_BACKEND -DNEPTUNE_DEBUG_LEVEL=$DEBUG_LEVEL -DM68K_CPU=$CPU -DM68K_FPU=$CPU_FPU $lto_arg -DNEPTUNE_BUILD_STAMP=$BUILD_STAMP $USER_CONFIGURE_ARGS"
+    export NEPTUNE_BUILD_DIR="$build_rel"
+    [[ -n "$BUILD_IMAGE" ]] && export NEPTUNE_BUILD_IMAGE="$BUILD_IMAGE"
 
     local what="building"; (( DO_PACKAGE )) && what="building + packaging"
     echo ">> $what via scripts/docker-build.sh (cpu=$CPU, fpu=$CPU_FPU, debug backend=$DEBUG_BACKEND, level=$DEBUG_LEVEL, lto=${LTO,,}, stamp=$BUILD_STAMP) ..."
@@ -239,7 +242,7 @@ build_one() {
         # package has no build dependency - stage the freshly built tree into the .lha.
         "$ROOT/scripts/docker-build.sh" --target package
         local lha
-        lha="$(ls -t "$BUILD_DIR"/Poseidon-*.lha 2>/dev/null | head -1 || true)"
+        lha="$(ls -t "$BUILD_DIR"/Neptune-*.lha 2>/dev/null | head -1 || true)"
         if [[ -z "$lha" ]]; then
             echo "package produced no .lha in $BUILD_DIR" >&2
             return 1
@@ -283,8 +286,8 @@ if (( DO_UPLOAD )); then
         fi
     fi
 
-    echo ">> deploying core to LIBS: / LIBS:VHI / SYS:Classes/USB / C: / SYS:Prefs ..."
-    (( DRY )) || ensure_dir "SYS:Classes/USB"
+    echo ">> deploying core to LIBS: / LIBS:VHI / DEVS:USBClasses / C: / SYS:Prefs ..."
+    (( DRY )) || ensure_dir "DEVS:USBClasses"
     (( DRY )) || ensure_dir "LIBS:VHI"
     deploy_classes
     deploy_group "${CORE[@]}"
@@ -303,8 +306,8 @@ if (( DO_UPLOAD )); then
         echo "dry run - nothing copied."
     else
         echo "done: $ok copied, $fail failed."
-        echo "Note: poseidon.library / *.class are loaded into memory at boot - reboot"
-        echo "      (or unload the stack and re-run PsdStackLoader / AddUSBClasses) to pick up changes."
+        echo "Note: neptune.library / *.class are loaded into memory at boot - reboot"
+        echo "      (or unload the stack and re-run USBStart / AddUSBClasses) to pick up changes."
     fi
 fi
 (( fail == 0 ))

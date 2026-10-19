@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         simplemidi class for poseidon
+ *                         simplemidi class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon simplemidi class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -71,7 +71,7 @@ struct NepClassSimpleMidi * usbAttemptInterfaceBinding(struct NepSimpleMidiBase 
     BOOL ismidi = FALSE;
 
     KPRINTF(1, ("nepSimpleMidiAttemptInterfaceBinding(%08lx)\n", pif));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_INTERFACE, pif,
                     IFA_Class, &ifclass,
@@ -97,7 +97,7 @@ struct NepClassSimpleMidi * usbForceInterfaceBinding(struct NepSimpleMidiBase *n
     struct Task *tmptask;
 
     KPRINTF(1, ("nepSimpleMidiAttemptInterfaceBinding(%08lx)\n", pif));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         if((nch = psdAllocVec(sizeof(struct NepClassSimpleMidi))))
         {
@@ -122,7 +122,7 @@ struct NepClassSimpleMidi * usbForceInterfaceBinding(struct NepSimpleMidiBase *n
                     psdGetAttrs(PGA_CONFIG, pc, CA_Device, &pd, TAG_END);
                     psdGetAttrs(PGA_DEVICE, pd, DA_ProductName, &devname, TAG_END);
                     psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                                   PSD_BOUND1_TXT("Play it again, '%s'!"),
+                                   NEP_BOUND1_TXT,
                                    devname);
 
                     CloseLibrary(ps);
@@ -148,7 +148,7 @@ void usbReleaseInterfaceBinding(struct NepSimpleMidiBase *nh, struct NepClassSim
     STRPTR devname;
 
     KPRINTF(1, ("nepSimpleMidiReleaseInterfaceBinding(%08lx)\n", nch));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         Forbid();
         nch->nch_ReadySignal = SIGB_SINGLE;
@@ -167,7 +167,7 @@ void usbReleaseInterfaceBinding(struct NepSimpleMidiBase *nh, struct NepClassSim
         psdGetAttrs(PGA_CONFIG, pc, CA_Device, &pd, TAG_END);
         psdGetAttrs(PGA_DEVICE, pd, DA_ProductName, &devname, TAG_END);
         psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                       PSD_RELEASED_TXT("'%s' fell silent!"),
+                       NEP_RELEASED_TXT,
                        devname);
         psdFreeVec(nch);
         CloseLibrary(ps);
@@ -472,7 +472,7 @@ struct NepClassSimpleMidi * nAllocMidi(void)
     nch = thistask->tc_UserData;
     do
     {
-        if(!(nch->nch_Base = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+        if(!(nch->nch_Base = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
         {
             Alert(AG_OpenLib);
             break;
@@ -570,7 +570,7 @@ BOOL nLoadClassConfig(struct NepSimpleMidiBase *nh)
     struct PsdIFFContext *pic;
 
     KPRINTF(10, ("Loading Class Config...\n"));
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -597,7 +597,7 @@ LONG nOpenCfgWindow(struct NepSimpleMidiBase *nh)
 {
     struct Library *ps;
     KPRINTF(10, ("Opening GUI...\n"));
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -648,9 +648,9 @@ void nGUITask()
         nGUITaskCleanup(nh);
         return;
     }
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
-        KPRINTF(10, ("Couldn't open poseidon.library.\n"));
+        KPRINTF(10, ("Couldn't open neptune.library.\n"));
         nGUITaskCleanup(nh);
         return;
     }
@@ -662,7 +662,7 @@ void nGUITask()
         MUIA_Application_Author     , (IPTR)"Chris Hodges <chrisly@platon42.de>",
         MUIA_Application_Description, (IPTR)"Settings for the simplemidi.class",
         MUIA_Application_Base       , (IPTR)"SIMPLEMIDI",
-        MUIA_Application_HelpFile   , (IPTR)"HELP:Poseidon.guide",
+        MUIA_Application_HelpFile   , (IPTR)"HELP:Neptune.guide",
         MUIA_Application_Menustrip  , (IPTR)MenustripObject,
             Child, (IPTR)MenuObjectT((IPTR)"Project"),
                 Child, (IPTR)(nh->nh_AboutMI = MenuitemObject,
@@ -810,7 +810,7 @@ void nGUITask()
                     break;
 
                case ID_ABOUT:
-                    MUI_RequestA(nh->nh_App, nh->nh_MainWindow, 0, NULL, PSD_OK_TXT("Fabulous!"), VERSION_STRING, NULL);
+                    NEP_CLASS_ABOUT(nh->nh_App, nh->nh_MainWindow);
                     break;
             }
             if(retid == MUIV_Application_ReturnID_Quit)

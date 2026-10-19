@@ -1,6 +1,6 @@
 /*
  *----------------------------------------------------------------------------
- *                        usbvideo class for poseidon
+ *                        usbvideo class for Neptune
  *----------------------------------------------------------------------------
  * USB Video Class (UVC 1.0 / 1.1 / 1.5) cameras.
  *
@@ -95,7 +95,7 @@ int libExpunge(struct NepVideoBase * nh)
  */
 
 /* /// "usbAttemptInterfaceBinding()" */
-/* Poseidon offers an interface. Taken if it is the VideoControl interface
+/* Neptune offers an interface. Taken if it is the VideoControl interface
    of a video function; NULL = not ours. */
 struct NepClassVideo * usbAttemptInterfaceBinding(struct NepVideoBase *nh, struct PsdInterface *pif)
 {
@@ -108,7 +108,7 @@ struct NepClassVideo * usbAttemptInterfaceBinding(struct NepVideoBase *nh, struc
     BOOL take;
 
     KPRINTF(1, ("nepVideoAttemptInterfaceBinding(%08lx)\n", pif));
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return NULL;
     }
@@ -153,7 +153,7 @@ struct NepClassVideo * usbForceInterfaceBinding(struct NepVideoBase *nh, struct 
     struct Task *tmptask;
 
     KPRINTF(1, ("nepVideoForceInterfaceBinding(%08lx)\n", pif));
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return NULL;
     }
@@ -188,7 +188,7 @@ struct NepClassVideo * usbForceInterfaceBinding(struct NepVideoBase *nh, struct 
             {
                 ncv->ncv_ReadySigTask = NULL;
                 psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                               PSD_BOUND1_TXT("Smile, '%s', you're on Amiga!"),
+                               NEP_BOUND1_TXT,
                                devname);
                 CloseLibrary(ps);
                 return ncv;
@@ -210,7 +210,7 @@ void usbReleaseInterfaceBinding(struct NepVideoBase *nh, struct NepClassVideo *n
     struct Library *ps;
     STRPTR devname;
 
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return;
     }
@@ -239,7 +239,7 @@ void usbReleaseInterfaceBinding(struct NepVideoBase *nh, struct NepClassVideo *n
     }
     psdGetAttrs(PGA_DEVICE, ncv->ncv_Device, DA_ProductName, &devname, TAG_END);
     psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                   PSD_RELEASED_TXT("'%s' has left the picture."),
+                   NEP_RELEASED_TXT,
                    devname);
     psdFreeVec(ncv);
     CloseLibrary(ps);
@@ -247,7 +247,7 @@ void usbReleaseInterfaceBinding(struct NepVideoBase *nh, struct NepClassVideo *n
 /* \\\ */
 
 /* /// "usbGetAttrsA()" */
-/* What Poseidon and Trident want to know of the class and of a binding.
+/* What Neptune and NeptuneUSB want to know of the class and of a binding.
    Returns the number of tags answered. */
 LONG (usbGetAttrsA)(ULONG type asm("d0"), APTR usbstruct asm("a0"), struct TagItem * tags asm("a1"), struct NepVideoBase * nh asm("a6"))
 {
@@ -1176,7 +1176,7 @@ void nVideoTask()
    nCloseVideo(). */
 static BOOL nOpenVideo(struct NepClassVideo *ncv)
 {
-    if(!(ncv->ncv_Base = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ncv->ncv_Base = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         Alert(AG_OpenLib);
         return FALSE;

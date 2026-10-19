@@ -479,7 +479,7 @@ struct NepClassHid
 {
     struct Node         nch_Node;         /* Node linkage */
     struct NepHidBase  *nch_ClsBase;      /* Up linkage */
-    struct Library     *nch_Base;         /* Poseidon base */
+    struct Library     *nch_Base;         /* neptune.library base */
     struct Library     *nch_HIntBase;     /* Intuition base (hid class) */
     struct PsdDevice   *nch_Device;       /* Up linkage */
     struct PsdConfig   *nch_Config;       /* Up linkage */
@@ -579,7 +579,7 @@ struct NepClassHid
     ULONG               nch_LastCfgCRC;   /* use this to check config change */
 
     struct Library     *nch_MUIBase;      /* MUI master base */
-    struct Library     *nch_PsdBase;      /* Poseidon base */
+    struct Library     *nch_PsdBase;      /* neptune.library base */
     struct Library     *nch_IntBase;      /* Intuition base (GUI task) */
     struct Library     *nch_KeyBase;      /* Keymap base */
     struct Task        *nch_GUITask;      /* GUI Task */
@@ -743,7 +743,7 @@ struct NepClassHid
     STRPTR              nch_ExtRawKeyArray[129]; /* Pointer to array of all converted ANSI strings */
 
     struct Library     *nch_HCMUIBase;    /* MUI master base */
-    struct Library     *nch_HCPsdBase;    /* Poseidon base */
+    struct Library     *nch_HCPsdBase;    /* neptune.library base */
     struct Library     *nch_HCIntBase;    /* Intuition base (GUI task) */
     struct Task        *nch_HCGUITask;    /* GUI Task */
 

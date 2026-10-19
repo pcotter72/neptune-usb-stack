@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         dfu class for poseidon
+ *                         dfu class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon dfu class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -57,7 +57,7 @@ struct NepClassDFU * usbAttemptInterfaceBinding(struct NepDFUBase *nh, struct Ps
     IPTR proto;
 
     KPRINTF(1, ("nepDFUAttemptInterfaceBinding(%08lx)\n", pif));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_INTERFACE, pif,
                     IFA_Class, &ifclass,
@@ -95,7 +95,7 @@ struct NepClassDFU * usbForceInterfaceBinding(struct NepDFUBase *nh, struct PsdI
     struct UsbDFUDesc *dfudesc = NULL;
 
     KPRINTF(1, ("nepDFUForceInterfaceBinding(%08lx)\n", pif));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_INTERFACE, pif,
                     IFA_Config, &pc,
@@ -177,7 +177,7 @@ void usbReleaseInterfaceBinding(struct NepDFUBase *nh, struct NepClassDFU *nch)
     STRPTR devname;
 
     KPRINTF(1, ("nepDFUReleaseInterfaceBinding(%08lx)\n", nch));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         Forbid();
         nch->nch_ReadySignal = SIGB_SINGLE;
@@ -197,7 +197,7 @@ void usbReleaseInterfaceBinding(struct NepDFUBase *nh, struct NepClassDFU *nch)
         psdGetAttrs(PGA_CONFIG, pc, CA_Device, &pd, TAG_END);
         psdGetAttrs(PGA_DEVICE, pd, DA_ProductName, &devname, TAG_END);
         psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                       PSD_RELEASED_TXT("Lost firm grip on '%s'!"),
+                       NEP_RELEASED_TXT,
                        devname);
         psdFreeVec(nch);
         CloseLibrary(ps);
@@ -305,7 +305,7 @@ LONG nOpenBindingCfgWindow(struct NepDFUBase *nh, struct NepClassDFU *nch)
 {
     struct Library *ps;
     KPRINTF(10, ("Opening GUI...\n"));
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -406,9 +406,9 @@ void nGUITask()
             KPRINTF(10, ("Couldn't open dos.library.\n"));
             break;
         }
-        if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+        if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
         {
-            KPRINTF(10, ("Couldn't open poseidon.library.\n"));
+            KPRINTF(10, ("Couldn't open neptune.library.\n"));
             break;
         }
         if(!(nch->nch_TaskMsgPort = CreateMsgPort()))
@@ -446,7 +446,7 @@ void nGUITask()
         MUIA_Application_Author     , (IPTR)"Chris Hodges <chrisly@platon42.de>",
         MUIA_Application_Description, (IPTR)"Settings for the dfu.class",
         MUIA_Application_Base       , (IPTR)"DFU",
-        MUIA_Application_HelpFile   , (IPTR)"HELP:Poseidon.guide",
+        MUIA_Application_HelpFile   , (IPTR)"HELP:Neptune.guide",
         MUIA_Application_Menustrip  , (IPTR)MenustripObject,
             Child, (IPTR)MenuObjectT((IPTR)"Project"),
                 Child, (IPTR)(nch->nch_AboutMI = MenuitemObject,
@@ -586,7 +586,7 @@ void nGUITask()
                     break;
 
                 case ID_ABOUT:
-                    MUI_RequestA(nch->nch_App, nch->nch_MainWindow, 0, NULL, PSD_OK_TXT("Blimey!"), VERSION_STRING, NULL);
+                    NEP_CLASS_ABOUT(nch->nch_App, nch->nch_MainWindow);
                     break;
             }
             if(retid == MUIV_Application_ReturnID_Quit)

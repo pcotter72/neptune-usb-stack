@@ -1,7 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                        lan78xx class for poseidon
+ *                        lan78xx class for Neptune
  *----------------------------------------------------------------------------
+ * Based on the Poseidon lan78xx class.
  * Copyright (C) 2026, The AROS Development Team.
  *
  * Substantial portions of the chip-init, MII access, RX/TX framing and
@@ -140,7 +141,7 @@ struct NepClassEth *usbAttemptDeviceBinding(struct NepEthBase *nh, struct PsdDev
     IPTR prodid = 0;
     IPTR vendid = 0;
 
-    ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION);
+    ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION);
     if (!ps) {
         return (NULL);
     }
@@ -170,7 +171,7 @@ struct NepClassEth *usbForceDeviceBinding(struct NepEthBase *nh, struct PsdDevic
     BOOL unitfound;
     UBYTE buf[64];
 
-    ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION);
+    ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION);
     if (!ps) {
         return (NULL);
     }
@@ -278,7 +279,7 @@ void usbReleaseDeviceBinding(struct NepEthBase *nh, struct NepClassEth *ncp)
 
     (void)nh;
 
-    ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION);
+    ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION);
     if (!ps) {
         return;
     }
@@ -400,7 +401,7 @@ BOOL nLoadClassConfig(struct NepEthBase *nh)
         return (FALSE);
     }
 
-    ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION);
+    ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION);
     if (!ps) {
         return (FALSE);
     }
@@ -441,7 +442,7 @@ BOOL nLoadBindingConfig(struct NepClassEth *ncp)
     *ncp->ncp_CDC = *nh->nh_DummyNCP.ncp_CDC;
     ncp->ncp_UsingDefaultCfg = TRUE;
 
-    ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION);
+    ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION);
     if (!ps) {
         return (FALSE);
     }
@@ -738,7 +739,7 @@ struct NepClassEth *nAllocEth(void)
     thistask = FindTask(NULL);
     ncp = thistask->tc_UserData;
 
-    ncp->ncp_Base = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION);
+    ncp->ncp_Base = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION);
     if (!ncp->ncp_Base) {
         Alert(AG_OpenLib);
         return (NULL);
@@ -969,8 +970,8 @@ void nSetOnline(struct NepClassEth *ncp)
  * same 16-word VHF hash table written via the indirect DP_* register
  * window.  SANA-II has no ALLMULTI concept, so we map:
  *
- *   opener with SANA2OPF_PROM set  →  accept all unicast + all multicast
- *   otherwise                      →  perfect-match my MAC + hashed multicasts
+ *   opener with SANA2OPF_PROM set  ->  accept all unicast + all multicast
+ *   otherwise                      ->  perfect-match my MAC + hashed multicasts
  *
  * Broadcast is always accepted.  Called with no lock held; the chip's
  * EP0 requests are serialised by our ethernet task, so it's safe to

@@ -1,15 +1,15 @@
 /*
  *----------------------------------------------------------------------------
- *                         Pencam Tool for Poseidon
+ *                         Pencam Tool for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon Pencam Tool by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
 
 #include <proto/dos.h>
 #include <proto/exec.h>
-#include <proto/poseidon.h>
+#include <proto/neptune.h>
 #include <proto/intuition.h>
 #include <proto/graphics.h>
 #include <proto/diskfont.h>
@@ -18,7 +18,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <poseidon_version.h>
+#include <neptune_version.h>
 
 #define ARGS_TO       0
 #define ARGS_PICNUM   1
@@ -35,7 +35,7 @@
 
 const char PencamTool_prgname[] = "PencamTool";
 static const char *template = "TO/A,PICNUM/N,INTERVAL/N,UPTO/N/K,NOBEEP/S,GAMMA/K,SHARPEN/S,TEXT/K,FONT/K,FONTSIZE/N/K,UNIT/N/K";
-const char PencamTool_version[] = PSD_VER("PencamTool") ", by Chris Hodges <chrisly@platon42.de>";
+const char PencamTool_version[] = NEP_VER("PencamTool");
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 
@@ -762,7 +762,7 @@ int main(int argc, char *argv[])
         PutStr("Wrong arguments!\n");
         return(RETURN_FAIL);
     }
-    ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION);
+    ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION);
     if(!ps)
     {
         FreeArgs(ArgsHook);

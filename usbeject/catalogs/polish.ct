@@ -35,6 +35,6 @@ Nie mo¿na wysun±æ '%s':\nzainstalowana massstorage.class jest za stara\ndla bezp
 ; Cannot eject '%s':\nthe installed massstorage.class is too old\nfor safe eject - please update it.
 ;
 MSG_REQ_FAILED
-Wysuwanie '%s' nie powiod³o siê.\nZobacz dziennik b³êdów Poseidona (Trident).
-; Ejecting '%s' failed.\nSee the Poseidon error log (Trident).
+Wysuwanie '%s' nie powiod³o siê.\nZobacz dziennik b³êdów Neptuna (Neptune USB).
+; Ejecting '%s' failed.\nSee the Neptune error log (Neptune USB).
 ;

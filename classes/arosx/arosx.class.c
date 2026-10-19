@@ -117,7 +117,7 @@ struct AROSXClassController * usbAttemptInterfaceBinding(struct AROSXClassBase *
 
     KPRINTF(10, ("nepHidAttemptInterfaceBinding(%08lx)\n", pif));
 
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
 
         psdGetAttrs(PGA_INTERFACE, pif,
@@ -189,7 +189,7 @@ struct AROSXClassController * usbAttemptInterfaceBinding(struct AROSXClassBase *
 
                                         psdSafeRawDoFmt(arosxc->name, 64, "%s (%01lx)", arosxc->devname, arosxc->id);
 
-                    psdAddErrorMsg(RETURN_OK, (STRPTR) libname, PSD_BOUND1_TXT("Play it again, '%s'!"), arosxc->name);
+                    psdAddErrorMsg(RETURN_OK, (STRPTR) libname, NEP_BOUND1_TXT, arosxc->name);
 
                     CloseLibrary(ps);
                     return(arosxc);
@@ -222,7 +222,7 @@ void usbReleaseInterfaceBinding(struct AROSXClassBase *arosxb, struct AROSXClass
         Signal(arosxc->GUITask, SIGBREAKF_CTRL_C);
     }
 
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         Forbid();
         arosxc->ReadySignal = SIGB_SINGLE;
@@ -240,7 +240,7 @@ void usbReleaseInterfaceBinding(struct AROSXClassBase *arosxb, struct AROSXClass
         psdGetAttrs(PGA_INTERFACE, arosxc->Interface, IFA_Config, &pc, TAG_END);
         psdGetAttrs(PGA_CONFIG, pc, CA_Device, &pd, TAG_END);
         psdGetAttrs(PGA_DEVICE, pd, DA_ProductName, &devname, TAG_END);
-        psdAddErrorMsg(RETURN_OK, (STRPTR) libname, PSD_RELEASED_TXT("'%s' fell silent!"), devname);
+        psdAddErrorMsg(RETURN_OK, (STRPTR) libname, NEP_RELEASED_TXT, devname);
 
         AROSXClass_DisconnectController(arosxb, arosxc);
 
@@ -866,7 +866,7 @@ struct AROSXClassController * nAllocHid(void)
     arosxc = thistask->tc_UserData;
     do
     {
-        if(!(arosxc->Base = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+        if(!(arosxc->Base = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
         {
             Alert(AG_OpenLib);
             break;
@@ -995,7 +995,7 @@ LONG nOpenCfgWindow(struct AROSXClassController *arosxc)
 {
     struct Library *ps;
     KPRINTF(10, ("Opening GUI...\n"));
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }

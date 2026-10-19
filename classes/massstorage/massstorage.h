@@ -190,7 +190,7 @@ struct NepClassMS
     ULONG               ncm_UnitNo;       /* Unit number */
     struct NepMSBase   *ncm_ClsBase;      /* Up linkage */
     struct NepMSDevBase *ncm_DevBase;     /* Device base */
-    struct Library     *ncm_Base;         /* Poseidon base */
+    struct Library     *ncm_Base;         /* neptune.library base */
     struct PsdDevice   *ncm_Device;       /* Up linkage */
     struct PsdConfig   *ncm_Config;       /* Up linkage */
     struct PsdInterface *ncm_Interface;   /* Up linkage */
@@ -302,7 +302,7 @@ struct NepClassMS
     struct ClsUnitCfg  *ncm_CUC;
 
     struct Library     *ncm_MUIBase;      /* MUI master base */
-    struct Library     *ncm_PsdBase;      /* Poseidon base */
+    struct Library     *ncm_PsdBase;      /* neptune.library base */
     struct Library     *ncm_IntBase;      /* Intuition base */
     struct Task        *ncm_GUITask;      /* GUI Task */
     struct NepClassMS  *ncm_GUIBinding;   /* Window of binding that's open */

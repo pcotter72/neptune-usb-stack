@@ -30,7 +30,7 @@ struct AROSXClassBase
 
     struct Library              *MUIBase;     /* MUI master base */
     struct Library              *IntuitionBase; /* intuition base */
-    struct Library              *PsdBase;     /* Poseidon base */
+    struct Library              *PsdBase;     /* neptune.library base */
     struct Library              *UtilityBase; /* utility base */
 
     struct AROSXBase            *AROSXBase;
@@ -85,7 +85,7 @@ struct AROSXClassController
 
     struct AROSXClassBase  *arosxb;      /* Up linkage */
 
-    struct Library     *Base;         /* Poseidon base */
+    struct Library     *Base;         /* neptune.library base */
     struct PsdDevice   *Device;       /* Up linkage */
     struct PsdConfig   *Config;       /* Up linkage */
     struct PsdInterface *Interface;   /* Up linkage */

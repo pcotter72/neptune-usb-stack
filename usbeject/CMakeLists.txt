@@ -3,15 +3,15 @@
 find_program(FLEXCAT_EXECUTABLE NAMES flexcat HINTS $ENV{HOME}/.local/bin /opt/m68k-amigaos/bin REQUIRED)
 
 # Generate strings.h (the CatCompArray + MSG_* enum) from USBEject.cd via flexcat +
-# the shared AROS catcomp template (trident/catalogs/C_h_aros.sd), into <bindir>/generated/.
+# the shared AROS catcomp template (neptuneusb/catalogs/C_h_aros.sd), into <bindir>/generated/.
 set(_strings ${CMAKE_CURRENT_BINARY_DIR}/generated/strings.h)
 add_custom_command(OUTPUT ${_strings}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/generated
     COMMAND ${FLEXCAT_EXECUTABLE}
             ${CMAKE_CURRENT_SOURCE_DIR}/catalogs/USBEject.cd
-            ${_strings}=${CMAKE_SOURCE_DIR}/trident/catalogs/C_h_aros.sd
+            ${_strings}=${CMAKE_SOURCE_DIR}/neptuneusb/catalogs/C_h_aros.sd
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/catalogs/USBEject.cd
-            ${CMAKE_SOURCE_DIR}/trident/catalogs/C_h_aros.sd
+            ${CMAKE_SOURCE_DIR}/neptuneusb/catalogs/C_h_aros.sd
     VERBATIM)
 add_custom_target(usbeject_strings DEPENDS ${_strings})
 
@@ -35,13 +35,13 @@ endforeach()
 add_custom_target(usbeject_catalogs ALL DEPENDS ${_catalogs})
 
 add_executable(USBEject USBEject.c locale.c)
-add_dependencies(USBEject poseidon_sfd_headers usbclass_sfd_headers usbeject_strings)
+add_dependencies(USBEject neptune_sfd_headers usbclass_sfd_headers usbeject_strings)
 target_compile_options(USBEject PRIVATE
     -Os                            # cold resident daemon: size over speed
-    -DPOSEIDON_BASE_NAME=ps)       # client base-var = the program's own `ps`
+    -DNEPTUNE_BASE_NAME=ps)       # client base-var = the program's own `ps`
 target_include_directories(USBEject PRIVATE
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}/generated)   # the flexcat-generated strings.h
-target_link_libraries(USBEject PRIVATE poseidon_headers usbclass_headers -lamiga)
-psd_debug_finalize(USBEject)
+target_link_libraries(USBEject PRIVATE neptune_headers usbclass_headers -lamiga)
+nep_debug_finalize(USBEject)

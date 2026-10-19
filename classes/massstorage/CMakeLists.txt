@@ -4,8 +4,8 @@
 # routes its diagnostics to our mounter_log() -> debug backend, -DMOUNTER_TRACE=1
 # keeps its per-step dbg() tracing on -- the submodule used to hardcode that, and
 # now leaves the choice to the host). MUI config GUI.
-# See add_poseidon_class() in the top-level CMakeLists.txt.
-add_poseidon_class(massstorage BASETYPE NepMSBase GUI
+# See add_neptune_class() in the top-level CMakeLists.txt.
+add_neptune_class(massstorage BASETYPE NepMSBase GUI
     SOURCES massstorage_bulk.c massstorage_cbi.c massstorage_uas.c
             massstorage_removable.c dev.c
             mounter/mounter.c mounter/mounter_rdb.c mounter/mounter_cd.c mounter/mounter_legacy.c

@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         massstorage class for poseidon
+ *                         massstorage class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon massstorage class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -255,9 +255,10 @@ static void nUasFillCommandIU(struct NepClassMS *ncm, struct UasCommandIU *iu, U
     nUasFillLun(iu->iu_Lun, ncm->ncm_UnitLUN);
 }
 
-/* Send one chunk: arm the status pipe, then the data pipe, command IU last
-   (Linux uas ordering). The command IU is a sub-ms message on its own
-   non-stream endpoint - blocking on it keeps IU ordering trivial. */
+/* Send one chunk: arm the status pipe, then the data pipe, command IU last,
+   so the device's data and status always find a request waiting. The command
+   IU is a sub-ms message on its own non-stream endpoint - blocking on it keeps
+   IU ordering trivial. */
 static LONG nUasSubmitChunk(struct NepClassMS *ncm, struct UasTag *ut)
 {
     ULONG maxtrans = 1UL<<(ncm->ncm_CDC->cdc_MaxTransfer+16);

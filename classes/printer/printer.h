@@ -31,7 +31,7 @@ struct NepPrinterBase
     struct List         nh_Units;         /* List of units available */
 
     struct Library     *nh_MUIBase;       /* MUI master base */
-    struct Library     *nh_PsdBase;       /* Poseidon base */
+    struct Library     *nh_PsdBase;       /* neptune.library base */
     struct Library     *nh_IntBase;       /* Intuition base */
     struct Task        *nh_GUITask;       /* GUI Task */
 
@@ -66,7 +66,7 @@ struct NepClassPrinter
     ULONG               ncp_UnitNo;       /* Unit number */
     struct NepPrinterBase *ncp_ClsBase;   /* Up linkage */
     struct NepPrtDevBase *ncp_DevBase;    /* Device base */
-    struct Library     *ncp_Base;         /* Poseidon base */
+    struct Library     *ncp_Base;         /* neptune.library base */
     struct PsdDevice   *ncp_Device;       /* Up linkage */
     struct PsdConfig   *ncp_Config;       /* Up linkage */
     struct PsdInterface *ncp_Interface;   /* Up linkage */

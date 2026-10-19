@@ -1,8 +1,8 @@
-/* debug.h - stack-wide debug logging for the Poseidon backport.
+/* debug.h - stack-wide debug logging for Neptune.
  *
  * Header-only: the KPRINTF()/XPRINTF()/DB() macros AND the formatter live here as
  * static inlines (no shared .c). The output backend is chosen at build time by
- * cmake/PoseidonDebug.cmake (POSEIDON_DEBUG_BACKEND):
+ * cmake/NeptuneDebug.cmake (NEPTUNE_DEBUG_BACKEND):
  *
  *   pistorm : RawDoFmt -> *(UBYTE*)0xdeadbeef, which Emu68/PiStorm traps and prints
  *             on the Pi console. No debug.lib.                       (default)
@@ -12,12 +12,12 @@
  * DEBUG is simply defined (logging on) or not (off) by the backend - it carries no
  * level. Verbosity is DB_LEVEL: KPRINTF(level, x) emits iff level >= DB_LEVEL, where
  * level is the message priority (1 = trace ... 200 = critical) and DB_LEVEL (default
- * 1 = show all) comes from cmake via POSEIDON_DEBUG_LEVEL. The call-site API is
+ * 1 = show all) comes from cmake via NEPTUNE_DEBUG_LEVEL. The call-site API is
  * unchanged from the old per-component debug.h's; only the output path changed
  * (debug.lib KPrintF -> exec RawDoFmt + a switchable byte sink).
  */
-#ifndef POSEIDON_DEBUG_H
-#define POSEIDON_DEBUG_H
+#ifndef NEPTUNE_DEBUG_H
+#define NEPTUNE_DEBUG_H
 
 #undef KPRINTF
 #undef XPRINTF
@@ -27,7 +27,7 @@
 
 #include <stdarg.h>
 /* RawDoFmt is an exec call; bind its inline to the canonical $4 base so this header
- * is self-contained under __NOLIBBASE__ (classes/poseidon) regardless of include
+ * is self-contained under __NOLIBBASE__ (classes/neptune.library) regardless of include
  * order. Matches classes/common.h's identical definition (no redefinition). */
 #ifndef EXEC_BASE_NAME
 #define EXEC_BASE_NAME (*(struct ExecBase **)4UL)
@@ -42,8 +42,8 @@
 #endif
 
 /* RawDoFmt byte sink: data in d0, our putChData (NULL) in a3 - same ABI as
- * poseidon.library.c's pPutChar(). volatile keeps the MMIO store from being elided. */
-static inline void psd_putch(UBYTE data asm("d0"), APTR dummy asm("a3"))
+ * neptune.library.c's pPutChar(). volatile keeps the MMIO store from being elided. */
+static inline void nep_putch(UBYTE data asm("d0"), APTR dummy asm("a3"))
 {
     (void)dummy;
     if (data != 0)
@@ -58,16 +58,16 @@ static inline void psd_putch(UBYTE data asm("d0"), APTR dummy asm("a3"))
 
 /* Shared formatter. %p is NOT supported by exec RawDoFmt - debug call sites use
  * %08lx for pointers instead (see the build's %p migration). */
-static inline void psd_kprintf(const char *fmt, ...)
+static inline void nep_kprintf(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    RawDoFmt((CONST_STRPTR)fmt, (APTR)args, (APTR)psd_putch, NULL);
+    RawDoFmt((CONST_STRPTR)fmt, (APTR)args, (APTR)nep_putch, NULL);
     va_end(args);
 }
 
 #define KPRINTF(l, x) do { if ((l) >= DB_LEVEL) \
-     { psd_kprintf("%s:%s/%lu: ", __FILE__, __FUNCTION__, __LINE__); psd_kprintf x; } } while (0)
+     { nep_kprintf("%s:%s/%lu: ", __FILE__, __FUNCTION__, __LINE__); nep_kprintf x; } } while (0)
 #define XPRINTF(l, x) KPRINTF(l, x)
 #define DB(x) x
 
@@ -76,7 +76,7 @@ static inline void dumpmem(void *mem, unsigned long int len)
     unsigned char *p;
     if (!mem || !len) { return; }
     p = (unsigned char *) mem;
-    psd_kprintf("\n");
+    nep_kprintf("\n");
     do
     {
         unsigned char b, c, str[17];
@@ -85,13 +85,13 @@ static inline void dumpmem(void *mem, unsigned long int len)
             c = *p++;
             str[b] = ((c >= ' ') && (c <= 'z')) ? c : '.';
             str[b + 1] = 0;
-            psd_kprintf("%02lx ", c);
+            nep_kprintf("%02lx ", c);
             if (--len == 0) break;
         }
-        while (++b < 16) { psd_kprintf("   "); }
-        psd_kprintf("  %s\n", str);
+        while (++b < 16) { nep_kprintf("   "); }
+        nep_kprintf("  %s\n", str);
     } while (len);
-    psd_kprintf("\n\n");
+    nep_kprintf("\n\n");
 }
 
 #else /* !DEBUG */
@@ -102,4 +102,4 @@ static inline void dumpmem(void *mem, unsigned long int len)
 
 #endif /* DEBUG */
 
-#endif /* POSEIDON_DEBUG_H */
+#endif /* NEPTUNE_DEBUG_H */

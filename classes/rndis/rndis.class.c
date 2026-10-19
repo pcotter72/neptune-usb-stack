@@ -120,7 +120,7 @@ struct NepClassEth * usbAttemptInterfaceBinding(struct NepEthBase *nh, struct Ps
 
     KPRINTF(1, ("nepEthAttemptInterfaceBinding(%08lx)\n", pif));
 
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_INTERFACE, pif,
                     IFA_Class, &ifclass,
@@ -165,7 +165,7 @@ struct NepClassEth * usbForceInterfaceBinding(struct NepEthBase *nh, struct PsdI
 
     KPRINTF(1, ("nepEthForceInterfaceBinding(%08lx)\n", pif));
 
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         /* Resolve the parent device from the (control) interface we were handed. */
         psdGetAttrs(PGA_INTERFACE, pif, IFA_Config, &pc, TAG_END);
@@ -200,7 +200,7 @@ struct NepClassEth * usbForceInterfaceBinding(struct NepEthBase *nh, struct PsdI
         if(!unitfound)
         {
             /* as units are freed in the expunge-vector, the memory is
-               outside the scope of the poseidon library */
+               outside the scope of neptune.library */
             if(!(ncp = AllocVec(sizeof(struct NepClassEth), MEMF_PUBLIC|MEMF_CLEAR)))
             {
                 Permit();
@@ -265,7 +265,7 @@ struct NepClassEth * usbForceInterfaceBinding(struct NepEthBase *nh, struct PsdI
                 ncp->ncp_ReadySigTask = NULL;
                 //FreeSignal(ncp->ncp_ReadySignal);
                 psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                               PSD_BOUND_TXT("Mr. Data linked '%s' to %s unit %ld!"),
+                               NEP_BOUND_TXT,
                                devname, nh->nh_DevBase->np_Library.lib_Node.ln_Name,
                                ncp->ncp_UnitNo);
 
@@ -294,7 +294,7 @@ void usbReleaseDeviceBinding(struct NepEthBase *nh, struct NepClassEth *ncp)
     STRPTR devname;
     KPRINTF(1, ("nepEthReleaseDeviceBinding(%08lx)\n", ncp));
 
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         Forbid();
         ncp->ncp_ReadySignal = SIGB_SINGLE;
@@ -311,7 +311,7 @@ void usbReleaseDeviceBinding(struct NepEthBase *nh, struct NepClassEth *ncp)
         //FreeSignal(ncp->ncp_ReadySignal);
         psdGetAttrs(PGA_DEVICE, ncp->ncp_Device, DA_ProductName, &devname, TAG_END);
         psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                       PSD_RELEASED_TXT("Shrinkwrapped and wasted '%s'."),
+                       NEP_RELEASED_TXT,
                        devname);
         /*psdFreeVec(ncp);*/
         CloseLibrary(ps);
@@ -528,7 +528,7 @@ void nEthTask()
                                 if(errcount > 20)
                                 {
                                     psdAddErrorMsg(RETURN_FAIL, (STRPTR) libname,
-                                                   PSD_GIVEUP_TXT);
+                                                   NEP_GIVEUP_TXT);
                                     Signal(ncp->ncp_Task, SIGBREAKF_CTRL_C);
                                 }
                             }
@@ -601,7 +601,7 @@ struct NepClassEth * nAllocEth(void)
     do
     {
         ncp = thistask->tc_UserData;
-        if(!(ncp->ncp_Base = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+        if(!(ncp->ncp_Base = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
         {
             Alert(AG_OpenLib);
             break;

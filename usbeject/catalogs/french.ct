@@ -35,6 +35,6 @@ Impossible d'éjecter '%s' :\nla massstorage.class installée est trop ancienne\np
 ; Cannot eject '%s':\nthe installed massstorage.class is too old\nfor safe eject - please update it.
 ;
 MSG_REQ_FAILED
-L'éjection de '%s' a échoué.\nConsultez le journal d'erreurs de Poseidon (Trident).
-; Ejecting '%s' failed.\nSee the Poseidon error log (Trident).
+L'éjection de '%s' a échoué.\nConsultez le journal d'erreurs de Neptune (Neptune USB).
+; Ejecting '%s' failed.\nSee the Neptune error log (Neptune USB).
 ;

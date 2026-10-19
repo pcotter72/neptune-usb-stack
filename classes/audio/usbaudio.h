@@ -101,7 +101,7 @@ struct NepAudioMode
     struct Node         nam_Node;         /* Node linkage */
     struct NepAudioSubLibBase *nam_SubLibBase; /* usbaudio.audio AHI driver library */
     struct NepClassAudio *nam_Unit;       /* Up linkage */
-    struct Library     *nam_PsdBase;      /* Poseidon base */
+    struct Library     *nam_PsdBase;      /* neptune.library base */
     struct NepAudioMode *nam_RecStream;   /* Of a playback mode: the recording stream that goes with it
                                              (full duplex); NULL = output only */
     struct NepAudioMode *nam_PartOf;      /* Of a recording stream: the AHI mode it belongs to - the playback
@@ -205,7 +205,7 @@ struct NepAudioBase
     struct List         nh_Units;         /* List of bindings created */
 
     struct Library     *nh_MUIBase;       /* MUI master base */
-    struct Library     *nh_PsdBase;       /* Poseidon base */
+    struct Library     *nh_PsdBase;       /* neptune.library base */
     struct Library     *nh_IntBase;       /* Intuition base */
     struct Task        *nh_GUITask;       /* GUI Task */
 
@@ -227,7 +227,7 @@ struct NepClassAudio
     struct Node         nch_Node;         /* Node linkage */
     ULONG               nch_UnitNo;       /* Unit number */
     struct NepAudioBase *nch_ClsBase;     /* Up linkage */
-    struct Library     *nch_Base;         /* Poseidon base */
+    struct Library     *nch_Base;         /* neptune.library base */
     struct Library     *nch_AHIBase;      /* AHI Device base */
     struct PsdDevice   *nch_Device;       /* Up linkage */
     struct PsdConfig   *nch_Config;       /* Up linkage */

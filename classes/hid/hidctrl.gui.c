@@ -2,10 +2,10 @@
  * GUI
  */
 
-/* Bind the file-scope MUI accessor (mui_base.h, used by every `…Object…End` constructor
+/* Bind the file-scope MUI accessor (mui_base.h, used by every `...Object...End` constructor
    and direct muimaster call below) to THIS GUI's own muimaster base, nch_HCMUIBase - not
    the config GUI's nch_MUIBase.
-   MUST precede the first include that pulls hid.h: numtostr.h → hid.class.h → hid.h, whose
+   MUST precede the first include that pulls hid.h: numtostr.h -> hid.class.h -> hid.h, whose
    HID_H guard makes its mui_base.h block run only on the FIRST inclusion. */
 #define MUI_BASE_USERDATA struct NepClassHid
 #define MUI_BASE_FIELD    nch_HCMUIBase
@@ -54,9 +54,9 @@ void nHIDCtrlGUITask()
         return;
     }
 
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
-        KPRINTF(10, ("Couldn't open poseidon.library.\n"));
+        KPRINTF(10, ("Couldn't open neptune.library.\n"));
         nHIDCtrlGUITaskCleanup(nch);
         return;
     }
@@ -76,7 +76,7 @@ void nHIDCtrlGUITask()
         MUIA_Application_Author     , (IPTR)"Chris Hodges <chrisly@platon42.de>",
         MUIA_Application_Description, (IPTR)"HID Device Output Control",
         MUIA_Application_Base       , (IPTR)nch->nch_CDC->cdc_HIDCtrlRexx,
-        MUIA_Application_HelpFile   , (IPTR)"HELP:Poseidon.guide",
+        MUIA_Application_HelpFile   , (IPTR)"HELP:Neptune.guide",
         MUIA_Application_Menustrip  , (IPTR)MenustripObject,
             Child, (IPTR)MenuObjectT((IPTR)"Project"),
                 Child, (IPTR)(nch->nch_HCAboutMI = MenuitemObject,
@@ -514,7 +514,7 @@ IPTR HCActionDispatcher(struct IClass * cl asm("a0"), Object * obj asm("a2"), Ms
         }
 
         case MUIM_Action_About:
-            MUI_RequestA(nch->nch_HCApp, nch->nch_HCMainWindow, 0, NULL, PSD_OK_TXT("Blimey!"), "HID Output Control Window", NULL);
+            NEP_CLASS_ABOUT(nch->nch_HCApp, nch->nch_HCMainWindow);
             return(TRUE);
 
         case MUIM_Action_ShowHIDControl:

@@ -1,19 +1,19 @@
 /*
  *----------------------------------------------------------------------------
- *                         DRadio Tool for Poseidon
+ *                         DRadio Tool for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon DRadio Tool by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
 
 #include <proto/dos.h>
 #include <proto/exec.h>
-#include <proto/poseidon.h>
+#include <proto/neptune.h>
 
 #include "DRadioTool.h"
 #include <string.h>
-#include <poseidon_version.h>
+#include <neptune_version.h>
 
 #define ARGS_ON       0
 #define ARGS_OFF      1
@@ -26,7 +26,7 @@
 
 const char DRadioTool_prgname[] = "DRadioTool";
 static const char *template = "ON/S,OFF/S,FREQ/K/N,SCAN/S,AUTO/S,SIGNAL/S,UNIT/N/K";
-const char DRadioTool_version[] = PSD_VER("DRadioTool") ", by Chris Hodges <chrisly@platon42.de>";
+const char DRadioTool_version[] = NEP_VER("DRadioTool");
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 
@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
         PutStr("Wrong arguments!\n");
         return(RETURN_FAIL);
     }
-    ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION);
+    ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION);
     if(!ps)
     {
         FreeArgs(ArgsHook);

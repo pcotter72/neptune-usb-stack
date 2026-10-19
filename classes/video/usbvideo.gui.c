@@ -2,7 +2,7 @@
  *----------------------------------------------------------------------------
  *            usbvideo class: the settings window of a camera
  *----------------------------------------------------------------------------
- * Opened from Trident for one camera (UCM_OpenBindingCfgWindow); a task of
+ * Opened from NeptuneUSB for one camera (UCM_OpenBindingCfgWindow); a task of
  * its own, like every window of a class.
  *
  * The window knows no control by itself. It asks for the camera's controls
@@ -117,7 +117,7 @@ LONG nOpenBindingCfgWindow(struct NepVideoBase *nh, struct NepClassVideo *ncv)
     struct Library *ps;
 
     KPRINTF(10, ("Opening GUI...\n"));
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return FALSE;
     }
@@ -785,7 +785,7 @@ void nGUITask()
 
     if(!(ncv->ncv_MUIBase = OpenLibrary(MUIMASTER_NAME, MUIMASTER_VMIN)) ||
        !(IntuitionBase = OpenLibrary("intuition.library", 39)) ||
-       !(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)) ||
+       !(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)) ||
        !(gui->ug_ReqPort = CreateMsgPort()) ||
        !(gui->ug_EventPort = CreateMsgPort()))
     {
@@ -802,10 +802,10 @@ void nGUITask()
     gui->ug_App = ApplicationObject,
         MUIA_Application_Title      , (IPTR)libname,
         MUIA_Application_Version    , (IPTR)VERSION_STRING,
-        MUIA_Application_Copyright  , (IPTR)POSEIDON_DIST_NAME,
+        MUIA_Application_Copyright  , (IPTR)"(C) 2026 The Neptune contributors",
         MUIA_Application_Description, (IPTR)"Settings for a USB camera",
         MUIA_Application_Base       , (IPTR)"USBVIDEO",
-        MUIA_Application_HelpFile   , (IPTR)"HELP:Poseidon.guide",
+        MUIA_Application_HelpFile   , (IPTR)"HELP:Neptune.guide",
         MUIA_Application_Menustrip  , (IPTR)MenustripObject,
             Child, (IPTR)MenuObjectT((IPTR)"Project"),
                 Child, (IPTR)(gui->ug_AboutMI = MenuitemObject,
@@ -954,7 +954,7 @@ void nGUITask()
                     break;
 
                 case ID_ABOUT:
-                    MUI_RequestA(gui->ug_App, gui->ug_Window, 0, NULL, "OK", VERSION_STRING, NULL);
+                    NEP_CLASS_ABOUT(gui->ug_App, gui->ug_Window);
                     break;
             }
             if(!done && sigs)

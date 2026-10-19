@@ -1,15 +1,15 @@
 /*
  *----------------------------------------------------------------------------
- *                     Rocket Launcher Tool for Poseidon
+ *                     Rocket Launcher Tool for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon Rocket Launcher Tool by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
 
 #include <proto/dos.h>
 #include <proto/exec.h>
-#include <proto/poseidon.h>
+#include <proto/neptune.h>
 #include <proto/intuition.h>
 #include <proto/graphics.h>
 #include <proto/diskfont.h>
@@ -20,7 +20,7 @@
 
 #include "RocketTool.h"
 #include <string.h>
-#include <poseidon_version.h>
+#include <neptune_version.h>
 
 #define ARGS_LEFT     0
 #define ARGS_RIGHT    1
@@ -34,7 +34,7 @@
 
 const char RocketTool_prgname[] = "RocketTool";
 static const char *template = "LEFT/S,RIGHT/S,UP/S,DOWN/S,FIRE/S,TIME/N/K,JOYPORT/N/K,UNIT/N/K";
-const char RocketTool_version[] = PSD_VER("RocketTool") ", by Chris Hodges <chrisly@platon42.de>";
+const char RocketTool_version[] = NEP_VER("RocketTool");
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 
@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
         PutStr("Wrong arguments!\n");
         return(RETURN_FAIL);
     }
-    ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION);
+    ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION);
     if(!ps)
     {
         FreeArgs(ArgsHook);

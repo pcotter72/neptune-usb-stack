@@ -38,7 +38,7 @@ direction for a compatibility gate.
 
 Intersecting the closure with "names the MUI 5 SDK defines, and we don't" is also what
 keeps this free of a hand-maintained exemption list: the ~120 project-private
-MUIM_Action_* / MUIM_DevWin_* / MUIM_PoPo_* tags, MUI_LPR_FULLDROP and the
+MUIM_Action_* / MUIM_DevWin_* / MUIM_DevNotify_* tags, MUI_LPR_FULLDROP and the
 MUIMASTER_BASE_NAME plumbing all fall out on their own.  (The corollary: hardcoding a
 V20 tag's hex value under your own name would hide it from this check.  Don't.)
 

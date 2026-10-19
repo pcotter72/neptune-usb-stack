@@ -1,160 +1,132 @@
-# Poseidon for AmigaOS
+# Neptune - an incompatible fork of the Poseidon USB stack
 
-The USB stack for **AmigaOS 3.1 and newer**. Plug in a keyboard, a mouse, a memory stick, a
+A USB stack for **AmigaOS 3.1 and newer**. Plug in a keyboard, a mouse, a memory stick, a
 USB sound card or a network adapter and use it from Workbench - hot-plug, unplug, no reboot.
 
-Poseidon was written for AmigaOS by **Chris Hodges** (2002-2009). In 2009 he placed the
-sources into AROS, where the **AROS Development Team** maintained and extended them for
-the next seventeen years. This project brings that evolved version back to its original
-platform - and then goes a good deal further than it.
+Neptune is derived from **Poseidon** as maintained in the AROS tree. **Chris Hodges** wrote
+Poseidon for AmigaOS (2002-2009) and placed it into AROS in 2009, where the **AROS
+Development Team** has maintained and extended it since. Neptune started from those sources
+and has gone its own way: a
+host-controller interface of its own design, rewritten SuperSpeed hub handling, UAS mass
+storage over bulk streams, USB link power management and a rebuilt mounting layer
+([`RELEASE-NOTES.md`](RELEASE-NOTES.md) has the details).
 
-**This is more than a port.** A second way of talking to the host controller, largely
-rewritten SuperSpeed hub handling, UAS mass storage over bulk streams with several
-commands in flight, USB link power management and a rebuilt mounting layer are all new
-work done here, on top of what the AROS line provides.
-[`RELEASE-NOTES.md`](RELEASE-NOTES.md) is the itemised list.
+**Neptune is not Poseidon.** It is an independent fork, not maintained by or affiliated with
+Chris Hodges or the AROS Development Team, and it is not compatible with Poseidon - see
+[Compatibility with Poseidon](#compatibility-with-poseidon). Releases 6.0 to 6.2 were
+published as "Poseidon for AmigaOS"; from 6.3 on the project is Neptune.
 
 ## What you get
 
-- **Real plug and play** - devices appear and disappear as you connect them.
-- **30 USB class drivers** covering input, storage, networking, serial, printing, audio,
-  MIDI and video (full list [below](#class-drivers)).
-- **USB 3.0 SuperSpeed** - SuperSpeed hubs and devices are handled as SuperSpeed, and
-  mass storage uses UAS with several commands in flight at once.
-- **USB power management** - idle devices and idle links drop into low-power states, and
-  a suspended keyboard or mouse wakes its own link the moment you use it.
-- **Trident** - a control panel where you see every connected device, configure each
-  class, and suspend, resume or power-cycle a port by hand.
-- **Shell commands** - start the stack, list what is attached, read the error log.
-- **Optionally, USB in ROM** - on PiStorm/Emu68 the archive's `ROM/` drawer builds a custom
-  2 MB Kickstart with the stack inside it, for a USB mouse and keyboard in the boot menu and
-  booting from a USB drive. See `ROM/ROM-ReadMe.md` in the archive.
+- **Plug and play** - devices appear and disappear as you connect them.
+- **30 USB class drivers** - input, storage, networking, serial, printing, audio, MIDI and
+  video ([list](#class-drivers)).
+- **USB 3.0 SuperSpeed** - SuperSpeed hubs and devices handled as such; UAS mass storage
+  with several commands in flight.
+- **Power management** - idle devices and links drop into low-power states; a suspended
+  keyboard or mouse wakes on use.
+- **Neptune USB** - a control panel for every connected device and class.
+- **Shell commands** and, on PiStorm/Emu68, an optional **USB-in-ROM** kit (USB keyboard
+  and mouse in the boot menu, booting from USB; see `ROM/ROM-ReadMe.md` in the archive).
 
-**What you also need, and is not in here:** a *USB host-controller driver* - the piece
-that talks to your actual USB hardware. Poseidon sits above it. See
+Not included: the *host-controller driver* for your USB hardware - see
 [Talking to your USB hardware](#talking-to-your-usb-hardware).
 
 ## Requirements
 
-- **Kickstart and Workbench 3.1, or newer** - the whole distribution, Trident and USBEject
-  included. A few details differ below 3.2; see [Known limitations](#known-limitations).
-- **Installer 43.3 or newer** to run the `Install` script - it is freely distributable and is
-  on Aminet as `util/misc/Installer-43_3.lha`. OS 3.5 and later already have one.
-- A **68020 or better**, and **no FPU is required**. One archive per CPU - pick yours under
-  [Download](#download).
-- A **USB host-controller driver** - see [below](#talking-to-your-usb-hardware). Both
-  `xhci.device` **6.x** and `xhci.device` **5.x** from the
-  [Emu68 driver stack](https://github.com/rondoval/emu68-driver-stack) (PiStorm / Emu68
-  on a Raspberry Pi 4 or CM4) are confirmed working.
-- **MUI 3.8 or newer** (`muimaster.library` 19+), for Trident and the per-class settings
-  dialogs; the stack itself runs without it.
-- A **640×480 or larger screen**, again only for the GUI. Trident's window does not fit a
-  shorter one - 640×256 PAL or 640×200 NTSC - and says so rather than opening: *"Couldn't
-  open window! Maybe screen is too small. Try a higher resolution!"*
+- **Kickstart and Workbench 3.1 or newer** - a few details differ below 3.2, see
+  [Known limitations](#known-limitations).
+- A **68020 or better**; no FPU needed.
+- A **USB host-controller driver**. `xhci.device` 6.x and 5.x from the
+  [Emu68 driver stack](https://github.com/rondoval/emu68-driver-stack) (PiStorm/Emu68 on a
+  Raspberry Pi 4 or CM4) are confirmed working.
+- **Installer 43.3 or newer** for the `Install` script (Aminet `util/misc/Installer-43_3.lha`;
+  OS 3.5 and later have one).
+- **MUI 3.8 or newer** and a **640×480 or larger screen**, for Neptune USB and the class
+  settings windows only; the stack itself needs neither.
 
 ## Talking to your USB hardware
 
-Poseidon does not drive USB controllers itself - a separate host-controller driver does,
-and you tell the stack which one to use (`PsdStackLoader xhci.device 0`, or in Trident). This release
-can speak **two different interfaces** to that driver, and which one your driver
-implements decides what the stack can do with it.
+A separate host-controller driver drives the USB hardware; you name it to the stack
+(`USBStart xhci.device 0`, or in Neptune USB), and the stack asks it which of two
+interfaces it speaks:
 
 | | **Legacy interface** | **Context interface** |
 |---|---|---|
-| Who speaks it | Classic Amiga USB cards (Deneb, Subway, …) and `xhci.device` **5.x** | `xhci.device` **6.x** |
-| USB 2.0 and older devices | yes | yes |
-| SuperSpeed devices | yes, but the stack sees them as USB 2.0 | handled as SuperSpeed |
-| SuperSpeed (USB 3) hubs | no - `hubss.class` declines to bind | yes |
-| UAS mass storage | one command at a time (no bulk streams) | bulk streams, several commands in flight |
-| Link power management | whatever the driver does on its own, with no control from Trident | the stack's policy - switchable in Trident, overridable per device |
+| Spoken by | Classic Amiga USB cards (Deneb, Subway, …), `xhci.device` **5.x** | `xhci.device` **6.x** |
+| SuperSpeed devices | seen as USB 2.0 | handled as SuperSpeed |
+| SuperSpeed (USB 3) hubs | no | yes |
+| UAS mass storage | one command at a time | bulk streams, several commands in flight |
+| Link power management | up to the driver | the stack's policy, switchable in Neptune USB |
 
-**Both are confirmed working.** The legacy interface is the classic
-`IOUsbHWReq`/`UHCMD_*` contract Poseidon has always used, unchanged and frozen, so
-existing third-party drivers keep working exactly as they did - you simply get the
-classic feature set. The context interface is new in 6.0 and is where the USB 3.0 work
-lives; take `xhci.device` 6.x if your hardware has one. Having named the driver you need
-say nothing further: the stack asks it which interface it implements and uses that one.
+The legacy interface is the classic V1/V2 `IOUsbHWReq` contract, unchanged, so existing
+drivers written to it keep working. The context interface is Neptune's own and carries the
+USB 3.0 work; take `xhci.device` 6.x if your hardware has one.
 
-## Download
+## Compatibility with Poseidon
 
-Take the archive from the
-[Releases](https://github.com/rondoval/poseidon-backport/releases) page. Pick the one for
-your CPU (see [Requirements](#requirements)) - that is the only choice that matters:
+Neptune is an incompatible fork:
 
-| Archive | When to use it |
+- **Classes and tools.** Poseidon's classes and tools (the 4.x and AROS 5.x lines) do not
+  run on Neptune, and Neptune's do not run on Poseidon. Neptune's library is
+  `neptune.library`, and its class protocol has diverged from Poseidon's.
+- **Host-controller drivers.** Neptune speaks the classic V1/V2 `IOUsbHWReq` interface and
+  its own context interface. It does **not** implement Poseidon's **V3** host-controller
+  interface, which the AROS Development Team designed with Chris Hodges, so a driver that
+  depends on V3 does not work with Neptune.
+- **The context interface is not Poseidon's.** It is Neptune's own design and is not part
+  of Poseidon's API; a driver written to it works with Neptune only.
+- **Settings.** Neptune keeps its settings in `ENVARC:Sys/neptune.prefs`. On first start,
+  if that file does not exist, it imports `poseidon.prefs` once; `poseidon.prefs` itself is
+  never changed.
+
+## Download and install
+
+Take the archive for your CPU from the [Releases](https://github.com/rondoval/neptune/releases)
+page:
+
+| Archive | For |
 |---|---|
-| `Poseidon-<ver>-020.lha` | **Start here** on a 68020 or 68030. Also runs on an 040 or 060, just not tuned for them. |
-| `Poseidon-<ver>-040.lha` | **Start here** on a 68040, and on PiStorm / Emu68. |
-| `Poseidon-<ver>-060.lha` | **Start here** on a 68060. |
-| `Poseidon-<ver>-<cpu>-serial.lha` | Identical to the above, but also prints diagnostics to the serial port. Troubleshooting only. |
+| `Neptune-<ver>-020.lha` | 68020 or 68030 (also runs on 040/060, untuned) |
+| `Neptune-<ver>-040.lha` | 68040, and PiStorm / Emu68 |
+| `Neptune-<ver>-060.lha` | 68060 |
+| `Neptune-<ver>-<cpu>-serial.lha` | the same, plus diagnostics on the serial port |
 
-The archives are otherwise the same: same version, same components, same settings. Every
-component reports its CPU at the end of its version string, so `Version
-LIBS:poseidon.library` on the running machine tells you which one is installed.
+Unpack it, run `Install` (double-click, or `Installer Install` from a Shell), answer the
+questions and reboot. The installer puts `neptune.library` in `LIBS:`, the classes in
+`DEVS:USBClasses/`, the commands in `C:` and Neptune USB in `SYS:Prefs/`; USBEject, the
+optional tools and the settings-file icon are separate questions. It never replaces a newer
+file without asking - to switch CPU variant, which has the same version number, run it at
+the *Average* or *Expert* level.
 
-## Installing
-
-1. Unpack the archive on your Amiga.
-2. Run the `Install` script (double-click its icon, or `Installer Install` from a Shell).
-3. Answer the questions, then reboot.
-
-The installer copies `poseidon.library` to `LIBS:`, the class drivers to
-`SYS:Classes/USB/`, the shell commands to `C:`, and Trident with its icon, translations
-and the USB attach/detach sounds to `SYS:Prefs/`. It version-checks everything and never
-replaces a newer file without asking. The safe-eject Workbench menu (USBEject), the
-optional per-gadget tools and the Poseidon preset datatype are separate questions.
-
-**Switching CPU variant.** All three archives carry the same version number, so installing
-one over another is a same-version copy that the installer's version check would otherwise
-skip. Run it at the *Average* or *Expert* user level, where it offers to overwrite, or
-delete the installed files first.
-
-It also offers to add the startup command to `S:User-Startup`, which is what you want
-unless you prefer to start the stack yourself:
+It can also add the one startup command to `S:User-Startup`:
 
 ```
-C:PsdStackLoader >NIL: xhci.device 0     ; your host-controller device and unit
+C:USBStart >NIL: xhci.device 0     ; your host-controller device and unit
 ```
 
-That one command starts everything. It applies your saved settings; where they say nothing
-it loads every class in `SYS:Classes/USB` and attaches the controller named on the line.
-Once you have saved a controller in Trident, or when the stack starts from ROM, the name on
-the line is not used. An older installation's three-line startup (`PsdStackLoader`,
-`AddUSBHardware`, `AddUSBClasses`) is replaced when you run the installer, and keeps working
-if you leave it.
+`USBStart` applies your saved settings; where they say nothing it loads every class and
+attaches the named controller.
 
-If you already run a Poseidon, this upgrades it. Your settings are kept - they live in
-`ENVARC:Sys/poseidon.prefs` as they always did, in the classic Poseidon file format (AROS
-had changed the file's identifier; it is changed back). The classes and tools require
-`poseidon.library` **6**, so install the whole archive rather than picking pieces out of it.
+**Upgrading from 6.0-6.2 ("Poseidon for AmigaOS").** The installer disables the old
+`Poseidon USB Stack` startup block and offers to remove the old files (`poseidon.library`,
+`SYS:Classes/USB/`, `C:Psd*`, `SYS:Prefs/Trident` and friends) - only files that report
+version 6 or newer, so a classic Poseidon is never touched. Neptune imports your settings on
+first start and moves any sounds you added to `SYS:Prefs/Presets/Neptune/`.
 
 ## Settings worth knowing about
 
-Open **Trident** (`SYS:Prefs/Trident`). Beyond the device list, a few switches are worth
-finding:
+In **Neptune USB** (`SYS:Prefs/NeptuneUSB`):
 
-- *Various Settings → Stack Settings → **Enable power-saving suspend mode*** puts idle
-  devices to sleep. A suspended keyboard or mouse brings its own link back up the moment
-  you use it.
-- *Various Settings → Stack Settings → **Enable USB link power management*** lets an idle
-  link drop into a low-power state between transfers (U1/U2 on SuperSpeed, L1 on
-  High-Speed). The controller handles it invisibly; turn it off if a device misbehaves
-  when idle. It can also be overridden per device. Needs a driver that speaks the context
-  interface - on a legacy driver the switch does nothing.
-- *Various Settings → Logging Options → **Use plain, factual messages*** replaces
-  Poseidon's traditional light-hearted log entries, popups and requesters with short
-  factual ones. Off by default.
-- **massstorage settings** (select the class, then *Configure*) - which handler to use
-  for FAT, NTFS, exFAT and CD/DVD partitions; what to automount (RDB, MBR/GPT, CD/DVD) and
-  whether to unmount on removal; whether to prefer UAS over the older BOT transport, and
-  the UAS queue depth. The DOS name and buffer count are set **per filesystem**, so discs
-  mount as `UCD0` with CD-sized buffering while sticks stay in the `UMSD0…` sequence.
-  Clearing a handler row is how you turn a filesystem off. **exFAT** is configured out of
-  the box but needs two files this archive does not contain - `exFATFileSystem` in `L:` and
-  `filesysbox.library` in `LIBS:`; without them exFAT media are skipped.
-- **The device list** - suspend, resume, power-cycle or safely eject a device by hand.
-  Power-cycling often revives a device that has stopped responding; *Eject* is the same
-  operation USBEject offers from Workbench (see [Tools](#tools)).
+- *Various Settings → Stack Settings*: **power-saving suspend** puts idle devices to sleep;
+  **USB link power management** lets idle links drop into U1/U2 or L1 (context interface
+  only; also per device). Turn either off if a device misbehaves when idle.
+- **massstorage** (select the class, *Configure*): the handler per filesystem (FAT, NTFS,
+  exFAT, CD/DVD) with its DOS name and buffers, what to automount, unmount on removal, UAS vs
+  BOT and the UAS queue depth. exFAT needs `L:exFATFileSystem` and `LIBS:filesysbox.library`,
+  which are not in this archive.
+- **The device list**: suspend, resume, power-cycle or safely eject a device by hand;
+  power-cycling often revives a device that has stopped responding.
 
 ## Class drivers
 
@@ -172,173 +144,103 @@ finding:
 
 ## Tools
 
-Shell commands, installed to `C:`:
-
-- **PsdStackLoader** - starts the stack; the one command the startup needs
-  (`PsdStackLoader xhci.device 0`).
-- **AddUSBHardware** - attaches or removes a host-controller device by hand.
-- **AddUSBClasses** - loads or removes the class drivers by hand.
-- **PsdDevLister** - lists connected USB devices (`lsusb`-like).
-- **PsdErrorlog** - prints the stack's error log.
-
-**USBEject** (optional) installs to `SYS:WBStartup/` and adds a **USB** menu to the
-Workbench menu bar with an *Eject* item per attached USB drive - the Amiga's "Safely
-Remove Hardware". Ejecting flushes and cleanly unmounts every volume on the drive
-(refusing if files are still open, and naming the volume in use), stops the drive and
-disables its port; a requester then confirms it is safe to unplug. Only filesystem-level
-use is seen - a program on `usbscsi.device` directly, such as a raw backup tool, cannot
-veto an eject.
-
-Under a Workbench replacement the drives appear as plain items in the **Tools** menu
-instead, because those hosts emulate the flat AppMenu only (with **Directory Opus 5**,
-enable *Show Tools menu*). USBEject logs which menu it landed in. Trident's *Eject*
-button needs no Workbench at all.
-
-Optional per-gadget tools (`DRadioTool`, `PencamTool`, `SonixcamTool`, `RocketTool`,
-`PowManTool`, `UPSTool`, `UVCTool`) install to `SYS:Tools/`.
-
-For USB webcams there is also a VHI driver, `usbvideo.vhi`, installed to `LIBS:VHI/`: programs
-that speak VHI, such as cAMIra, get the camera's pictures through it. A camera's brightness,
-exposure, focus and default picture size are set in its settings window, opened from Trident.
+- **USBStart** - starts the stack (the one startup command).
+- **AddUSBHardware**, **AddUSBClasses** - attach or remove controllers and classes by hand.
+- **USBList** - lists connected USB devices.
+- **USBErrorlog** - prints the stack's error log.
+- **USBEject** (optional, `SYS:WBStartup/`) - a Workbench **USB** menu with an *Eject* item
+  per drive. It flushes and unmounts every volume (refusing while files are open), then
+  stops the drive and confirms it is safe to unplug. Under a Workbench replacement the items
+  appear in the **Tools** menu instead.
+- Optional per-gadget tools in `SYS:Tools/`: `DRadioTool`, `PencamTool`, `SonixcamTool`,
+  `RocketTool`, `PowManTool`, `UPSTool`, `UVCTool`.
+- `usbvideo.vhi` in `LIBS:VHI/` lets VHI programs such as cAMIra use USB webcams; camera
+  controls are in the camera's settings window in Neptune USB.
 
 ## Known limitations
 
-- **BOT read throughput.** On drives that only speak the older BOT transport, sustained
-  reads run below what the drive can manage. The cause is understood - unaligned transfer
-  buffers being copied wholesale on the driver side - and the fix is in progress. UAS
-  drives are not affected.
-- **Not tested with classic Amiga USB cards.** The legacy interface itself is confirmed
-  working - `xhci.device` 5.x runs on it - but no Deneb, Subway or similar card has been
-  tried.
-- **Below OS 3.2, a held key on a USB keyboard does not auto-repeat.** `input.device` gained
-  the command that drives its repeat state machine (`IND_ADDEVENT`) in V47; below that,
-  events are handed over the older way, which delivers every keystroke and every mouse
-  movement but does not repeat. The boot keyboard and boot mouse classes have always worked
-  this way, on every OS version.
-- **Below `workbench.library` 45, USBEject's entries sit flat in the Tools menu** rather than
-  under a **USB** title of their own - submenus under an AppMenu title need that version.
-  Ejecting itself is unaffected.
-- **On a `lowlevel.library` older than 40.27, USB gamepads have no analogue stick or rumble.**
-  They still work as ordinary joystick and CD32 controllers; only the analogue/rumble
-  extension needs `SetJoyPortAttrs()`, which that library lacks.
-- **Two HID features want libraries from the Workbench disks, not ROM:** the sound actions
-  need `datatypes.library` and the key-string actions need `commodities.library`. A missing
-  one is skipped with a line in the error log; keyboard and mouse carry on as normal.
+- **BOT read throughput** is below what the drive can do (unaligned buffers copied on the
+  driver side); a fix is in progress. UAS drives are not affected.
+- **Not tested with classic Amiga USB cards.** The legacy interface works (`xhci.device` 5.x
+  runs on it), but no Deneb, Subway or similar card has been tried.
+- **Below OS 3.2, held keys do not auto-repeat** - `input.device` gained the command that
+  drives repeat (`IND_ADDEVENT`) in V47.
+- **Below `workbench.library` 45**, USBEject's items sit flat in the Tools menu.
+- **On `lowlevel.library` older than 40.27**, gamepads have no analogue stick or rumble.
+- **HID sound and key-string actions** need `datatypes.library` and `commodities.library`;
+  without them those actions are skipped.
 
 ## Version numbers
 
-`poseidon.library` keeps its name - every USB class and application opens it by that name,
-and that compatibility *is* the point - so the version number is what tells this line apart
-from the ones before it. Chris Hodges' classic AmigaOS Poseidon is the **4.x** line and the
-AROS one is **5.x**; **Poseidon for AmigaOS is 6.x**, and does not track AROS's numbering.
+`neptune.library` **6.x** continues the numbering of the releases published as "Poseidon for
+AmigaOS" and is unrelated to Poseidon's own 4.x (Chris Hodges) and 5.x (AROS) lines. Every
+component carries the same version - **6.3** here - and the classes and tools require
+`neptune.library` 6 or newer.
 
-Every shipped component carries the same version - **6.3** here - and identifies itself as
-`Poseidon for AmigaOS` in its `$VER` string. Because the 6.x jump table extends the classic
-one, the classes and tools require `poseidon.library` **6** or newer. Host-controller drivers
-are negotiated by capability, never by version number.
+## Licence and credits
 
-[`RELEASE-NOTES.md`](RELEASE-NOTES.md) lists what changed in each version.
-
-## Licence
-
-Poseidon is distributed under the **AROS Public License (APL) Version 1.1** - see
-[LICENSE](LICENSE) for the full text. Chris Hodges placed the original Poseidon sources
-into AROS under the APL in 2009.
-
-Some components carry their own licences (an ISC-licensed driver port, a BSD-licensed
-submodule, GPL-licensed icon artwork), and MUI is a runtime dependency that is not part
-of this distribution. See [LEGAL](LEGAL) for the full attribution and third-party
-notices.
-
-## Credits
+Neptune is distributed under the **AROS Public License (APL) Version 1.1** - see
+[LICENSE](LICENSE). It is derived from the Poseidon sources in the AROS tree, maintained by the
+**AROS Development Team**. Poseidon's original author and Initial Developer is **Chris
+Hodges**, who placed his sources into AROS under the APL in 2009. Some components carry their
+own licences, and MUI is a runtime dependency not included here - see [LEGAL](LEGAL).
 
 - **Chris Hodges** - original author of Poseidon (2002-2009).
-- **The AROS Development Team** - maintainers of the 5.x line since 2009.
+- **The AROS Development Team** - maintainers of Poseidon in the AROS tree since 2009, whose
+  sources Neptune is derived from.
 - The third-party authors named in [LEGAL](LEGAL).
 
 ---
 
 ## Building from source
 
-The easy path needs only **docker** - `./build.sh` runs the build inside the shared
-toolchain container (a public image, pulled automatically; no host toolchain to set up):
+With **docker**, `./build.sh` builds inside the shared toolchain container (pulled
+automatically):
 
 ```sh
-./build.sh --build                 # build everything in the container
-./build.sh --package               # …and produce the installable Poseidon-<ver>-<cpu>.lha
-./build.sh --package --all-cpus    # …one archive per released CPU (020, 040, 060)
+./build.sh --build                 # build everything
+./build.sh --package               # ...and the Neptune-<ver>-<cpu>.lha archive
+./build.sh --package --all-cpus    # one archive per CPU (020, 040, 060)
 ```
 
-`BACKEND=pistorm|serial|off` and `DEBUG=<level>` select the debug build; `CPU=68020|68040|68060`
-selects the target CPU (default `68040`, and `FPU=` follows it - see
-[below](#native-build-without-the-container)). Each non-default CPU gets its own build
-tree (`build-020/`, `build-060/`) so the variants never clobber each other. With no flags
+`CPU=68020|68040|68060` picks the CPU (default 68040; each gets its own `build-*/` tree),
+`BACKEND=pistorm|serial|off` and `DEBUG=<level>` the debug output. With no flags
 `./build.sh` also uploads to a live Amiga - see [CONTRIBUTING](CONTRIBUTING.md).
 
-Under the hood `build.sh` (and CI) run the container build through
-`scripts/docker-build.sh`, which owns the image tag and the `cmake` configure
-incantation. Drive it directly for a bare build:
-`POSEIDON_CONFIGURE_ARGS="-DPOSEIDON_DEBUG_BACKEND=off" ./scripts/docker-build.sh`.
-
-`POSEIDON_LTO` (default `ON`) builds `poseidon.library` and the classes with link-time
-optimization. It needs the container toolchain, whose binutils has linker-plugin support; set
-`-DPOSEIDON_LTO=OFF` to bisect a suspected miscompile.
-
-### Native build (without the container)
-
-With a local m68k-amigaos toolchain you can drive `cmake` directly. You need an
-**`m68k-amigaos` GCC 16.2** at `/opt/m68k-amigaos` with the **NDK 3.2** headers (provides
-`sfdc`), the **MUI 5 SDK**, the **NDK 3.2 SANA+Roadshow** package (the ethernet classes'
-`<devices/sana2.h>`), **flexcat** and **python3** on `PATH`, and **CMake ≥ 3.14**. The
-MUI/SANA SDKs default to `$HOME/amiga/{MUI5,NDK3.2R4}`; override `AMIGA_SDK_ROOT` (or
-`MUI_INCLUDE_DIR` / `SANA2_INCLUDE_DIR`) if yours live elsewhere.
+**Without the container** you need `m68k-amigaos` GCC 16.2 in `/opt/m68k-amigaos` with the
+NDK 3.2 headers and `sfdc`, the MUI 5 SDK, the NDK 3.2 SANA+Roadshow package, `flexcat`,
+`python3` and CMake 3.14+. The SDKs default to `$HOME/amiga/{MUI5,NDK3.2R4}`
+(`AMIGA_SDK_ROOT`, `MUI_INCLUDE_DIR`, `SANA2_INCLUDE_DIR` override them):
 
 ```sh
-# the toolchain file is REQUIRED on first configure
-cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain.cmake
+cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain.cmake   # add -DM68K_CPU=68020 -DM68K_FPU=soft etc.
 cmake --build build -j"$(nproc)"
-cmake --build build --target bootmouse_class    # …or a single component
-cmake --build build --target package            # …or build/Poseidon-<ver>-<cpu>.lha
+cmake --build build --target package
 ```
-
-**Clean rebuild:** `rm -rf build`, then re-run the configure command (re-passing
-`-DCMAKE_TOOLCHAIN_FILE` once the cache is gone).
-
-**CPU** is a pair of configure options, `-DM68K_CPU=` and `-DM68K_FPU=`. The three
-released variants are:
-
-| Variant | Configure |
-|---|---|
-| 020 | `-DM68K_CPU=68020 -DM68K_FPU=soft` |
-| 040 (default) | `-DM68K_CPU=68040 -DM68K_FPU=hard` |
-| 060 | `-DM68K_CPU=68060 -DM68K_FPU=hard` |
-
-A configured build tree is tied to one CPU, so give each variant its own - which is what
-`build.sh` does: `CPU=68060 ./build.sh --package` builds into `build-060/`, and
-`./build.sh --package --all-cpus` sweeps all three in one go.
 
 ### Project layout
 
 | Path | Contents |
 |---|---|
-| `poseidon.library/` | The stack core. |
+| `neptune.library/` | The stack core. |
 | `usbclass.library/` | The base meta-class every class inherits (ABI headers). |
-| `classes/` | The 30 USB class drivers. |
-| `trident/` | The MUI control panel + translations. |
-| `c/`, `tools/` | CLI commands and optional gadget tools. |
-| `vhi/` | The VHI driver for USB cameras, a client of `usbvideo.device`. |
-| `include/` | Public ABI headers. |
-| `dist/` | Installer script, icons, datatypes, presets. |
-| `docs/` | Architecture & ABI documentation, the porting playbook and the original AROS autodocs. |
-| `scripts/` | Container build wrapper and the de-AROS porting scripts. |
+| `classes/` | The class drivers. |
+| `neptuneusb/` | Neptune USB, the MUI control panel, and its translations. |
+| `c/`, `tools/`, `usbeject/`, `vhi/` | Commands, gadget tools, USBEject, the VHI driver. |
+| `romstartup/` | The Kickstart-ROM startup resident. |
+| `include/` | Public headers. |
+| `dist/`, `presets/` | Installer, icons, datatype, sounds. |
+| `docs/` | Architecture and interface documents, the porting playbook, reference manuals. |
+| `scripts/` | Container build wrapper and the scripts for porting from the AROS sources. |
 
-The AROS baseline this port descends from is recorded in [`AROS-BASELINE`](AROS-BASELINE)
-and tagged `aros-extract-base`.
+The AROS Poseidon baseline Neptune was forked from is in [`AROS-BASELINE`](AROS-BASELINE),
+tagged `aros-extract-base`.
 
 ### Documentation
 
-Start at [docs/README.md](docs/README.md) - it indexes the reverse-engineered
-architecture documents (the core library and each class driver), the context HCD ABI the
-stack speaks to `xhci.device`, the porting playbook, and the implementation plan for the
-remaining work. The same directory also carries the original AROS reference manuals
-(`poseidon.doc`, `usbclass.doc`, `usbhardware.doc`).
+In [`docs/`](docs/): the architecture documents - start with
+[neptune.library-architecture.md](docs/neptune.library-architecture.md), then one per major
+class (`hub`, `hubss`, `hid`, `massstorage`, `usbaudio`, `usbvideo`); the context interface
+Neptune speaks to `xhci.device`, [neptune-context-hcd-abi.md](docs/neptune-context-hcd-abi.md);
+the [porting playbook](docs/porting-playbook.md); and the reference manuals `neptune.doc`,
+`usbclass.doc` and `usbhardware.doc`.

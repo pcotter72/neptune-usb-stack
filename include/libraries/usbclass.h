@@ -57,15 +57,15 @@
 #define UCM_ReleaseDeviceBinding    0x0006
 #define UCM_OpenCfgWindow           0x0020
 #define UCM_CloseCfgWindow          0x0021
-#define UCM_OpenBindingCfgWindow    0x0022 /* { binding�} */
+#define UCM_OpenBindingCfgWindow    0x0022 /* { binding } */
 #define UCM_CloseBindingCfgWindow   0x0023 /* { binding } */
 #define UCM_LocaleAvailableEvent    0x0030
 #define UCM_DOSAvailableEvent       0x0031
 #define UCM_ConfigChangedEvent      0x0032
 #define UCM_SoftRestart             0x0040
 #define UCM_HardRestart             0x0041
-#define UCM_AttemptSuspendDevice    0x0050 /* success = { binding�} */
-#define UCM_AttemptResumeDevice     0x0051 /* success = { binding�} */
+#define UCM_AttemptSuspendDevice    0x0050 /* success = { binding } */
+#define UCM_AttemptResumeDevice     0x0051 /* success = { binding } */
 #define UCM_SafeEject               0x0052 /* SAFEEJECT_* = { binding, STRPTR busybuf,
                                               ULONG busybufsize } - device-scoped: quiesce
                                               everything this class holds on the binding's

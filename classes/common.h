@@ -1,7 +1,7 @@
-/* common.h - shared include aggregator for all Poseidon USB class drivers.
+/* common.h - shared include aggregator for all Neptune USB class drivers.
  *
  * Every class compiles the shared classes/class_main.c skeleton and pulls in
- * this header for the common NDK/Poseidon includes. Per-class identity comes
+ * this header for the common NDK/Neptune includes. Per-class identity comes
  * from the class's CMakeLists via -D: the source uses CLASS_NAME directly, plus
  * VERSION_STRING - the $VER cookie built from it and the distribution version.
  */
@@ -42,7 +42,7 @@
 #include <proto/dos.h>
 #include <proto/commodities.h>
 #include <proto/intuition.h>
-#include <proto/poseidon.h>
+#include <proto/neptune.h>
 #include <proto/utility.h>
 #include <proto/keymap.h>
 #include <proto/layers.h>
@@ -75,17 +75,8 @@ static inline void nApplyInputTaskPriFloor(void)
     }
 }
 
-/* Plain wordings shared by every class driver, for psdTxt() (see
- * <libraries/poseidon.h>). Each class keeps its own traditional wording at its
- * own call site and passes it in as `flavour`; only the boring half is common.
- * The plain text is lan78xx.class's, which was already written this way.
- *
- * The specifier-prefix rule applies: the args listed below are what the call
- * site must pass, in that order.
- */
-#define PSD_BOUND_TXT(flavour)    psdTxt("Bound '%s' to %s unit %ld.", (flavour))  /* devname, unit name, unit no */
-#define PSD_BOUND1_TXT(flavour)   psdTxt("Bound '%s'.", (flavour))                 /* devname */
-#define PSD_RELEASED_TXT(flavour) psdTxt("Released '%s'.", (flavour))              /* devname */
-#define PSD_GIVEUP_TXT            psdTxt("Too many consecutive transfer errors; shutting the device down.", \
-                                         "That's it, that device pissed me off long enough!")
-#define PSD_OK_TXT(flavour)       psdTxt("OK", (flavour))                          /* requester gadget */
+/* Log wordings shared by every class driver. */
+#define NEP_BOUND_TXT     "Bound '%s' to %s unit %ld."   /* devname, unit name, unit no */
+#define NEP_BOUND1_TXT    "Bound '%s'."                  /* devname */
+#define NEP_RELEASED_TXT  "Released '%s'."               /* devname */
+#define NEP_GIVEUP_TXT    "Too many consecutive transfer errors; shutting the device down."

@@ -99,6 +99,25 @@ usbclass/usbSetAttrs
 
         If you have good ideas on expanding the API, please let me know.
 
+   NEPTUNE
+        This document is Chris Hodges' description of the class interface, as
+        carried in the AROS sources. It applies to Neptune as written, with
+        these differences; sections headed NEPTUNE below mark the rest.
+
+        - The stack library is neptune.library (NEPTUNENAME), version 6 or
+          newer. Read "Poseidon" and "poseidon.library" above and below as
+          Neptune and neptune.library; the structures stay private.
+        - Class drivers are stored in DEVS:USBClasses. The prefs editor
+          ("Trident" below) is Neptune USB.
+        - A class library's jump table has three entries: usbGetAttrsA(),
+          usbSetAttrsA() and usbDoMethodA(). The binding calls described
+          below as separate vectors are reached only as usbDoMethod()
+          methods (UCM_AttemptDeviceBinding and so on); a class implements
+          them there and nowhere else.
+        - Neptune adds methods and tags for safe eject, the ROM boot gate and
+          hub port reset; they are described with usbDoMethod() and
+          usbGetAttrs(), headed NEPTUNE.
+
 
 usbclass/usbAttemptDeviceBinding             usbclass/usbAttemptDeviceBinding
 
@@ -138,6 +157,10 @@ usbclass/usbSetAttrs
    RESULT
         udb - private pointer of the binding context or NULL, if no binding
               could be established.
+
+   NEPTUNE
+        Not a library vector: Neptune calls
+        usbDoMethod(UCM_AttemptDeviceBinding, ...).
 
    SEE ALSO
         usbReleaseDeviceBinding(), usbForceDeviceBinding()
@@ -181,6 +204,10 @@ usbclass/usbSetAttrs
    RESULT
         uifb - private pointer of the binding context or NULL, if no binding
                could be established.
+
+   NEPTUNE
+        Not a library vector: Neptune calls
+        usbDoMethod(UCM_AttemptInterfaceBinding, ...).
 
    SEE ALSO
         usbReleaseInterfaceBinding(), usbForceInterfaceBinding()
@@ -326,6 +353,81 @@ usbclass/usbSetAttrs
             This method requests the GUI window for the binding settings to
             be closed. The class may or may not obey to this.
 
+        UCM_DOSAvailableEvent
+
+            usbDoMethod(UCM_DOSAvailableEvent);
+
+            Sent to every class once dos.library is available, after the
+            classes answering UCCA_AfterDOSRestart have had their bindings
+            released for a restart. No parameters.
+
+        UCM_ConfigChangedEvent
+
+            usbDoMethod(UCM_ConfigChangedEvent);
+
+            Sent to every class after the stack configuration changed, so it
+            can reload its class and binding prefs. No parameters.
+
+        UCM_LocaleAvailableEvent, UCM_SoftRestart, UCM_HardRestart
+
+            Defined in libraries/usbclass.h; no parameters.
+
+        UCM_AttemptSuspendDevice, UCM_AttemptResumeDevice
+
+            BOOL ok = usbDoMethod(UCM_AttemptSuspendDevice, APTR binding);
+            BOOL ok = usbDoMethod(UCM_AttemptResumeDevice, APTR binding);
+
+            Asked before a device is suspended and after it is resumed, for
+            classes that answer UCCA_SupportsSuspend with TRUE. Return TRUE
+            once the binding has stopped (or restarted) its traffic; FALSE on
+            suspend means the binding is in use and the device stays awake.
+
+        UCM_Hub... methods
+
+            Methods 0x0f01 and up are for hub classes only and are listed in
+            libraries/usbclass.h.
+
+   NEPTUNE
+        Neptune never sends UCM_LocaleAvailableEvent, UCM_SoftRestart or
+        UCM_HardRestart. On suspend it asks only classes that answer
+        UCCA_SupportsSuspend; a class that does not is released instead if
+        its device has transfers in flight, otherwise the device is
+        suspended anyway. Neptune adds these methods:
+
+        UCM_SafeEject
+
+            LONG res = usbDoMethod(UCM_SafeEject, APTR binding,
+                                   STRPTR busybuf, ULONG busybufsize);
+
+            Quiesce everything the class holds on the binding's device (for
+            storage: flush and unmount every volume, stop the drives) so it
+            can be unplugged. All or nothing: return SAFEEJECT_BUSY and name
+            the object in use in busybuf rather than lose data, undoing
+            whatever was already done. Called on a process, never with a
+            device lock held; it may block. Only classes answering
+            UCCA_SupportsSafeEject are asked, through psdSafeEjectDevice(),
+            which disables the hub port afterwards. Results: SAFEEJECT_OK,
+            SAFEEJECT_BUSY, SAFEEJECT_FAIL; 0 (SAFEEJECT_NOT_SUPPORTED) is what
+            a class that does not know the method returns.
+
+        UCM_MediaPending, UCM_PortsPending
+
+            ULONG count = usbDoMethod(UCM_MediaPending);
+            ULONG count = usbDoMethod(UCM_PortsPending);
+
+            For the ROM boot gate, polled before DOS exists: how many of the
+            class's units are still bringing a medium up, or how many of its
+            hubs have not finished a port pass. Must not block. 0 means
+            nothing pending, and is what a class that does not implement the
+            method returns. A drive with no medium at all is not pending.
+
+        UCM_HubResetPort
+
+            BOOL ok = usbDoMethod(UCM_HubResetPort, APTR hubbinding, APTR pd);
+
+            Hub classes only: reset the device's port in place, with no
+            re-enumeration and no device teardown (behind psdResetDevice()).
+
    NOTE
         The list of methods may grow in future.
 
@@ -375,6 +477,10 @@ usbclass/usbSetAttrs
         udb - private pointer of the binding context or NULL, if no binding
               could be established.
 
+   NEPTUNE
+        Not a library vector: Neptune calls
+        usbDoMethod(UCM_ForceDeviceBinding, ...).
+
    SEE ALSO
         usbAttemptDeviceBinding(), usbReleaseDeviceBinding()
 
@@ -413,6 +519,10 @@ usbclass/usbSetAttrs
    RESULT
         uifb - private pointer of the binding context or NULL, if no binding
                could be established.
+
+   NEPTUNE
+        Not a library vector: Neptune calls
+        usbDoMethod(UCM_ForceInterfaceBinding, ...).
 
    SEE ALSO
         usbAttemptInterfaceBinding(), usbReleaseInterfaceBinding()
@@ -474,12 +584,21 @@ usbclass/usbSetAttrs
             has been available. This only applies to classes that are
             available while booting and don't need the dos.library, but would
             benefit from its existance later on.
+        UCCA_UsingDefaultCfg (BOOL) - Returns TRUE, if the class runs on its
+            default global prefs (none have been saved).
+        UCCA_SupportsSuspend (BOOL) - Returns TRUE, if the class implements
+            UCM_AttemptSuspendDevice and UCM_AttemptResumeDevice.
 
-        UCBA_BINDING:
+        UGA_BINDING:
+        UCBA_UsingDefaultCfg (BOOL) - Returns TRUE, if the binding runs on
+            default prefs.
+
+        UGA_CONFIG:
         no tags yet defined
 
-        UCFA_CONFIG:
-        no tags yet defined
+   NEPTUNE
+        UGA_CLASS also has UCCA_SupportsSafeEject (BOOL) - Returns TRUE, if
+            the class implements UCM_SafeEject.
 
    RESULT
         num - number of tags actually read or -1, if the request was not
@@ -520,6 +639,10 @@ usbclass/usbSetAttrs
    INPUTS
         udb - private pointer of the binding context.
 
+   NEPTUNE
+        Not a library vector: Neptune calls
+        usbDoMethod(UCM_ReleaseDeviceBinding, ...).
+
    SEE ALSO
         usbAttemptDeviceBinding()
 
@@ -555,6 +678,10 @@ usbclass/usbSetAttrs
 
    INPUTS
         uifb - private pointer of the binding context.
+
+   NEPTUNE
+        Not a library vector: Neptune calls
+        usbDoMethod(UCM_ReleaseInterfaceBinding, ...).
 
    SEE ALSO
         usbAttemptInterfaceBinding()

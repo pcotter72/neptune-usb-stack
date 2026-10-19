@@ -95,7 +95,7 @@ struct NepClassSerial
     struct Unit         ncp_Unit;         /* Unit structure */
     ULONG               ncp_UnitNo;       /* Unit number */
     struct NepSerDevBase *ncp_DevBase;    /* Device base */
-    struct Library     *ncp_Base;         /* Poseidon base */
+    struct Library     *ncp_Base;         /* neptune.library base */
     struct PsdDevice   *ncp_Device;       /* Up linkage */
     struct PsdConfig   *ncp_Config;       /* Up linkage */
     struct PsdInterface *ncp_Interface;   /* Up linkage */

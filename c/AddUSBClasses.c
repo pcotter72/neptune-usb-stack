@@ -10,11 +10,11 @@
 #include <dos/dosextens.h>
 #include <dos/datetime.h>
 #include <dos/exall.h>
-#include <libraries/poseidon.h>
-#include <proto/poseidon.h>
+#include <libraries/neptune.h>
+#include <proto/neptune.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
-#include <poseidon_version.h>
+#include <neptune_version.h>
 #include <classdir.h>
 
 #define ARGS_QUIET      0
@@ -22,7 +22,7 @@
 #define ARGS_SIZEOF     2
 
 static const char *template = "QUIET/S,REMOVE/S";
-const char *version = PSD_VER("AddUSBClasses") ", (C) The AROS Development Team";
+const char *version = NEP_VER("AddUSBClasses") ", (C) The AROS Development Team";
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
         fail("Wrong arguments!\n");
     }
     
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         if(ArgsArray[ARGS_REMOVE])
         {
@@ -74,12 +74,12 @@ int main(int argc, char *argv[])
             {
                 psdClassScan();
             } else {
-                errmsg = "Failed to lock " PSD_CLASSDRAWER ".\n";
+                errmsg = "Failed to lock " NEP_CLASSDRAWER ".\n";
             }
         }
         CloseLibrary(ps);
     } else {
-        errmsg = "Unable to open poseidon.library\n";
+        errmsg = "Unable to open neptune.library\n";
     }
     fail(errmsg);
     return(0); // never gets here, just to shut the compiler up

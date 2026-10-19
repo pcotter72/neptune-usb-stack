@@ -1,5 +1,5 @@
 /*
- * usbromstart.c - the Poseidon Kickstart-ROM startup resident.
+ * usbromstart.c - the Neptune Kickstart-ROM startup resident.
  *
  * A plain NT_TASK RTF_COLDSTART resident with no library of its own: exec calls
  * rt_Init once during the coldstart chain and that is the module's whole life.  It
@@ -38,8 +38,8 @@
 
 #include <string.h>
 
-#include <libraries/poseidon.h>
-#include <proto/poseidon.h>
+#include <libraries/neptune.h>
+#include <proto/neptune.h>
 
 /* Inline LVO macros only, for both of these: the base is a local (TimerBase,
    UsbClsBase - the names the inlines default to), because a ROM module may not
@@ -47,7 +47,7 @@
 #include <proto/timer.h>
 #include <inline/usbclass.h>
 
-#include <poseidon_version.h>
+#include <neptune_version.h>
 #include "debug.h"
 
 /* This is only the compile-time default (cmake -DROMSTART_HCD=<name>); the slot
@@ -66,7 +66,7 @@
  * checks it occurs exactly once, and overwrites the 32 bytes that follow.  A byte
  * signature rather than a symbol because the module is linked -s.
  */
-#define ROMSTART_HCD_COOKIE "PSDHCD\1"   /* 8 bytes with the NUL; \1 = layout version */
+#define ROMSTART_HCD_COOKIE "NEPHCD\1"   /* 8 bytes with the NUL; \1 = layout version */
 
 static const struct {
     char cookie[8];
@@ -107,17 +107,17 @@ static ULONG initUsbRom(ULONG            dummy   asm("d0"),
                         BPTR             seglist asm("a0"),
                         struct ExecBase *sysbase asm("a6"));
 
-/* `residentId` feeds the shared $VER cookie (include/poseidon_version.h), so this
+/* `residentId` feeds the shared $VER cookie (include/neptune_version.h), so this
    module carries the same version identity as the rest of the distribution. */
-static const char residentName[] = "Poseidon ROM Init";
-static const char residentId[]   = PSD_VER("Poseidon ROM Startup");
+static const char residentName[] = "Neptune ROM Init";
+static const char residentId[]   = NEP_VER("Neptune ROM Startup");
 
 const struct Resident romTag __attribute__((used, section(".text.modhdr"))) = {
     RTC_MATCHWORD,
     (struct Resident *)&romTag,
     (APTR)&endOfCode,
     RTF_COLDSTART,
-    POSEIDON_VERSION,
+    NEPTUNE_VERSION,
     NT_TASK,
     -46,
     (char *)residentName,
@@ -128,7 +128,7 @@ const struct Resident romTag __attribute__((used, section(".text.modhdr"))) = {
 /* Keyboard and mouse.
  *
  * hid.class is tried first and is expected to fail in the shipping ROM.
- * The two boot-protocol classes cover keyboard and mouse until PsdStackLoader
+ * The two boot-protocol classes cover keyboard and mouse until USBStart
  * runs from the startup-sequence. Its class scan is the first one from a
  * process, and that is what runs the AfterDOS pass: it releases the boot
  * classes' bindings and hands the devices to the disk-loaded hid.class.
@@ -241,7 +241,7 @@ static ULONG classCount(struct Library *UsbClsBase, ULONG method)
 }
 
 /* The class base is what carries usbDoMethodA(); psdAddClass() gave us the
-   Poseidon-side object. */
+   Neptune-side object. */
 static struct Library *classBase(struct Library *ps, APTR puc)
 {
     struct Library *base = NULL;
@@ -430,12 +430,12 @@ static ULONG initUsbRom(ULONG            dummy   asm("d0"),
 
     (void)dummy; (void)seglist; (void)sysbase;
 
-    KPRINTF(10, ("usbromstart: opening poseidon.library\n"));
+    KPRINTF(10, ("usbromstart: opening neptune.library\n"));
 
-    struct Library *ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION);
+    struct Library *ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION);
     if(!ps)
     {
-        KPRINTF(20, ("usbromstart: poseidon.library not available\n"));
+        KPRINTF(20, ("usbromstart: neptune.library not available\n"));
         return 0;
     }
 

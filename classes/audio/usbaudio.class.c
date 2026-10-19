@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         usbaudio class for poseidon
+ *                         usbaudio class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon usbaudio class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -225,7 +225,7 @@ struct NepClassAudio * usbAttemptInterfaceBinding(struct NepAudioBase *nh, struc
     BOOL isaudio;
 
     KPRINTF(1, ("nepAudioAttemptInterfaceBinding(%08lx)\n", pif));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         isaudio = nVerifyAudioStreamDevice(ps, pif);
         CloseLibrary(ps);
@@ -257,7 +257,7 @@ struct NepClassAudio * usbForceInterfaceBinding(struct NepAudioBase *nh, struct 
     struct Task *tmptask;
 
     KPRINTF(1, ("nepAudioAttemptInterfaceBinding(%08lx)\n", pif));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_INTERFACE, pif,
                     IFA_InterfaceNum, &ifnum,
@@ -301,7 +301,7 @@ struct NepClassAudio * usbForceInterfaceBinding(struct NepAudioBase *nh, struct 
         if(!unitfound)
         {
             /* as units are freed in the expunge-vector, the memory is
-               outside the scope of the poseidon library */
+               outside the scope of neptune.library */
             if(!(nch = AllocVec(sizeof(struct NepClassAudio), MEMF_PUBLIC|MEMF_CLEAR)))
             {
                 Permit();
@@ -335,7 +335,7 @@ struct NepClassAudio * usbForceInterfaceBinding(struct NepAudioBase *nh, struct 
                 //FreeSignal(nch->nch_ReadySignal);
 
                 psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                               PSD_BOUND1_TXT("Play it again, '%s'!"),
+                               NEP_BOUND1_TXT,
                                devname);
                 CloseLibrary(ps);
                 return(nch);
@@ -358,7 +358,7 @@ void usbReleaseInterfaceBinding(struct NepAudioBase *nh, struct NepClassAudio *n
     STRPTR devname;
 
     KPRINTF(1, ("nepAudioReleaseInterfaceBinding(%08lx)\n", nch));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         Forbid();
         nch->nch_DenyRequests = TRUE;
@@ -379,7 +379,7 @@ void usbReleaseInterfaceBinding(struct NepAudioBase *nh, struct NepClassAudio *n
         psdGetAttrs(PGA_CONFIG, pc, CA_Device, &pd, TAG_END);
         psdGetAttrs(PGA_DEVICE, pd, DA_ProductName, &devname, TAG_END);
         psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                       PSD_RELEASED_TXT("'%s' fell silent!"),
+                       NEP_RELEASED_TXT,
                        devname);
         CloseLibrary(ps);
     }
@@ -1325,8 +1325,7 @@ void nExamineAudioDescriptors(struct NepClassAudio *nch)
                                         }
                                         if(freq > 64000)
                                         {
-                                            psdAddErrorMsg(RETURN_WARN, (STRPTR) libname, psdTxt("AHI does not support %ld Hz (above 65 KHz).",
-                       "AHI does not support %ld Hz as it is above 65 KHz, sorry."), freq);
+                                            psdAddErrorMsg(RETURN_WARN, (STRPTR) libname, "AHI does not support %ld Hz (above 65 KHz).", freq);
                                             nam->nam_NumFrequencies--;
                                             cnt--;
                                             fptr += 3;
@@ -1354,8 +1353,7 @@ void nExamineAudioDescriptors(struct NepClassAudio *nch)
                                     if(nam->nam_MaxFreq > 64000)
                                     {
                                         nam->nam_MaxFreq = 64000;
-                                        psdAddErrorMsg(RETURN_WARN, (STRPTR) libname, psdTxt("AHI does not support frequencies above 65 KHz.",
-                        "AHI does not support frequencies above 65 KHz, sorry."));
+                                        psdAddErrorMsg(RETURN_WARN, (STRPTR) libname, "AHI does not support frequencies above 65 KHz.");
                                     }
                                     nam->nam_NumFrequencies = 0;
                                     while(*freqtab && (nam->nam_NumFrequencies < 64))
@@ -2326,7 +2324,7 @@ struct NepClassAudio * nAllocAudio(void)
     nch = thistask->tc_UserData;
     do
     {
-        if(!(nch->nch_Base = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+        if(!(nch->nch_Base = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
         {
             Alert(AG_OpenLib);
             break;
@@ -2379,8 +2377,7 @@ struct NepClassAudio * nAllocAudio(void)
                 nch->nch_TaskMsgPort = NULL;
             }
         } else {
-            psdAddErrorMsg(RETURN_FAIL, (STRPTR) libname, psdTxt("No suitable audio modes found for this device.",
-                        "No suitable audio modes found for this audio device. Very sorry, dude."));
+            psdAddErrorMsg(RETURN_FAIL, (STRPTR) libname, "No suitable audio modes found for this device.");
         }
     } while(FALSE);
     if(AHIBase)
@@ -2460,7 +2457,7 @@ BOOL nLoadClassConfig(struct NepAudioBase *nh)
     struct PsdIFFContext *pic;
 
     KPRINTF(10, ("Loading Class Config...\n"));
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -2487,7 +2484,7 @@ LONG nOpenCfgWindow(struct NepAudioBase *nh)
 {
     struct Library *ps;
     KPRINTF(10, ("Opening GUI...\n"));
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -2537,9 +2534,9 @@ void nGUITask()
         nGUITaskCleanup(nh);
         return;
     }
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
-        KPRINTF(10, ("Couldn't open poseidon.library.\n"));
+        KPRINTF(10, ("Couldn't open neptune.library.\n"));
         nGUITaskCleanup(nh);
         return;
     }
@@ -2551,7 +2548,7 @@ void nGUITask()
         MUIA_Application_Author     , (IPTR)"Chris Hodges <chrisly@platon42.de>",
         MUIA_Application_Description, (IPTR)"Settings for the usbaudio.class",
         MUIA_Application_Base       , (IPTR)"USBAUDIO",
-        MUIA_Application_HelpFile   , (IPTR)"HELP:Poseidon.guide",
+        MUIA_Application_HelpFile   , (IPTR)"HELP:Neptune.guide",
         MUIA_Application_Menustrip  , (IPTR)MenustripObject,
             Child, (IPTR)MenuObjectT((IPTR)"Project"),
                 Child, (IPTR)(nh->nh_AboutMI = MenuitemObject,
@@ -2667,7 +2664,7 @@ void nGUITask()
                     break;
 
                case ID_ABOUT:
-                    MUI_RequestA(nh->nh_App, nh->nh_MainWindow, 0, NULL, PSD_OK_TXT("Marvellous!"), VERSION_STRING, NULL);
+                    NEP_CLASS_ABOUT(nh->nh_App, nh->nh_MainWindow);
                     break;
             }
             if(retid == MUIV_Application_ReturnID_Quit)
@@ -2736,7 +2733,7 @@ struct NepAudioSubLibBase * subLibInit(struct NepAudioSubLibBase * nas asm("d0")
     nas->nas_Library.lib_Node.ln_Name = SUBLIBNAME;
     nas->nas_Library.lib_Flags        = LIBF_SUMUSED | LIBF_CHANGED;
     nas->nas_Library.lib_Version      = AHI_SUB_LIB_VERSION;
-    nas->nas_Library.lib_Revision     = POSEIDON_REVISION;
+    nas->nas_Library.lib_Revision     = NEPTUNE_REVISION;
     nas->nas_Library.lib_IdString     = VERSION_STRING;
 
     /* Store segment */
@@ -3089,7 +3086,7 @@ void nReleaseHook(struct Hook * hook asm("a0"), APTR prt asm("a2"), APTR unused 
     if(nam->nam_IsInput)
     {
         // we can only stop recording, we still need to call the player func until audio is done
-        psdAddErrorMsg(RETURN_ERROR, (STRPTR) libname, psdTxt("Recording stopped.", "Violently stopped recording!"));
+        psdAddErrorMsg(RETURN_ERROR, (STRPTR) libname, "Recording stopped.");
     } else {
         /* AHI's player goes on, on the timer clock, until AHI stops it;
            if it is not playing, subLibStart() starts the timer */
@@ -3102,8 +3099,7 @@ void nReleaseHook(struct Hook * hook asm("a0"), APTR prt asm("a2"), APTR unused 
     }
     nch->nch_DenyRequests = TRUE;
     psdAddErrorMsg(RETURN_ERROR, (STRPTR) libname,
-                   psdTxt("Audio device removed while playing.",
-                       "Removing the soundcard while playing is not very bright!"));
+                   "Audio device removed while playing.");
     
 
 }
@@ -3626,7 +3622,7 @@ ULONG (subLibAllocAudio)(struct TagItem * tags asm("a1"), struct AHIAudioCtrlDrv
     }
     audioctrl->ahiac_DriverData = nam;
     nam->nam_AudioCtrl = audioctrl;
-    if(!(nam->nam_PsdBase = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(nam->nam_PsdBase = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return AHISF_ERROR;
     }

@@ -1,5 +1,11 @@
-Poseidon USB Stack - Licensing & Attribution
-============================================
+Neptune - Licensing & Attribution
+=================================
+
+Neptune is an incompatible fork of the Poseidon USB stack. It is derived from
+Poseidon, whose original author and Initial Developer is Chris Hodges, by way
+of the AROS Development Team's Poseidon sources (AROS commit c01498ab, see
+AROS-BASELINE). It is not Poseidon and is not maintained by or affiliated with
+Chris Hodges or the AROS Development Team.
 
 Primary license: AROS Public License (APL) Version 1.1. The full text is in the
 LICENSE file at the root of this repository.
@@ -14,8 +20,8 @@ related files into the AROS repository under the AROS Public License:
     Chris Hodges, 26.08.2009
 
 Poseidon is (C) Copyright 2002-2009 Chris Hodges and (C) Copyright 2009-2026 The
-AROS Development Team. This AmigaOS 3.2 backport is distributed under the same
-AROS Public License.
+AROS Development Team. Neptune, as a work derived from it, is distributed under
+the same AROS Public License.
 
 ----------------------------------------------------------------------------
 
@@ -27,9 +33,10 @@ Third-party code
   (c) 2018 Kevin Lo <kevlo@openbsd.org>, redistributed under the ISC licence.
   The full ISC notice is carried at the top of classes/lan78xx/lan78xx.class.c.
 
-  classes/massstorage/mounter - a git submodule (https://github.com/A4091/mounter):
-  the generic autoboot/automount RDB/MBR/GPT parser and mounter from
-  a4091.device. Copyright 2021-2022 Toni Wilen (extended by Stefan Reinauer and
+  classes/massstorage/mounter - a git submodule
+  (https://github.com/rondoval/mounter, branch neptune-fixes): a fork of the
+  generic autoboot/automount RDB/MBR/GPT parser and mounter from a4091.device
+  (https://github.com/A4091/mounter). Copyright 2021-2022 Toni Wilen (extended by Stefan Reinauer and
   Matt Harlum), distributed under the 2-clause BSD licence. Its own licence
   travels with the submodule - see the submodule's README.
 
@@ -38,24 +45,27 @@ Third-party code
 Third-party artwork
 -------------------
 
-  trident/icons/Trident.png  (and the generated dist/Trident.info packaged as
-  Prefs/Trident.info) is taken from the AROS "Gorilla" icon set, which is
-  distributed under the terms of the GNU General Public License. That icon
-  file is therefore licensed under the GPL; the rest of this distribution
-  remains under the AROS Public License (aggregation of separate works).
+  dist/icons/NeptuneUSB.png and dist/icons/USBEject.png (and the generated
+  dist/NeptuneUSB.info and dist/USBEject.info, packaged as Prefs/NeptuneUSB.info
+  and WBStartup/USBEject.info) are the Trident icon from the AROS "Gorilla"
+  icon set, which is distributed under the terms of the GNU General Public
+  License. Those icon files are therefore licensed under the GPL; the rest of
+  this distribution remains under the AROS Public License (aggregation of
+  separate works).
   Source: https://github.com/aros-development-team/AROS
           images/IconSets/Gorilla/Icons/Medium/AROS/Prefs/Trident.png
 
-  trident/icons/def_PSD.png and trident/datatypes/PSD.dtd (and the generated
-  dist/def_PSD.info and dist/datatypes/PSD) originate in the Poseidon sources
-  (rom/usb/trident), under the AROS Public License as above.
+  dist/icons/def_Neptune.png and dist/datatypes/Neptune.dtd (and the generated
+  dist/def_Neptune.info and dist/datatypes/Neptune) are derived from def_PSD.png
+  and PSD.dtd in the Poseidon sources (rom/usb/trident), under the AROS Public
+  License as above.
 
 ----------------------------------------------------------------------------
 
 Runtime dependency (not redistributed)
 --------------------------------------
 
-  The Trident preferences program and the per-class configuration dialogs use
+  The Neptune USB preferences program and the per-class configuration dialogs use
   Magic User Interface (MUI). MUI is required at run time but is NOT part of
   this distribution. MUI is (C) Copyright 1992-2006 Stefan Stuntz and
   (C) Copyright 2006 onwards the MUI developers (Thore Boeckelmann, Jens Maus).

@@ -18,5 +18,5 @@ target_link_libraries(usbvideo_vhi PRIVATE
 target_link_options(usbvideo_vhi PRIVATE -nostdlib -nostartfiles -s)
 
 set_target_properties(usbvideo_vhi PROPERTIES OUTPUT_NAME usbvideo SUFFIX ".vhi")
-psd_enable_lto(usbvideo_vhi)
-psd_module_layout(usbvideo_vhi)            # entry at 0, RT_ENDSKIP, no writable data
+nep_enable_lto(usbvideo_vhi)
+nep_module_layout(usbvideo_vhi)            # entry at 0, RT_ENDSKIP, no writable data

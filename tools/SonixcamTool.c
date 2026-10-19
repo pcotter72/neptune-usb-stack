@@ -1,15 +1,15 @@
 /*
  *----------------------------------------------------------------------------
- *                         Sonixcam Tool for Poseidon
+ *                         Sonixcam Tool for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon Sonixcam Tool by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
 
 #include <proto/dos.h>
 #include <proto/exec.h>
-#include <proto/poseidon.h>
+#include <proto/neptune.h>
 #include <proto/intuition.h>
 #include <proto/graphics.h>
 #include <proto/diskfont.h>
@@ -18,7 +18,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <poseidon_version.h>
+#include <neptune_version.h>
 
 #define ARGS_TO       0
 #define ARGS_INTERVAL 1
@@ -33,7 +33,7 @@
 
 const char SonixcamTool_prgname[] = "SonixcamTool";
 static const char *template = "TO/A,INTERVAL/N,UPTO/N/K,GAMMA/K,SHARPEN/S,TEXT/K,FONT/K,FONTSIZE/N/K,UNIT/N/K";
-const char SonixcamTool_version[] = PSD_VER("SonixcamTool") ", by Chris Hodges <chrisly@platon42.de>";
+const char SonixcamTool_version[] = NEP_VER("SonixcamTool");
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 
@@ -906,16 +906,16 @@ void bayer_unshuffle(struct SCImageHeader *scih, UBYTE *raw, UBYTE *output)
     UBYTE *oline;
 
 /* Byte Order. Each cell is one byte.
-   start + 0:  B00 G01 B02 G03
-   start + 4:  G10 R11 G12 R13
-   start + 8:  B20 G21 B22 G23
-   start + 12: G30 R31 G32 R33 */
+   start + 0:  B00 G01 B02 G03
+   start + 4:  G10 R11 G12 R13
+   start + 8:  B20 G21 B22 G23
+   start + 12: G30 R31 G32 R33 */
 
 /* Byte Order. Each cell is one byte.
-   start + 0:  G00 B01 G02 B03
-   start + 4:  R10 G11 R12 G13
-   start + 8:  G20 B21 G22 B23
-   start + 12: R30 G31 R32 G33 */
+   start + 0:  G00 B01 G02 B03
+   start + 4:  R10 G11 R12 G13
+   start + 8:  G20 B21 G22 B23
+   start + 12: R30 G31 R32 G33 */
 
     // RGB
     for(y = 0; y < vh; y++)
@@ -1262,7 +1262,7 @@ int main(int argc, char *argv[])
         PutStr("Wrong arguments!\n");
         return(RETURN_FAIL);
     }
-    ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION);
+    ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION);
     if(!ps)
     {
         FreeArgs(ArgsHook);

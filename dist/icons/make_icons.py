@@ -37,8 +37,8 @@ ICONTOOL = os.environ.get("ICONTOOL",
 # (source PNG, .info.src, output .info) - paths relative to the repo root
 ICONS = [
     ("dist/icons/installer.png", "dist/icons/installer.info.src", "dist/Install.info"),
-    ("dist/icons/Trident.png", "dist/icons/Trident.info.src", "dist/Trident.info"),
-    ("dist/icons/def_PSD.png", "dist/icons/def_PSD.info.src", "dist/def_PSD.info"),
+    ("dist/icons/NeptuneUSB.png", "dist/icons/NeptuneUSB.info.src", "dist/NeptuneUSB.info"),
+    ("dist/icons/def_Neptune.png", "dist/icons/def_Neptune.info.src", "dist/def_Neptune.info"),
     ("dist/icons/USBEject.png", "dist/icons/USBEject.info.src", "dist/USBEject.info"),
 ]
 

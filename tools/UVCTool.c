@@ -1,6 +1,6 @@
 /*
  *----------------------------------------------------------------------------
- *                          UVC Tool for Poseidon
+ *                          UVC Tool for Neptune
  *----------------------------------------------------------------------------
  * usbvideo.device command-line client: prints camera info and the mode
  * table, captures frames to files.
@@ -30,7 +30,7 @@
 #include <dos/dos.h>
 #include <devices/usbvideodevice.h>
 
-#include <poseidon_version.h>
+#include <neptune_version.h>
 
 #include "uvc_client.h"
 
@@ -52,7 +52,7 @@ enum
 
 const char UVCTool_prgname[] = "UVCTool";
 static const char *template = "UNIT/N/K,TO/K,FORMAT/K,WIDTH/N/K,HEIGHT/N/K,FPS/N/K,FRAMES/N/K,BITRATE/N/K,KEYFRAME/N/K";
-const char UVCTool_version[] = PSD_VER("UVCTool");
+const char UVCTool_version[] = NEP_VER("UVCTool");
 static LONG ArgsArray[ARGS_SIZEOF];
 
 /* Return the value of a /N argument, or none if it is absent */

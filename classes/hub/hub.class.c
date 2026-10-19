@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         hub class for poseidon
+ *                         hub class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon hub class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -64,7 +64,7 @@ struct NepClassHub * usbAttemptDeviceBinding(struct NepHubBase *nh, struct PsdDe
     IPTR devclass;
     KPRINTF(1, ("nepHubAttemptDeviceBinding(0x%08lx)\n", pd));
 
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_DEVICE, pd,
                     DA_Class, &devclass,
@@ -90,7 +90,7 @@ struct NepClassHub * usbForceDeviceBinding(struct NepHubBase * nh, struct PsdDev
 
     KPRINTF(1, ("nepHubAttemptDeviceBinding(0x%08lx)\n", pd));
 
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_DEVICE, pd,
                     DA_ProductName, &devname,
@@ -113,7 +113,7 @@ struct NepClassHub * usbForceDeviceBinding(struct NepHubBase * nh, struct PsdDev
                     nch->nch_ReadySigTask = NULL;
                     //FreeSignal(nch->nch_ReadySignal);
                     psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                                   psdTxt("Hub '%s' configured.", "I'm in love with hub '%s'."),
+                                   "Hub '%s' configured.",
                                    devname);
 
                     Forbid();
@@ -140,7 +140,7 @@ void usbReleaseDeviceBinding(struct NepHubBase *nh, struct NepClassHub *nch)
     STRPTR devname;
 
     KPRINTF(1, ("nepHubReleaseDeviceBinding(0x%08lx)\n", nch));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         Forbid();
         nch->nch_ReadySignal = SIGB_SINGLE;
@@ -160,7 +160,7 @@ void usbReleaseDeviceBinding(struct NepHubBase *nh, struct NepClassHub *nch)
         psdGetAttrs(PGA_DEVICE, nch->nch_Device, DA_ProductName, &devname, TAG_END);
         if (!devname) devname = hubunknown;
         psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                       PSD_RELEASED_TXT("Time to get rid of '%s'!"),
+                       NEP_RELEASED_TXT,
                        devname);
         Forbid();
         Remove(&nch->nch_Node);
@@ -387,7 +387,7 @@ IPTR (usbDoMethodA)(ULONG methodid asm("d0"), IPTR * methoddata asm("a1"), struc
             nhm.nhm_Result = (IPTR) NULL;
             nhm.nhm_MethodID = methodid;
             nhm.nhm_Params = methoddata;
-            if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+            if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
             {
                 if(nch->nch_Task == FindTask(NULL))
                 {
@@ -646,8 +646,7 @@ void nHubTask()
                 psdGetAttrs(PGA_DEVICE, pd, DA_ProductName, &devname, TAG_END);
                 if (!devname) devname = devunknown;
                 psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                               psdTxt("Detected device '%s' at port %ld.",
-                                      "Detected device '%s' at port %ld. I like it."),
+                               "Detected device '%s' at port %ld.",
                                devname, num);
                 count++;
             }
@@ -655,8 +654,7 @@ void nHubTask()
         if(count)
         {
             psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                           psdTxt("Hub added %ld device(s).",
-                                  "Hub has added %ld device(s). That'll be fun!"),
+                           "Hub added %ld device(s).",
                            count);
         }
         // do a class scan
@@ -711,8 +709,7 @@ void nHubTask()
                             psdGetAttrs(PGA_DEVICE, pd, DA_ProductName, &devname, TAG_END);
                             if (!devname) devname = devunknown;
                             psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                                           psdTxt("Removing dead device '%s' at port %ld.",
-                                                  "Zapping device '%s' at port %ld!"),
+                                           "Removing dead device '%s' at port %ld.",
                                            devname, num);
                             psdFreeDevice(pd);
                             psdSendEvent(EHMB_REMDEVICE, pd, NULL);
@@ -748,8 +745,7 @@ void nHubTask()
                                 psdGetAttrs(PGA_DEVICE, pd, DA_ProductName, &devname, TAG_END);
                                 if (!devname) devname = devunknown;
                                 psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                                               psdTxt("Device '%s' returned.",
-                                                      "Device '%s' returned. Happy happy joy joy."),
+                                               "Device '%s' returned.",
                                                devname);
                                 psdHubClassScan(pd);
                             }
@@ -847,7 +843,7 @@ void nHubTask()
                                         }
                                     } else {
                                         psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                                                       psdTxt("Hub is now self-powered.", "Hub is now self-powered! Yay!"));
+                                                       "Hub is now self-powered.");
                                         if(pc && phw)
                                         {
                                             psdSetAttrs(PGA_CONFIG, pc, CA_SelfPowered, TRUE, TAG_END);
@@ -1020,8 +1016,7 @@ void nHubTask()
                                                 psdGetAttrs(PGA_DEVICE, pd, DA_ProductName, &devname, TAG_END);
                                                 if (!devname) devname = devunknown;
                                                 psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                                                               psdTxt("New device '%s' at port %ld.",
-                                                               "New device '%s' at port %ld. Very nice."),
+                                                               "New device '%s' at port %ld.",
                                                                devname, num);
                                                 psdClassScan();
                                             }
@@ -1040,8 +1035,7 @@ void nHubTask()
                         if(ioerr != IOERR_ABORTED)
                         {
                             psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
-                                           psdTxt("Status packet failed: %s (%ld)",
-                                           "Something weird happened to the status packet, it failed: %s (%ld)"),
+                                           "Status packet failed: %s (%ld)",
                                            psdNumToStr(NTS_IOERR, ioerr, "unknown"), ioerr);
                             psdDelayMS(200);
                         }
@@ -1058,7 +1052,7 @@ void nHubTask()
             psdAbortPipe(nch->nch_EP1Pipe);
             psdWaitPipe(nch->nch_EP1Pipe);
         }
-        psdAddErrorMsg(RETURN_OK, (STRPTR) libname, psdTxt("Hub task terminated.", "Oh no! I've been shot! Arrggghh..."));
+        psdAddErrorMsg(RETURN_OK, (STRPTR) libname, "Hub task terminated.");
         nFreeHub(nch);
     }
 }
@@ -1090,7 +1084,7 @@ struct NepClassHub * nAllocHub(void)
     nch = thistask->tc_UserData;
     do
     {
-        if(!(nch->nch_Base = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+        if(!(nch->nch_Base = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
         {
             Alert(AG_OpenLib);
             break;
@@ -1156,7 +1150,7 @@ struct NepClassHub * nAllocHub(void)
 
         if(!nch->nch_EP1)
         {
-            psdAddErrorMsg(RETURN_FAIL, (STRPTR) libname, psdTxt("No endpoints defined.", "Ooops!?! No endpoints defined?"));
+            psdAddErrorMsg(RETURN_FAIL, (STRPTR) libname, "No endpoints defined.");
             KPRINTF(1, ("Ooops!?! No Endpoints defined?\n"));
             break;
         }
@@ -1365,8 +1359,7 @@ void nFreeHub(struct NepClassHub *nch)
             psdGetAttrs(PGA_DEVICE, pd, DA_ProductName, &devname, TAG_END);
             if (!devname) devname = devunknown;
             psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                           psdTxt("Hub removal disconnected device '%s' at port %ld.",
-                           "My death killed device '%s' at port %ld!"),
+                           "Hub removal disconnected device '%s' at port %ld.",
                            devname, num);
             KPRINTF(1, ("FreeDevice 0x%08lx\n", pd));
             psdFreeDevice(pd);
@@ -1654,8 +1647,7 @@ struct PsdDevice * nConfigurePort(struct NepClassHub *nch, UWORD port)
                        (UPSF_PORT_CONNECTION|UPSF_PORT_POWER|UPSF_PORT_LOW_SPEED))
                     {
                         psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
-                                       psdTxt("Unexpected port response, power-cycling port %ld.",
-                                       "Strange port response, power-cycling port %ld"),
+                                       "Unexpected port response, power-cycling port %ld.",
                                        port);
                         psdPipeSetup(nch->nch_EP0Pipe, URTF_CLASS|URTF_OTHER,
                                      USR_CLEAR_FEATURE, UFS_PORT_ENABLE, (ULONG) port);

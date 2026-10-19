@@ -38,15 +38,15 @@ jobs:
           ./scripts/docker-build.sh
           ./scripts/docker-build.sh --target install
         env:
-          POSEIDON_INSTALL_DIR: dist
-          POSEIDON_CONFIGURE_ARGS: >-
-            -DPOSEIDON_DEBUG_BACKEND=${{ matrix.backend }}
+          NEPTUNE_INSTALL_DIR: dist
+          NEPTUNE_CONFIGURE_ARGS: >-
+            -DNEPTUNE_DEBUG_BACKEND=${{ matrix.backend }}
             -DM68K_CPU=${{ matrix.cpu }}
             -DM68K_FPU=${{ matrix.fpu }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: poseidon-${{ matrix.cpu }}-${{ matrix.backend }}
+          name: neptune-${{ matrix.cpu }}-${{ matrix.backend }}
           path: dist
           if-no-files-found: error

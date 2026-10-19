@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         hid class for poseidon
+ *                         hid class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon hid class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -160,7 +160,7 @@ struct NepClassHid * usbAttemptInterfaceBinding(struct NepHidBase *nh, struct Ps
     //IPTR proto;
 
     KPRINTF(1, ("nepHidAttemptInterfaceBinding(%08lx)\n", pif));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_INTERFACE, pif,
                     IFA_Class, &ifclass,
@@ -194,7 +194,7 @@ struct NepClassHid * usbForceInterfaceBinding(struct NepHidBase *nh, struct PsdI
     KPRINTF(1, ("nepHidForceInterfaceBinding(%08lx)\n", pif));
 
     nInstallLLPatch(nh);
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_INTERFACE, pif,
                     IFA_Config, &pc,
@@ -238,7 +238,7 @@ struct NepClassHid * usbForceInterfaceBinding(struct NepHidBase *nh, struct PsdI
                     nch->nch_ReadySigTask = NULL;
                     //FreeSignal(nch->nch_ReadySignal);
                     psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                                   PSD_BOUND1_TXT("HID the road, '%s'!"),
+                                   NEP_BOUND1_TXT,
                                    devname);
                     Forbid();
                     AddTail(&nh->nh_Interfaces, &nch->nch_Node);
@@ -272,7 +272,7 @@ void usbReleaseInterfaceBinding(struct NepHidBase *nh, struct NepClassHid *nch)
     STRPTR devname;
 
     KPRINTF(1, ("nepHidReleaseInterfaceBinding(%08lx)\n", nch));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         Forbid();
         nch->nch_ReadySignal = SIGB_SINGLE;
@@ -313,7 +313,7 @@ void usbReleaseInterfaceBinding(struct NepHidBase *nh, struct NepClassHid *nch)
         psdGetAttrs(PGA_CONFIG, pc, CA_Device, &pd, TAG_END);
         psdGetAttrs(PGA_DEVICE, pd, DA_ProductName, &devname, TAG_END);
         psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                       PSD_RELEASED_TXT("And don't you come back no more, '%s'!"),
+                       NEP_RELEASED_TXT,
                        devname);
         Forbid();
         Remove(&nch->nch_Node);
@@ -492,7 +492,7 @@ void nInstallLLPatch(struct NepHidBase *nh)
                 /* nh_LLOldSetJoyPortAttrsA stays NULL, which is how libExpunge() knows not to
                    unpatch a vector we never touched -- a live jump table entry is never NULL. */
                 struct Library *ps;
-                if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+                if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
                 {
                     psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
                                    "This lowlevel.library (V%ld.%ld) has no SetJoyPortAttrs(). USB pads "
@@ -522,7 +522,7 @@ BOOL nLoadClassConfig(struct NepHidBase *nh)
     {
         return(FALSE);
     }
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -619,7 +619,7 @@ BOOL nLoadBindingConfig(struct NepClassHid *nch, BOOL gui)
     nch->nch_KeymapCfg = nh->nh_DummyNCH.nch_KeymapCfg;
     nch->nch_UsingDefaultCfg = TRUE;
 
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -669,7 +669,7 @@ LONG nOpenBindingCfgWindow(struct NepHidBase *nh, struct NepClassHid *nch)
 {
     struct Library *ps;
     KPRINTF(10, ("Opening GUI...\n"));
-    if(!(ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if(!(ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         return(FALSE);
     }
@@ -995,7 +995,7 @@ void nHidTask()
                                     if(errcount > 20)
                                     {
                                         psdAddErrorMsg(RETURN_FAIL, (STRPTR) libname,
-                                                       PSD_GIVEUP_TXT);
+                                                       NEP_GIVEUP_TXT);
                                         sigs |= SIGBREAKF_CTRL_C;
                                     }
                                 }
@@ -1117,7 +1117,7 @@ struct NepClassHid * nAllocHid(void)
     NewList(&nch->nch_HidReports);
     do
     {
-        if(!(nch->nch_Base = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+        if(!(nch->nch_Base = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
         {
             Alert(AG_OpenLib);
             break;
@@ -2174,7 +2174,7 @@ BOOL nReadReports(struct NepClassHid *nch)
                                    1, psdNumToStr(NTS_IOERR, ioerr, "unknown"), ioerr);
                 }
             } else {
-                psdAddErrorMsg(RETURN_OK, (STRPTR) libname, psdTxt("Retry successful.", "Burstroem retry successful ;)"));
+                psdAddErrorMsg(RETURN_OK, (STRPTR) libname, "Retry successful.");
             }
         }
         actlen = psdGetPipeActual(nch->nch_EP0Pipe);
@@ -2206,7 +2206,7 @@ BOOL nReadReports(struct NepClassHid *nch)
                 ioerr = psdDoPipe(nch->nch_EP0Pipe, nch->nch_HidDesc, (ULONG) buf[0]);
                 if(!ioerr)
                 {
-                    psdAddErrorMsg(RETURN_OK, (STRPTR) libname, psdTxt("Retry successful.", "Burstroem retry successful ;)"));
+                    psdAddErrorMsg(RETURN_OK, (STRPTR) libname, "Retry successful.");
                 }
             }
             if(!ioerr)
@@ -3107,7 +3107,7 @@ BOOL nParseReport(struct NepClassHid *nch, struct NepHidReport *nhr)
                                         nhc->nhc_Usage = nhc->nhc_Parent->nhc_Usage;
                                         nhc->nhc_Name = psdCopyStr(nhc->nhc_Parent->nhc_Name);
                                     } else {
-                                        nhc->nhc_Name = psdCopyStr(psdTxt("(unnamed)", "Argl!"));
+                                        nhc->nhc_Name = psdCopyStr("(unnamed)");
                                     }
                                 }
                             }
@@ -6988,17 +6988,14 @@ void nInstallLastActionHero(struct NepClassHid *nch)
             if(!nh->nh_DispatcherTask)
             {
                 psdAddErrorMsg(RETURN_FAIL, (STRPTR) libname,
-                               psdTxt("Could not create the action subtask.",
-                       "It's your fault! I'm sure! Couldn't create subtask for launching!"));
+                               "Could not create the action subtask.");
             } else {
                 psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                               psdTxt("Action subtask started.",
-                       "Last Action Hero successfully launched!"));
+                               "Action subtask started.");
             }
         } else {
             psdAddErrorMsg(RETURN_FAIL, (STRPTR) libname,
-                           psdTxt("Could not create the action subtask.",
-                       "It's your fault! I'm sure! Couldn't create subtask for launching!"));
+                           "Could not create the action subtask.");
         }
         nh->nh_ReadySigTask = NULL;
         //FreeSignal(nh->nh_ReadySignal);
@@ -7049,7 +7046,7 @@ void nDispatcherTask()
                         if(!nh->nh_DTBase || !nh->nh_CxBase)
                         {
                             struct Library *ps;
-                            if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+                            if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
                             {
                                 if(!nh->nh_DTBase)
                                 {
@@ -7137,10 +7134,6 @@ void nDispatcherTask()
 /* \\\ */
 
 /* /// "nLastActionHero()" */
-/* The file-scope `#define ps` above was undef'd before nDispatcherTask();
-   NepHidBase carries no poseidon base, so re-point it at the bound instance
-   here -- psdTxt() and every psd* call below need it. */
-#define ps nch->nch_Base
 void nLastActionHero(struct NepHidBase *nh)
 {
     ULONG sigmask;
@@ -7167,21 +7160,19 @@ void nLastActionHero(struct NepHidBase *nh)
                     strcat(buf, ">");
                     if(!nSendKeyString(nh, buf))
                     {
-                        nEasyRequest(nh, psdTxt("Unknown vanilla key name '%s'.",
-                                     "'%s' is no good. Really."), PSD_OK_TXT("Argl!"), nha->nha_VanillaString);
+                        nEasyRequest(nh, "Unknown vanilla key name '%s'.", "OK", nha->nha_VanillaString);
                     }
                     break;
 
                 case HUA_KEYSTRING:
                     if(!nSendKeyString(nh, nha->nha_KeyString))
                     {
-                        nEasyRequest(nh, psdTxt("Unknown key name '%s'.",
-                                     "Don't you ever say\n'%s'\nto me again!"), PSD_OK_TXT("Terribly sorry!"), nha->nha_KeyString);
+                        nEasyRequest(nh, "Unknown key name '%s'.", "OK", nha->nha_KeyString);
                     }
                     break;
 
                 case HUA_SOUND:
-                    nPlaySound(nh, nch, nha);
+                    nPlaySound(nh, nha);
                     break;
 
                 case HUA_SHELL:
@@ -7198,17 +7189,15 @@ void nLastActionHero(struct NepHidBase *nh)
                                            TAG_END);
                         if(ioerr)
                         {
-                            nEasyRequest(nh, psdTxt("Could not execute\n'%s'\n(error code %ld).",
-                                         "Offender survived execution of\n'%s'\nwith error code %ld."), PSD_OK_TXT("Get me a shotgun then!"), nha->nha_ExeString, ioerr);
+                            nEasyRequest(nh, "Could not execute\n'%s'\n(error code %ld).", "OK", nha->nha_ExeString, ioerr);
                         }
                         if((!nha->nha_ShellAsync) || ioerr)
                         {
                             Close(fhandle);
                         }
                     } else {
-                        nEasyRequest(nh, psdTxt("'%s'\nis not a usable console window specification.",
-                                       "Do you really think\n'%s'\nis a nice and witty\nconsole window? Well, it's not!"),
-                                       PSD_OK_TXT("I'll use that string to hang myself!"), nch->nch_CDC->cdc_ShellCon);
+                        nEasyRequest(nh, "'%s'\nis not a usable console window specification.",
+                                       "OK", nch->nch_CDC->cdc_ShellCon);
                     }
                     break;
                 }
@@ -7297,13 +7286,10 @@ void nLastActionHero(struct NepHidBase *nh)
         sigs = Wait(sigmask);
     } while(!(sigs & SIGBREAKF_CTRL_C));
 }
-#undef ps
 /* \\\ */
 
 /* /// "nLoadSound()" */
-/* nch is threaded in only to give psdTxt() a poseidon base, as above */
-#define ps nch->nch_Base
-struct NepHidSound * nLoadSound(struct NepHidBase *nh, struct NepClassHid *nch, STRPTR name)
+struct NepHidSound * nLoadSound(struct NepHidBase *nh, STRPTR name)
 {
     struct NepHidSound *nhs;
     if((nhs = AllocVec(sizeof(struct NepHidSound), MEMF_PUBLIC|MEMF_CLEAR)))
@@ -7319,9 +7305,8 @@ struct NepHidSound * nLoadSound(struct NepHidBase *nh, struct NepClassHid *nch, 
                                             TAG_END);
             if(!nhs->nhs_DTHandle)
             {
-                nEasyRequest(nh, psdTxt("Could not load sound file '%s'.",
-                                    "Does '%s' make a sound\nin the woods, when it was chopped\nbut nobody was looking at it?"),
-                                    PSD_OK_TXT("No! Couldn't load it!"), name);
+                nEasyRequest(nh, "Could not load sound file '%s'.",
+                                    "OK", name);
             }
             return(nhs);
         }
@@ -7332,7 +7317,7 @@ struct NepHidSound * nLoadSound(struct NepHidBase *nh, struct NepClassHid *nch, 
 /* \\\ */
 
 /* /// "nPlaySound()" */
-BOOL nPlaySound(struct NepHidBase *nh, struct NepClassHid *nch, struct NepHidAction *nha)
+BOOL nPlaySound(struct NepHidBase *nh, struct NepHidAction *nha)
 {
     struct NepHidSound *nhs;
     struct dtTrigger playmsg;
@@ -7343,7 +7328,7 @@ BOOL nPlaySound(struct NepHidBase *nh, struct NepClassHid *nch, struct NepHidAct
     nhs = (struct NepHidSound *) FindName(&nh->nh_Sounds, nha->nha_SoundFile);
     if(!nhs)
     {
-        nhs = nLoadSound(nh, nch, nha->nha_SoundFile);
+        nhs = nLoadSound(nh, nha->nha_SoundFile);
     }
     if(!nhs)
     {
@@ -7364,7 +7349,6 @@ BOOL nPlaySound(struct NepHidBase *nh, struct NepClassHid *nch, struct NepHidAct
     DoMethodA(nhs->nhs_DTHandle, (Msg) &playmsg);
     return(TRUE);
 }
-#undef ps
 /* \\\ */
 
 /* /// "nFreeSound()" */

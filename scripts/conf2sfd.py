@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 conf2sfd.py - convert an AROS genmodule .conf into an .sfd (for sfdc) and/or a
-C funcTable[] in LVO order. Reused for poseidon, usbclass and the 30 classes.
+C funcTable[] in LVO order. Reused for neptune.library, usbclass and the 30 classes.
 
 Usage:
   conf2sfd.py <file.conf> --modname <name> --base <_XxxBase> [--mode sfd|functable]

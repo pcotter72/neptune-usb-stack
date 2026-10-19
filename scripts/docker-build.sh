@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build the Poseidon backport inside the Amiga cross-toolchain container.
+# Build Neptune inside the Amiga cross-toolchain container.
 #
 # No local m68k-amigaos toolchain is required: this runs the same public image CI
 # uses (ghcr.io/rondoval/amiga-build-container, GCC 16.2 + NDK 3.2 built from the
@@ -13,30 +13,30 @@
 #   scripts/docker-build.sh                    # configure + build everything
 #   scripts/docker-build.sh --target package   # ...stage + create the .lha (build first!)
 #   scripts/docker-build.sh --target install   # ...stage the install() tree into the prefix
-#   POSEIDON_CONFIGURE_ARGS="-DPOSEIDON_DEBUG_BACKEND=serial" scripts/docker-build.sh
+#   NEPTUNE_CONFIGURE_ARGS="-DNEPTUNE_DEBUG_BACKEND=serial" scripts/docker-build.sh
 #   # a CPU variant (the release builds 68020/soft, 68040/hard and 68060/hard):
-#   POSEIDON_BUILD_DIR=build-060 \
-#   POSEIDON_CONFIGURE_ARGS="-DM68K_CPU=68060 -DM68K_FPU=hard" scripts/docker-build.sh
+#   NEPTUNE_BUILD_DIR=build-060 \
+#   NEPTUNE_CONFIGURE_ARGS="-DM68K_CPU=68060 -DM68K_FPU=hard" scripts/docker-build.sh
 #
 # Any arguments are forwarded to `cmake --build <build dir>`.  The `package` target has
 # no build dependency (it stages whatever is built), so package after a plain build:
 #   scripts/docker-build.sh && scripts/docker-build.sh --target package
 #
 # Environment overrides:
-#   POSEIDON_BUILD_IMAGE     Toolchain image tag (default: ghcr.io/rondoval/amiga-build-container:gcc-v16.2)
-#   POSEIDON_CONFIGURE_ARGS  Extra args appended to the `cmake -S . -B <build dir>` configure step
-#                            (e.g. -DPOSEIDON_DEBUG_BACKEND=... -DPOSEIDON_DEBUG_LEVEL=...,
+#   NEPTUNE_BUILD_IMAGE     Toolchain image tag (default: ghcr.io/rondoval/amiga-build-container:gcc-v16.2)
+#   NEPTUNE_CONFIGURE_ARGS  Extra args appended to the `cmake -S . -B <build dir>` configure step
+#                            (e.g. -DNEPTUNE_DEBUG_BACKEND=... -DNEPTUNE_DEBUG_LEVEL=...,
 #                            -DM68K_CPU=... -DM68K_FPU=...)
-#   POSEIDON_BUILD_DIR       CMake build directory, relative to the workspace (default: build)
-#   POSEIDON_INSTALL_DIR     Install prefix (--target install), relative to the workspace
+#   NEPTUNE_BUILD_DIR       CMake build directory, relative to the workspace (default: build)
+#   NEPTUNE_INSTALL_DIR     Install prefix (--target install), relative to the workspace
 #                            (default: install)
-#   POSEIDON_SKIP_MUI38_CHECK
+#   NEPTUNE_SKIP_MUI38_CHECK
 #                            Set to 1 to skip the MUI 3.8 subset check
 #                            (scripts/check-mui38.py), which keeps the GUI fleet runnable
 #                            on muimaster.library 19; see that script for what it catches.
 set -euo pipefail
 
-IMAGE=${POSEIDON_BUILD_IMAGE:-"ghcr.io/rondoval/amiga-build-container:gcc-v16.2"}
+IMAGE=${NEPTUNE_BUILD_IMAGE:-"ghcr.io/rondoval/amiga-build-container:gcc-v16.2"}
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 ROOT=$(cd -- "${SCRIPT_DIR}/.." && pwd)
 
@@ -48,20 +48,20 @@ fi
 # Must contain no single quote.  `sh -ec` runs it, so the first failing step aborts the build;
 # "$@" is whatever the caller passed us, forwarded to `cmake --build`.
 BUILD_RECIPE='
-BD=${POSEIDON_BUILD_DIR:-build}
-ID=/work/${POSEIDON_INSTALL_DIR:-install}
+BD=${NEPTUNE_BUILD_DIR:-build}
+ID=/work/${NEPTUNE_INSTALL_DIR:-install}
 
 cmake -S . -B "$BD" \
 	-DCMAKE_TOOLCHAIN_FILE=cmake/toolchain.cmake \
 	-DCMAKE_INSTALL_PREFIX="$ID" \
 	-DMUI_INCLUDE_DIR="$MUI_INCLUDE_DIR" \
 	-DSANA2_INCLUDE_DIR="$SANA2_INCLUDE_DIR" \
-	${POSEIDON_CONFIGURE_ARGS:-}
+	${NEPTUNE_CONFIGURE_ARGS:-}
 
 cmake --build "$BD" -j"$(nproc)" "$@"
 
 # Post-build gate; fails the build on its own.  See the script for what it catches.
-[ "${POSEIDON_SKIP_MUI38_CHECK:-0}" = 1 ] || python3 scripts/check-mui38.py
+[ "${NEPTUNE_SKIP_MUI38_CHECK:-0}" = 1 ] || python3 scripts/check-mui38.py
 '
 
 # Outputs are written back to the mounted workspace; -u keeps them host-owned (not
@@ -78,9 +78,9 @@ docker run --rm \
 	-u "$(id -u):$(id -g)" \
 	-e HOME=/tmp \
 	-e LC_ALL=C \
-	-e POSEIDON_CONFIGURE_ARGS \
-	-e POSEIDON_BUILD_DIR \
-	-e POSEIDON_INSTALL_DIR \
-	-e POSEIDON_SKIP_MUI38_CHECK \
+	-e NEPTUNE_CONFIGURE_ARGS \
+	-e NEPTUNE_BUILD_DIR \
+	-e NEPTUNE_INSTALL_DIR \
+	-e NEPTUNE_SKIP_MUI38_CHECK \
 	"${IMAGE}" \
 	sh -ec "${BUILD_RECIPE}" sh "$@"

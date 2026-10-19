@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                     Power Management Tool for Poseidon
+ *                     Power Management Tool for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon Power Management Tool by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -11,11 +11,11 @@
 
 #include <proto/dos.h>
 #include <proto/exec.h>
-#include <proto/poseidon.h>
+#include <proto/neptune.h>
 
 #include "PowManTool.h"
 #include <string.h>
-#include <poseidon_version.h>
+#include <neptune_version.h>
 
 #define ARGS_OUTLET         0
 #define ARGS_ON             1
@@ -27,7 +27,7 @@
 
 const char PowManTool_prgname[] = "PowManTool";
 static const char *template = "SOCKET=OUTLET/N,ON/S,OFF/S,TOGGLE/S,STATUS/S,UNIT/N/K";
-const char PowManTool_version[] = PSD_VER("PowManTool") ", by Chris Hodges <chrisly@platon42.de>";
+const char PowManTool_version[] = NEP_VER("PowManTool");
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 
@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
             return(RETURN_ERROR);
         }
     }
-    ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION);
+    ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION);
     if(!ps)
     {
         FreeArgs(ArgsHook);

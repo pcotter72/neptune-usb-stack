@@ -1,7 +1,7 @@
 
 #include "numtostr.h"
 
-#include <proto/poseidon.h>
+#include <proto/neptune.h>
 
 #define PsdBase nch->nch_Base
 

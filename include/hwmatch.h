@@ -1,27 +1,25 @@
-#ifndef POSEIDON_HWMATCH_H
-#define POSEIDON_HWMATCH_H
+#ifndef NEPTUNE_HWMATCH_H
+#define NEPTUNE_HWMATCH_H
 /*
- * One definition of host-controller naming, shared by the library, Trident and
+ * One definition of host-controller naming, shared by the library, NeptuneUSB and
  * the CLI tools.
  *
- * A Poseidon hardware entry is a device name plus a unit number, and the name
+ * A Neptune hardware entry is a device name plus a unit number, and the name
  * is always the BARE driver name ("xhci.device"): psdAddHardware() strips any
- * path, so phw_DevName / HA_DeviceName, Trident's list and the prefs Trident
+ * path, so phw_DevName / HA_DeviceName, NeptuneUSB's list and the prefs NeptuneUSB
  * writes never carry one. Where the driver comes from is decided when it is
  * opened: one already in memory (Kickstart or Emu68 ROM resident, or opened
- * before) by that name, anything else from PSD_HWDRAWER -- a bare name alone
+ * before) by that name, anything else from NEP_HWDRAWER -- a bare name alone
  * would only ever be looked for in DEVS:.
  *
- * Paths still arrive from outside: an older poseidon.prefs, a command line, an
+ * Paths still arrive from outside: an imported poseidon.prefs, a command line, an
  * ASL pick. So matching compares trailing path components, and a stored
  * "DEVS:USBHardware/xhci.device" and a live "xhci.device" stay one controller.
  */
 
 #include <exec/types.h>
 #include <string.h>     /* stricmp() */
-
-/* The one drawer host-controller drivers are loaded from. */
-#define PSD_HWDRAWER "DEVS:USBHardware"
+#include <nep_paths.h>  /* NEP_HWDRAWER */
 
 /* The trailing path component: what follows the last '/' or ':'. */
 static inline CONST_STRPTR psdHwFilePart(CONST_STRPTR s)
@@ -57,4 +55,4 @@ static inline BOOL psdHwMatch(CONST_STRPTR a, ULONG unita,
     return((BOOL) ((unita == unitb) && psdHwNameMatch(a, b)));
 }
 
-#endif /* POSEIDON_HWMATCH_H */
+#endif /* NEPTUNE_HWMATCH_H */

@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         serialcp210x class for poseidon
+ *                         serialcp210x class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon serialcp210x class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -170,7 +170,7 @@ struct NepClassSerial * usbAttemptDeviceBinding(struct NepSerialBase *nh, struct
     IPTR vendid;
 
     KPRINTF(1, ("nepSerialAttemptDeviceBinding(%08lx)\n", pd));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_DEVICE, pd,
                     DA_VendorID, &vendid,
@@ -204,7 +204,7 @@ struct NepClassSerial * usbForceDeviceBinding(struct NepSerialBase *nh, struct P
     struct Task *tmptask;
 
     KPRINTF(1, ("nepSerialForceDeviceBinding(%08lx)\n", pd));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_DEVICE, pd,
                     DA_ProductID, &prodid,
@@ -240,7 +240,7 @@ struct NepClassSerial * usbForceDeviceBinding(struct NepSerialBase *nh, struct P
         if(!unitfound)
         {
             /* as units are freed in the expunge-vector, the memory is
-               outside the scope of the poseidon library */
+               outside the scope of neptune.library */
             if(!(ncp = AllocVec(sizeof(struct NepClassSerial), MEMF_PUBLIC|MEMF_CLEAR)))
             {
                 Permit();
@@ -272,7 +272,7 @@ struct NepClassSerial * usbForceDeviceBinding(struct NepSerialBase *nh, struct P
                 ncp->ncp_ReadySigTask = NULL;
                 //FreeSignal(ncp->ncp_ReadySignal);
                 psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                               PSD_BOUND_TXT("Another serial killer '%s' at %s unit %ld!"),
+                               NEP_BOUND_TXT,
                                devname, nh->nh_DevBase->np_Library.lib_Node.ln_Name,
                                ncp->ncp_UnitNo);
 
@@ -300,7 +300,7 @@ void usbReleaseDeviceBinding(struct NepSerialBase *nh, struct NepClassSerial *nc
     STRPTR devname;
 
     KPRINTF(1, ("nepSerialReleaseDeviceBinding(%08lx)\n", ncp));
-    if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+    if((ps = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
     {
         Forbid();
         ncp->ncp_ReadySignal = SIGB_SINGLE;
@@ -317,7 +317,7 @@ void usbReleaseDeviceBinding(struct NepSerialBase *nh, struct NepClassSerial *nc
         //FreeSignal(ncp->ncp_ReadySignal);
         psdGetAttrs(PGA_DEVICE, ncp->ncp_Device, DA_ProductName, &devname, TAG_END);
         psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                       PSD_RELEASED_TXT("Lost the wire on '%s'."),
+                       NEP_RELEASED_TXT,
                        devname);
         /*psdFreeVec(ncp);*/
         CloseLibrary(ps);
@@ -790,7 +790,7 @@ struct NepClassSerial * nAllocSerial(void)
     ncp = thistask->tc_UserData;
     do
     {
-        if(!(ncp->ncp_Base = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
+        if(!(ncp->ncp_Base = OpenLibrary(NEPTUNENAME, NEPTUNE_LIB_MIN_VERSION)))
         {
             Alert(AG_OpenLib);
             break;

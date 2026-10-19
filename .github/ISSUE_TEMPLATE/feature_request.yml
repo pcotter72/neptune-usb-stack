@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         Have an idea - a new USB device to support, a missing class driver, or an
-        improvement to the stack or Trident? Please describe it below.
+        improvement to the stack or Neptune USB? Please describe it below.
 
   - type: textarea
     id: problem
@@ -29,7 +29,7 @@ body:
     attributes:
       label: Affected component
       description: Which part of the stack this touches, if known.
-      placeholder: "new ethernet class / hub.class / Trident / poseidon.library"
+      placeholder: "new ethernet class / hub.class / Neptune USB / neptune.library"
     validations:
       required: false
 
@@ -37,7 +37,7 @@ body:
     id: device-ids
     attributes:
       label: Device vendor/product IDs
-      description: For a specific peripheral, its USB VID:PID (from PsdDevLister or lsusb).
+      description: For a specific peripheral, its USB VID:PID (from USBList or lsusb).
       placeholder: "0bda:8153"
     validations:
       required: false

@@ -3,7 +3,7 @@
 
 #include <exec/types.h>
 #include <exec/lists.h>
-#include <libraries/poseidon.h>
+#include <libraries/neptune.h>
 
 struct NepHubBase
 {
@@ -20,7 +20,7 @@ struct NepClassHub
 {
     struct Node         nch_Node;         /* Node linkage */
     struct NepHubBase  *nch_HubBase;      /* hub.class base */
-    struct Library     *nch_Base;         /* Poseidon base */
+    struct Library     *nch_Base;         /* neptune.library base */
     struct PsdHardware *nch_Hardware;     /* Up linkage */
     struct PsdDevice   *nch_Device;       /* Up linkage */
     struct PsdConfig   *nch_Config;       /* Up linkage */
