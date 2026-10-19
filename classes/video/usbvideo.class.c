@@ -188,7 +188,7 @@ struct NepClassVideo * usbForceInterfaceBinding(struct NepVideoBase *nh, struct 
             {
                 ncv->ncv_ReadySigTask = NULL;
                 psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                               PSD_BOUND1_TXT("Smile, '%s', you're on Amiga!"),
+                               NEP_BOUND1_TXT,
                                devname);
                 CloseLibrary(ps);
                 return ncv;
@@ -239,7 +239,7 @@ void usbReleaseInterfaceBinding(struct NepVideoBase *nh, struct NepClassVideo *n
     }
     psdGetAttrs(PGA_DEVICE, ncv->ncv_Device, DA_ProductName, &devname, TAG_END);
     psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                   PSD_RELEASED_TXT("'%s' has left the picture."),
+                   NEP_RELEASED_TXT,
                    devname);
     psdFreeVec(ncv);
     CloseLibrary(ps);

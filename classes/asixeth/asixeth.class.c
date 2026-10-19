@@ -307,7 +307,7 @@ struct NepClassEth * usbForceDeviceBinding(struct NepEthBase *nh, struct PsdDevi
                 ncp->ncp_ReadySigTask = NULL;
                 //FreeSignal(ncp->ncp_ReadySignal);
                 psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                               PSD_BOUND_TXT("A six yards hit by '%s' on %s unit %ld!"),
+                               NEP_BOUND_TXT,
                                devname, nh->nh_DevBase->np_Library.lib_Node.ln_Name,
                                ncp->ncp_UnitNo);
 
@@ -353,7 +353,7 @@ void usbReleaseDeviceBinding(struct NepEthBase *nh, struct NepClassEth *ncp)
         //FreeSignal(ncp->ncp_ReadySignal);
         psdGetAttrs(PGA_DEVICE, ncp->ncp_Device, DA_ProductName, &devname, TAG_END);
         psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                       PSD_RELEASED_TXT("A '%s' sucks."),
+                       NEP_RELEASED_TXT,
                        devname);
         /*psdFreeVec(ncp);*/
         CloseLibrary(ps);
@@ -725,7 +725,7 @@ void nEthTask()
                                 if(errcount > 20)
                                 {
                                     psdAddErrorMsg(RETURN_FAIL, (STRPTR) libname,
-                                                   PSD_GIVEUP_TXT);
+                                                   NEP_GIVEUP_TXT);
                                     Signal(ncp->ncp_Task, SIGBREAKF_CTRL_C);
                                 }
                             }
@@ -1177,8 +1177,7 @@ BOOL nInitASIX(struct NepClassEth *ncp)
     switch(ncp->ncp_PatchFlags & 0xf)
     {
         case PF_AX88178:
-            psdAddErrorMsg(RETURN_WARN, (STRPTR) libname, psdTxt("This adapter uses the AX88178 chipset; support is untested.",
-                       "This adapter uses the AX88178 chipset. This code is untested! Please report, if it works!"));
+            psdAddErrorMsg(RETURN_WARN, (STRPTR) libname, "This adapter uses the AX88178 chipset; support is untested.");
             psdPipeSetup(ncp->ncp_EP0Pipe, URTF_OUT|URTF_DEVICE|URTF_VENDOR, UAXR_WRITE_ENABLE, 0, 0);
             ioerr = psdDoPipe(ncp->ncp_EP0Pipe, NULL, 0);
             if(ioerr)

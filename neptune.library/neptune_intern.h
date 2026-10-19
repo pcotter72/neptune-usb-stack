@@ -1,24 +1,10 @@
 /****************************************************************************
-
-                 __   __                                    V/\V.       /\
-                |" | |" |                                   mMMnw,      || []
-                |  | |  |                                  (o  o)W   () || ||
-                |__|_|_"|                                  | /  |Mw  || ||//
-                ("  "  \|                                  \ -'_/mw   \\||/
-                 \______)                                   ~%%/WM"    \||
- _____    ___     ______  _____  __  _____     ___  __  __/~~__ ~~\    _||
-|"("  \()/\" \ ()/"_    )|"(___) ) )|"("  \ ()/\" \(__)/" ) /" ) " \  /_)O
-|  )   )/" \  \ (_/"\__/ |  )_  ( ( |  )_  ) /" \  \  /  /|/  / .\  \/ ,|O
-| (___/(  (_\__) _\  \_  | (__)  ) )| (__) |(  (_\__)/  /"/  /   |\   '_|O
-|  |  _ \  /  / /" \_/ ) | ")__ ( ( |  )"  ) \  /  //  /|/  / . .|/\__/ ||
-|__| (_) \/__/ (______/  |_(___) )_)|_(___/ . \/__/(__/ (__/ .:.:|      ||
-                 _____
-                |" __ \  Poseidon -- The divine USB stack for Amiga computers
-                | (__) ) Poseidon for AmigaOS
-                |  __ (  Designed and written by
-                |"(__) )   Chris Hodges <chrisly@platon42.de>
-                |_____/  Copyright (c) 2009-2026 The AROS Dev Team.
-                         Copyright (c) 2002-2009 Chris Hodges.
+ * Neptune - a fork of the Poseidon USB stack.
+ *
+ * Poseidon: designed and written by
+ *   Chris Hodges <chrisly@platon42.de>
+ * Copyright (c) 2009-2026 The AROS Dev Team.
+ * Copyright (c) 2002-2009 Chris Hodges.
  ****************************************************************************/
 
 /*
@@ -241,7 +227,6 @@ struct PsdBase
                                              the stack allocates there, and exec does not arbitrate
                                              a pool. Leaf-level. */
     ULONG               ps_MemAllocated;  /* Bytes of memory allocated by stack */
-    UWORD               ps_FunnyCount;    /* Funny Message Counter */
     BOOL                ps_ConfigRead;    /* Has a config been loaded? */
     BOOL                ps_CheckConfigReq; /* Set to true, to check if config changed */
     BOOL                ps_LinkPowerReq;  /* Set to true, to re-apply the link power policy */

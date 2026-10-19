@@ -1,24 +1,10 @@
 /****************************************************************************
-
-                 __   __                                    V/\V.       /\
-                |" | |" |                                   mMMnw,      || []
-                |  | |  |                                  (o  o)W   () || ||
-                |__|_|_"|                                  | /  |Mw  || ||//
-                ("  "  \|                                  \ -'_/mw   \\||/
-                 \______)                                   ~%%/WM"    \||
- _____    ___     ______  _____  __  _____     ___  __  __/~~__ ~~\    _||
-|"("  \()/\" \ ()/"_    )|"(___) ) )|"("  \ ()/\" \(__)/" ) /" ) " \  /_)O
-|  )   )/" \  \ (_/"\__/ |  )_  ( ( |  )_  ) /" \  \  /  /|/  / .\  \/ ,|O
-| (___/(  (_\__) _\  \_  | (__)  ) )| (__) |(  (_\__)/  /"/  /   |\   '_|O
-|  |  _ \  /  / /" \_/ ) | ")__ ( ( |  )"  ) \  /  //  /|/  / . .|/\__/ ||
-|__| (_) \/__/ (______/  |_(___) )_)|_(___/ . \/__/(__/ (__/ .:.:|      ||
-                 _____
-                |" __ \  Poseidon -- The divine USB stack for Amiga computers
-                | (__) )
-                |  __ (  Designed and written by
-                |"(__) )   Chris Hodges <chrisly@platon42.de>
-                |_____/  Copyright (c) 2009-2026 The AROS Dev Team.
-                         Copyright (c) 2002-2009 Chris Hodges.
+ * Neptune - a fork of the Poseidon USB stack.
+ *
+ * Poseidon: designed and written by
+ *   Chris Hodges <chrisly@platon42.de>
+ * Copyright (c) 2009-2026 The AROS Dev Team.
+ * Copyright (c) 2002-2009 Chris Hodges.
  ****************************************************************************/
 
 /*
@@ -160,9 +146,6 @@ int libOpen(struct PsdBase * ps)
                 /* also the value every prefs file written before this field
                    existed inherits, so link power keeps working as it did */
                 ps->ps_GlobalCfg->pgc_LinkPowerMgmt = TRUE;
-                /* likewise inherited by every older prefs file, so the
-                   traditional wording is what you get unless you ask */
-                ps->ps_GlobalCfg->pgc_MakeMeBoring = FALSE;
 
                 ps->ps_GlobalCfg->pgc_PrefsVersion = 0; // is updated on writing
                 ps->ps_ConfigRead = FALSE;
@@ -177,8 +160,7 @@ int libOpen(struct PsdBase * ps)
 
                 /* VERSION_STRING is the $VER cookie ("$VER: neptune.library <ver> (date) ...");
                  * skip the 6-char "$VER: " tag for the welcome banner. */
-                psdAddErrorMsg(RETURN_OK, (STRPTR) libname, psdTxt("Started %s (0x%08lx).",
-                               "Welcome to %s (0x%08lx)!"),
+                psdAddErrorMsg(RETURN_OK, (STRPTR) libname, "Started %s (0x%08lx).",
                                (STRPTR) VERSION_STRING + 6, ps->ps_ReleaseVersion);
 
                 KPRINTF(10, ("libOpen: Ok\n"));
@@ -2607,8 +2589,7 @@ static LONG pLegacyAddressDevice(struct PsdBase *ps, struct PsdPipe *pp, struct 
 
     if(!pAllocDevAddr(pd)) {
         psdAddErrorMsg0(RETURN_FAIL, (STRPTR) libname,
-                        psdTxt("No free device address: more than 127 devices on the bus.",
-                               "This cannot happen! More than 127 devices on the bus???"));
+                        "No free device address: more than 127 devices on the bus.");
         KPRINTF(20, ("out of addresses???\n"));
         return(UHIOERR_OUTOFMEMORY);
     }
@@ -4252,8 +4233,7 @@ BOOL (psdSetDeviceConfig)(struct PsdPipe * pp asm("a1"), UWORD cfgnum asm("d0"),
     }
     Permit();
     if(!pd->pd_CurrentConfig) {
-        psdAddErrorMsg0(RETURN_ERROR, (STRPTR) libname, psdTxt("Device has no current configuration.",
-                                                        "No current configuration, huh?"));
+        psdAddErrorMsg0(RETURN_ERROR, (STRPTR) libname, "Device has no current configuration.");
     } else {
         UWORD status = 0;
         // power saving stuff
@@ -4652,8 +4632,7 @@ fail_restore:
     pp->pp_IOReq.iouh_NakTimeout = oldnaktimeout;
 
     psdAddErrorMsg0(RETURN_FAIL, (STRPTR) libname,
-                    psdTxt("Device enumeration failed.",
-                           "Device enumeration failed, sorry."));
+                    "Device enumeration failed.");
     psdUnlockDevice(pd);
     return(NULL);
 
@@ -5538,8 +5517,7 @@ struct PsdDevice * (psdEnumerateHardware)(struct PsdHardware * phw asm("a0"), st
     if (!phw->phw_RootDevice)
     {
         psdAddErrorMsg0(RETURN_FAIL, (STRPTR)libname,
-                        psdTxt("Root hub enumeration failed.",
-                               "Root hub enumeration failed. Blame your hardware driver programmer."));
+                        "Root hub enumeration failed.");
         return NULL;
     }
 
@@ -5637,8 +5615,7 @@ void (psdRemHardware)(struct PsdHardware * phw asm("a0"), struct PsdBase * ps as
     //FreeSignal(phw->phw_ReadySignal);
     KPRINTF(1, ("FreeHardware(0x%08lx) freevec name\n", phw));
     psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                   psdTxt("Removed hardware %s/%ld.",
-                          "Removed hardware %s/%ld. Bye bye!"),
+                   "Removed hardware %s/%ld.",
                    phw->phw_DevName, phw->phw_Unit);
     psdFreeVec(phw->phw_DevName);
     psdFreeVec(phw->phw_ProductName);
@@ -5754,8 +5731,7 @@ struct PsdPipe * (psdAllocPipe)(struct PsdDevice * pd asm("a0"), struct MsgPort 
             (pep->pep_TransType == USEAF_ISOCHRONOUS) &&
             (!(pd->pd_Hardware->phw_Capabilities & UHCF_ISO))) {
         psdAddErrorMsg0(RETURN_FAIL, (STRPTR) libname,
-                        psdTxt("Controller driver does not support isochronous transfers.",
-                               "Your HW controller driver does not support iso transfers. Sorry."));
+                        "Controller driver does not support isochronous transfers.");
         return(NULL);
     }
 
@@ -6427,8 +6403,7 @@ LONG (psdWaitPipe)(struct PsdPipe * pp asm("a1"), struct PsdBase * ps asm("a6"))
         if(!(pd->pd_Flags & PDFF_DEAD)) {
             pd->pd_Flags |= PDFF_DEAD;
             psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
-                           psdTxt("Device %s stopped responding.",
-                                  "Device %s probably dropped dead!"), pd->pd_ProductStr);
+                           "Device %s stopped responding.", pd->pd_ProductStr);
 
             psdSendEvent(EHMB_DEVICEDEAD, pp->pp_Device, NULL);
         }
@@ -6436,8 +6411,7 @@ LONG (psdWaitPipe)(struct PsdPipe * pp asm("a1"), struct PsdBase * ps asm("a6"))
         if((!pd->pd_DeadCount) && ((pd->pd_Flags & (PDFF_DEAD|PDFF_CONNECTED)) == (PDFF_DEAD|PDFF_CONNECTED))) {
             pd->pd_Flags &= ~PDFF_DEAD;
             psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                           psdTxt("Device %s is responding again.",
-                                  "Uuuhuuuhh, the zombie %s returned from the dead!"), pd->pd_ProductStr);
+                           "Device %s is responding again.", pd->pd_ProductStr);
         }
     }
     return(ioerr);
@@ -7153,8 +7127,7 @@ struct PsdRTIsoHandler * (psdAllocRTIsoHandlerA)(struct PsdEndpoint * pep asm("a
         (phw->phw_ContextBackend &&
          !(phw->phw_CtxCmdMask & UHCD_CTXCMD_BIT(NSCMD_USB_REGISTER_HOOKS))))
     {
-        psdAddErrorMsg0(RETURN_FAIL, (STRPTR)libname, psdTxt("Controller driver does not support realtime isochronous transfers.",
-                                                 "Your HW controller driver does not support realtime iso transfers. Sorry."));
+        psdAddErrorMsg0(RETURN_FAIL, (STRPTR)libname, "Controller driver does not support realtime isochronous transfers.");
         return (NULL);
     }
 
@@ -7259,21 +7232,7 @@ struct PsdUsbClass * (psdAddClass)(STRPTR name asm("a1"), ULONG vers asm("d0"), 
     struct PsdUsbClass *puc;
     IPTR pri = 0;
     STRPTR desc;
-    UWORD msgoff;
     STRPTR origname = name;
-    /* Deliberately a *local* array: a static pointer table needs relocations
-       and would give the library a .data section, which ROM-ability forbids.
-       All eight take the same args as the plain wording below. */
-    STRPTR evilmsg[8] = { "Say hello to %s V%ld.%ld (%s).",
-                          "Whoah! %s V%ld.%ld surprised as %s.",
-                          "The door bell rang for %s V%ld.%ld (%s).",
-                          "Welcome %s V%ld.%ld (%s) to the party.",
-
-                          "Don't laugh at %s V%ld.%ld for %s.",
-                          "Time has come for %s V%ld.%ld (%s) to join the show.",
-                          "Start blaming %s V%ld.%ld for helping at %s.",
-                          "Ain't %s V%ld.%ld useful for %s?"
-                        };
 
     KPRINTF(5, ("psdAddClass(%s, %ld)\n", name, vers));
 
@@ -7293,8 +7252,7 @@ struct PsdUsbClass * (psdAddClass)(STRPTR name asm("a1"), ULONG vers asm("d0"), 
         if(FindName(&ps->ps_Classes, cls->lib_Node.ln_Name)) {
             Permit();
             psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
-                           psdTxt("Class %s is already installed.",
-                                  "Attempted to add class %s twice. Nothing is good enough for people like you."),
+                           "Class %s is already installed.",
                            name);
             KPRINTF(20, ("attempt to add class twice!\n"));
             CloseLibrary(cls);
@@ -7316,10 +7274,8 @@ struct PsdUsbClass * (psdAddClass)(STRPTR name asm("a1"), ULONG vers asm("d0"), 
             psdLockWritePBase();
             Enqueue(&ps->ps_Classes, &puc->puc_Node);
             psdUnlockPBase();
-            msgoff = ps->ps_FunnyCount++ & 7;
-
             psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                           psdTxt((STRPTR) "Added class %s V%ld.%ld (%s).", evilmsg[msgoff]),
+                           "Added class %s V%ld.%ld (%s).",
                            cls->lib_Node.ln_Name, cls->lib_Version, cls->lib_Revision, desc);
             psdSendEvent(EHMB_ADDCLASS, puc, NULL);
             return(puc);
@@ -7382,14 +7338,12 @@ void (psdRemClass)(struct PsdUsbClass * puc asm("a1"), struct PsdBase * ps asm("
         /* counter out of sync with the binding fields: leaking the class is
            safer than closing a library something still believes it holds */
         psdAddErrorMsg(RETURN_FAIL, (STRPTR) libname,
-                       psdTxt("Class %s still in use (cnt=%ld); not removed.",
-                              "This should never happen! Class %s still in use (cnt=%ld). Could not get rid of it! Sorry, we're broke."),
+                       "Class %s still in use (cnt=%ld); not removed.",
                        puc->puc_ClassBase->lib_Node.ln_Name, puc->puc_UseCnt);
         return;
     }
     psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                   psdTxt("Removed class %s.",
-                          "I shot class %s, but I didn't kill the deputy."),
+                   "Removed class %s.",
                    puc->puc_ClassBase->lib_Node.ln_Name);
     CloseLibrary(puc->puc_ClassBase);
     psdFreeVec(puc->puc_ClassName);
@@ -7400,13 +7354,6 @@ void (psdRemClass)(struct PsdUsbClass * puc asm("a1"), struct PsdBase * ps asm("
 /* \\\ */
 
 /* *** Error Msgs *** */
-
-/* /// "psdIsBoring()" */
-BOOL (psdIsBoring)(struct PsdBase * ps asm("a6"))
-{
-    return(ps->ps_GlobalCfg->pgc_MakeMeBoring ? TRUE : FALSE);
-}
-/* \\\ */
 
 /* /// "psdAddErrorMsgA()" */
 struct PsdErrorMsg * (psdAddErrorMsgA)(UWORD level asm("d0"), STRPTR origin asm("a0"), STRPTR fmtstr asm("a1"), RAWARG fmtdata asm("a2"), struct PsdBase * ps asm("a6"))
@@ -7636,8 +7583,7 @@ struct PsdAppBinding * (psdClaimAppBindingA)(struct TagItem * tags asm("a1"), st
             /* If there are bindings, get rid of them. */
             if(pd->pd_DevBinding) {
                 psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                               psdTxt("Task %s claimed '%s'; the previous binding was released.",
-                                      "%s really wants to bind to %s, so I'm letting the old binding go."),
+                               "Task %s claimed '%s'; the previous binding was released.",
                                FindTask(NULL)->tc_Node.ln_Name,
                                pd->pd_ProductStr);
 
@@ -7649,8 +7595,7 @@ struct PsdAppBinding * (psdClaimAppBindingA)(struct TagItem * tags asm("a1"), st
                     while(pif->pif_Node.ln_Succ) {
                         if(pif->pif_IfBinding) {
                             psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                                           psdTxt("Task %s claimed '%s'; the previous binding was released.",
-                                      "%s really wants to bind to %s, so I'm letting the old binding go."),
+                                           "Task %s claimed '%s'; the previous binding was released.",
                                            FindTask(NULL)->tc_Node.ln_Name,
                                            pd->pd_ProductStr);
                             psdReleaseIfBinding(pif);
@@ -7912,8 +7857,7 @@ void (psdHubClassScan)(struct PsdDevice * pd asm("a0"), struct PsdBase * ps asm(
                                         }
                                         if(!pif->pif_Node.ln_Succ) {
                                             KPRINTF(5, ("Interface list walk fell off the end!\n"));
-                                            psdAddErrorMsg0(RETURN_FAIL, (STRPTR) libname, psdTxt("Interface list walk failed; giving up.",
-                                                                            "Something incredibly stupid happened. I've given up."));
+                                            psdAddErrorMsg0(RETURN_FAIL, (STRPTR) libname, "Interface list walk failed; giving up.");
                                             Permit();
                                             break;
                                         }
@@ -8231,8 +8175,7 @@ BOOL (psdReadCfg)(struct PsdIFFContext * pic asm("a0"), APTR formdata asm("a1"),
         buf = (ULONG *) (((UBYTE *) buf) + chlen);
     }
     if(len) {
-        psdAddErrorMsg0(RETURN_FAIL, (STRPTR) libname, psdTxt("Corrupted FORM chunk; the configuration may be damaged.",
-                                                   "Tried to add a nasty corrupted FORM chunk! Configuration is probably b0rken!"));
+        psdAddErrorMsg0(RETURN_FAIL, (STRPTR) libname, "Corrupted FORM chunk; the configuration may be damaged.");
         res = 0;
     }
 
@@ -9383,8 +9326,7 @@ struct PsdIFFContext * pAddCfgChunk(struct PsdBase * ps, struct PsdIFFContext *p
                 buf = (ULONG *) (((UBYTE *) buf) + chlen);
             }
             if(len) {
-                psdAddErrorMsg0(RETURN_FAIL, (STRPTR) libname, psdTxt("Corrupted FORM chunk; the configuration may be damaged.",
-                                                   "Tried to add a nasty corrupted FORM chunk! Configuration is probably b0rken!"));
+                psdAddErrorMsg0(RETURN_FAIL, (STRPTR) libname, "Corrupted FORM chunk; the configuration may be damaged.");
                 return(NULL);
             }
         } else {
@@ -10638,14 +10580,12 @@ void pDeviceTask()
                 psdDelayMS(100);
                 if(++cnt == 50) {
                     psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
-                                   psdTxt("Still %ld IORequests pending before the unit can go down.",
-                                          "There are still %ld IORequests pending, before unit can go down. Driver buggy?"),
+                                   "Still %ld IORequests pending before the unit can go down.",
                                    phw->phw_MsgCount);
                 }
                 if(cnt == 300) {
                     psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
-                                   psdTxt("Timed out waiting for %ld pending IORequests; abandoning them.",
-                                          "Okay, I've waited long enough, sod these %ld IORequests."),
+                                   "Timed out waiting for %ld pending IORequests; abandoning them.",
                                    phw->phw_MsgCount);
                     phw->phw_MsgCount = 0;
                     break;
@@ -10863,7 +10803,7 @@ void pEventHandlerTask()
                                     po->po_ReadySigTask = NULL;
                                     //FreeSignal(po->po_ReadySignal);
                                     if(po->po_Task) {
-                                        psdAddErrorMsg0(RETURN_OK, (STRPTR) libname, psdTxt("PoPo started.", "PoPo kicks ass."));
+                                        psdAddErrorMsg0(RETURN_OK, (STRPTR) libname, "PoPo started.");
                                     }
                                 }
                                 if((cfgchanged + 2) == counter) {
@@ -11130,7 +11070,6 @@ static const ULONG PsdGlobalCfgPT[] = {
     PACK_ENTRY(GCA_Dummy, GCA_LogWarning, PsdGlobalCfg, pgc_LogWarning, PKCTRL_UWORD|PKCTRL_PACKUNPACK),
     PACK_ENTRY(GCA_Dummy, GCA_LogError, PsdGlobalCfg, pgc_LogError, PKCTRL_UWORD|PKCTRL_PACKUNPACK),
     PACK_ENTRY(GCA_Dummy, GCA_LogFailure, PsdGlobalCfg, pgc_LogFailure, PKCTRL_UWORD|PKCTRL_PACKUNPACK),
-    PACK_ENTRY(GCA_Dummy, GCA_MakeMeBoring, PsdGlobalCfg, pgc_MakeMeBoring, PKCTRL_UWORD|PKCTRL_PACKUNPACK),
     PACK_ENTRY(GCA_Dummy, GCA_BootDelay, PsdGlobalCfg, pgc_BootDelay, PKCTRL_ULONG|PKCTRL_PACKUNPACK),
     PACK_ENTRY(GCA_Dummy, GCA_SubTaskPri, PsdGlobalCfg, pgc_SubTaskPri, PKCTRL_WORD|PKCTRL_PACKUNPACK),
     PACK_ENTRY(GCA_Dummy, GCA_PopupDeviceNew, PsdGlobalCfg, pgc_PopupDeviceNew, PKCTRL_UWORD|PKCTRL_PACKUNPACK),
@@ -11215,7 +11154,7 @@ static const ULONG * const PsdPTArray[] = {
  * addresses, and those public prototypes omit the a6 libbase that every implementation
  * takes (APTR psdAllocVec(ULONG) vs APTR psdAllocVec(ULONG asm("d0"), struct PsdBase * asm("a6"))).
  * Pre-LTO the two never met; with LTO the compiler sees both TUs and it is
- * -Wlto-type-mismatch on all 100 of them -- the same conflict neptune.library.h warns
+ * -Wlto-type-mismatch on every one of them -- the same conflict neptune.library.h warns
  * about for <proto/neptune.h>.  Below the definitions, no declarations are needed at all.
  *
  * Order IS the ABI: 4 std vectors, then neptune.sfd order (neptune_funcs.inc -- hand

@@ -147,8 +147,7 @@ struct NepClassPTP * usbAttemptInterfaceBinding(struct NepPTPBase *nh, struct Ps
                                         PPA_NakTimeout, TRUE,
                                         PPA_NakTimeoutTime, 500,
                                         TAG_END);
-                            psdAddErrorMsg(RETURN_OK, (STRPTR) libname, psdTxt("Checking whether this is an MTP device.",
-                       "This might be an MTP device, we will look in detail."));
+                            psdAddErrorMsg(RETURN_OK, (STRPTR) libname, "Checking whether this is an MTP device.");
                             idstr = psdGetStringDescriptor(pp, 0xee);
                             if(idstr)
                             {
@@ -239,7 +238,7 @@ struct NepClassPTP * usbForceInterfaceBinding(struct NepPTPBase *nh, struct PsdI
                         nch->nch_ReadySigTask = NULL;
                         //FreeSignal(nch->nch_ReadySignal);
                         psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                                       PSD_BOUND1_TXT("Hold still for images from for '%s'!"),
+                                       NEP_BOUND1_TXT,
                                        devname);
 
                         Forbid();
@@ -301,7 +300,7 @@ void usbReleaseInterfaceBinding(struct NepPTPBase *nh, struct NepClassPTP *nch)
         psdGetAttrs(PGA_CONFIG, pc, CA_Device, &pd, TAG_END);
         psdGetAttrs(PGA_DEVICE, pd, DA_ProductName, &devname, TAG_END);
         psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                       PSD_RELEASED_TXT("Still pictures of '%s' became fugitive!"),
+                       NEP_RELEASED_TXT,
                        devname);
         Forbid();
         Remove(&nch->nch_Node);

@@ -981,8 +981,7 @@ struct NepClassMS * usbForceInterfaceBinding(struct NepMSBase *nh, struct PsdInt
                     //ncm->ncm_ReadySigTask = NULL;
                     //FreeSignal(ncm->ncm_ReadySignal);
                     psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                                   psdTxt("Mounted '%s' LUN %ld as %s unit %ld.",
-                                   "MSD '%s' LUN %ld available through %s unit %ld!"),
+                                   "Mounted '%s' LUN %ld as %s unit %ld.",
                                    devname, lunnum, nh->nh_DevBase->np_Library.lib_Node.ln_Name,
                                    ncm->ncm_UnitNo);
                     //lunnum++;
@@ -1051,7 +1050,7 @@ void usbReleaseInterfaceBinding(struct NepMSBase *nh, struct NepClassMS *ncm)
             }
         }
         psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                       PSD_RELEASED_TXT("'%s' retreated, pitiful coward."),
+                       NEP_RELEASED_TXT,
                        devname);
         CloseLibrary(ps);
     }
@@ -5714,7 +5713,7 @@ void nGUITask()
                 }
 
                 case ID_ABOUT:
-                    MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, PSD_OK_TXT("Blimey!"), VERSION_STRING "\n\nAutomounting by the a4091.device mounter,\n(c) Toni Wilen and contributors.\nSee LEGAL for full attribution.", NULL);
+                    MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", VERSION_STRING "\n\nAutomounting by the a4091.device mounter,\n(c) Toni Wilen and contributors.\nSee LEGAL for full attribution.", NULL);
                     break;
 
                 case ID_FORGET_CONFIG:
@@ -5791,13 +5790,13 @@ void AutoDetectMaxTransfer(struct NepClassMS *cncm)
     }
     if(!cncm->ncm_UnitReady)
     {
-        MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, PSD_OK_TXT("Argh!"), "No disk/media in drive!", NULL);
+        MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "No disk/media in drive!", NULL);
         return;
     }
     memory = (UBYTE *) AllocVec(memsize, MEMF_CLEAR);
     if(!memory)
     {
-        MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, PSD_OK_TXT("Argh!"), "Sorry, out of memory!", NULL);
+        MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "Sorry, out of memory!", NULL);
         return;
     }
     mp = CreateMsgPort();
@@ -5851,7 +5850,7 @@ void AutoDetectMaxTransfer(struct NepClassMS *cncm)
                             {
                                 if(!memcmp(&orgbuffer[block * maxtrans], &orgbuffer[(block + 1) * maxtrans], (size_t) maxtrans))
                                 {
-                                    res = MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "Continue|Abort", "Sorry, media contents do not\nseem to be diversive enough!\nResults might be wrong!", NULL);
+                                    res = MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "Continue|Abort", "Medium contents are too uniform\nfor a reliable test.\nResults might be wrong.", NULL);
                                     if(!res)
                                     {
                                         bail = TRUE;
@@ -5900,7 +5899,7 @@ void AutoDetectMaxTransfer(struct NepClassMS *cncm)
                             }
                         }
                         if(bail) break;
-                        //MUI_Request(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, PSD_OK_TXT("Wow!"), "Test with %ld (%ld) succeeded!", maxtrans, numblocks);
+                        //MUI_Request(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "Test with %ld (%ld) succeeded!", maxtrans, numblocks);
                         if(ncm->ncm_CDC->cdc_MaxTransfer < 7)
                         {
                             ncm->ncm_CDC->cdc_MaxTransfer++;
@@ -5910,20 +5909,20 @@ void AutoDetectMaxTransfer(struct NepClassMS *cncm)
                     } while(TRUE);
                     if(!bail)
                     {
-                        MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, PSD_OK_TXT("Wow!"), "Test succeeded, setting MaxTrans to maximum value!", NULL);
+                        MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "Test succeeded, setting MaxTrans to maximum value!", NULL);
                     }
                 } while(FALSE);
                 CloseDevice((struct IORequest *) ioreq);
             } else {
-                MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, PSD_OK_TXT("Argh!"), "Couldn't open device!", NULL);
+                MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "Couldn't open device!", NULL);
             }
             DeleteIORequest((struct IORequest *) ioreq);
         } else {
-            MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, PSD_OK_TXT("Argh!"), "No IOReq!", NULL);
+            MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "No IOReq!", NULL);
         }
         DeleteMsgPort(mp);
     } else {
-        MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, PSD_OK_TXT("Argh!"), "No MsgPort!", NULL);
+        MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "No MsgPort!", NULL);
     }
     FreeVec(memory);
 }

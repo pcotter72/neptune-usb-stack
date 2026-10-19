@@ -285,7 +285,7 @@ struct NepClassEth * usbForceDeviceBinding(struct NepEthBase *nh, struct PsdDevi
                 ncp->ncp_ReadySigTask = NULL;
                 //FreeSignal(ncp->ncp_ReadySignal);
                 psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                               PSD_BOUND_TXT("And Goliath trembled with fear over '%s' on %s unit %ld!"),
+                               NEP_BOUND_TXT,
                                devname, nh->nh_DevBase->np_Library.lib_Node.ln_Name,
                                ncp->ncp_UnitNo);
 
@@ -331,7 +331,7 @@ void usbReleaseDeviceBinding(struct NepEthBase *nh, struct NepClassEth *ncp)
         //FreeSignal(ncp->ncp_ReadySignal);
         psdGetAttrs(PGA_DEVICE, ncp->ncp_Device, DA_ProductName, &devname, TAG_END);
         psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                       PSD_RELEASED_TXT("But finally Goliath crushed '%s'."),
+                       NEP_RELEASED_TXT,
                        devname);
         /*psdFreeVec(ncp);*/
         CloseLibrary(ps);
@@ -697,7 +697,7 @@ void nEthTask()
                                 if(errcount > 20)
                                 {
                                     psdAddErrorMsg(RETURN_FAIL, (STRPTR) libname,
-                                                   PSD_GIVEUP_TXT);
+                                                   NEP_GIVEUP_TXT);
                                     Signal(ncp->ncp_Task, SIGBREAKF_CTRL_C);
                                 }
                             }

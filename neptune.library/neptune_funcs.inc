@@ -94,7 +94,6 @@
     (APTR)psdResumeDevice,
     (APTR)psdSuspendBindings,
     (APTR)psdResumeBindings,
-    (APTR)psdIsBoring,
     (APTR)psdResetDevice,
     (APTR)psdSafeEjectDevice,
     (APTR)psdClearEndpointHalt,

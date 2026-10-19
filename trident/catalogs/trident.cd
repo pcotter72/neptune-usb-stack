@@ -113,7 +113,7 @@ MSG_ERRLVL_FAILURES (//)
 Failures only
 ;
 MSG_POPUP_NEVER (//)
-Never open a popup window! Bah!
+Never open a popup window
 ;
 MSG_POPUP_ERROR (//)
 Only popup on an error condition
@@ -134,7 +134,7 @@ MSG_POPUP_BINDING (//)
 Popup, regardless of binding
 ;
 MSG_POPUP_ALWAYS (//)
-Always immediately annoy me
+Always open a popup window
 ;
 MSG_PANEL_GENERAL_LABEL1 (//)
 \33cTrident Graphical User Interface
@@ -298,9 +298,6 @@ MSG_PANEL_DEVICES_DISABLE (//)
 MSG_PANEL_DEVICES_DISABLE_HELP (//)
 Permanently powers off the port. It cannot be\nreactivated by unplugging/replugging the device.\n
 ;
-MSG_POSEIDON_SHORTHELP (//)
-Poseidon (his latin name Neptune) the god of the sea\nand its inhabitants, and one of the Olympians, the son\nof Cronus and Rhea, brother of Zeus, Hades, Demeter,\nHera, Hestia. He was married to Amphitrite, a Nereid,\nand had by her the son Triton, a merman. Like other\nOlympians, had many love affairs (e.g. with Medusa)\nand numerous children (e.g. Pegasos).
-;
 MSG_PANEL_CLASSES (//)
 \33c\33bUSB Classes available
 ;
@@ -386,7 +383,7 @@ MSG_PANEL_OPTIONS_POWERCYCLE (//)
 Automatically power cycle hub port, if device drops dead:
 ;
 MSG_PANEL_OPTIONS_POWERCYCLE_HELP (//)
-If a device drops dead (transfer timeouts),\nand this switch is selected, then the hub port\nwill be reset automatically to try to revive the\ndevice. However, this can lead to nasty infinity loops.
+Power-cycles a device that stopped responding, which\nis often enough to bring it back. Leave this on unless\na device reacts badly to being power-cycled.
 ;
 MSG_PANEL_OPTIONS_POWERSAVE (//)
 Enable power-saving suspend mode:
@@ -671,10 +668,10 @@ MSG_ACTION_DEV_FORCEBIND_NONE (//)
 None
 ;
 MSG_ACTION_DEV_FORCE_REQ (//)
-I'm not dumb!|I'll reconsider
+Continue|Cancel
 ;
 MSG_ACTION_DEV_FORCE_REQ_TXT (//)
-You are about to establish a forced \33bdevice\33n\nbinding. This is not an interface binding. As\nmost people are not capable of reading the\nmanual and they cause more harm than good.\nPlease make sure you know, what you're doing\nand not breaking things (and then bugger me with\nsilly emails).
+You are about to create a forced \33bdevice\33n binding.\nThis is not an interface binding, and an incorrect\nforced binding can stop the device working entirely.\n\nContinue only if you know what this does.
 ;
 MSG_ACTION_DEV_FORCE (//)
 Forcing device binding of %s to %s.
@@ -730,9 +727,6 @@ Failed to open file %s.
 MSG_ACTION_CFG_IMPORT (//)
 Select file to import prefs from...
 ;
-MSG_ACTION_CFGDATA_OOPS (//)
-Oops!
-;
 MSG_ACTION_CFGDATA_OOPS_HELP (//)
 To import device or interface\nprefs data, you need to select\nthe device entry where it should be added.
 ;
@@ -780,9 +774,6 @@ Add|Cancel
 ;
 MSG_APPLYDRAGACTION_DEVICECFG_ADD_HELP (//)
 Do you want to \33badd\33n the prefs of\n\33b%s\33n\nto the device\n\33b%s\33n?
-;
-MSG_CFGLISTDISPATCHER_OOPS (//)
-Oops!
 ;
 MSG_CFGLISTDISPATCHER_OOPS_HELP (//)
 Sorry, drag'n drop operation to\nthat target is not supported.
@@ -844,31 +835,7 @@ Enable USB link power management:
 MSG_PANEL_OPTIONS_LINKPOWER_HELP (//)
 Lets an idle link drop into a low power state\nbetween transfers (U1/U2 on SuperSpeed, L1 on\nHigh-Speed) and enables Latency Tolerance\nMessaging. Entry and exit are handled by the\ncontroller and are transparent to transfers.\nTurn this off if a device misbehaves when idle.
 ;
-MSG_PANEL_OPTIONS_BORING (//)
-Use plain, factual messages:
-;
-MSG_PANEL_OPTIONS_BORING_HELP (//)
-Replaces Poseidon's traditional light-hearted log\nentries, popups and requesters with short factual\nones. Takes effect immediately for new messages;\nentries already in the log keep their original\nwording, and the Poseidon logo's help text changes\nafter the next Trident restart.
-;
-MSG_POPUP_NEVER_PLAIN (//)
-Never open a popup window
-;
-MSG_POPUP_ALWAYS_PLAIN (//)
-Always open a popup window
-;
-MSG_POSEIDON_SHORTHELP_PLAIN (//)
-The Poseidon USB stack for AmigaOS.
-;
-MSG_PANEL_OPTIONS_POWERCYCLE_HELP_PLAIN (//)
-Power-cycles a device that stopped responding, which\nis often enough to bring it back. Leave this on unless\na device reacts badly to being power-cycled.
-;
-MSG_ACTION_DEV_FORCE_REQ_PLAIN (//)
-Continue|Cancel
-;
-MSG_ACTION_DEV_FORCE_REQ_TXT_PLAIN (//)
-You are about to create a forced \33bdevice\33n binding.\nThis is not an interface binding, and an incorrect\nforced binding can stop the device working entirely.\n\nContinue only if you know what this does.
-;
-MSG_REQ_OOPS_PLAIN (//)
+MSG_REQ_OK (//)
 OK
 ;
 MSG_PANEL_DEVICES_EJECT (//)

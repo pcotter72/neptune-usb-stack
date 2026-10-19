@@ -492,18 +492,10 @@ IPTR DevWinDispatcher(struct IClass * cl asm("a0"), Object * obj asm("a2"), Msg 
                         Child, Label("Power info:"),
                         Child, data->overridepowerobj = CycleObject,
                             MUIA_CycleChain, 1,
-                            MUIA_ShortHelp, psdTxt(
-                                            "Some devices and hubs report that they are\n"
+                            MUIA_ShortHelp, "Some devices and hubs report that they are\n"
                                             "self-powered when they are in fact bus-powered.\n"
                                             "Overriding what the device claims about itself\n"
                                             "lets power management work correctly.",
-
-                                            "Some devices and hubs give wrong information\n"
-                                            "about being self-powered, when they're actually\n"
-                                            "bus-powered, making me lose my hair.\n"
-                                            "Hence, you can override the information the\n"
-                                            "device gives about itself, allowing the power\n"
-                                            "management to work nicely."),
                             MUIA_Cycle_Entries, overridepowerstrings,
                             MUIA_Cycle_Active, overridepower,
                             End,
@@ -859,20 +851,11 @@ IPTR DevWinDispatcher(struct IClass * cl asm("a0"), Object * obj asm("a2"), Msg 
                     /* not localised, unlike its device-binding twin in
                        ActionClass.c (MSG_ACTION_DEV_FORCE_REQ) */
                     clever = MUI_RequestA(_app(obj), obj, 0, NULL,
-                                         psdTxt("Continue|Cancel",
-                                                "I'm not dumb!|I'll reconsider"),
-                                         psdTxt(
+                                         "Continue|Cancel",
                                          "You are about to create a forced \33binterface\33n\n"
                                          "binding. An incorrect forced binding can stop the\n"
                                          "device working entirely.\n\n"
-                                         "Continue only if you know what this does.",
-
-                                         "You are about to establish a forced \33binterface\33n\n"
-                                         "binding. As most people are not capable of reading the\n"
-                                         "manual and they cause more harm than good,\n"
-                                         "please make sure you know, what you're doing\n"
-                                         "and not breaking things (and then bugger me with\n"
-                                         "silly emails)."), NULL);
+                                         "Continue only if you know what this does.", NULL);
                     if(!clever)
                     {
                         return(FALSE);

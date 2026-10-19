@@ -145,7 +145,6 @@ struct ActionData
     Object *cfglogwarnobj;
     Object *cfglogerrobj;
     Object *cfglogfailobj;
-    Object *cfgboringobj;
     Object *cfgpopupnewobj;
     Object *cfgpopupgoneobj;
     Object *cfgpopupdeathobj;

@@ -172,7 +172,7 @@ void pPoPoGUITask()
         MUIA_Application_Version    , (IPTR)VERSION_STRING,
         MUIA_Application_Copyright  , (IPTR)"(C) 2004-2009 Chris Hodges",
         MUIA_Application_Author     , (IPTR)"Chris Hodges <chrisly@platon42.de>",
-        MUIA_Application_Description, (IPTR)"Opens annoying windows",
+        MUIA_Application_Description, (IPTR)"Shows USB device notifications",
         MUIA_Application_Base       , (IPTR)"POPO",
         MUIA_Application_HelpFile   , (IPTR)"HELP:Poseidon.guide",
         MUIA_Application_Menustrip  , (IPTR)MenustripObject,
@@ -375,8 +375,7 @@ void pPoPoGUITask()
                (!ps->ps_GlobalCfg->pgc_PopupDeviceDeath) &&
                (!ps->ps_GlobalCfg->pgc_PopupDeviceGone))
             {
-                psdAddErrorMsg0(RETURN_OK, (STRPTR) "PoPo", psdTxt("PoPo has no popups left to show; exiting.",
-                                "PoPo has been abandoned (is it you, stuntzi?)."));
+                psdAddErrorMsg0(RETURN_OK, (STRPTR) "PoPo", "PoPo has no popups left to show; exiting.");
                 break;
             }
 
@@ -638,8 +637,7 @@ struct PsdPoPoGadgets * pGenerateAddBox(struct PsdBase * ps, struct PsdDevice *p
     {
         bindinginfo = psdCopyStrFmt("It is bound to \33b%s\33n", bindingsstr);
     } else {
-        bindinginfo = psdCopyStr(psdTxt("No class has claimed it yet.",
-                                     "No class seems responsible (yet)!"));
+        bindinginfo = psdCopyStr("No class has claimed it yet.");
     }
     if(!bindinginfo)
     {
@@ -945,7 +943,7 @@ void pEventHandler(struct PsdBase * ps)
                 devname = pd->pd_ProductStr;
                 if(!devname)
                 {
-                    devname = psdTxt("(unnamed device)", "Unknown Soldier");
+                    devname = "(unnamed device)";
                 }
                 if(lowpower && isdead)
                 {
@@ -1005,12 +1003,11 @@ void pEventHandler(struct PsdBase * ps)
                     //psdFreeVec(pd->pd_ProductStr);
                     //pd->pd_ProductStr = NULL;
                 } else {
-                    body = psdCopyStr(psdTxt("An unnamed USB device has been removed.",
-                                      "An USB device has been removed,\nbut I cannot recall its name."));
+                    body = psdCopyStr("An unnamed USB device has been removed.");
                 }
                 if(body)
                 {
-                    STRPTR gads[4] = { NULL, NULL, NULL, psdTxt("OK", "Bye bye!") };
+                    STRPTR gads[4] = { NULL, NULL, NULL, "OK" };
                     pog = pAllocPoPoGadgets(ps, body, gads);
                     psdFreeVec(body);
                     if(!pog)
@@ -1563,9 +1560,8 @@ IPTR PoPoDispatcher(struct IClass * cl asm("a0"), Object * obj asm("a2"), Msg ms
         }
 
         case MUIM_PoPo_About:
-            MUI_RequestA(po->po_AppObj, po->po_WindowObj, 0, NULL, psdTxt("OK", "Blimey!"),
-                         psdTxt("PoPo -- The Poseidon Popup Provider\n\nWritten by Chris Hodges.",
-                                "PoPo -- The Poseidon Popup Provider\n\nWritten by Chris Hodges.\n\nWichtig ist, was hinten rauskommt (Helmut Kohl)."), NULL);
+            MUI_RequestA(po->po_AppObj, po->po_WindowObj, 0, NULL, "OK",
+                         "PoPo -- The Poseidon Popup Provider\n\nWritten by Chris Hodges.", NULL);
             return(0);
 
         case MUIM_PoPo_OpenTrident:
@@ -1585,9 +1581,8 @@ IPTR PoPoDispatcher(struct IClass * cl asm("a0"), Object * obj asm("a2"), Msg ms
                                   TAG_END))
                     {
                         Close(fhandle);
-                        MUI_RequestA(po->po_AppObj, po->po_WindowObj, 0, NULL, psdTxt("OK", "Oh no!"),
-                                     psdTxt("Could not start Trident.",
-                                            "Bugger!\n\nI tried hard to load Trident,\nbut there was Cryptonite somewhere!"), NULL);
+                        MUI_RequestA(po->po_AppObj, po->po_WindowObj, 0, NULL, "OK",
+                                     "Could not start Trident.", NULL);
                     }
                 }
                 CloseLibrary(DOSBase);

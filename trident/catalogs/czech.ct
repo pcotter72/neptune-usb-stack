@@ -1,4 +1,4 @@
-## version $VER: Trident.catalog 6.0 (17.08.2026)
+## version $VER: Trident.catalog 7.0 (19.10.2026)
 ## language czech
 ## codeset 5
 ;
@@ -156,7 +156,7 @@ Záva¾né chyby
 ;
 MSG_POPUP_NEVER
 Upozornìní nezobrazovat
-; Never open a popup window! Bah!
+; Never open a popup window
 ;
 MSG_POPUP_ERROR
 Upozornit pouze na chyby
@@ -184,7 +184,7 @@ Upozornit bez ohledu na stav propojení
 ;
 MSG_POPUP_ALWAYS
 Upozornit na ka¾dou zmìnu
-; Always immediately annoy me
+; Always open a popup window
 ;
 MSG_PANEL_GENERAL_LABEL1
 \33cGrafické rozhraní Trident
@@ -402,10 +402,6 @@ MSG_PANEL_DEVICES_DISABLE_HELP
 Odpojí napájení portu rozboèovaèe, ve kterém je\nvybrané zaøízení. Toto zaøízení pak ji¾ nelze znovu\naktivovat prostým vyta¾ením a zasunutím zpìt do portu.
 ; Permanently powers off the port. It cannot be\nreactivated by unplugging/replugging the device.\n
 ;
-MSG_POSEIDON_SHORTHELP
-Poseidón (v øímské mytologii Neptun) je bùh moøe,\nsyn Kronùv a Rheiin, bratr Dia, Háda, Démétér, Héry\na Hestie. Jeho man¾elkou je Amfitríta a synem Triton.\nStejnì jako ostatní olymp¹tí bohové má mnoho pletek\n(napø. s Medúsou) a z nich nesèetnì dal¹ích potomkù\n(napø. Pegas).
-; Poseidon (his latin name Neptune) the god of the sea\nand its inhabitants, and one of the Olympians, the son\nof Cronus and Rhea, brother of Zeus, Hades, Demeter,\nHera, Hestia. He was married to Amphitrite, a Nereid,\nand had by her the son Triton, a merman. Like other\nOlympians, had many love affairs (e.g. with Medusa)\nand numerous children (e.g. Pegasos).
-;
 MSG_PANEL_CLASSES
 \33c\33bSeznam kategorií
 ; \33c\33bUSB Classes available
@@ -519,8 +515,8 @@ V pøípadì chyby zaøízení reaktivovat port rozboèovaèe:
 ; Automatically power cycle hub port, if device drops dead:
 ;
 MSG_PANEL_OPTIONS_POWERCYCLE_HELP
-Pokusí se reaktivovat port rozboèovaèe v pøípadì,\n¾e zaøízení pøestane reagovat (obvykle se pøedtím\nobjevují chyby pøi pøenosu dat).\nTímto zpùsobem mù¾e dojít jak k nápravì situace,\ntak také k výraznému \33bzhor¹ení\33n (napø. zacyklení této\noperace) a pádu systému!
-; If a device drops dead (transfer timeouts),\nand this switch is selected, then the hub port\nwill be reset automatically to try to revive the\ndevice. However, this can lead to nasty infinity loops.
+Restartuje napájení zaøízení, které pøestalo\nodpovídat; èasto to staèí k jeho obnovení.\nNechte zapnuté, pokud nìkteré zaøízení na\nvypnutí napájení nereaguje dobøe.
+; Power-cycles a device that stopped responding, which\nis often enough to bring it back. Leave this on unless\na device reacts badly to being power-cycled.
 ;
 MSG_PANEL_OPTIONS_POWERSAVE
 Povolit re¾im ¹etøení energií:
@@ -899,12 +895,12 @@ MSG_ACTION_DEV_FORCEBIND_NONE
 ; None
 ;
 MSG_ACTION_DEV_FORCE_REQ
-Vynutit|Rad¹i ne
-; I'm not dumb!|I'll reconsider
+Pokraèovat|Zru¹it
+; Continue|Cancel
 ;
 MSG_ACTION_DEV_FORCE_REQ_TXT
-Právì se chystáte vynutit propojení zaøízení. Vezmìte\nprosím, ¾e toto \33bnení\33n bì¾ný typ propojení a v¹echny\npøípadné následky (pád systému, ztrátu dat atp.) pøiètìte\npouze sami sobì.
-; You are about to establish a forced \33bdevice\33n\nbinding. This is not an interface binding. As\nmost people are not capable of reading the\nmanual and they cause more harm than good.\nPlease make sure you know, what you're doing\nand not breaking things (and then bugger me with\nsilly emails).
+Chystáte se vytvoøit vynucené propojení\n\33bzaøízení\33n. Nejde o propojení rozhraní\na nesprávné vynucené propojení mù¾e zaøízení\núplnì vyøadit z provozu.\n\nPokraèujte jen tehdy, víte-li, co dìláte.
+; You are about to create a forced \33bdevice\33n binding.\nThis is not an interface binding, and an incorrect\nforced binding can stop the device working entirely.\n\nContinue only if you know what this does.
 ;
 MSG_ACTION_DEV_FORCE
 Vynucení propojení %s se zaøízením %s.
@@ -978,10 +974,6 @@ MSG_ACTION_CFG_IMPORT
 Vyberte konfiguraèní soubor...
 ; Select file to import prefs from...
 ;
-MSG_ACTION_CFGDATA_OOPS
-Ale ne!
-; Oops!
-;
 MSG_ACTION_CFGDATA_OOPS_HELP
 Chcete-li naimportovat tento druh konfiguraèního\nsouboru, vyberte nejprve po¾adované zaøízení.
 ; To import device or interface\nprefs data, you need to select\nthe device entry where it should be added.
@@ -1045,10 +1037,6 @@ Pøidat|Zru¹it
 MSG_APPLYDRAGACTION_DEVICECFG_ADD_HELP
 Chcete pøidat konfiguraci zaøízení %s\nke konfigurací zaøízení %s?
 ; Do you want to \33badd\33n the prefs of\n\33b%s\33n\nto the device\n\33b%s\33n?
-;
-MSG_CFGLISTDISPATCHER_OOPS
-Ale ne!
-; Oops!
 ;
 MSG_CFGLISTDISPATCHER_OOPS_HELP
 Tato operace není podporována.
@@ -1132,39 +1120,7 @@ MSG_PANEL_OPTIONS_LINKPOWER_HELP
 Umo¾ní neèinné lince pøejít mezi pøenosy do stavu\nnízké spotøeby (U1/U2 na SuperSpeed, L1 na\nHigh-Speed) a povolí Latency Tolerance Messaging.\nVstup a výstup øídí øadiè a jsou pro pøenosy\ntransparentní. Vypnìte, pokud se zaøízení pøi\nneèinnosti chová chybnì.
 ; Lets an idle link drop into a low power state\nbetween transfers (U1/U2 on SuperSpeed, L1 on\nHigh-Speed) and enables Latency Tolerance\nMessaging. Entry and exit are handled by the\ncontroller and are transparent to transfers.\nTurn this off if a device misbehaves when idle.
 ;
-MSG_PANEL_OPTIONS_BORING
-Pou¾ívat struèné vìcné zprávy:
-; Use plain, factual messages:
-;
-MSG_PANEL_OPTIONS_BORING_HELP
-Nahradí tradièní ¾ertovné zprávy Poseidonu\nv protokolu, upozornìních a dialozích krátkými\na vìcnými. Projeví se ihned u nových zpráv;\nzáznamy, které u¾ v protokolu jsou, si ponechají\npùvodní znìní, a nápovìda u loga Poseidonu se\nzmìní a¾ po restartu Tridentu.
-; Replaces Poseidon's traditional light-hearted log\nentries, popups and requesters with short factual\nones. Takes effect immediately for new messages;\nentries already in the log keep their original\nwording, and the Poseidon logo's help text changes\nafter the next Trident restart.
-;
-MSG_POPUP_NEVER_PLAIN
-Upozornìní nezobrazovat
-; Never open a popup window
-;
-MSG_POPUP_ALWAYS_PLAIN
-Upozornit na ka¾dou zmìnu
-; Always open a popup window
-;
-MSG_POSEIDON_SHORTHELP_PLAIN
-Systém USB Poseidon pro AmigaOS.
-; The Poseidon USB stack for AmigaOS.
-;
-MSG_PANEL_OPTIONS_POWERCYCLE_HELP_PLAIN
-Restartuje napájení zaøízení, které pøestalo\nodpovídat; èasto to staèí k jeho obnovení.\nNechte zapnuté, pokud nìkteré zaøízení na\nvypnutí napájení nereaguje dobøe.
-; Power-cycles a device that stopped responding, which\nis often enough to bring it back. Leave this on unless\na device reacts badly to being power-cycled.
-;
-MSG_ACTION_DEV_FORCE_REQ_PLAIN
-Pokraèovat|Zru¹it
-; Continue|Cancel
-;
-MSG_ACTION_DEV_FORCE_REQ_TXT_PLAIN
-Chystáte se vytvoøit vynucené propojení\n\33bzaøízení\33n. Nejde o propojení rozhraní\na nesprávné vynucené propojení mù¾e zaøízení\núplnì vyøadit z provozu.\n\nPokraèujte jen tehdy, víte-li, co dìláte.
-; You are about to create a forced \33bdevice\33n binding.\nThis is not an interface binding, and an incorrect\nforced binding can stop the device working entirely.\n\nContinue only if you know what this does.
-;
-MSG_REQ_OOPS_PLAIN
+MSG_REQ_OK
 OK
 ; OK
 ;

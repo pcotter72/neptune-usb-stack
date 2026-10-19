@@ -32,11 +32,6 @@ extern struct DosLibrary *DOSBase;
 
 #define NewList(list) NEWLIST(list)
 
-#define USE_NEPTUNE8_BODY
-//#define USE_NEPTUNE8_HEADER
-#define USE_NEPTUNE8_COLORS
-#include "neptune8logo.c"
-
 #define STACKLOADER     "Sys/poseidon.prefs"
 
 /* /// "Some strings" */
@@ -63,14 +58,14 @@ static STRPTR errlvlstrings[] =
 
 static STRPTR popupnewdevicestrings[] =
 {
-    NULL, //"Never open a popup window! Bah!",
+    NULL, //"Never open a popup window",
     NULL, //"Only popup on an error condition",
     NULL, //"Popup on new, unknown devices",
     NULL, //"Popup, if there is no binding",
     NULL, //"Popup, if there is no config yet",
     NULL, //"Popup on configurable class",
     NULL, //"Popup, regardless of binding",
-    NULL, //"Always immediately annoy me",
+    NULL, //"Always open a popup window",
     NULL
 };
 /* \\\ */
@@ -209,7 +204,7 @@ LONG DeviceListDisplayHook(struct Hook * hook asm("a0"), char ** strarr asm("a2"
                             "Spiritual");
             psdSafeRawDoFmt(buf3, 32, "\33O[%08lx] %s",
                             data->mimainlist[5], "Ghost");
-            *strarr++ = psdTxt("<gone>", "<You can't see me>");
+            *strarr++ = "<gone>";
             *strarr++ = "Zero";
             *strarr++ = buf3;
             *strarr++ = buf2;
@@ -1766,32 +1761,6 @@ void EventHandler(struct ActionData *data)
 }
 /* \\\ */
 
-/* /// "ApplyBoringToGUI()" */
-/* Most of Trident's whimsy is fetched on demand (requester bodies, gadget
-   labels, the per-device window), so it follows the switch by itself. These
-   few are baked into live objects at OM_NEW and have to be pushed again when
-   the switch is toggled. MSG_POSEIDON_SHORTHELP is deliberately not among
-   them: it hangs on the anonymous logo object and only changes on restart. */
-static void ApplyBoringToGUI(struct ActionData *data)
-{
-    IPTR active = 0;
-
-    set(data->cfgautopcobj, MUIA_ShortHelp,
-        psdTxt(_(MSG_PANEL_OPTIONS_POWERCYCLE_HELP_PLAIN),
-               _(MSG_PANEL_OPTIONS_POWERCYCLE_HELP)));
-
-    popupnewdevicestrings[0] = psdTxt(_(MSG_POPUP_NEVER_PLAIN), _(MSG_POPUP_NEVER));
-    popupnewdevicestrings[7] = psdTxt(_(MSG_POPUP_ALWAYS_PLAIN), _(MSG_POPUP_ALWAYS));
-    /* re-setting the entries resets the active one, so put it back.
-       MUIA_Cycle_Entries is settable from MUI 4 on (`is.'), but init-only on MUI 3.8
-       (`i..'), where this nnset is simply ignored and the gadget keeps the previous
-       wording until the window is reopened. */
-    get(data->cfgpopupnewobj, MUIA_Cycle_Active, &active);
-    nnset(data->cfgpopupnewobj, MUIA_Cycle_Entries, popupnewdevicestrings);
-    nnset(data->cfgpopupnewobj, MUIA_Cycle_Active, active);
-}
-/* \\\ */
-
 /* /// "UpdateConfigToGUI()" */
 void UpdateConfigToGUI(struct ActionData *data)
 {
@@ -1807,7 +1776,6 @@ void UpdateConfigToGUI(struct ActionData *data)
     IPTR logwarn;
     IPTR logerr;
     IPTR logfail;
-    IPTR boring = FALSE;
     IPTR popupnew = 0;
     IPTR popupgone = FALSE;
     IPTR popupdeath = FALSE;
@@ -1966,7 +1934,6 @@ void UpdateConfigToGUI(struct ActionData *data)
                     GCA_LogWarning, &logwarn,
                     GCA_LogError, &logerr,
                     GCA_LogFailure, &logfail,
-                    GCA_MakeMeBoring, &boring,
                     GCA_PopupDeviceNew, &popupnew,
                     GCA_PopupDeviceGone, &popupgone,
                     GCA_PopupDeviceDeath, &popupdeath,
@@ -1989,7 +1956,6 @@ void UpdateConfigToGUI(struct ActionData *data)
         nnset(data->cfglogwarnobj, MUIA_Selected, logwarn);
         nnset(data->cfglogerrobj, MUIA_Selected, logerr);
         nnset(data->cfglogfailobj, MUIA_Selected, logfail);
-        nnset(data->cfgboringobj, MUIA_Selected, boring);
         nnset(data->cfgpopupnewobj, MUIA_Cycle_Active, popupnew);
         nnset(data->cfgpopupgoneobj, MUIA_Selected, popupgone);
         nnset(data->cfgpopupdeathobj, MUIA_Selected, popupdeath);
@@ -2008,7 +1974,6 @@ void UpdateConfigToGUI(struct ActionData *data)
         nnset(data->cfgforcesuspendobj, MUIA_Selected, forcesuspend);
         nnset(data->cfgsuspendtimeoutobj, MUIA_Numeric_Value, suspendtimeout);
         nnset(data->cfglinkpowerobj, MUIA_Selected, linkpower);
-        ApplyBoringToGUI(data);
     }
 }
 /* \\\ */
@@ -2055,7 +2020,6 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
     IPTR logwarn = TRUE;
     IPTR logerr = TRUE;
     IPTR logfail = TRUE;
-    IPTR boring = FALSE;
     IPTR popupnew = 0;
     IPTR popupgone = FALSE;
     IPTR popupdeath = FALSE;
@@ -2088,14 +2052,14 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
     errlvlstrings[2] = _(MSG_ERRLVL_ERRORS);
     errlvlstrings[3] = _(MSG_ERRLVL_FAILURES);
 
-    popupnewdevicestrings[0] = psdTxt(_(MSG_POPUP_NEVER_PLAIN), _(MSG_POPUP_NEVER));
+    popupnewdevicestrings[0] = _(MSG_POPUP_NEVER);
     popupnewdevicestrings[1] = _(MSG_POPUP_ERROR);
     popupnewdevicestrings[2] = _(MSG_POPUP_UNKNOWN);
     popupnewdevicestrings[3] = _(MSG_POPUP_NOBINDING);
     popupnewdevicestrings[4] = _(MSG_POPUP_NOCONFIG);
     popupnewdevicestrings[5] = _(MSG_POPUP_CONFIGCLASS);
     popupnewdevicestrings[6] = _(MSG_POPUP_BINDING);
-    popupnewdevicestrings[7] = psdTxt(_(MSG_POPUP_ALWAYS_PLAIN), _(MSG_POPUP_ALWAYS));
+    popupnewdevicestrings[7] = _(MSG_POPUP_ALWAYS);
 
     if(!(obj = (Object *) DoSuperMethodA(cl, obj, msg)))
         return(0);
@@ -2135,7 +2099,6 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
                     GCA_LogWarning, &logwarn,
                     GCA_LogError, &logerr,
                     GCA_LogFailure, &logfail,
-                    GCA_MakeMeBoring, &boring,
                     GCA_PopupDeviceNew, &popupnew,
                     GCA_PopupDeviceGone, &popupgone,
                     GCA_PopupDeviceDeath, &popupdeath,
@@ -2162,39 +2125,16 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
                 Child, VSpace(0),
                 Child, HGroup,
                     Child, HSpace(0),
-                    Child, HGroup,
-                        Child, VGroup,
-                            Child, BodychunkObject,
-                                /* no stored object pointer, so this one only
-                                   follows the switch on the next restart */
-                                MUIA_ShortHelp, psdTxt(__(MSG_POSEIDON_SHORTHELP_PLAIN),
-                                                       __(MSG_POSEIDON_SHORTHELP)),
-                                MUIA_Bitmap_SourceColors, neptune8_colors,
-                                MUIA_FixWidth, NEPTUNE8_WIDTH,
-                                MUIA_FixHeight, NEPTUNE8_HEIGHT,
-                                MUIA_Bitmap_Width, NEPTUNE8_WIDTH,
-                                MUIA_Bitmap_Height, NEPTUNE8_HEIGHT,
-                                MUIA_Bodychunk_Depth, NEPTUNE8_DEPTH,
-                                MUIA_Bodychunk_Body, neptune8_body,
-                                MUIA_Bodychunk_Compression, NEPTUNE8_COMPRESSION,
-                                MUIA_Bodychunk_Masking, NEPTUNE8_MASKING,
-                                MUIA_Bitmap_Transparent, 0,
-                                MUIA_Bitmap_UseFriend, TRUE,
-                                MUIA_Bitmap_Precision, PRECISION_ICON,
-                                End,
-                            Child, VSpace(0),
-                            End,
-                        Child, VGroup,
-                            Child, VSpace(0),
-                            Child, Label(__(MSG_PANEL_GENERAL_LABEL1)),
-                            Child, Label(__(MSG_PANEL_GENERAL_LABEL2)),
-                            Child, VSpace(20),
-                            Child, Label(__(MSG_PANEL_GENERAL_LABEL3)),
-                            Child, Label(__(MSG_PANEL_GENERAL_LABEL4)),
-                            Child, VSpace(20),
-                            Child, Label(__(MSG_PANEL_GENERAL_LABEL5)),
-                            Child, VSpace(0),
-                            End,
+                    Child, VGroup,
+                        Child, VSpace(0),
+                        Child, Label(__(MSG_PANEL_GENERAL_LABEL1)),
+                        Child, Label(__(MSG_PANEL_GENERAL_LABEL2)),
+                        Child, VSpace(20),
+                        Child, Label(__(MSG_PANEL_GENERAL_LABEL3)),
+                        Child, Label(__(MSG_PANEL_GENERAL_LABEL4)),
+                        Child, VSpace(20),
+                        Child, Label(__(MSG_PANEL_GENERAL_LABEL5)),
+                        Child, VSpace(0),
                         End,
                     Child, HSpace(0),
                     End,
@@ -2506,23 +2446,6 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
                         MUIA_Selected, logfail,
                         MUIA_ShowSelState, FALSE,
                         End,
-                    Child, HGroup,
-                        Child, HSpace(0),
-                        Child, Label(__(MSG_PANEL_OPTIONS_BORING)),
-                        End,
-                    Child, data->cfgboringobj = ImageObject, ImageButtonFrame,
-                        MUIA_ShortHelp, __(MSG_PANEL_OPTIONS_BORING_HELP),
-                        MUIA_Background, MUII_ButtonBack,
-                        MUIA_CycleChain, 1,
-                        MUIA_InputMode, MUIV_InputMode_Toggle,
-                        MUIA_Image_Spec, MUII_CheckMark,
-                        MUIA_Image_FreeVert, TRUE,
-                        MUIA_Selected, boring,
-                        MUIA_ShowSelState, FALSE,
-                        End,
-                    /* the 5th pair only fills half of row 3 of the ColGroup(4) */
-                    Child, HSpace(0),
-                    Child, HSpace(0),
                     End,
                 Child, HSpace(0),
                 End,
@@ -2845,8 +2768,6 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
     DoMethod(data->cfglogerrobj, MUIM_Notify, MUIA_Selected, MUIV_EveryTime,
              obj, 1, MUIM_Action_Cfg_Changed);
     DoMethod(data->cfglogfailobj, MUIM_Notify, MUIA_Selected, MUIV_EveryTime,
-             obj, 1, MUIM_Action_Cfg_Changed);
-    DoMethod(data->cfgboringobj, MUIM_Notify, MUIA_Selected, MUIV_EveryTime,
              obj, 1, MUIM_Action_Cfg_Changed);
 
     DoMethod(data->cfgpopupnewobj, MUIM_Notify, MUIA_Cycle_Active, MUIV_EveryTime,
@@ -4065,8 +3986,8 @@ IPTR Action_Dev_ForceBind(struct IClass *cl, Object *obj, Msg msg)
                     TAG_END);
         if(name)
         {
-            clever = MUI_RequestA(data->appobj, data->winobj, 0, NULL, psdTxt(_(MSG_ACTION_DEV_FORCE_REQ_PLAIN), _(MSG_ACTION_DEV_FORCE_REQ)),
-                                  psdTxt(_(MSG_ACTION_DEV_FORCE_REQ_TXT_PLAIN), _(MSG_ACTION_DEV_FORCE_REQ_TXT)), NULL);
+            clever = MUI_RequestA(data->appobj, data->winobj, 0, NULL, _(MSG_ACTION_DEV_FORCE_REQ),
+                                  _(MSG_ACTION_DEV_FORCE_REQ_TXT), NULL);
             if(!clever)
             {
                 return(FALSE);
@@ -4096,7 +4017,6 @@ IPTR Action_Cfg_Changed(struct IClass *cl, Object *obj, Msg msg)
     IPTR logwarn = 0;
     IPTR logerr = 0;
     IPTR logfail = 0;
-    IPTR boring = 0;
     IPTR popupnew = 0;
     IPTR popupgone = 0;
     IPTR popupdeath = 0;
@@ -4119,7 +4039,6 @@ IPTR Action_Cfg_Changed(struct IClass *cl, Object *obj, Msg msg)
     get(data->cfglogwarnobj, MUIA_Selected, &logwarn);
     get(data->cfglogerrobj, MUIA_Selected, &logerr);
     get(data->cfglogfailobj, MUIA_Selected, &logfail);
-    get(data->cfgboringobj, MUIA_Selected, &boring);
     get(data->cfgpopupnewobj, MUIA_Cycle_Active, &popupnew);
     get(data->cfgpopupgoneobj, MUIA_Selected, &popupgone);
     get(data->cfgpopupdeathobj, MUIA_Selected, &popupdeath);
@@ -4154,7 +4073,6 @@ IPTR Action_Cfg_Changed(struct IClass *cl, Object *obj, Msg msg)
                     GCA_LogWarning, logwarn,
                     GCA_LogError, logerr,
                     GCA_LogFailure, logfail,
-                    GCA_MakeMeBoring, boring,
                     GCA_PopupDeviceNew, popupnew,
                     GCA_PopupDeviceGone, popupgone,
                     GCA_PopupDeviceDeath, popupdeath,
@@ -4169,9 +4087,6 @@ IPTR Action_Cfg_Changed(struct IClass *cl, Object *obj, Msg msg)
                     GCA_SuspendTimeout, suspendtimeout,
                     GCA_LinkPowerMgmt, linkpower,
                     TAG_END);
-        /* the notify path never runs UpdateConfigToGUI(), so the objects that
-           bake their text in have to be refreshed from here as well */
-        ApplyBoringToGUI(data);
     }
     return(TRUE);
 }
@@ -4726,7 +4641,7 @@ IPTR Action_Cfg_Import(struct IClass *cl, Object *obj, Msg msg)
                                             break;
                                         }
                                     }
-                                    MUI_RequestA(data->appobj, data->winobj, 0, NULL, psdTxt(_(MSG_REQ_OOPS_PLAIN), _(MSG_ACTION_CFGDATA_OOPS)), _(MSG_ACTION_CFGDATA_OOPS_HELP), NULL);
+                                    MUI_RequestA(data->appobj, data->winobj, 0, NULL, _(MSG_REQ_OK), _(MSG_ACTION_CFGDATA_OOPS_HELP), NULL);
                                     break;
 
                                 case IFFFORM_PSDCFG:
@@ -4734,7 +4649,7 @@ IPTR Action_Cfg_Import(struct IClass *cl, Object *obj, Msg msg)
                                     break;
 
                                 default:
-                                    MUI_RequestA(data->appobj, data->winobj, 0, NULL, psdTxt(_(MSG_REQ_OOPS_PLAIN), _(MSG_ACTION_CFGDATA_OOPS)), _(MSG_ACTION_CFGDATA_ERR), NULL);
+                                    MUI_RequestA(data->appobj, data->winobj, 0, NULL, _(MSG_REQ_OK), _(MSG_ACTION_CFGDATA_ERR), NULL);
                                     break;
                             }
                         } else {

@@ -44,7 +44,6 @@ add_executable(Trident
     DevWinClass.c
     IconListClass.c
     locale.c
-    neptune8logo.c
     ${MASON_ICONS})
 
 add_dependencies(Trident neptune_sfd_headers usbclass_sfd_headers trident_strings)

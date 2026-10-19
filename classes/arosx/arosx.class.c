@@ -189,7 +189,7 @@ struct AROSXClassController * usbAttemptInterfaceBinding(struct AROSXClassBase *
 
                                         psdSafeRawDoFmt(arosxc->name, 64, "%s (%01lx)", arosxc->devname, arosxc->id);
 
-                    psdAddErrorMsg(RETURN_OK, (STRPTR) libname, PSD_BOUND1_TXT("Play it again, '%s'!"), arosxc->name);
+                    psdAddErrorMsg(RETURN_OK, (STRPTR) libname, NEP_BOUND1_TXT, arosxc->name);
 
                     CloseLibrary(ps);
                     return(arosxc);
@@ -240,7 +240,7 @@ void usbReleaseInterfaceBinding(struct AROSXClassBase *arosxb, struct AROSXClass
         psdGetAttrs(PGA_INTERFACE, arosxc->Interface, IFA_Config, &pc, TAG_END);
         psdGetAttrs(PGA_CONFIG, pc, CA_Device, &pd, TAG_END);
         psdGetAttrs(PGA_DEVICE, pd, DA_ProductName, &devname, TAG_END);
-        psdAddErrorMsg(RETURN_OK, (STRPTR) libname, PSD_RELEASED_TXT("'%s' fell silent!"), devname);
+        psdAddErrorMsg(RETURN_OK, (STRPTR) libname, NEP_RELEASED_TXT, devname);
 
         AROSXClass_DisconnectController(arosxb, arosxc);
 

@@ -193,7 +193,7 @@ struct NepClassMidi * usbForceInterfaceBinding(struct NepMidiBase *nh, struct Ps
                     Permit();
 
                     psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                                   PSD_BOUND1_TXT("Play it again, '%s'!"),
+                                   NEP_BOUND1_TXT,
                                    devname);
                     CloseLibrary(ps);
                     return(nch);
@@ -236,7 +236,7 @@ void usbReleaseInterfaceBinding(struct NepMidiBase *nh, struct NepClassMidi *nch
         psdGetAttrs(PGA_CONFIG, pc, CA_Device, &pd, TAG_END);
         psdGetAttrs(PGA_DEVICE, pd, DA_ProductName, &devname, TAG_END);
         psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                       PSD_RELEASED_TXT("'%s' fell silent!"),
+                       NEP_RELEASED_TXT,
                        devname);
         psdFreeVec(nch);
         CloseLibrary(ps);

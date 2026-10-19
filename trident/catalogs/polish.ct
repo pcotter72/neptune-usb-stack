@@ -1,4 +1,4 @@
-## version $VER: Trident.catalog 6.0 (17.08.2026)
+## version $VER: Trident.catalog 7.0 (19.10.2026)
 ## language polski
 ## codeset 5
 ;
@@ -155,8 +155,8 @@ Tylko awarie
 ; Failures only
 ;
 MSG_POPUP_NEVER
-Nigdy nie otwieraj wyskakuj±cego okna! Bah!
-; Never open a popup window! Bah!
+Nigdy nie otwieraj wyskakuj±cego okna
+; Never open a popup window
 ;
 MSG_POPUP_ERROR
 Wyskakuje tylko w przypadku wyst±pienia b³êdu
@@ -183,8 +183,8 @@ Wyskakuj±ce okienko, niezale¿nie od powi±zania
 ; Popup, regardless of binding
 ;
 MSG_POPUP_ALWAYS
-Zawsze natychmiast mnie denerwuje
-; Always immediately annoy me
+Zawsze otwieraj wyskakuj±ce okno
+; Always open a popup window
 ;
 MSG_PANEL_GENERAL_LABEL1
 \33cTrident Graficzny interfejs u¿ytkownika
@@ -402,10 +402,6 @@ MSG_PANEL_DEVICES_DISABLE_HELP
 Trwale wy³±cza port. Nie mo¿na go ponownie\naktywowaæ przez od³±czenie/pod³±czenie urz±dzenia.\n
 ; Permanently powers off the port. It cannot be\nreactivated by unplugging/replugging the device.\n
 ;
-MSG_POSEIDON_SHORTHELP
-Posejdon (³aciñskie imiê Neptun) - bóg mórz\ni ich mieszkañców, jeden z Olimpijczyków, syn Kronosa i Rhei,\nbrat Zeusa, Hadesa, Demeter, Hery i Hestii. By³ ¿onaty z Amfitryt±, Nereid±,\ni mia³ z ni± syna Trytona, cz³owieka. Podobnie jak inni Olimpijczycy,\nmia³ wiele romansów (np. z Meduz±) i liczne dzieci (np. Pegasosa).
-; Poseidon (his latin name Neptune) the god of the sea\nand its inhabitants, and one of the Olympians, the son\nof Cronus and Rhea, brother of Zeus, Hades, Demeter,\nHera, Hestia. He was married to Amphitrite, a Nereid,\nand had by her the son Triton, a merman. Like other\nOlympians, had many love affairs (e.g. with Medusa)\nand numerous children (e.g. Pegasos).
-;
 MSG_PANEL_CLASSES
 \33c\33bDostêpne klasy USB
 ; \33c\33bUSB Classes available
@@ -519,8 +515,8 @@ Automatyczny cykl zasilania portu koncentratora, je¶li urz±dzenie padnie:
 ; Automatically power cycle hub port, if device drops dead:
 ;
 MSG_PANEL_OPTIONS_POWERCYCLE_HELP
-Je¶li urz±dzenie padnie (przekroczenie limitu czasu\ntransferu), a ten prze³±cznik jest zaznaczony,\nport koncentratora zostanie automatycznie zresetowany,\naby spróbowaæ o¿ywiæ urz±dzenie. Mo¿e to jednak\nprowadziæ do nieprzyjemnego zapêtlenia.
-; If a device drops dead (transfer timeouts),\nand this switch is selected, then the hub port\nwill be reset automatically to try to revive the\ndevice. However, this can lead to nasty infinity loops.
+Wy³±cza i ponownie w³±cza zasilanie urz±dzenia,\nktóre przesta³o odpowiadaæ - czêsto to wystarcza,\nby je przywróciæ. Zostaw w³±czone, chyba ¿e jakie¶\nurz±dzenie ¼le znosi odciêcie zasilania.
+; Power-cycles a device that stopped responding, which\nis often enough to bring it back. Leave this on unless\na device reacts badly to being power-cycled.
 ;
 MSG_PANEL_OPTIONS_POWERSAVE
 W³±cz tryb wstrzymania (oszczêdzania energii):
@@ -899,12 +895,12 @@ Brak
 ; None
 ;
 MSG_ACTION_DEV_FORCE_REQ
-Nie jestem g³upi!|Rozwa¿ê to jeszcze raz
-; I'm not dumb!|I'll reconsider
+Kontynuuj|Anuluj
+; Continue|Cancel
 ;
 MSG_ACTION_DEV_FORCE_REQ_TXT
-Zamierzasz ustanowiæ wymuszone powi±zanie \33burz±dzenia \33n.\nTo nie jest powi±zanie interfejsu. Wiêkszo¶æ ludzi\nnie jest w stanie przeczytaæ instrukcji obs³ugi i powoduje\nwiêcej szkód ni¿ po¿ytku. Upewnij siê, ¿e wiesz, co robisz\ni nie psujesz rzeczy (a potem zawracaj mi g³owê e-mailami).
-; You are about to establish a forced \33bdevice\33n\nbinding. This is not an interface binding. As\nmost people are not capable of reading the\nmanual and they cause more harm than good.\nPlease make sure you know, what you're doing\nand not breaking things (and then bugger me with\nsilly emails).
+Zamierzasz utworzyæ wymuszone powi±zanie\n\33burz±dzenia\33n. To nie jest powi±zanie interfejsu,\na b³êdne wymuszone powi±zanie mo¿e ca³kowicie\nuniemo¿liwiæ dzia³anie urz±dzenia.\n\nKontynuuj tylko wtedy, gdy wiesz, co robisz.
+; You are about to create a forced \33bdevice\33n binding.\nThis is not an interface binding, and an incorrect\nforced binding can stop the device working entirely.\n\nContinue only if you know what this does.
 ;
 MSG_ACTION_DEV_FORCE
 Wymuszenie powi±zania urz±dzenia %s z %s.
@@ -978,10 +974,6 @@ MSG_ACTION_CFG_IMPORT
 Wybierz plik, z którego chcesz zaimportowaæ preferencje...
 ; Select file to import prefs from...
 ;
-MSG_ACTION_CFGDATA_OOPS
-Ups!
-; Oops!
-;
 MSG_ACTION_CFGDATA_OOPS_HELP
 Aby zaimportowaæ preferencje urz±dzenia\nlub interfejsu, nale¿y wybraæ wpis\nurz±dzenia, do którego maj± one zostaæ dodane.
 ; To import device or interface\nprefs data, you need to select\nthe device entry where it should be added.
@@ -1045,10 +1037,6 @@ Dodaj|Poniechaj
 MSG_APPLYDRAGACTION_DEVICECFG_ADD_HELP
 Czy chcesz \33bdodaæ\33n preferencje z\n\33b%s\33n\ndo urz±dzenia\n\33b%s\33n?
 ; Do you want to \33badd\33n the prefs of\n\33b%s\33n\nto the device\n\33b%s\33n?
-;
-MSG_CFGLISTDISPATCHER_OOPS
-Ups!
-; Oops!
 ;
 MSG_CFGLISTDISPATCHER_OOPS_HELP
 Przepraszamy, operacja przeci±gnij i upu¶æ\ndo tego celu nie jest obs³ugiwana.
@@ -1130,39 +1118,7 @@ MSG_PANEL_OPTIONS_LINKPOWER_HELP
 Pozwala bezczynnemu ³±czu przej¶æ miêdzy transferami\nw stan niskiego poboru mocy (U1/U2 w SuperSpeed,\nL1 w High-Speed) i w³±cza Latency Tolerance\nMessaging. Wej¶ciem i wyj¶ciem zarz±dza kontroler,\njest to przezroczyste dla transferów. Wy³±cz, je¶li\nurz±dzenie dzia³a nieprawid³owo w bezczynno¶ci.
 ; Lets an idle link drop into a low power state\nbetween transfers (U1/U2 on SuperSpeed, L1 on\nHigh-Speed) and enables Latency Tolerance\nMessaging. Entry and exit are handled by the\ncontroller and are transparent to transfers.\nTurn this off if a device misbehaves when idle.
 ;
-MSG_PANEL_OPTIONS_BORING
-U¿ywaj zwiêz³ych, rzeczowych komunikatów:
-; Use plain, factual messages:
-;
-MSG_PANEL_OPTIONS_BORING_HELP
-Zastêpuje tradycyjne ¿artobliwe komunikaty\nPoseidona w dzienniku, wyskakuj±cych oknach\ni okienkach dialogowych krótkimi i rzeczowymi.\nDzia³a od razu dla nowych komunikatów; wpisy\nju¿ zapisane w dzienniku zachowuj± pierwotne\nbrzmienie, a podpowied¼ logo Poseidona zmieni\nsiê po ponownym uruchomieniu Tridenta.
-; Replaces Poseidon's traditional light-hearted log\nentries, popups and requesters with short factual\nones. Takes effect immediately for new messages;\nentries already in the log keep their original\nwording, and the Poseidon logo's help text changes\nafter the next Trident restart.
-;
-MSG_POPUP_NEVER_PLAIN
-Nigdy nie otwieraj wyskakuj±cego okna
-; Never open a popup window
-;
-MSG_POPUP_ALWAYS_PLAIN
-Zawsze otwieraj wyskakuj±ce okno
-; Always open a popup window
-;
-MSG_POSEIDON_SHORTHELP_PLAIN
-Stos USB Poseidon dla AmigaOS.
-; The Poseidon USB stack for AmigaOS.
-;
-MSG_PANEL_OPTIONS_POWERCYCLE_HELP_PLAIN
-Wy³±cza i ponownie w³±cza zasilanie urz±dzenia,\nktóre przesta³o odpowiadaæ - czêsto to wystarcza,\nby je przywróciæ. Zostaw w³±czone, chyba ¿e jakie¶\nurz±dzenie ¼le znosi odciêcie zasilania.
-; Power-cycles a device that stopped responding, which\nis often enough to bring it back. Leave this on unless\na device reacts badly to being power-cycled.
-;
-MSG_ACTION_DEV_FORCE_REQ_PLAIN
-Kontynuuj|Anuluj
-; Continue|Cancel
-;
-MSG_ACTION_DEV_FORCE_REQ_TXT_PLAIN
-Zamierzasz utworzyæ wymuszone powi±zanie\n\33burz±dzenia\33n. To nie jest powi±zanie interfejsu,\na b³êdne wymuszone powi±zanie mo¿e ca³kowicie\nuniemo¿liwiæ dzia³anie urz±dzenia.\n\nKontynuuj tylko wtedy, gdy wiesz, co robisz.
-; You are about to create a forced \33bdevice\33n binding.\nThis is not an interface binding, and an incorrect\nforced binding can stop the device working entirely.\n\nContinue only if you know what this does.
-;
-MSG_REQ_OOPS_PLAIN
+MSG_REQ_OK
 OK
 ; OK
 ;

@@ -1,4 +1,4 @@
-## version $VER: Trident.catalog 6.0 (17.08.2026)
+## version $VER: Trident.catalog 7.0 (19.10.2026)
 ## language français
 ## codeset 0
 ;
@@ -157,7 +157,7 @@ MSG_ERRLVL_FAILURES
 ;
 MSG_POPUP_NEVER
 Ne jamais notifier
-; Never open a popup window! Bah!
+; Never open a popup window
 ;
 MSG_POPUP_ERROR
 Ne notifier que si il y a une erreur
@@ -185,7 +185,7 @@ Notifier, quelque soit la liaison
 ;
 MSG_POPUP_ALWAYS
 Toujours notifier
-; Always immediately annoy me
+; Always open a popup window
 ;
 MSG_PANEL_GENERAL_LABEL1
 \33cInterface graphique de Trident
@@ -403,10 +403,6 @@ MSG_PANEL_DEVICES_DISABLE_HELP
 Coupe le port. Il ne sera pas activé de nouveau en branchant le périphérique
 ; Permanently powers off the port. It cannot be\nreactivated by unplugging/replugging the device.\n
 ;
-MSG_POSEIDON_SHORTHELP
-Poseidon (son nom latin est Neptune) est le dieu de la mer\net des ses habitants, c'est l'un des Olympiens, le fils\nde Cronos et Rhéa, le frère de Zeus, Hades, Demeter,\nHera, Hestia. Il a été marié à Amphitrite, une Néréïde,\net a eu un fils, Triton, avec elle. Comme les autres\nOlympiens, il eu beaucoup d'aventures (par ex. avec la Méduse)\net eu de nombreux enfants (par ex. Pégase).
-; Poseidon (his latin name Neptune) the god of the sea\nand its inhabitants, and one of the Olympians, the son\nof Cronus and Rhea, brother of Zeus, Hades, Demeter,\nHera, Hestia. He was married to Amphitrite, a Nereid,\nand had by her the son Triton, a merman. Like other\nOlympians, had many love affairs (e.g. with Medusa)\nand numerous children (e.g. Pegasos).
-;
 MSG_PANEL_CLASSES
 \33c\33bClasses USB disponibles
 ; \33c\33bUSB Classes available
@@ -520,8 +516,8 @@ Rafraîchir les ports si un périphérique meurt :
 ; Automatically power cycle hub port, if device drops dead:
 ;
 MSG_PANEL_OPTIONS_POWERCYCLE_HELP
-Si un périph. meurt (délai de transfert dépassé),\et cette option est sélectionnée,\nalors le port sera automatiquement mis à zéro\npour rafraîchir le périph. Cela peut induire des boucles infinies.
-; If a device drops dead (transfer timeouts),\nand this switch is selected, then the hub port\nwill be reset automatically to try to revive the\ndevice. However, this can lead to nasty infinity loops.
+Remet sous tension un périphérique qui ne répond\nplus, ce qui suffit souvent à le réactiver. Laissez\ncette option activée, sauf si un périphérique\nsupporte mal la coupure d'alimentation.
+; Power-cycles a device that stopped responding, which\nis often enough to bring it back. Leave this on unless\na device reacts badly to being power-cycled.
 ;
 MSG_PANEL_OPTIONS_POWERSAVE
 Activer le mode d'économie :
@@ -900,12 +896,12 @@ Aucun
 ; None
 ;
 MSG_ACTION_DEV_FORCE_REQ
-Je ne suis pas fou|Je vais réfléchir
-; I'm not dumb!|I'll reconsider
+Continuer|Annuler
+; Continue|Cancel
 ;
 MSG_ACTION_DEV_FORCE_REQ_TXT
-Vous êtes sur le point de \33bforcer la liaison\33n d'un périphérique.\n\nEtes vous sûr ?
-; You are about to establish a forced \33bdevice\33n\nbinding. This is not an interface binding. As\nmost people are not capable of reading the\nmanual and they cause more harm than good.\nPlease make sure you know, what you're doing\nand not breaking things (and then bugger me with\nsilly emails).
+Vous êtes sur le point de forcer une liaison de\n\33bpériphérique\33n. Il ne s'agit pas d'une liaison\nd'interface, et une liaison forcée incorrecte peut\nempêcher complètement le périphérique de fonctionner.\n\nNe continuez que si vous savez ce que vous faites.
+; You are about to create a forced \33bdevice\33n binding.\nThis is not an interface binding, and an incorrect\nforced binding can stop the device working entirely.\n\nContinue only if you know what this does.
 ;
 MSG_ACTION_DEV_FORCE
 Forcer la liaison de %s à %s.
@@ -979,10 +975,6 @@ MSG_ACTION_CFG_IMPORT
 Choisir d'où importer les préférences...
 ; Select file to import prefs from...
 ;
-MSG_ACTION_CFGDATA_OOPS
-Ouille !
-; Oops!
-;
 MSG_ACTION_CFGDATA_OOPS_HELP
 Pour importer des préférences, vous avez besoin de choisir\nle périph.
 ; To import device or interface\nprefs data, you need to select\nthe device entry where it should be added.
@@ -1046,10 +1038,6 @@ Ajouter|Annuler
 MSG_APPLYDRAGACTION_DEVICECFG_ADD_HELP
 Voulez-vous \33bajouter\33n les préfs. de \33b%s\33n au périph. \33b%s\33n ?
 ; Do you want to \33badd\33n the prefs of\n\33b%s\33n\nto the device\n\33b%s\33n?
-;
-MSG_CFGLISTDISPATCHER_OOPS
-Ouille !
-; Oops!
 ;
 MSG_CFGLISTDISPATCHER_OOPS_HELP
 Désolé, le glisser/déposer sur cette cible 'est pas supporté !
@@ -1131,39 +1119,7 @@ MSG_PANEL_OPTIONS_LINKPOWER_HELP
 Permet à un lien inactif de passer dans un état de\nbasse consommation entre les transferts (U1/U2 en\nSuperSpeed, L1 en High-Speed) et active le Latency\nTolerance Messaging. L'entrée et la sortie sont gérées\npar le contrôleur et sont transparentes pour les\ntransferts. Désactivez si un périphérique se comporte\nmal lorsqu'il est inactif.
 ; Lets an idle link drop into a low power state\nbetween transfers (U1/U2 on SuperSpeed, L1 on\nHigh-Speed) and enables Latency Tolerance\nMessaging. Entry and exit are handled by the\ncontroller and are transparent to transfers.\nTurn this off if a device misbehaves when idle.
 ;
-MSG_PANEL_OPTIONS_BORING
-Utiliser des messages simples et factuels :
-; Use plain, factual messages:
-;
-MSG_PANEL_OPTIONS_BORING_HELP
-Remplace les messages humoristiques traditionnels\nde Poseidon (journal, notifications et requêtes) par\ndes messages courts et factuels. L'effet est immédiat\npour les nouveaux messages ; les entrées déjà dans\nle journal gardent leur formulation d'origine, et\nl'aide du logo Poseidon change au prochain\ndémarrage de Trident.
-; Replaces Poseidon's traditional light-hearted log\nentries, popups and requesters with short factual\nones. Takes effect immediately for new messages;\nentries already in the log keep their original\nwording, and the Poseidon logo's help text changes\nafter the next Trident restart.
-;
-MSG_POPUP_NEVER_PLAIN
-Ne jamais notifier
-; Never open a popup window
-;
-MSG_POPUP_ALWAYS_PLAIN
-Toujours notifier
-; Always open a popup window
-;
-MSG_POSEIDON_SHORTHELP_PLAIN
-La pile USB Poseidon pour AmigaOS.
-; The Poseidon USB stack for AmigaOS.
-;
-MSG_PANEL_OPTIONS_POWERCYCLE_HELP_PLAIN
-Remet sous tension un périphérique qui ne répond\nplus, ce qui suffit souvent à le réactiver. Laissez\ncette option activée, sauf si un périphérique\nsupporte mal la coupure d'alimentation.
-; Power-cycles a device that stopped responding, which\nis often enough to bring it back. Leave this on unless\na device reacts badly to being power-cycled.
-;
-MSG_ACTION_DEV_FORCE_REQ_PLAIN
-Continuer|Annuler
-; Continue|Cancel
-;
-MSG_ACTION_DEV_FORCE_REQ_TXT_PLAIN
-Vous êtes sur le point de forcer une liaison de\n\33bpériphérique\33n. Il ne s'agit pas d'une liaison\nd'interface, et une liaison forcée incorrecte peut\nempêcher complètement le périphérique de fonctionner.\n\nNe continuez que si vous savez ce que vous faites.
-; You are about to create a forced \33bdevice\33n binding.\nThis is not an interface binding, and an incorrect\nforced binding can stop the device working entirely.\n\nContinue only if you know what this does.
-;
-MSG_REQ_OOPS_PLAIN
+MSG_REQ_OK
 OK
 ; OK
 ;

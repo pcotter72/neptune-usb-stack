@@ -122,7 +122,7 @@ struct NepClassSimpleMidi * usbForceInterfaceBinding(struct NepSimpleMidiBase *n
                     psdGetAttrs(PGA_CONFIG, pc, CA_Device, &pd, TAG_END);
                     psdGetAttrs(PGA_DEVICE, pd, DA_ProductName, &devname, TAG_END);
                     psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                                   PSD_BOUND1_TXT("Play it again, '%s'!"),
+                                   NEP_BOUND1_TXT,
                                    devname);
 
                     CloseLibrary(ps);
@@ -167,7 +167,7 @@ void usbReleaseInterfaceBinding(struct NepSimpleMidiBase *nh, struct NepClassSim
         psdGetAttrs(PGA_CONFIG, pc, CA_Device, &pd, TAG_END);
         psdGetAttrs(PGA_DEVICE, pd, DA_ProductName, &devname, TAG_END);
         psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                       PSD_RELEASED_TXT("'%s' fell silent!"),
+                       NEP_RELEASED_TXT,
                        devname);
         psdFreeVec(nch);
         CloseLibrary(ps);
@@ -810,7 +810,7 @@ void nGUITask()
                     break;
 
                case ID_ABOUT:
-                    MUI_RequestA(nh->nh_App, nh->nh_MainWindow, 0, NULL, PSD_OK_TXT("Fabulous!"), VERSION_STRING, NULL);
+                    MUI_RequestA(nh->nh_App, nh->nh_MainWindow, 0, NULL, "OK", VERSION_STRING, NULL);
                     break;
             }
             if(retid == MUIV_Application_ReturnID_Quit)

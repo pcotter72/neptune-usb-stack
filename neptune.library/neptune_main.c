@@ -4,7 +4,7 @@
  *
  * The real init/open/expunge logic lives in neptune.library.c (libInit/libOpen/
  * libExpunge); this file only wraps them in the standard Exec library vectors and
- * publishes the 97-entry jump table in neptune.sfd order.
+ * publishes the jump table in neptune.sfd order.
  */
 
 #include <exec/types.h>

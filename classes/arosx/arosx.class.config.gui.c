@@ -333,7 +333,7 @@ void nGUITask()
                             switch(retid)
                             {
                                 case ID_ABOUT:
-                                    MUI_RequestA(gui->App, gui->MainWindow, 0, NULL, PSD_OK_TXT("Fabulous!"), VERSION_STRING, NULL);
+                                    MUI_RequestA(gui->App, gui->MainWindow, 0, NULL, "OK", VERSION_STRING, NULL);
                                     break;
                             }
                             if(retid == MUIV_Application_ReturnID_Quit)

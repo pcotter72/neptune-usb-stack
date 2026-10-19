@@ -335,7 +335,7 @@ struct NepClassAudio * usbForceInterfaceBinding(struct NepAudioBase *nh, struct 
                 //FreeSignal(nch->nch_ReadySignal);
 
                 psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                               PSD_BOUND1_TXT("Play it again, '%s'!"),
+                               NEP_BOUND1_TXT,
                                devname);
                 CloseLibrary(ps);
                 return(nch);
@@ -379,7 +379,7 @@ void usbReleaseInterfaceBinding(struct NepAudioBase *nh, struct NepClassAudio *n
         psdGetAttrs(PGA_CONFIG, pc, CA_Device, &pd, TAG_END);
         psdGetAttrs(PGA_DEVICE, pd, DA_ProductName, &devname, TAG_END);
         psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
-                       PSD_RELEASED_TXT("'%s' fell silent!"),
+                       NEP_RELEASED_TXT,
                        devname);
         CloseLibrary(ps);
     }
@@ -1325,8 +1325,7 @@ void nExamineAudioDescriptors(struct NepClassAudio *nch)
                                         }
                                         if(freq > 64000)
                                         {
-                                            psdAddErrorMsg(RETURN_WARN, (STRPTR) libname, psdTxt("AHI does not support %ld Hz (above 65 KHz).",
-                       "AHI does not support %ld Hz as it is above 65 KHz, sorry."), freq);
+                                            psdAddErrorMsg(RETURN_WARN, (STRPTR) libname, "AHI does not support %ld Hz (above 65 KHz).", freq);
                                             nam->nam_NumFrequencies--;
                                             cnt--;
                                             fptr += 3;
@@ -1354,8 +1353,7 @@ void nExamineAudioDescriptors(struct NepClassAudio *nch)
                                     if(nam->nam_MaxFreq > 64000)
                                     {
                                         nam->nam_MaxFreq = 64000;
-                                        psdAddErrorMsg(RETURN_WARN, (STRPTR) libname, psdTxt("AHI does not support frequencies above 65 KHz.",
-                        "AHI does not support frequencies above 65 KHz, sorry."));
+                                        psdAddErrorMsg(RETURN_WARN, (STRPTR) libname, "AHI does not support frequencies above 65 KHz.");
                                     }
                                     nam->nam_NumFrequencies = 0;
                                     while(*freqtab && (nam->nam_NumFrequencies < 64))
@@ -2379,8 +2377,7 @@ struct NepClassAudio * nAllocAudio(void)
                 nch->nch_TaskMsgPort = NULL;
             }
         } else {
-            psdAddErrorMsg(RETURN_FAIL, (STRPTR) libname, psdTxt("No suitable audio modes found for this device.",
-                        "No suitable audio modes found for this audio device. Very sorry, dude."));
+            psdAddErrorMsg(RETURN_FAIL, (STRPTR) libname, "No suitable audio modes found for this device.");
         }
     } while(FALSE);
     if(AHIBase)
@@ -2667,7 +2664,7 @@ void nGUITask()
                     break;
 
                case ID_ABOUT:
-                    MUI_RequestA(nh->nh_App, nh->nh_MainWindow, 0, NULL, PSD_OK_TXT("Marvellous!"), VERSION_STRING, NULL);
+                    MUI_RequestA(nh->nh_App, nh->nh_MainWindow, 0, NULL, "OK", VERSION_STRING, NULL);
                     break;
             }
             if(retid == MUIV_Application_ReturnID_Quit)
@@ -3089,7 +3086,7 @@ void nReleaseHook(struct Hook * hook asm("a0"), APTR prt asm("a2"), APTR unused 
     if(nam->nam_IsInput)
     {
         // we can only stop recording, we still need to call the player func until audio is done
-        psdAddErrorMsg(RETURN_ERROR, (STRPTR) libname, psdTxt("Recording stopped.", "Violently stopped recording!"));
+        psdAddErrorMsg(RETURN_ERROR, (STRPTR) libname, "Recording stopped.");
     } else {
         /* AHI's player goes on, on the timer clock, until AHI stops it;
            if it is not playing, subLibStart() starts the timer */
@@ -3102,8 +3099,7 @@ void nReleaseHook(struct Hook * hook asm("a0"), APTR prt asm("a2"), APTR unused 
     }
     nch->nch_DenyRequests = TRUE;
     psdAddErrorMsg(RETURN_ERROR, (STRPTR) libname,
-                   psdTxt("Audio device removed while playing.",
-                       "Removing the soundcard while playing is not very bright!"));
+                   "Audio device removed while playing.");
     
 
 }
