@@ -4,148 +4,88 @@ Guidance for coding agents working in this repository. `AGENTS.md` is a symlink 
 
 ## What this repo is
 
-**Poseidon for AmigaOS** - the 6.x line of the Poseidon USB stack, backported from the AROS 5.x
-line to **AmigaOS 3.2** (m68k, GCC 16.2, NDK 3.2, cmake). The shipping version is `project(VERSION)` in the
-top-level `CMakeLists.txt`, the single place it is written; every component reports it.)
-It runs on a classic Amiga with PiStorm + RPi4/CM4 (Emu68) over the emu68 `xhci.device` - the two
-repos are a **matched pair**: the driver lives in the `emu68-driver-stack` checkout under
-`components/emu68-xhci-driver-context/`, and cross-ABI changes must land in both. (A frozen
-`emu68-xhci-driver-legacy/` sibling there still ships the 5.x classic-ABI driver; don't edit it
-for stack work.)
+**Neptune** - an incompatible fork of the Poseidon USB stack (released as "Poseidon for AmigaOS"
+up to 6.2), started from the AROS 5.x line, for AmigaOS 3.x on m68k (GCC 16.2, NDK 3.2, cmake).
+The version is `project(VERSION)` in the top-level `CMakeLists.txt` and nowhere else.
 
-The AROS baseline SHA is in `AROS-BASELINE` and the verbatim extraction is tagged
-`aros-extract-base`; original Poseidon 4.x sources are recoverable via
-`git show <initial-import>:path`, with no AROS checkout needed.
+It is a **matched pair** with `xhci.device` in the `emu68-driver-stack` checkout
+(`components/emu68-xhci-driver-context/`): cross-ABI changes land in both, and the vendored
+`usbhcd_*.h` copies there stay byte-identical to `include/devices/`. Don't edit the frozen
+`emu68-xhci-driver-legacy/` for stack work.
+
+AROS baseline: `AROS-BASELINE`, extraction tagged `aros-extract-base`.
 
 ## Build
 
 ```sh
-./build.sh --build          # container build (image auto-pulled; no local toolchain needed)
-./build.sh --package        # + build/Neptune-<ver>-<cpu>.lha (use BACKEND=off for a release)
-./build.sh --package --all-cpus   # one archive per released CPU (68020/68040/68060)
-./build.sh --upload         # push binaries to a live Amiga via Cloanto AE.exe
-./build.sh                  # = --build --upload (the edit-build-test loop)
+./build.sh --build                # container build (image auto-pulled)
+./build.sh --package --all-cpus   # Neptune-<ver>-<cpu>.lha for 68020/68040/68060
+./build.sh                        # --build --upload (to a live Amiga)
 ```
 
-Also `--tools` (upload the optional per-gadget tools) and `--dry-run` (upload: show, copy nothing).
-Env knobs: `BACKEND=pistorm|serial|off` (debug sink, default `pistorm`), `DEBUG=<level>` (min
-KPRINTF level, default 1 = verbose), `CPU=68020|68040|68060` (default `68040`; `FPU=` follows it,
-soft for 020 and hard otherwise), `BUILD_IMAGE=`, `BUILD_DIR=`, `AE=`. A build tree is tied to one
-CPU, so a non-default `CPU=` gets its own (`build-020/`, `build-060/`). `build.sh` wraps
-`scripts/docker-build.sh`, which owns the docker invocation **and the toolchain image tag**
-(`amiga-build-container:gcc-v16.2` - the same tag `emu68-driver-stack` builds on); CI runs the
-same wrapper.
+`BACKEND=pistorm|serial|off`, `DEBUG=<level>`, `CPU=68020|68040|68060` (non-default CPUs build in
+`build-020/`, `build-060/`). `scripts/docker-build.sh` owns the image tag; CI uses it too.
 
-Every build ends with `scripts/check-mui38.py`, which fails the build if the GUI fleet reaches outside the
-MUI 3.8 subset it is supposed to run on - a MUI 4/5-only tag compiles fine against the MUI 5 SDK and
-is simply ignored by `muimaster.library` 19. `NEPTUNE_SKIP_MUI38_CHECK=1` skips it; see
-`docs/porting-playbook.md` §4.2 for the floor and how it is held.
+After editing C, build and confirm **zero errors and zero warnings**. There is no test suite;
+correctness is verified on the real Amiga.
 
-Optimization is per tier, set in each target's `CMakeLists.txt`; everything else
-(`-m$M68K_CPU -m$M68K_FPU-float -fomit-frame-pointer -mcrt=nix20 -Wno-array-bounds`) comes from
-`cmake/toolchain.cmake`, and `-Wno-int-conversion` + the `aros_compat.h` force-include from one
-`add_compile_options()` in the root `CMakeLists.txt`. Don't re-state any of those per target.
-The CPU/FPU pair defaults to `68040`/`hard`; the release sweeps 68020-soft, 68040-hard and
-68060-hard into one archive each, and `M68K_CPU` also lands in every `$VER` cookie
-(`NEPTUNE_CPU`) so an installed system says which variant it is.
-
-| Tier | Targets | Flags |
-|---|---|---|
-| Hot path | `poseidon.library`, all 30 `*.class` | `-O3 -ffreestanding` |
-| GUI | `Trident` | `-O2` |
-| Cold | `c/` shell commands, `tools/` gadget tools, the embedded `camd_driver` CAMD blob | `-Os` |
-
-`-ffreestanding` must stay a **compile** option - as a link-only flag it is silently inert.
-
-Two per-target calls are **not** flag levels, so they do not break the rule above:
-`nep_module_layout(<t>)` (links through `ldscripts/module.lds`: `doNotExecute` at offset 0 via
-`.text.entry`, romtag via `.text.modhdr`, `_endOfCode` for `RT_ENDSKIP`, and a link-time assert that
-the module has no writable sections) and `nep_enable_lto(<t>)` (CMake's
-`INTERPROCEDURAL_OPTIMIZATION` property - **never write `-flto` by hand**). A TU whose payload is
-file-scope `asm()` must opt out with `nep_lto_keep_real_objects(<t> <src>)`: LTO cannot see a symbol
-defined only inside an asm string. `Trident`, `USBEject`, `c/`, `tools/` and the single-TU CAMD blob
-stay out of LTO - nothing to inline across.
-
-After editing a C file, build and confirm **zero errors and zero warnings** before reporting done.
-There is no automated test suite; correctness is verified on the real Amiga.
+Build traps:
+- Common flags come from `cmake/toolchain.cmake` and the root `CMakeLists.txt`; per-target files
+  set only the optimisation tier. Don't re-state the common ones.
+- `-ffreestanding` must stay a **compile** option; link-only it is silently inert.
+- LTO only via `nep_enable_lto(<t>)`, **never `-flto` by hand**. A TU whose payload is file-scope
+  `asm()` must opt out with `nep_lto_keep_real_objects(<t> <src>)`.
+- `nep_module_layout(<t>)` links through `ldscripts/module.lds`, which asserts the module has no
+  writable sections (ROM-able).
+- `scripts/check-mui38.py` fails the build if a GUI uses anything outside MUI 3.8.
 
 ## Layout
 
 | Path | Contents |
 |---|---|
-| `poseidon.library/` | The stack core (`poseidon.library.c` ~10k lines + `poseidon_intern.h` + `poseidon.sfd` + romtag skeleton) |
-| `romstartup/` | The Kickstart-ROM startup resident (pri −46) that brings the stack up before DOS; `scripts/build-kickstart.py` builds the image, `dist/ROM-ReadMe.md` is the user guide |
-| `classes/` | All `*.class` drivers (hub, hubss, hid, massstorage, audio, …; shared skeleton `class_main.c`, `common.h`) |
-| `usbclass.library/` | Class-registry library - sfd + CMake only, no C |
-| `include/` | Public headers: `libraries/poseidon.h`, `devices/usbhardware.h`, `libraries/usbclass.h` |
-| `trident/` | The MUI preferences GUI |
-| `c/`, `tools/` | CLI tools (PsdStackLoader, AddUSBHardware, …) and the optional per-gadget tools |
-| `vhi/` | `usbvideo.vhi` - VHI driver for USB cameras (`LIBS:VHI/`), a client of `usbvideo.device` with no USB code |
-| `usbeject/` | USBEject - WBStartup daemon: Workbench "USB" menu, safe eject via `UCM_MSSafeEject` |
-| `dist/`, `presets/` | Installer, icons, ReadMe template; shipped prefs |
-| `docs/` | Architecture & ABI docs, porting playbook, implementation plan - **start at `docs/README.md`** |
-| `scripts/` | `docker-build.sh` + the de-AROS porting scripts (`conf2sfd.py`, `dearos_lh.py`) |
+| `neptune.library/` | The stack core |
+| `classes/` | The `*.class` drivers (shared skeleton `class_main.c`, `common.h`) |
+| `neptuneusb/` | Neptune USB, the MUI prefs editor |
+| `c/`, `tools/`, `usbeject/`, `vhi/` | CLI commands, gadget tools, USBEject, `usbvideo.vhi` |
+| `romstartup/` | Kickstart-ROM startup resident; `scripts/build-kickstart.py` builds the image |
+| `include/` | Public headers; on-disk names and the Poseidon-prefs migration names in `nep_paths.h` |
+| `dist/`, `presets/` | Installer, icons, ReadMe template, sounds |
+| `docs/` | Architecture and ABI docs - start at `docs/neptune.library-architecture.md` |
 
-## Open work
-
-`docs/implementation-plan.md` is the **single open-work document** - everything in it is not yet
-done or not yet run on hardware, and nothing else tracks TODOs. When landing a phase, update
-the doc sections its doc-maintenance map (§5) lists.
-
-The lower-edge rework it grew out of is finished: the context HCD ABI ships and is the only client
-ABI `xhci.device` speaks. Design: `docs/poseidon-context-hcd-abi.md`; rationale:
-`docs/poseidon-vs-xhci-driver-model.md`.
+Open work lives in `docs/implementation-plan.md` only.
 
 ## Hard constraints
 
-- **The runtime floor is Kickstart/Workbench 3.1 (V40)**, even though the build targets the NDK 3.2
-  headers - an OS call newer than V40 compiles perfectly and fails only on the user's machine. No
-  `OpenLibrary("<os library>", N)` above 40, and nothing the NDK 3.2 SFDs' `==version` markers or the
-  headers' `V4x` annotations put past V40. The one deliberate exception is `IND_ADDEVENT` (V47),
-  gated at `classes/hid/hid.class.c` on `input.device`'s own `lib_Version >= 47` with an
-  `IND_WRITEEVENT` fallback; anything else newer needs its own runtime gate, added deliberately.
-  `docs/porting-playbook.md` §5 records how the floor was established and how to re-check it.
+- **Runtime floor is Kickstart/Workbench 3.1 (V40)** although the build uses NDK 3.2 headers: no
+  OS call or `OpenLibrary` version above 40 without a deliberate runtime gate (the one existing
+  case: `IND_ADDEVENT`, V47, gated in `hid.class.c`). See `docs/porting-playbook.md` §5.
 - **The legacy HCD ABI is frozen.** `IOUsbHWReq` V1+V2 layout and all `UHCMD_*`/`UHIOERR_*`/
-  `UHFB_*`/`UHCF_*` values are binary contract with classic third-party HCDs (Deneb, Subway, …).
-  Never change these offsets or values. V3 may only append fields.
-- **Do not regress the driver-workaround fixes (2026-07-02):** the class scan must not
-  wire-switch alternates while probing (R5), and endpoint-recipient class requests must carry the
-  full endpoint address (number | direction) in `wIndex` - the xhci.device workarounds that used
-  to mask these were deleted.
-- The address-0 enumeration lock is **`hub.class`-local** (`nh_Adr0Sema`, class-wide, held across
-  the whole of `nConfigurePort`). The old stack-wide `PsdBase.ps_Adr0Sema` was retired:
-  `hubss.class` is context-only and SuperSpeed has no default-address phase, so it doesn't
-  serialize address 0 at all. Don't reintroduce a stack-wide semaphore, and don't narrow the scope
-  of the hub.class one - a partial hold reintroduces the wrong-hub slot-binding race.
+  `UHFB_*`/`UHCF_*` values are binary contract with classic HCDs. Neptune does not implement
+  Poseidon's V3 interface; new HCD capabilities go into the context ABI, never into the request.
+- **Settings file format is fixed:** the IFF IDs (`PSDC`, `STKC`, …) stay, and
+  `struct PsdGlobalCfg` is the raw `GCFG` chunk - append-only, retired fields keep their slot.
+- **Catalogs:** a `MSG_*` number is both the catalog id and the `CatCompArray` index; adding,
+  removing or reordering messages needs a `CATALOG_VERSION` bump. `.ct` files are ISO-8859 or
+  cp1251 - use `grep -a`.
+- The class scan must not wire-switch alternates while probing, and endpoint-recipient class
+  requests carry the full endpoint address in `wIndex`.
+- The address-0 enumeration lock is `hub.class`-local (`nh_Adr0Sema`, held across all of
+  `nConfigurePort`). Don't reintroduce a stack-wide one or narrow it.
 
-## Source conventions (de-AROS'd bebbo ABI)
+## Source conventions
 
-- **LVO functions** are plain C with register annotations (`asm("d0")` …, libbase in `a6`) and a
-  **parenthesised name** at the definition (`APTR (psdAllocVec)(…)`) so the inline call-macros
-  don't expand there. Internal self-calls go through the sfdc inline stubs;
-  `POSEIDON_BASE_NAME=ps` is set globally in `CMakeLists.txt`, so every call site needs an
-  in-scope `ps` (classes often `#define ps <ctx>->Base` at file scope).
-- **Adding public functions**: append to `poseidon.sfd` (bias 30, 6-byte stride) *and*
-  `poseidon_funcs.inc` in the same order; headers are regenerated by sfdc at build time.
-- **RawDoFmt rules** (OS3.2 exec): no `%p` (use `0x%08lx`); always `l`-size (`%ld`/`%lu`/`%lx`) -
-  bare `%d` reads 16 bits but gcc varargs push 32.
-- ROM-clean discipline: `__NOLIBBASE__`, `SysBase` from absolute `$4`
-  (`EXEC_BASE_NAME (*(struct ExecBase **)4UL)`), string tables `const`.
-- Match the surrounding (AROS-derived) code style in edits; the codebase predates C99 idioms.
-- **`include/mui_compat.h` is force-included into every MUI TU** and carries two things. First, a
-  `va_list` replacement for the SDK's `__inline MUI_NewObject`, which passes `&tags` - the address of
-  the first named vararg - as the tag array; the varargs are then dead and the inliner drops them, at
-  every `-O` level. Don't use the SDK inline. Second, it lowers `MUIMASTER_VMIN` from the SDK's 20
-  to 19, so **we build against the MUI 5 SDK but run on MUI 3.8+**. Nothing in the fleet reaches past
-  V14; keep it that way - `scripts/check-mui38.py` fails the build otherwise, and has no escape
-  hatch by design (`docs/porting-playbook.md` §4.2).
+- **LVO functions:** plain C with register annotations and a **parenthesised name** at the
+  definition (`APTR (psdAllocVec)(…)`). Self-calls go through the sfdc inlines with an in-scope
+  `ps` (`NEPTUNE_BASE_NAME=ps`).
+- **New public functions:** append to `neptune.sfd` *and* `neptune_funcs.inc`, same order.
+- **RawDoFmt:** no `%p` (use `0x%08lx`); always `l`-size (`%ld`/`%lu`/`%lx`).
+- **ROM-clean:** `__NOLIBBASE__`, `SysBase` from `$4`, no writable data (string tables `const`,
+  pointer tables as locals).
+- **MUI:** `include/mui_compat.h` is force-included; don't use the SDK's inline `MUI_NewObject`.
+- Declare variables at first use; comments technical and terse.
 
-## Documentation upkeep
+## Docs
 
-`docs/porting-playbook.md` is the de-AROS recipe (genmodule→sfd, `AROS_LH`→C, the class-driver
-recipe) - read it before porting an AROS fix or adding a class driver.
-
-The `docs/` architecture documents are reverse-engineered and kept current: if a change
-invalidates a documented behavior (locking, enumeration order, scan semantics, ABI), update the
-affected doc section in the same change. Line-number anchors in docs are indicative; function
-names are the stable references.
+Read `docs/porting-playbook.md` before porting an AROS fix or adding a class. If a change
+invalidates documented behaviour (locking, enumeration, scan, ABI), update that doc in the same
+change; function names are the stable anchors, not line numbers.

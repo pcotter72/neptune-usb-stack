@@ -80,10 +80,10 @@ Installing newer ones on the Amiga alone changes nothing.
 **The Amiga does not start, or stops before the boot menu.** Undo it as described above.
 
 **It starts, but USB does not work.** Look at the list the script printed: `bcmpcie.library` and
-`xhci.device` must both be in it. If they are, open Trident (the Poseidon settings program) and
-read its log. `No xhci.device unit found` means the driver did not start. The usual reason is a
-driver from the `-rangeops` archive on an Emu68 that does not support it; use the plain driver
-archive.
+`xhci.device` must both be in it. If they are, open Neptune USB (the settings program in
+`SYS:Prefs`) and read its log. `No xhci.device unit found` means the driver did not start. The
+usual reason is a driver from the `-rangeops` archive on an Emu68 that does not support it; use
+the plain driver archive.
 
 **A USB drive works, but is not in the boot menu.** The drive must be partitioned the Amiga way
 (RDB) and its partition marked bootable. For a CD, check that you added `ODFileSystem`.

@@ -1,10 +1,60 @@
-# Release notes - Poseidon for AmigaOS 6.3
+# Release notes - Neptune 6.3
 
-Everything in this archive - `poseidon.library`, all 30 class drivers, Trident, USBEject
+Everything in this archive - `neptune.library`, all 30 class drivers, Neptune USB, USBEject
 and the command-line tools - reports version **6.3**, followed by the CPU it was built
 for.
 
-**Upgrading from 6.2:** install the whole archive. Your settings are untouched.
+**Upgrading from 6.2:** run the installer; it replaces the old installation and your
+settings are imported (see below).
+
+## Poseidon for AmigaOS is now Neptune
+
+At the request of the AROS Development Team, this project no longer presents itself
+ as Poseidon. From 6.3 it is **Neptune - an incompatible fork of the Poseidon USB stack**.
+
+**Neptune is not compatible with Poseidon:**
+
+* Poseidon's classes and tools (the 4.x and AROS 5.x lines) do not run on Neptune, and
+  Neptune's do not run on Poseidon.
+* Host-controller drivers written for **Poseidon's V3 host-controller interface** are not
+  supported. Neptune speaks the classic V1/V2 interface and its own context interface; the
+  context interface is not part of Poseidon's API.
+
+**What changed names:**
+
+| | 6.0-6.2 | 6.3 |
+|---|---|---|
+| Library | `LIBS:poseidon.library` | `LIBS:neptune.library` |
+| Class drivers | `SYS:Classes/USB/` | `DEVS:USBClasses/` |
+| Control panel | `SYS:Prefs/Trident` | `SYS:Prefs/NeptuneUSB` ("Neptune USB") |
+| Commands | `PsdStackLoader`, `PsdDevLister`, `PsdErrorlog` | `USBStart`, `USBList`, `USBErrorlog` |
+| Settings | `ENV(ARC):Sys/poseidon.prefs` | `ENV(ARC):Sys/neptune.prefs` |
+| Sounds | `SYS:Prefs/Presets/Poseidon/` | `SYS:Prefs/Presets/Neptune/` |
+| Device popups | "Poseidon Popups" (PoPo) | "USB device notifications" |
+| Settings-file datatype | `PSD` | `Neptune` |
+| Archive | `Poseidon-<ver>-<cpu>.lha` | `Neptune-<ver>-<cpu>.lha` |
+
+`AddUSBHardware`, `AddUSBClasses`, `USBEject` and the optional tools keep their names.
+
+**What the installer does:**
+
+* It disables the `Poseidon USB Stack` block in `S:User-Startup`, so the old stack is not
+  started next to Neptune, and adds a `Neptune USB Stack` block if you ask for autostart.
+* It offers to remove the 6.0-6.2 files listed above. Only files that report version 6 or
+  newer are removed, so a classic Poseidon is never touched, and `poseidon.prefs` is kept.
+* It copies sounds you added to `SYS:Prefs/Presets/Poseidon/` into the new drawer.
+
+**Your settings:** on first start, if there is no `neptune.prefs`, Neptune imports
+`poseidon.prefs`, moves the class and sound paths to the new drawers, and saves the result
+as `neptune.prefs`. Loading an old settings file by hand converts it the same way.
+Neptune USB's saved window positions start afresh, because the program's name changed.
+
+**Programmers:** the library is opened as `NEPTUNENAME` (`"neptune.library"`), version
+`NEPTUNE_LIB_MIN_VERSION`, with `<libraries/neptune.h>` and `<proto/neptune.h>`; the base is
+`NeptuneBase`. The `psd*()` function names, structures and tags are unchanged.
+Classes built for 6.0-6.2 open `poseidon.library` and must be rebuilt.
+
+The notes for 6.0-6.2 below keep the names those releases used.
 
 ## USB cameras
 
@@ -17,7 +67,7 @@ Tested with a Logitech C930e, up to 1920x1080 at 30 frames a second.
   C930e. Other H.264 and VP8 cameras and bulk-transfer cameras should work but are untested.
 * **cAMIra and other VHI programs:** the Installer offers to put `usbvideo.vhi` into
   `LIBS:VHI/`. Each camera is one input.
-* **Camera settings** in Trident: brightness, exposure, focus, white balance and the other
+* **Camera settings** in Neptune USB: brightness, exposure, focus, white balance and the other
   standard controls, applied at once and saved per camera.
 * **`UVCTool`** (optional tools) lists a camera's modes and saves pictures or H.264 video,
   e.g. `UVCTool TO=RAM:shot`.
@@ -74,7 +124,7 @@ interface once in the MIDI Ports editor.
 * Better recovery from errors on UAS disks.
 * Possible crash on disk change with several partitions.
 
-# Release notes - Poseidon for AmigaOS 6.2
+# Release notes - Neptune 6.2 (released as Poseidon for AmigaOS 6.2)
 
 Everything in this archive - `poseidon.library`, all 29 class drivers, Trident, USBEject
 and the command-line tools - reports version **6.2**, followed by the CPU it was built
@@ -201,7 +251,7 @@ each one comes from is given in brackets.
   a busy receive path can no longer hold up sending. Ported without the upstream change to the
   chip's idle behaviour; not tested here. (`14ff79a6`)
 
-# Release notes - Poseidon for AmigaOS 6.1
+# Release notes - Neptune 6.1 (released as Poseidon for AmigaOS 6.1)
 
 Everything in this archive - `poseidon.library`, all 29 class drivers, Trident, USBEject
 and the command-line tools - reports version **6.1**, followed by the CPU it was built
@@ -334,19 +384,18 @@ working.
   the others.
 * **USB keyboard + mouse combos:** Ctrl-Alt-Del is detected reliably.
 
-# Release notes - Poseidon for AmigaOS 6.0
+# Release notes - Neptune 6.0 (released as Poseidon for AmigaOS 6.0)
 
-The first release of **Poseidon for AmigaOS** - the Poseidon USB stack, back on the
-machine it was written for, and taken a good deal further while it was at it.
+The first release of this fork, published as **Poseidon for AmigaOS**: the AROS Poseidon
+sources rebuilt for AmigaOS, and taken further.
 
 Poseidon was Chris Hodges' USB stack for AmigaOS (2002-2009). In 2009 he placed the
-sources into AROS, and the AROS Development Team carried them forward for the next
-seventeen years - gaining a SuperSpeed hub class, more class drivers and a long tail of
-fixes, none of which an AmigaOS machine could use. This project takes that evolved
-version (AROS commit `c01498ab`) and brings it home, rebuilt for **AmigaOS 3.2** on 68k.
+sources into AROS, and the AROS Development Team has carried them forward since - gaining
+a SuperSpeed hub class, more class drivers and a long tail of fixes. This fork starts from
+that version (AROS commit `c01498ab`), rebuilt for **AmigaOS 3.2** on 68k.
 
 **The port is only half of it.** Roughly as much of this release is new work that has no
-counterpart in the AROS line at all: a second, purpose-built interface to the host
+counterpart in the AROS line: a second, purpose-built interface to the host
 controller and the reworked SuperSpeed handling that rides on it, UAS mass storage over
 bulk streams with several commands in flight and real error recovery, USB link power
 management under your control, a rebuilt mounting layer, and the isochronous-audio and
@@ -373,19 +422,18 @@ own icon, and Trident's translations (Czech, French, Italian, Polish, Russian, S
 
 **New here.** Poseidon has always talked to a host-controller driver by filling in a
 `struct IOUsbHWReq` and sending it - the classic V1/V2 request. It describes a transfer
-the way a 1998 controller wanted one: an address, an endpoint, a buffer. A USB 3.0
-controller wants something quite different. It keeps *contexts* - durable per-device and
-per-endpoint state it is told once - and a transfer is then a tiny reference to those
-contexts. Handed only classic requests, an xHCI driver has to reconstruct the topology by
-watching the traffic go past and guessing what the stack is doing.
+the way the USB 1.1 and 2.0 controllers of its day wanted one: an address, an endpoint, a
+buffer. A USB 3.0 controller wants something quite different. It keeps *contexts* - durable
+per-device and per-endpoint state it is told once - and a transfer is then a tiny reference
+to those contexts. Handed only classic requests, an xHCI driver has to reconstruct the
+topology by watching the traffic go past and guessing what the stack is doing.
 
-AROS's answer was to make the request bigger: a **"V3" extension** that bolted the missing
-topology onto *every* transfer - route string, root port, split/TT parameters, SuperSpeed
-burst settings. It never existed on AmigaOS, and it puts once-per-device facts on the hot
-path of every single transfer. **It has been removed here**, and replaced with a **context
-interface**: a set of operations that establish a device and its endpoints once, up front,
-so the transfers themselves stay small. It is what `xhci.device` 6.x speaks, and where
-everything below in this section comes from.
+Poseidon addresses this with its **V3 interface**, designed by the AROS Development Team
+with Chris Hodges, which carries the topology and SuperSpeed parameters with each transfer.
+This fork took a different approach and **does not implement V3**: its own **context
+interface** establishes a device and its endpoints once, up front, so the transfers stay
+small. It is not part of Poseidon's API, and a V3 driver does not work with this stack.
+It is what `xhci.device` 6.x speaks, and where everything below in this section comes from.
 
 **The legacy interface stays, and stays frozen.** The classic V1+V2 `IOUsbHWReq` layout
 and every `UHCMD_*`/`UHIOERR_*` value are untouched binary contract, because classic Amiga
@@ -462,6 +510,8 @@ endpoint address the audio class sent on the wire - which `xhci.device` used to 
 workaround for - was fixed at the source.
 
 ### "Use plain, factual messages"
+
+*(Removed in 6.3 - the plain wording is now the only one.)*
 
 **New here.** Poseidon traditionally reports itself with a certain amount of humour. In Trident,
 *Various Settings → Logging Options → **Use plain, factual messages*** swaps every log

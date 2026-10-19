@@ -1,8 +1,9 @@
-# Contributing to Poseidon for AmigaOS
+# Contributing to Neptune
 
-Thanks for your interest! This repository is **Poseidon for AmigaOS** - the 6.x
-line of the Poseidon USB stack, backported from the AROS 5.x line to **AmigaOS
-3.2** on m68k. Bug reports, fixes, new class drivers, and documentation are all
+Thanks for your interest! This repository is **Neptune** - an incompatible fork of
+the Poseidon USB stack for **AmigaOS 3.1 and newer** on m68k, started from the AROS
+5.x line. It is not Poseidon and is not affiliated with the AROS Development Team;
+see [Compatibility with Poseidon](README.md#compatibility-with-poseidon). Bug reports, fixes, new class drivers, and documentation are all
 welcome.
 
 ## Licensing of contributions
@@ -80,8 +81,10 @@ scripts/aros-port.sh <aros-clone> <sha> [<upstream-path> ...]
 
 The script applies the commit's changes to our files with a three-way merge and leaves
 the result **staged** - it never commits. It maps the paths (`rom/usb/classes` →
-`classes`, `rom/usb/poseidon` → `poseidon.library`, `rom/usb/poseidon/shellcommands` →
-`c`, `rom/usb/shellapps` → `tools`, `rom/usb/trident` → `trident`), skips AROS build
+`classes`, `rom/usb/poseidon` → `neptune.library`, `rom/usb/poseidon/shellcommands` →
+`c`, `rom/usb/shellapps` → `tools`, `rom/usb/trident` → `neptuneusb`) and the renamed
+files (`poseidon.library.c` → `neptune.library.c`, `Trident.c` → `NeptuneUSB.c`,
+`PsdStackLoader.c` → `USBStart.c`, …), skips AROS build
 files, and reports anything it could not place: files with conflicts (ordinary conflict
 markers - resolve and `git add`), files that were renamed or removed here, and files we
 have no place for, such as the host-controller drivers. It needs a clean index, so a
@@ -96,9 +99,10 @@ git commit --author='Upstream Author <address>' --date='<upstream date>' -F AROS
 ```
 
 "Applied cleanly" is not "builds". Upstream code still uses AROS idioms this tree has
-dropped (`GM_UNIQUENAME()`, `AROS_LH…`, bare message strings where we use `psdTxt()`),
-so build before committing - [docs/porting-playbook.md](docs/porting-playbook.md) is the
-recipe for those.
+dropped (`GM_UNIQUENAME()`, `AROS_LH…`), so build before committing -
+[docs/porting-playbook.md](docs/porting-playbook.md) is the recipe for those. Upstream's
+log and requester texts are also Poseidon's original light-hearted ones; this tree has
+plain wording only, so reword any that a port brings in.
 
 ### How ports are committed
 

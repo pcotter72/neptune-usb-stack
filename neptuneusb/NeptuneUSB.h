@@ -52,7 +52,6 @@ extern struct ExecBase *SysBase;
 /* prototypes */
 
 BOOL WriteConfig(STRPTR name);
-void LoadPsdStackloader(void);
 BOOL GetToolTypes(void);
 
 void CleanupClasses(void);
