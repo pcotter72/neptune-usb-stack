@@ -2,7 +2,7 @@
  *----------------------------------------------------------------------------
  *                         DRadio Tool for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon DRadio Tool by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -26,7 +26,7 @@
 
 const char DRadioTool_prgname[] = "DRadioTool";
 static const char *template = "ON/S,OFF/S,FREQ/K/N,SCAN/S,AUTO/S,SIGNAL/S,UNIT/N/K";
-const char DRadioTool_version[] = NEP_VER("DRadioTool") ", by Chris Hodges <chrisly@platon42.de>";
+const char DRadioTool_version[] = NEP_VER("DRadioTool");
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 

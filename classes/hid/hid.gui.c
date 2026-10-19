@@ -2441,7 +2441,7 @@ IPTR ActionDispatcher(struct IClass * cl asm("a0"), Object * obj asm("a2"), Msg 
         }
 
         case MUIM_Action_About:
-            MUI_RequestA(nch->nch_App, nch->nch_MainWindow, 0, NULL, "OK", VERSION_STRING, NULL);
+            NEP_CLASS_ABOUT(nch->nch_App, nch->nch_MainWindow);
             return(TRUE);
 
         case MUIM_Action_UpdateDevPrefs:

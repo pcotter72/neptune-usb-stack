@@ -7,7 +7,7 @@ endif()
 
 # --- Release identity ------------------------------------------------------------
 # The project() version above is the ONE place the shipping version is written: the
-# library, all 29 classes, Trident and every tool report it, and Packaging names the
+# library, all 29 classes, NeptuneUSB and every tool report it, and Packaging names the
 # archive after it. These six defines are global (they must reach every TU); the
 # $VER cookie itself is assembled by NEP_VER() in include/neptune_version.h.
 # The date is the configure timestamp.
@@ -36,7 +36,7 @@ add_compile_definitions(
 
 find_program(SFDC_EXECUTABLE NAMES sfdc HINTS /opt/m68k-amigaos/bin REQUIRED)
 
-# External AmigaOS SDKs not bundled with bebbo: the MUI 5 SDK (GUI classes + Trident) and the NDK
+# External AmigaOS SDKs not bundled with bebbo: the MUI 5 SDK (GUI classes + NeptuneUSB) and the NDK
 # 3.2 SANA+Roadshow package (the ethernet classes' <devices/sana2.h>).
 # Defaulted under one root - override AMIGA_SDK_ROOT, or either dir directly.
 set(AMIGA_SDK_ROOT    "$ENV{HOME}/amiga" CACHE PATH "Root holding the external AmigaOS SDKs (MUI, NDK)")
@@ -162,14 +162,14 @@ endfunction()
 # The CPU/FPU/CRT flags (-m${M68K_CPU} -m${M68K_FPU}-float -fomit-frame-pointer -mcrt=nix20
 # and -Wno-array-bounds) come from cmake/toolchain.cmake - the release builds this tree once
 # per CPU. These two apply to every TU in the tree; each target adds only its own -O level
-# (library + classes -O3, Trident -O2, the CLI programs -Os) and, where it is freestanding,
+# (library + classes -O3, NeptuneUSB -O2, the CLI programs -Os) and, where it is freestanding,
 # -ffreestanding.
 #
 # -Wno-int-conversion: m68k tag/vararg calls inherently mix pointers and ULONGs (sfdc's
 # vararg inlines marshal them through one array); pointers are ULONG-sized here. GCC 14+
 # makes int<->pointer conversion an error by default, so this is load-bearing.
 # SHELL: keeps the -include pair intact - CMake de-dups a bare repeated -include flag,
-# which would otherwise collapse Trident's second force-include into this one.
+# which would otherwise collapse NeptuneUSB's second force-include into this one.
 add_compile_options(-Wno-int-conversion
     "SHELL:-include ${CMAKE_CURRENT_SOURCE_DIR}/include/aros_compat.h")
 
@@ -229,7 +229,7 @@ add_subdirectory(classes/palmpda)
 add_subdirectory(classes/hubss)
 add_subdirectory(classes/arosx)
 add_subdirectory(classes/hid)
-add_subdirectory(trident)
+add_subdirectory(neptuneusb)
 add_subdirectory(usbeject)
 
 include(cmake/Packaging.cmake)

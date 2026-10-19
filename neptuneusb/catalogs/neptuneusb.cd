@@ -1,8 +1,8 @@
 MSG_APP_TITLE (//)
-Trident
+Neptune USB
 ;
 MSG_APP_DESC (//)
-Poseidon USB Stack GUI
+Neptune USB Stack GUI
 ;
 MSG_MENU_PROJECT (//)
 Project
@@ -137,16 +137,16 @@ MSG_POPUP_ALWAYS (//)
 Always open a popup window
 ;
 MSG_PANEL_GENERAL_LABEL1 (//)
-\33cTrident Graphical User Interface
+\33c\33bNeptune USB
 ;
 MSG_PANEL_GENERAL_LABEL2 (//)
-\33cfor the Poseidon USB Stack
+\33cPreferences for the Neptune USB stack,\nan incompatible fork of the Poseidon USB stack.
 ;
 MSG_PANEL_GENERAL_LABEL3 (//)
-\33cCopyright (C) 2002-2009 Chris Hodges
+\33cBased on Trident by Chris Hodges.
 ;
 MSG_PANEL_GENERAL_LABEL4 (//)
-\33cAll rights reserved.
+\33cCopyright (C) 2002-2009 Chris Hodges,\n2009-2026 The AROS Development Team.
 ;
 MSG_PANEL_GENERAL_LABEL5 (//)
 \33cMason Icons are\ncourtesy of Martin Merz.
@@ -356,13 +356,13 @@ MSG_PANEL_OPTIONS_PRIORITY (//)
 SubTask priority:
 ;
 MSG_PANEL_OPTIONS_PRIORITY_HELP (//)
-Defines the task priority of all\nsubtasks started by Poseidon.
+Defines the task priority of all\nsubtasks started by Neptune.
 ;
 MSG_PANEL_OPTIONS_BOOT (//)
 Boot delay:
 ;
 MSG_PANEL_OPTIONS_BOOT_HELP (//)
-If reset resident, this value defines,\nhow long Poseidon should wait for USB\ndevices to settle, allowing to boot from\nslow devices such as an USB CD drive.
+If reset resident, this value defines,\nhow long Neptune should wait for USB\ndevices to settle, allowing to boot from\nslow devices such as an USB CD drive.
 ;
 MSG_PANEL_OPTIONS_BOOT_FORMAT (//)
 %ld sec.
@@ -434,7 +434,7 @@ MSG_PANEL_OPTIONS_LOGGING_FAIL_HELP (//)
 Toggles logging of failures.
 ;
 MSG_PANEL_OPTIONS_MEMORY (//)
-Memory allocated in Poseidon Pool:
+Memory allocated in Neptune Pool:
 ;
 MSG_PANEL_NOTIFY (//)
 \33c\33bPopup Settings
@@ -563,7 +563,7 @@ MSG_PANEL_CONFIG_LOGFLUSH_HELP (//)
 Clicking on this button will remove all\nthe messages in the stack. There's no way\nto get them back.
 ;
 MSG_PANEL_CONFIG_LOGHELP (//)
-These are the messages of the Poseidon stack\ngenerated so far. If you want to clear this list\njust click on the 'Flush all messages' button.
+These are the messages of the Neptune stack\ngenerated so far. If you want to clear this list\njust click on the 'Flush all messages' button.
 ;
 MSG_PANEL_CONFIG_ALLONLINE (//)
 \33c All Online
@@ -629,13 +629,13 @@ MSG_ACTION_SAVE_DEV_FILE (//)
 DevList.log
 ;
 MSG_ACTION_SAVE_DEV_ERREXE (//)
-Error executing PsdDevLister
+Error executing USBList
 ;
 MSG_ACTION_DEV_SAVED (//)
-DevLister saved to %s.
+Device list saved to %s.
 ;
 MSG_ACTION_PREFS_LOAD (//)
-Select a Poseidon Prefs file...
+Select a Neptune Prefs file...
 ;
 MSG_ACTION_PREFS_LOADED (//)
 Config loaded from %s.
@@ -683,7 +683,7 @@ MSG_ACTION_CFG_REMOVE (//)
 Remove|Cancel
 ;
 MSG_ACTION_CFG_REMOVE_HELP (//)
-You are about to \33bremove\33n the configuration\ndata related to the device with the ID\n\33b%s\33n.\nThis includes all individually saved class\nsetting for the device or interfaces, as well\nas the stuff Trident saves (such as custom name or\npopup inhibit).\n\nAre you sure you want to remove these prefs?
+You are about to \33bremove\33n the configuration\ndata related to the device with the ID\n\33b%s\33n.\nThis includes all individually saved class\nsetting for the device or interfaces, as well\nas the stuff Neptune USB saves (such as custom name or\npopup inhibit).\n\nAre you sure you want to remove these prefs?
 ;
 MSG_ACTION_CFG_REMOVE_DEFAULT (//)
 You are about to \33bremove\33n the (default)\nconfiguration of the class \33b%s\33n.\nThis will set the classes initial prefs to the\ninternal defaults \33bon next boot\33n!\nIt does normally not affect the device or interface\nindividually saved settings.\n\nAre you sure you want to remove these prefs?

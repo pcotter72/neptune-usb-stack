@@ -1,15 +1,15 @@
-## version $VER: Trident.catalog 7.0 (19.10.2026)
+## version $VER: NeptuneUSB.catalog 7.0 (19.10.2026)
 ## language français
 ## codeset 0
 ;
 ;
 MSG_APP_TITLE
-Trident
-; Trident
+Neptune USB
+; Neptune USB
 ;
 MSG_APP_DESC
-Préférences de Poseidon
-; Poseidon USB Stack GUI
+Préférences de Neptune
+; Neptune USB Stack GUI
 ;
 MSG_MENU_PROJECT
 Projet
@@ -188,20 +188,20 @@ Toujours notifier
 ; Always open a popup window
 ;
 MSG_PANEL_GENERAL_LABEL1
-\33cInterface graphique de Trident
-; \33cTrident Graphical User Interface
+\33c\33bNeptune USB
+; \33c\33bNeptune USB
 ;
 MSG_PANEL_GENERAL_LABEL2
-\33cpour la pile USB Poseidon
-; \33cfor the Poseidon USB Stack
+\33cPréférences de la pile USB Neptune,\nun fork incompatible de la pile USB Poseidon.
+; \33cPreferences for the Neptune USB stack,\nan incompatible fork of the Poseidon USB stack.
 ;
 MSG_PANEL_GENERAL_LABEL3
-\33cCopyright ©2002-2009 Chris Hodges
-; \33cCopyright ©2002-2009 Chris Hodges
+\33cBasé sur Trident de Chris Hodges.
+; \33cBased on Trident by Chris Hodges.
 ;
 MSG_PANEL_GENERAL_LABEL4
-\33cAll rights reserved.
-; \33cAll rights reserved.
+\33cCopyright (C) 2002-2009 Chris Hodges,\n2009-2026 The AROS Development Team.
+; \33cCopyright (C) 2002-2009 Chris Hodges,\n2009-2026 The AROS Development Team.
 ;
 MSG_PANEL_GENERAL_LABEL5
 \33cMason Icons, courtoisie\n de Martin Merz.
@@ -480,16 +480,16 @@ Priorité des sous-tâches
 ; SubTask priority:
 ;
 MSG_PANEL_OPTIONS_PRIORITY_HELP
-Définit la priorité de toutes les sous-tâches démarées par Poseidon.
-; Defines the task priority of all\nsubtasks started by Poseidon.
+Définit la priorité de toutes les sous-tâches démarées par Neptune.
+; Defines the task priority of all\nsubtasks started by Neptune.
 ;
 MSG_PANEL_OPTIONS_BOOT
 Délai au démarrage :
 ; Boot delay:
 ;
 MSG_PANEL_OPTIONS_BOOT_HELP
-Après un redémarrage cette valeur définit combien de temps\nPoseidon devrait attendre les \périphériques USB lents, tels qu'un lecteur de CDROM.
-; If reset resident, this value defines,\nhow long Poseidon should wait for USB\ndevices to settle, allowing to boot from\nslow devices such as an USB CD drive.
+Après un redémarrage cette valeur définit combien de temps\nNeptune devrait attendre les \périphériques USB lents, tels qu'un lecteur de CDROM.
+; If reset resident, this value defines,\nhow long Neptune should wait for USB\ndevices to settle, allowing to boot from\nslow devices such as an USB CD drive.
 ;
 MSG_PANEL_OPTIONS_BOOT_FORMAT
 %ld sec.
@@ -584,8 +584,8 @@ Bascule la journalisation des messages d'échec.
 ; Toggles logging of failures.
 ;
 MSG_PANEL_OPTIONS_MEMORY
-Mémoire allouée par Poseidon :
-; Memory allocated in Poseidon Pool:
+Mémoire allouée par Neptune :
+; Memory allocated in Neptune Pool:
 ;
 MSG_PANEL_NOTIFY
 \33c\33bParamètres des notifications
@@ -756,8 +756,8 @@ Effacera tous les messages.\nIl n'y a pas de retour possible.
 ; Clicking on this button will remove all\nthe messages in the stack. There's no way\nto get them back.
 ;
 MSG_PANEL_CONFIG_LOGHELP
-Voici les messages générés par Poseidon jusqu'ici.\nPour effacer cette liste, cliquez sur 'Effacer tout'.
-; These are the messages of the Poseidon stack\ngenerated so far. If you want to clear this list\njust click on the 'Flush all messages' button.
+Voici les messages générés par Neptune jusqu'ici.\nPour effacer cette liste, cliquez sur 'Effacer tout'.
+; These are the messages of the Neptune stack\ngenerated so far. If you want to clear this list\njust click on the 'Flush all messages' button.
 ;
 MSG_PANEL_CONFIG_ALLONLINE
 \33cTout en ligne
@@ -772,7 +772,7 @@ MSG_PANEL_CONFIG_ALLOFFLINE
 ; \33c All Offline
 ;
 MSG_PANEL_CONFIG_ALLOFFLINE_HELP
-Ceci stoppe totalement Poseidon.
+Ceci stoppe totalement Neptune.
 ; Using 'Offline' you can take down all the USB\nhardware device drivers.\nThis totally halts the stack.
 ;
 MSG_PANEL_CONFIG_RESTART
@@ -844,16 +844,16 @@ DevList.log
 ; DevList.log
 ;
 MSG_ACTION_SAVE_DEV_ERREXE
-Erreur d'exécution sur PsdDevLister
-; Error executing PsdDevLister
+Erreur d'exécution sur USBList
+; Error executing USBList
 ;
 MSG_ACTION_DEV_SAVED
-DevLister sauvé en %s.
-; DevLister saved to %s.
+Liste des périphériques sauvée dans %s.
+; Device list saved to %s.
 ;
 MSG_ACTION_PREFS_LOAD
-Choisir un fichier Poseidon...
-; Select a Poseidon Prefs file...
+Choisir un fichier Neptune...
+; Select a Neptune Prefs file...
 ;
 MSG_ACTION_PREFS_LOADED
 Configuration chargée depuis %s.
@@ -917,7 +917,7 @@ Effacer|Annuler
 ;
 MSG_ACTION_CFG_REMOVE_HELP
 Vous êtes sur le point d'effacer la configuration de \33b%s\33n.\n\nEtes-vous sûr ?
-; You are about to \33bremove\33n the configuration\ndata related to the device with the ID\n\33b%s\33n.\nThis includes all individually saved class\nsetting for the device or interfaces, as well\nas the stuff Trident saves (such as custom name or\npopup inhibit).\n\nAre you sure you want to remove these prefs?
+; You are about to \33bremove\33n the configuration\ndata related to the device with the ID\n\33b%s\33n.\nThis includes all individually saved class\nsetting for the device or interfaces, as well\nas the stuff Neptune USB saves (such as custom name or\npopup inhibit).\n\nAre you sure you want to remove these prefs?
 ;
 MSG_ACTION_CFG_REMOVE_DEFAULT
 Vous êtes sur le point \33bd'effacer\33b la configuration de la classe \33b%s\33n.\n\nEtes-vous sûr ?

@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         bluetooth class for poseidon
+ *                         bluetooth class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon bluetooth class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -1366,7 +1366,7 @@ void nGUITask()
                     break;
 
                 case ID_ABOUT:
-                    MUI_RequestA(ncp->ncp_App, ncp->ncp_MainWindow, 0, NULL, "OK", VERSION_STRING, NULL);
+                    NEP_CLASS_ABOUT(ncp->ncp_App, ncp->ncp_MainWindow);
                     break;
             }
             if(retid == MUIV_Application_ReturnID_Quit)

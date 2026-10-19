@@ -22,11 +22,11 @@
  *     rather than edited at the 25 OpenLibrary sites - a new GUI class copied from an
  *     existing one then cannot quietly regress the floor.
  *
- * Force-included into every MUI TU: Trident via its CMake -include, the class drivers
+ * Force-included into every MUI TU: NeptuneUSB via its CMake -include, the class drivers
  * via classes/mui_base.h, notify.gui.c directly. Order matters - <proto/muimaster.h> is
  * pulled first, so the SDK inline exists before we shadow the name, and MUI_NewObjectA
  * binds to whatever MUIMASTER_BASE_NAME is at that point (the global MUIMasterBase for
- * Trident, the per-instance task accessor for the classes and the notifier).
+ * NeptuneUSB, the per-instance task accessor for the classes and the notifier).
  */
 #ifndef NEP_MUI_COMPAT_H
 #define NEP_MUI_COMPAT_H

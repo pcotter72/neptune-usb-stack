@@ -60,7 +60,7 @@ map=(
     "rom/usb/poseidon                neptune.library"
     "rom/usb/shellapps               tools"
     "rom/usb/classes                 classes"
-    "rom/usb/trident                 trident"
+    "rom/usb/trident                 neptuneusb"
 )
 
 # Upstream basename -> ours, for files renamed here (applied after the directory map).
@@ -70,6 +70,11 @@ renamed=(
     "poseidon_intern.h   neptune_intern.h"
     "popo.gui.c          notify.gui.c"
     "popo.gui.h          notify.gui.h"
+    "Trident.c           NeptuneUSB.c"
+    "Trident.h           NeptuneUSB.h"
+    "PsdStackLoader.c    USBStart.c"
+    "PsdDevLister.c      USBList.c"
+    "PsdErrorlog.c       USBErrorlog.c"
 )
 
 # Our path for an upstream file, or nothing if we have no place for it.

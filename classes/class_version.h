@@ -12,4 +12,18 @@
 
 #define VERSION_STRING  NEP_VER(CLASS_NAME)
 
+/* About requester of the class settings windows: name, version, the fork
+ * statement and the application's MUIA_Application_Copyright (the class's own
+ * authors). extra is a string literal appended after it, "" for none. Needs MUI
+ * in scope at the call site. */
+#define NEP_CLASS_ABOUT_EXTRA(app, win, extra) \
+    do { \
+        IPTR _copyright = (IPTR) ""; \
+        get((app), MUIA_Application_Copyright, &_copyright); \
+        MUI_RequestA((app), (win), 0, NULL, "OK", \
+                     NEP_NAME_VER(CLASS_NAME) " (" NEPTUNE_DATE ")\n\n" NEP_FORK_TXT "\n\n%s" extra, \
+                     &_copyright); \
+    } while(0)
+#define NEP_CLASS_ABOUT(app, win) NEP_CLASS_ABOUT_EXTRA(app, win, "")
+
 #endif /* NEPTUNE_CLASS_VERSION_H */

@@ -5,7 +5,7 @@
 ;   neptune.library              -> LIBS:
 ;   the USB device classes        -> DEVS:USBClasses/
 ;   the CLI tools                 -> C:
-;   Trident (the control panel)   -> SYS:Prefs/
+;   Neptune USB (the control panel)   -> SYS:Prefs/
 ;   USBEject (safe-eject menu)    -> SYS:WBStartup/     (optional)
 ;   the per-gadget Tools          -> SYS:Tools/         (optional)
 ;   the localized catalogs        -> LOCALE:Catalogs/   (if LOCALE: exists)
@@ -36,7 +36,7 @@
 )
 
 (welcome ("Welcome to the installation of " #poseidon ", the USB stack for AmigaOS 3.1 and newer.\n\n"
-          "This installs neptune.library, the USB device classes, the Trident "
+          "This installs neptune.library, the USB device classes, the Neptune USB "
           "control panel and the command-line tools.\n\n"
           "Note: it does NOT install a USB host-controller driver - that ships "
           "separately (e.g. xhci.device from the Emu68 driver stack). You will be "
@@ -80,11 +80,11 @@
     (copylib
         (prompt ("Installing " @each-name " into C:"))
         (help ("These commands bring the stack up and inspect it:\n\n"
-               "  PsdStackLoader  - start the stack (the one startup command)\n"
+               "  USBStart        - start the stack (the one startup command)\n"
                "  AddUSBHardware  - attach a host-controller device by hand\n"
                "  AddUSBClasses   - load the classes from DEVS:USBClasses/ by hand\n"
-               "  PsdDevLister    - list the connected USB devices\n"
-               "  PsdErrorlog     - show the stack error log\n\n" @copylib-help))
+               "  USBList         - list the connected USB devices\n"
+               "  USBErrorlog     - show the stack error log\n\n" @copylib-help))
         (source (tackon "C" @each-name))
         (dest "C:")
         (confirm "expert")
@@ -92,27 +92,27 @@
 )
 
 ;==========================================================================
-; Trident (the MUI control panel) + the USB attach/detach sounds -> SYS:Prefs/
-;   Prefs/Trident                          -> SYS:Prefs/Trident            (version-checked)
-;   Prefs/Trident.info  Prefs/Presets/...  -> SYS:Prefs/                   (icon + sounds, no $VER)
+; Neptune USB (the MUI control panel) + the USB attach/detach sounds -> SYS:Prefs/
+;   Prefs/NeptuneUSB                          -> SYS:Prefs/NeptuneUSB            (version-checked)
+;   Prefs/NeptuneUSB.info  Prefs/Presets/...  -> SYS:Prefs/                   (icon + sounds, no $VER)
 ; The executable goes via copylib (it carries a $VER, so a newer one is kept); the icon and
-; the sound presets have no version, so they ride along with copyfiles (~(Trident) = all but it).
+; the sound presets have no version, so they ride along with copyfiles (~(NeptuneUSB) = all but it).
 ;==========================================================================
 (complete 55)
 (copylib
-    (prompt "Installing Trident (the control panel) into SYS:Prefs/")
-    (help ("Trident is the Poseidon control panel.\n\n" @copylib-help))
-    (source "Prefs/Trident")
+    (prompt "Installing Neptune USB (the control panel) into SYS:Prefs/")
+    (help ("Neptune USB is the control panel for the USB stack.\n\n" @copylib-help))
+    (source "Prefs/NeptuneUSB")
     (dest "SYS:Prefs")
     (confirm "expert")
 )
 (copyfiles
-    (prompt "Installing Trident's icon and the USB attach/detach sounds into SYS:Prefs/")
+    (prompt "Installing Neptune USB's icon and the USB attach/detach sounds into SYS:Prefs/")
     (help ("Connect.iff / Disconnect.iff are the default sounds played when a USB device is "
            "plugged in or removed (SYS:Prefs/Presets/Neptune/).\n\n" @copyfiles-help))
     (source "Prefs")
     (dest "SYS:Prefs")
-    (pattern "~(Trident)")
+    (pattern "~(NeptuneUSB)")
 )
 
 ;==========================================================================
@@ -121,8 +121,8 @@
 (complete 65)
 (if (exists "LOCALE:" (noreq))
     (copyfiles
-        (prompt "Installing the Trident catalogs (translations) into LOCALE:Catalogs/")
-        (help ("Trident speaks English by default. The catalogs add other "
+        (prompt "Installing the Neptune USB catalogs (translations) into LOCALE:Catalogs/")
+        (help ("Neptune USB speaks English by default. The catalogs add other "
                "languages; they are only used if your Locale language matches.\n\n"
                @copyfiles-help))
         (source "Catalogs")
@@ -184,7 +184,7 @@
         (help ("Installs USBEject into SYS:WBStartup so it starts with "
                "Workbench. It waits in the background and keeps the 'USB' "
                "menu in sync as drives come and go. Safe to decline; the "
-               "same eject is also available from Trident's Devices page."))
+               "same eject is also available from Neptune USB's Devices page."))
         (default 1))
     (
         (makedir "SYS:WBStartup" (prompt "Creating SYS:WBStartup") (help @makedir-help))
@@ -262,7 +262,7 @@
         (help ("'S:User-Startup' runs the start command early on every boot "
                "(recommended).\n\n"
                "'Manual' installs nothing extra - you start the stack yourself by "
-               "running PsdStackLoader <device> <unit> (e.g. from a shell or your own "
+               "running USBStart <device> <unit> (e.g. from a shell or your own "
                "script)."))
         (choices "Add to S:User-Startup (recommended)"
                  "Manual - don't auto-start")
@@ -288,20 +288,20 @@
             (prompt "Add the Poseidon startup command to S:User-Startup?")
             (help @startup-help)
             ; One command starts the stack. The device and unit are its fallback for a
-            ; machine with no saved settings; once Trident has saved a controller, or on
+            ; machine with no saved settings; once Neptune USB has saved a controller, or on
             ; a ROM-started stack, they are not used. An older three-line block
-            ; (PsdStackLoader / AddUSBHardware / AddUSBClasses) is replaced by this one,
+            ; (USBStart / AddUSBHardware / AddUSBClasses) is replaced by this one,
             ; because (startup) rewrites the block it finds under #startupname.
             ; >NIL: keeps the boot quiet. AmigaDOS takes the redirection only straight
             ; after the command name, so it goes before the arguments.
-            (command (cat "C:PsdStackLoader >NIL: " #hcd " " #unit "\n")))
+            (command (cat "C:USBStart >NIL: " #hcd " " #unit "\n")))
     )
 )
 
 (complete 100)
 (message (#poseidon " has been installed.\n\n"
           (if (= #startmode 0)
-              "Reboot to start the USB stack, then open Trident from SYS:Prefs/ to see your devices."
-              "Start the stack with PsdStackLoader <device> <unit>, then open Trident from SYS:Prefs/."))
+              "Reboot to start the USB stack, then open Neptune USB from SYS:Prefs/ to see your devices."
+              "Start the stack with USBStart <device> <unit>, then open Neptune USB from SYS:Prefs/."))
          (all))
 (exit (quiet))

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Neptune - a fork of the Poseidon USB stack.
+ * Neptune - an incompatible fork of the Poseidon USB stack.
  *
  * Poseidon: designed and written by
  *   Chris Hodges <chrisly@platon42.de>
@@ -11,7 +11,7 @@
  *----------------------------------------------------------------------------
  *                  Internal includes for neptune.library
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on Poseidon's poseidon_intern.h by Chris Hodges <chrisly@platon42.de>.
  *
  */
 
@@ -32,7 +32,7 @@
 /* Configuration stuff */
 
 /* How this works:
-   Configurations are stored in an IFF structure. It is managed by Trident
+   Configurations are stored in an IFF structure. It is managed by NeptuneUSB
    and the stack itself. Class drivers may only inject, delete or read out
    certain sections of the configuration data. They either get pointer to the
    FORM sections or return pointers to this FORM. The form data has to be

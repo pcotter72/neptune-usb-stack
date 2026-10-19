@@ -2,7 +2,7 @@
  *----------------------------------------------------------------------------
  *                     Rocket Launcher Tool for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon Rocket Launcher Tool by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -34,7 +34,7 @@
 
 const char RocketTool_prgname[] = "RocketTool";
 static const char *template = "LEFT/S,RIGHT/S,UP/S,DOWN/S,FIRE/S,TIME/N/K,JOYPORT/N/K,UNIT/N/K";
-const char RocketTool_version[] = NEP_VER("RocketTool") ", by Chris Hodges <chrisly@platon42.de>";
+const char RocketTool_version[] = NEP_VER("RocketTool");
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 

@@ -16,7 +16,7 @@
 #include <proto/icon.h>
 #include <proto/utility.h>
 
-#include "Trident.h"
+#include "NeptuneUSB.h"
 #include "ActionClass.h"
 #include "IconListClass.h"
 #include "DevWinClass.h"

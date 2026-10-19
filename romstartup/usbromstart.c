@@ -128,7 +128,7 @@ const struct Resident romTag __attribute__((used, section(".text.modhdr"))) = {
 /* Keyboard and mouse.
  *
  * hid.class is tried first and is expected to fail in the shipping ROM.
- * The two boot-protocol classes cover keyboard and mouse until PsdStackLoader
+ * The two boot-protocol classes cover keyboard and mouse until USBStart
  * runs from the startup-sequence. Its class scan is the first one from a
  * process, and that is what runs the AfterDOS pass: it releases the boot
  * classes' bindings and hands the devices to the disk-loaded hid.class.

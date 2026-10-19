@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         ptp class for poseidon
+ *                         ptp class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon ptp class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -4558,7 +4558,7 @@ void nGUITask()
                 }
 
                 case ID_ABOUT:
-                    MUI_RequestA(nch->nch_App, nch->nch_MainWindow, 0, NULL, "Moo!", VERSION_STRING, NULL);
+                    NEP_CLASS_ABOUT(nch->nch_App, nch->nch_MainWindow);
                     break;
             }
             if(retid == MUIV_Application_ReturnID_Quit)

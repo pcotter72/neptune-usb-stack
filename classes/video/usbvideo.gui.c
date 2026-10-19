@@ -2,7 +2,7 @@
  *----------------------------------------------------------------------------
  *            usbvideo class: the settings window of a camera
  *----------------------------------------------------------------------------
- * Opened from Trident for one camera (UCM_OpenBindingCfgWindow); a task of
+ * Opened from NeptuneUSB for one camera (UCM_OpenBindingCfgWindow); a task of
  * its own, like every window of a class.
  *
  * The window knows no control by itself. It asks for the camera's controls
@@ -802,7 +802,7 @@ void nGUITask()
     gui->ug_App = ApplicationObject,
         MUIA_Application_Title      , (IPTR)libname,
         MUIA_Application_Version    , (IPTR)VERSION_STRING,
-        MUIA_Application_Copyright  , (IPTR)NEPTUNE_DIST_NAME,
+        MUIA_Application_Copyright  , (IPTR)"(C) 2026 The Neptune contributors",
         MUIA_Application_Description, (IPTR)"Settings for a USB camera",
         MUIA_Application_Base       , (IPTR)"USBVIDEO",
         MUIA_Application_HelpFile   , (IPTR)"HELP:Neptune.guide",
@@ -954,7 +954,7 @@ void nGUITask()
                     break;
 
                 case ID_ABOUT:
-                    MUI_RequestA(gui->ug_App, gui->ug_Window, 0, NULL, "OK", VERSION_STRING, NULL);
+                    NEP_CLASS_ABOUT(gui->ug_App, gui->ug_Window);
                     break;
             }
             if(!done && sigs)

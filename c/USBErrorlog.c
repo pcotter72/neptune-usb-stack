@@ -1,5 +1,6 @@
 /*
-** PsdErrorlog by Chris Hodges <chrisly@platon42.de>
+** USBErrorlog - prints the stack error log.
+** Based on Poseidon's PsdErrorlog by Chris Hodges <chrisly@platon42.de>.
 */
 
 #include <stdio.h>
@@ -19,7 +20,7 @@
 #define ARGS_SIZEOF   3
 
 static const char *template = "NOFLUSH/S,DEBUG/S,NOTIMESTAMPS=NOTS/S";
-const char *version = NEP_VER("PsdErrorlog") ", by Chris Hodges <chrisly@platon42.de>";
+const char *version = NEP_VER("USBErrorlog");
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 

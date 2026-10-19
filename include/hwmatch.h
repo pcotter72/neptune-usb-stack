@@ -1,12 +1,12 @@
 #ifndef NEPTUNE_HWMATCH_H
 #define NEPTUNE_HWMATCH_H
 /*
- * One definition of host-controller naming, shared by the library, Trident and
+ * One definition of host-controller naming, shared by the library, NeptuneUSB and
  * the CLI tools.
  *
  * A Neptune hardware entry is a device name plus a unit number, and the name
  * is always the BARE driver name ("xhci.device"): psdAddHardware() strips any
- * path, so phw_DevName / HA_DeviceName, Trident's list and the prefs Trident
+ * path, so phw_DevName / HA_DeviceName, NeptuneUSB's list and the prefs NeptuneUSB
  * writes never carry one. Where the driver comes from is decided when it is
  * opened: one already in memory (Kickstart or Emu68 ROM resident, or opened
  * before) by that name, anything else from NEP_HWDRAWER -- a bare name alone

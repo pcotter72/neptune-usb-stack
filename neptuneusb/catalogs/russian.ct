@@ -1,33 +1,33 @@
-## version $VER: Trident.catalog 7.0 (19.10.2026)
-## language czech
-## codeset 5
+## version $VER: NeptuneUSB.catalog 7.0 (19.10.2026)
+## codeset 2104
+## language russian
 ;
 MSG_APP_TITLE
-Trident
-; Trident
+Настройки USB-стека
+; Neptune USB
 ;
 MSG_APP_DESC
-Nastavenн pro Poseidon
-; Poseidon USB Stack GUI
+Интерфейс USB-стека Neptune
+; Neptune USB Stack GUI
 ;
 MSG_MENU_PROJECT
-Projekt
+Проект
 ; Project
 ;
 MSG_MENU_ABOUT
-O programu...
+О программе...
 ; About...
 ;
 MSG_MENU_ABOUTMUI
-O rozhranн MUI...
+О Zune...
 ; About MUI...
 ;
 MSG_MENU_HELP
-Nбpovмda
+Помощь
 ; Help
 ;
 MSG_MENU_ONLINE
-Online
+Подключить
 ; Online
 ;
 MSG_MENU_SC_ONLINE
@@ -35,7 +35,7 @@ O
 ; O
 ;
 MSG_MENU_OFFLINE
-Offline
+Отключить
 ; Offline
 ;
 MSG_MENU_SC_OFFLINE
@@ -43,7 +43,7 @@ F
 ; F
 ;
 MSG_MENU_ICONIFY
-Ikonifikovat
+Свернуть
 ; Iconify
 ;
 MSG_MENU_SC_ICONIFY
@@ -51,7 +51,7 @@ H
 ; H
 ;
 MSG_MENU_QUIT
-Ukonиit
+Выход
 ; Quit
 ;
 MSG_MENU_SC_QUIT
@@ -59,27 +59,27 @@ Q
 ; Q
 ;
 MSG_MENU_INFO
-Informace
+Информация
 ; Information
 ;
 MSG_MENU_SAVELOG
-Uloѕit vэpis chyb...
+Сохранить журнал ошибок...
 ; Save error log...
 ;
 MSG_MENU_FLUSH
-Vymazat vэpis chyb
+Сбросить ошибки
 ; Flush errors
 ;
 MSG_MENU_SAVEDEV
-Uloѕit seznam zaшнzenн...
+Сохранить список устройств...
 ; Save device list...
 ;
 MSG_MENU_SETTINGS
-Nastavenн
+Настройки
 ; Settings
 ;
 MSG_MENU_LOAD
-Naинst...
+Открыть...
 ; Load...
 ;
 MSG_MENU_SC_LOAD
@@ -87,7 +87,7 @@ L
 ; L
 ;
 MSG_MENU_SAVE
-Uloѕit
+Сохранить
 ; Save
 ;
 MSG_MENU_SC_SAVE
@@ -95,7 +95,7 @@ S
 ; S
 ;
 MSG_MENU_SAVEAS
-Uloѕit jako...
+Сохранить как...
 ; Save as...
 ;
 MSG_MENU_SC_SAVEAS
@@ -103,7 +103,7 @@ A
 ; A
 ;
 MSG_MENU_MUISETTINGS
-Nastavenн MUI
+Настройки Zune
 ; MUI Settings
 ;
 MSG_MENU_SC_MUISETTINGS
@@ -111,715 +111,715 @@ M
 ; M
 ;
 MSG_MAINPANEL_GENERAL
-Obecnй
+Общие данные
 ; General
 ;
 MSG_MAINPANEL_CONTROLLERS
-Шadiиe
+Контроллеры
 ; Controllers
 ;
 MSG_MAINPANEL_DEVICES
-Zaшнzenн
+Устройства
 ; Devices
 ;
 MSG_MAINPANEL_CLASSES
-Kategorie
+Классы
 ; Classes
 ;
 MSG_MAINPANEL_OPTIONS
-Moѕnosti
+Настройки
 ; Options
 ;
 MSG_MAINPANEL_POPUPS
-Upozornмnн
+Уведомления
 ; Popups
 ;
 MSG_MAINPANEL_CONFIG
-Konfigurace
+Управление
 ; Config
 ;
 MSG_ERRLVL_ALL
-V№echny zprбvy
+Все сообщения
 ; All messages
 ;
 MSG_ERRLVL_WARNINGS
-Upozornмnн
+Предупреждения/ошибки/сбои
 ; Warning and worse
 ;
 MSG_ERRLVL_ERRORS
-V№echny chyby
+Ошибки и сбои
 ; Errors and failures
 ;
 MSG_ERRLVL_FAILURES
-Zбvaѕnй chyby
+Только сбои
 ; Failures only
 ;
 MSG_POPUP_NEVER
-Upozornмnн nezobrazovat
+Не открывать всплывающее окно
 ; Never open a popup window
 ;
 MSG_POPUP_ERROR
-Upozornit pouze na chyby
+Уведомления только при ошибках
 ; Only popup on an error condition
 ;
 MSG_POPUP_UNKNOWN
-Upozornit na novй, neznбmй zaшнzenн
+Уведомления о неизвестных устройствах
 ; Popup on new, unknown devices
 ;
 MSG_POPUP_NOBINDING
-Upozornit na neexistujнcн propojenн
+Уведомления, если нет привязок
 ; Popup, if there is no binding
 ;
 MSG_POPUP_NOCONFIG
-Upozornit na chybмjнcн konfiguraci
+Уведомления ненастроенных классов
 ; Popup, if there is no config yet
 ;
 MSG_POPUP_CONFIGCLASS
-Upozornit na znбmou kategorii
+Уведомления настраиваемых классов
 ; Popup on configurable class
 ;
 MSG_POPUP_BINDING
-Upozornit bez ohledu na stav propojenн
+Уведомления независимо от привязки
 ; Popup, regardless of binding
 ;
 MSG_POPUP_ALWAYS
-Upozornit na kaѕdou zmмnu
+Всегда открывать всплывающее окно
 ; Always open a popup window
 ;
 MSG_PANEL_GENERAL_LABEL1
-\33cGrafickй rozhranн Trident
-; \33cTrident Graphical User Interface
+\33c\33bNeptune USB
+; \33c\33bNeptune USB
 ;
 MSG_PANEL_GENERAL_LABEL2
-\33cpro balнk Poseidon USB
-; \33cfor the Poseidon USB Stack
+\33cНастройки USB-стека Neptune,\nнесовместимого ответвления USB-стека Poseidon.
+; \33cPreferences for the Neptune USB stack,\nan incompatible fork of the Poseidon USB stack.
 ;
 MSG_PANEL_GENERAL_LABEL3
-\33cCopyright (c) 2002-2009 Chris Hodges
-; \33cCopyright \xa92002-2009 Chris Hodges
+\33cОсновано на Trident Криса Ходжеса.
+; \33cBased on Trident by Chris Hodges.
 ;
 MSG_PANEL_GENERAL_LABEL4
-\33cV№echna prбva vyhrazena
-; \33cAll rights reserved.
+\33cCopyright (C) 2002-2009 Chris Hodges,\n2009-2026 The AROS Development Team.
+; \33cCopyright (C) 2002-2009 Chris Hodges,\n2009-2026 The AROS Development Team.
 ;
 MSG_PANEL_GENERAL_LABEL5
-\33cMason Icons (c) Martin Merz
+\33cMason Icons были\nлюбезно предоставлены\nМартином Мерцем.
 ; \33cMason Icons are\ncourtesy of Martin Merz.
 ;
 MSG_PANEL_HARDWARE_LABEL1
-\33c\33bSeznam шadiищ
+\33c\33bДоступные USB-контроллеры
 ; \33c\33bUSB Hardware Controllers available
 ;
 MSG_PANEL_HARDWARE_CONTROLLER_HELP
-Zobrazн seznam шadiищ hardwaru, pшiиemѕ v systйmu\nlze mнt vнcero rщznэch typщ.\nNovэ pшidбte kliknutнm na tlaинtko 'Pшidat'. Pшed\npшipojenнm prvnнho novйho zaшнzenн je nutno шadiи\nruиnм uvйst do stavu online.
+Это список контроллеров доступных аппаратно.\nВ ОС м.б. несколько разных контроллеров одновременно.\nДля добавления используйте кнопку 'Создать' ниже.\nВам необходимо настроить подключаемый контроллер\nвручную, при первом добавлении устройства.
 ; This is the list of available hardware controllers.\nSeveral different controllers can be in the system at\nthe same time.\nTo add an entry, use the 'New' gadget at the bottom.\nYou need to manually set an hardware controller online\nthe first time you add the device.
 ;
 MSG_PANEL_HARDWARE_COLS_NAME
-\33uNбzev
+\33uУстройство
 ; \33uName
 ;
 MSG_PANEL_HARDWARE_COLS_UNIT
-\33uJedn.
+\33uUnit
 ; \33uUnit
 ;
 MSG_PANEL_HARDWARE_COLS_ONLINE
-\33uOnline
+\33uВключено
 ; \33uOnline
 ;
 MSG_PANEL_HARDWARE_COLS_PRODUCT
-\33uProdukt
+\33uОписание
 ; \33uProduct
 ;
 MSG_PANEL_HARDWARE_ONLINE_YES
-ano
+да
 ; Yes
 ;
 MSG_PANEL_HARDWARE_ONLINE_NO
-ne
+нет
 ; No
 ;
 MSG_PANEL_HARDWARE_UNKNOWN
-\33ineznбmэ
+\33iНечто неизвестное, ждём включения
 ; \33iunknown until online
 ;
 MSG_PANEL_HARDWARE_LABEL2
-Zaшнzenн:
+Устройство:
 ; Device:
 ;
 MSG_PANEL_HARDWARE_DEVICE_HELP
-Zobrazн nбzev ovladaиe zaшнzenн. Tyto soubory\nnajdete obvykle v DEVS:USBHardware.
+В этом поле указывается имя устройства (драйвера)\nконтроллера. Файлы этих драйверов обычно хранятся в\nDEVS:USBHardware.
 ; Give the name of the controller device\ndriver in this field. These devices are\nnormally stored in DEVS:USBHardware.
 ;
 MSG_PANEL_HARDWARE_SELECT
-Vyberte шadiи USB...
+Выберите USB-устройство...
 ; Select USBHardware device...
 ;
 MSG_PANEL_HARDWARE_UNIT
-Jednotka:
+Unit:
 ; Unit:
 ;
 MSG_PANEL_HARDWARE_UNIT_HELP
-Pokud je v systйmu pшipojeno vнce karet tйhoѕ\ntypu, zde zadejte инslo vybranйho.
+Если к ПК подключено несколько USB-хостов\nукажите здесь порядковый номер (unit).
 ; If there are multiple cards of the\nsame kind in your machine, enter\nthe unit number of the board here.
 ;
 MSG_PANEL_HARDWARE_DRIVER_NEW
-\33cPшidat
+\33cСоздать
 ; \33c New
 ;
 MSG_PANEL_HARDWARE_DRIVER_NEW_HELP
-Kliknutнm pшidбte novэ ovladaи hardwaru.
+Нажмите для создания записи о\nновом драйвере USB-хоста.
 ; Click here to create a\nnew hardware driver entry.
 ;
 MSG_PANEL_HARDWARE_DRIVER_COPY
-\33cZkopнrovat
+\33cКопировать
 ; \33c Copy
 ;
 MSG_PANEL_HARDWARE_DRIVER_COPY_HELP
-Kliknutнm zkopнrujete vybranэ ovladaи hardwaru.
+Нажмите для копирования выбраной\nзаписи драйвера USB-хоста
 ; Click here to copy the selected\nhardware driver entry.
 ;
 MSG_PANEL_HARDWARE_DRIVER_DELETE
-\33cOdebrat
+\33cУдалить
 ; \33c Delete
 ;
 MSG_PANEL_HARDWARE_DRIVER_DELETE_HELP
-Kliknutнm odstranнte vybranэ ovladaи hardwaru.\nOdpovнdajнcн (vиetnм souvisejнcнch) zaшнzenн\nse automaticky odpojн.
+Нажмите для удаления выбранной записи. Хост\nотключится автоматически, также отключив все\nподключенные к нему устройства.
 ; Click here to remove the selected entry.\nThe hardware will automatically go offline,\ntaking all its connected devices down.
 ;
 MSG_PANEL_HARDWARE_DRIVER_ONLINE
-\33cOnline
+\33cВключить
 ; \33c Online
 ;
 MSG_PANEL_HARDWARE_DRIVER_ONLINE_HELP
-Kliknutнm aktivujete vybranэ ovladaи hardwaru.
+Нажмите здесь для активации\nвыделеного драйвера.
 ; Click here to activate an\nindividual hardware driver.
 ;
 MSG_PANEL_HARDWARE_DRIVER_OFFLINE
-\33cOffline
+\33cОтключить
 ; \33c Offline
 ;
 MSG_PANEL_HARDWARE_DRIVER_OFFLINE_HELP
-Kliknutнm deaktivujete vybranэ ovladaи hardwaru.
+Нажмите здесь для деактивации\nвыделеного драйвера.
 ; Click here to deactivate an\nindividual hardware driver.
 ;
 MSG_PANEL_HARDWARE_DRIVER_INFO
-\33c Informace
+\33cСвойства
 ; \33c Info
 ;
 MSG_PANEL_HARDWARE_DRIVER_INFO_HELP
-Zobrazuje pшehled informacн o ovladaинch hardwaru.\nChcete-li zobrazit podrobnмj№н ъdaje, vyberte\npoѕadovanэ ovladaи a kliknмte na tlaинtko 'Informace'.
+Нажмите для получения информации об устройстве.\nУстройство должно быть включено, чтобы информация\nо нём стала доступной.
 ; To get information on the device driver,\nclick here. The device needs to be online\nfor the information to be available.
 ;
 MSG_PANEL_DEVICES_LABEL
-\33c\33bSeznam zaшнzenн
+\33c\33bНайденные USB-устройства и интерфейсы
 ; \33c\33bUSB Devices in the system
 ;
 MSG_PANEL_DEVICES_HELP
-Zobrazuje seznam zaшнzenн pшipojenэch do systйmu\nvиetnм ъdajщ o rychlosti, stavu, kategorii a event.\npropojenн.
+Это список текущих известных системе USB-устройств.\nЗдесь также показаны привязки назначенные устройствам\nили интерфейсам.
 ; This is the list of USB devices (functions)\ncurrently in the system. It also shows the\ncurrently existing device or interface bindings.
 ;
 MSG_PANEL_DEVICES_COLS_NAME
-\33uNбzev
+\33uНазвание
 ; \33uName
 ;
 MSG_PANEL_DEVICES_COLS_SPEED
-\33uRychlost
+\33uСкорость
 ; \33uSpeed
 ;
 MSG_PANEL_DEVICES_COLS_STATE
-\33uStav
+\33uСостояние
 ; \33uState
 ;
 MSG_PANEL_DEVICES_COLS_CLASS
-\33uKategorie
+\33uКласс
 ; \33uClass
 ;
 MSG_PANEL_DEVICES_COLS_BINDINGS
-\33uPropojenн
+\33uПривязка
 ; \33uBindings
 ;
 MSG_PANEL_DEVICES_SCAN
-\33cZaшadit
+\33cСканировать
 ; \33c Class Scan
 ;
 MSG_PANEL_DEVICES_SCAN_HELP
-Provede rozшazenн zaшнzenн do kategoriн. Podle svэch\nfunkcн patшн kaѕdй zaшнzenн do urиitй kategorie\na pokud danou kategorii Poseidon podporuje, pшiшadн\nodpovнdajнcн propojenн vиetnм zavedenн do systйmu.
+Нажмите для сканирования классов. Каждое устройство\nбудет проверяно на соответствие стандартным классам\nв системе. В случае нахождения класса устройство будет\nпривязано к нему автоматически с добавлением функций\nсоответствующих найденному классу.
 ; Clicking on this button will start a class scan. This means that\neach device will be examined if it matches some of the standard\nclasses in the system. In this case, a binding will be established\nand the functionality will be added to the system automatically.\n
 ;
 MSG_PANEL_DEVICES_UNBIND
-\33cOdpojit
+\33cОтвязать
 ; \33c Unbind
 ;
 MSG_PANEL_DEVICES_UNBIND_HELP
-Umoѕnн ruиnм odpojit vybranй zaшнzenн. To je vэhodnй\ntehdy, chcete-li danй zaшнzenн doиasnм deaktivovat.\nZnovu ho aktivujete kliknutнm na tlaинtko 'Zaшadit'.
+Ручное удаление привязки. Это м.б. полезно для\nвременной деактивации устройства. Используйте\nкнопку 'Сканировать' для возобновления привязки.
 ; Manually removes a binding. This can be\nuseful to temporarily deactivate a device.\nUse 'Class Scan' to reactivate the binding.
 ;
 MSG_PANEL_DEVICES_INFO
-\33cInformace
+\33cЗапрос данных
 ; \33c Information
 ;
 MSG_PANEL_DEVICES_INFO_HELP
-Otevшe okno s podrobnэmi informacemi o zaшнzenн.
+Открывает окно с подробной информацией. Такой\nзапрос м.б. невозможным, надо пробовать.
 ; Opens a detailed information window.\nJust try it, nothing can go wrong.
 ;
 MSG_PANEL_DEVICES_SETTINGS
-\33cNastavenн
+\33cНастройки
 ; \33c Settings
 ;
 MSG_PANEL_DEVICES_SETTINGS_HELP
-Pokud vybranй zaшнzenн nabнzн moѕnost konfigurace,\nkliknutнm na toto tlaинtko otevшete okno s pшehledem\nmoѕnostн nastavenн.\n\nPozn.: Moѕnosti tэkajнcн se konfigurace propojenн\nnajdete v oknм s informacemi o zaшнzenн.
+Если существует привязка устройства, а класс\nявляется настраиваемым, то этой кнопкой можно\nоткрыть окно настроек. Обратите внимание, что\nкнопка для настройки привязки находится внутри\nинформационного окна.
 ; If there is a device binding and the class\nsupports a configuration GUI, clicking on this\nbutton will open the preferences window.\n\nNote well, that the corresponding button for the\ninterface binding settings can be found inside\nthe information window.
 ;
 MSG_PANEL_DEVICES_SUSPEND
-\33cUspat
+\33cОстановить
 ; \33c Suspend
 ;
 MSG_PANEL_DEVICES_SUSPEND_HELP
-Pшepne vybranй zaшнzenн do reѕimu spбnku. Pokud\nkategorie danйho zaшнzenн tento reѕim nepodporuje,\nnestane se nic.
+Переводит устройство в режим ожидания. Но если\nпривязанный класс не поддерживает энергосбережение,\nэта кнопка ничего не сделает.
 ; Sends device into power saving suspend mode.\nIf a class binding does not support suspend,\nthis button will do nothing.
 ;
 MSG_PANEL_DEVICES_RESUME
-\33cProbudit
+\33cЗапустить
 ; \33c Resume
 ;
 MSG_PANEL_DEVICES_RESUME_HELP
-Probudн vybranй zaшнzenн z reѕimu spбnku (bylo-li\npшedtнm v tomto reѕimu).
+Возобновляет работу устройства после того,\nкак его переводили в режим ожидания.\n
 ; Resumes the device to full operation after\nit was placed into suspend mode.\n
 ;
 MSG_PANEL_DEVICES_POWERCYCLE
-\33cReaktivovat
+\33cПереподключить
 ; \33c Powercycle
 ;
 MSG_PANEL_DEVICES_POWERCYCLE_HELP
-Vypne a zapne napбjenн pro odpovнdajнcн port rozboиovaиe.\nTento postup je vэhodnэ tehdy, chcete-li znovu aktivovat\nnereagujнcн zaшнzenн.
+Выключает и снова включает питание порта хаба. Это м.б.\nполезно для повторной активации не отвечающих устройств.\n
 ; Power cycles the hub port and re-enumerates\ndevice. Comes handy to reactivate dead devices.\n
 ;
 MSG_PANEL_DEVICES_DISABLE
-\33cVypnout
+\33cВыключить
 ; \33c Disable
 ;
 MSG_PANEL_DEVICES_DISABLE_HELP
-Odpojн napбjenн portu rozboиovaиe, ve kterйm je\nvybranй zaшнzenн. Toto zaшнzenн pak jiѕ nelze znovu\naktivovat prostэm vytaѕenнm a zasunutнm zpмt do portu.
+Обесточивает порт хаба. Обесточенный порт нельзя\nбудет включить переподключением устройства.\n
 ; Permanently powers off the port. It cannot be\nreactivated by unplugging/replugging the device.\n
 ;
 MSG_PANEL_CLASSES
-\33c\33bSeznam kategoriн
+\33c\33bИзвестные классы
 ; \33c\33bUSB Classes available
 ;
 MSG_PANEL_CLASSES_HELP
-Pшedstavuje seznam kategoriн zaшнzenн, pшiиemѕ kaѕdй\nkategorii odpovнdб ovladaи. Pomocн tlaинtka 'Pшidat'\nlze ovladaи dodat ruиnм, tlaинtkem 'Identifikovat' pak\nautomaticky.
+Это список известных USB-классов. Каждый класс\nдрайверов определяет группу USB-устройств.\nКлассы могут быть добавлены вручную кнопкой\n'Добавить' или найдены в системе по кнопке\n'Автоопределение'.
 ; This is the list of USB classes available.\nEach class is a software driver for a group of\nUSB devices. Classes can be manually added using\nthe 'Add' button or automatically with 'Dir Scan'.
 ;
 MSG_PANEL_CLASSES_COLS_NAME
-\33uNбzev
+\33uИмя класса
 ; \33uName
 ;
 MSG_PANEL_CLASSES_COLS_USE
-\33uPouѕitн
+\33uКол-во
 ; \33uUse#
 ;
 MSG_PANEL_CLASSES_COLS_DESC
-\33uPopis
+\33uОписание
 ; \33uDescription
 ;
 MSG_PANEL_CLASSES_LABEL
-Kategorie:
+Библиотека классов:
 ; Class library:
 ;
 MSG_PANEL_CLASSES_LABEL_HELP
-Chcete-li pшidat ovladaи pro kategorii (skupinu)\nzaшнzenн ruиnм, zadejte do tohoto textovйho pole\ncestu vиetnм nбzvu ovladaиe a kliknмte na tlaинtko\n'Pшidat'.
+Для добавления драйвера USB-класса вручную,\nвведите его имя здесь и нажмите 'Добавить'.
 ; To manually add an usb class driver,\nenter its name here and click on 'Add'.
 ;
 MSG_PANEL_CLASSES_SELECT
-Vyberte kategorii zaшнzenн...
+Выберите библиотеку USB-классов...
 ; Select USB class library...
 ;
 MSG_PANEL_CLASSES_ADD
-\33cPшidat
+\33cДобавить
 ; \33cAdd
 ;
 MSG_PANEL_CLASSES_ADD_HELP
-Chcete-li pшidat ovladaи pro kategorii (skupinu)\nzaшнzenн ruиnм, zadejte do vэ№e umнstмnйho textovйho\npole cestu vиetnм nбzvu ovladaиe a kliknмte na toto\ntlaинtko.
+Для добавления драйвера USB-класса, введите\nего имя выше и нажмите эту кнопку.
 ; To manually add an usb class\ndriver, enter its name above\nand click on this button.
 ;
 MSG_PANEL_CLASSES_REMOVE
-\33cOdebrat
+\33cУдалить
 ; \33c Remove
 ;
 MSG_PANEL_CLASSES_REMOVE_HELP
-Umoѕnн odebrat ovladaи kategorie zaшнzenн vиetnм\nv№ech propojenн.
+Нажмите здесь для удаления драйвера\nUSB-класса и всех его текущих привязок.
 ; Click here to remove a class driver\nand all its current bindings.
 ;
 MSG_PANEL_CLASSES_CONFIG
-\33cKonfigurovat
+\33cНастроить
 ; \33c Configure
 ;
 MSG_PANEL_CLASSES_CONFIG_HELP
-Pokud vybranэ ovladaи nabнzн moѕnost konfigurace,\nkliknutнm na toto tlaинtko otevшete okno s pшehledem\nmoѕnostн nastavenн.
+Если драйвер USB-класса поддерживается\nкакой-то конфигурацией, нажмите здесь\nдля открытия окна с настройками класса.
 ; If a class driver supports some kind of\nconfiguration, click here and it will\nopen a configuration window of the class.
 ;
 MSG_PANEL_CLASSES_SCAN
-\33cIdentifikovat
+\33cАвтоопределение
 ; \33c Dir Scan
 ;
 MSG_PANEL_CLASSES_SCAN_HELP
-Projde seznam dostupnэch ovladaищ a automaticky\nje pшidб do systйmu.
+Автоматический поиск и добавление всех\nнайденных драйверов USB-классов в систему.
 ; Automatically scans for class\ndrivers and\nadds all drivers found to the system.
 ;
 MSG_PANEL_OPTIONS
-\33c\33bOstatnн moѕnosti
+\33c\33bРазличные настройки
 ; \33c\33bVarious Settings
 ;
 MSG_PANEL_OPTIONS_STACK
-Obecnй moѕnosti
+Настройки USB-стека
 ; Stack Settings
 ;
 MSG_PANEL_OPTIONS_PRIORITY
-Priorita ъloh:
+Приоритет:
 ; SubTask priority:
 ;
 MSG_PANEL_OPTIONS_PRIORITY_HELP
-Definuje priority v№ech podpщrnэch ъloh spou№tмnэch\nprogramem Poseidon.
-; Defines the task priority of all\nsubtasks started by Poseidon.
+Определяет приоритет для всех\nзадач запущенных Neptune.
+; Defines the task priority of all\nsubtasks started by Neptune.
 ;
 MSG_PANEL_OPTIONS_BOOT
-Zpoѕdмnн pшi startu:
+Задержка загрузки:
 ; Boot delay:
 ;
 MSG_PANEL_OPTIONS_BOOT_HELP
-Definuje dobu, po kterou Poseidon иekб na pomalej№н\nzaшнzenн typu mechaniky CD nebo DVD tak, aby z nich\nbylo moѕno nastartovat systйm.
-; If reset resident, this value defines,\nhow long Poseidon should wait for USB\ndevices to settle, allowing to boot from\nslow devices such as an USB CD drive.
+Если сброс был резидентным, определяет как долго\nUSB-стек должен ждать, пока не подключатся USB-\nустройства. Это позволяет загружаться с медленных\nустройств, таких как USB CD-ROM.
+; If reset resident, this value defines,\nhow long Neptune should wait for USB\ndevices to settle, allowing to boot from\nslow devices such as an USB CD drive.
 ;
 MSG_PANEL_OPTIONS_BOOT_FORMAT
-%ld sek.
+%ld сек.
 ; %ld sec.
 ;
 MSG_PANEL_OPTIONS_DISABLELOW
-V pшнpadм nedostateиnйho napбjenн vypnout port rozboиovaиe:
+Автоотключение порта хаба при нехватке напряжения:
 ; Automatically disable hub port on low power conditions:
 ;
 MSG_PANEL_OPTIONS_DISABLELOW_HELP
-Umoѕnн automaticky odpojit zaшнzenн, jehoѕ odbмr\npшevy№uje moѕnosti portu rozboиovaиe.
+Если обнаружена нехватка напряжения,\nустройство вызвавшее просадку будет\nавтоматически отключено.
 ; If a low power condition is detected at a port,\nselecting this switch will automatically turn off\nthe device causing the low power condition.
 ;
 MSG_PANEL_OPTIONS_DISABLEDEAD
-V pшнpadм chyby zaшнzenн vypnout port rozboиovaиe:
+Автоотключение порта хаба при потере устройства:
 ; Automatically disable hub port, if device drops dead:
 ;
 MSG_PANEL_OPTIONS_DISABLEDEAD_HELP
-Vypne port rozboиovaиe v pшнpadм, ѕe zaшнzenн pшestane\nreagovat (obvykle chyby pшi pшenosu dat).
+Если устройство не отвечает,\nоно будет автоматически отключено,\nчтобы не тормозить систему ожиданием.
 ; If a device drops dead (transfer timeouts),\nand this switch is selected, then the hub port\nwill be disabled automatically to avoid unnecessary\nperformance penalties.
 ;
 MSG_PANEL_OPTIONS_POWERCYCLE
-V pшнpadм chyby zaшнzenн reaktivovat port rozboиovaиe:
+Переподключение порта хаба при потере устройства:
 ; Automatically power cycle hub port, if device drops dead:
 ;
 MSG_PANEL_OPTIONS_POWERCYCLE_HELP
-Restartuje napбjenн zaшнzenн, kterй pшestalo\nodpovнdat; иasto to staин k jeho obnovenн.\nNechte zapnutй, pokud nмkterй zaшнzenн na\nvypnutн napбjenн nereaguje dobшe.
+Перезапускает питание устройства, переставшего\nотвечать; часто этого достаточно, чтобы вернуть\nего к работе. Оставьте включённым, если только\nустройство плохо переносит отключение питания.
 ; Power-cycles a device that stopped responding, which\nis often enough to bring it back. Leave this on unless\na device reacts badly to being power-cycled.
 ;
 MSG_PANEL_OPTIONS_POWERSAVE
-Povolit reѕim №etшenн energiн:
+Включить энергосберегающий режим при ожидании:
 ; Enable power-saving suspend mode:
 ;
 MSG_PANEL_OPTIONS_POWERSAVE_HELP
-Po uplynutн definovanй doby pшepne zaшнzenн do reѕimu\n№etшenн energiн.\nOdbмr v tomto reѕimu klesne pod 1 mA, pшiиemѕ obnovenн\npracovnнho reѕimu trvб obvykle do 25 ms.
+Устройства переводятся в режим ожидания при бездействии,\nчерез указанный ниже интервал. Обычно потребляемая мощность\nстановится < 1 мА, а возобновление работы занимает 25 мс.
 ; Devices will be placed into suspend mode after\na specified interval of inactivity.\nPower consumption goes down to less than 1mA.\nResuming of operation usually takes place within 25ms.
 ;
 MSG_PANEL_OPTIONS_FORCESUSPEND
-Vynutit reѕim spбnku i tehdy, nepodporuje-li ho ovladaи:
+Принудительное ожидание, даже если нет поддержки:
 ; Force suspend mode, even if not supported by class:
 ;
 MSG_PANEL_OPTIONS_FORCESUSPEND_HELP
-Ovladaиe jednotlivэch kategoriн zaшнzenн by mмly\npodporovat reѕim №etшenн energiн. V pшнpadм ѕe tomu\ntak nenн, tato funkce zru№н propojenн souvisejнcн\ns ovladaиem a nбslednм zaшнzenн nucenм uvede\ndo reѕimu spбnku.\nPozn.: Funkce se tэkб pouze tмch zaшнzenн, kterй lze\nprobudit odpovнdajнcнm signбlem zvenин.
+Драйверы класса должны поддерживать переход в\nждущий режим, иначе стеку приходится освобождать\nих перед ожиданием. Этот способ подходит только\nдля дистанционно управляемых устройств.
 ; Class drivers should support going into suspend\nmode. If they don't, enabling this switch will\nsimply release the binding prior to suspending.\nThis is only performed on remote wakeup devices,\notherwise the class wouldn't rebind automatically.
 ;
 MSG_PANEL_OPTIONS_INACTIVITY
-Reѕim spбnku po:
+Ожидание при бездействии:
 ; Inactivity timeout for suspend:
 ;
 MSG_PANEL_OPTIONS_INACTIVITY_HELP
-Po uplynutн definovanй doby pшepne zaшнzenн do reѕimu\n№etшenн energiн.
+Задержка перед попыткой перевода устройства\nв энергосберегающий режим.
 ; Timeout before trying to place a device into\npower saving suspend mode.
 ;
 MSG_PANEL_OPTIONS_INACTIVITY_FORMAT
-%ld sek.
+%ld сек.
 ; %ld sec.
 ;
 MSG_PANEL_OPTIONS_LOGGING
-Vэpis hlб№enн
+Настройки журналирования
 ; Logging Options
 ;
 MSG_PANEL_OPTIONS_LOGGING_LABEL
-Bмѕnй informace:
+Информационные сообщения:
 ; Log info messages:
 ;
 MSG_PANEL_OPTIONS_LOGGING_LABEL_HELP
-Povolн vэpis bмѕnэch informacн programu Poseidon.
+Вкл. сохранение обычных\nинформационных сообщений.
 ; Toggles logging of normal\ninformation messages.
 ;
 MSG_PANEL_OPTIONS_LOGGING_WARN
-Upozornмnн:
+Предупреждения:
 ; Log warnings:
 ;
 MSG_PANEL_OPTIONS_LOGGING_WARN_HELP
-Povolн vэpis upozornмnн programu Poseidon.
+Вкл. сохранение предупреждений.
 ; Toggles logging of warnings.
 ;
 MSG_PANEL_OPTIONS_LOGGING_ERR
-Bмѕnй chyby:
+Сообщения об ошибках:
 ; Log errors:
 ;
 MSG_PANEL_OPTIONS_LOGGING_ERR_HELP
-Povolн vэpis bмѕnэch chyb programu Poseidon.
+Вкл. сохранение сообщений об ошибках.
 ; Toggles logging of errors.
 ;
 MSG_PANEL_OPTIONS_LOGGING_FAIL
-Zбvaѕnй chyby:
+Сообщения о сбоях:
 ; Log failures:
 ;
 MSG_PANEL_OPTIONS_LOGGING_FAIL_HELP
-Povolн vэpis zбvaѕnэch chyb programu Poseidon.
+Вкл. сохранение сообщений о сбоях стека
 ; Toggles logging of failures.
 ;
 MSG_PANEL_OPTIONS_MEMORY
-Velikost bloku pamмti pro Poseidon Pool:
-; Memory allocated in Poseidon Pool:
+Память занятая пулом USB-стека:
+; Memory allocated in Neptune Pool:
 ;
 MSG_PANEL_NOTIFY
-\33c\33bMoѕnosti upozornмnн
+\33c\33bНастройка уведомлений
 ; \33c\33bPopup Settings
 ;
 MSG_PANEL_NOTIFY_LABEL
-Moѕnosti upozornмnн
+Настройки всплывающих окон
 ; Popup Window Options
 ;
 MSG_PANEL_NOTIFY_CONNECT
-Pшi pшipojenн:
+При подключении:
 ; On connecting:
 ;
 MSG_PANEL_NOTIFY_CONNECT_HELP
-Zobrazн upozornмnн pшi pшipojenн novйho zaшнzenн.
+Поведение всплывающего окна при\nподключении новых USB-устройств.
 ; Popup display behaviour on\nconnecting new USB devices
 ;
 MSG_PANEL_NOTIFY_DISCONNECT
-Pшi odpojenн:
+При отключении:
 ; On disconnect:
 ;
 MSG_PANEL_NOTIFY_DISCONNECT_HELP
-Zobrazн upozornмnн po odpojenн zaшнzenн.
+Производить уведомление\nпри отключении устройства.
 ; Whether to popup a window\nif the device is removed.
 ;
 MSG_PANEL_NOTIFY_DEATH
-Pшi chybм zaшнzenн:
+При потере устройства:
 ; On device death:
 ;
 MSG_PANEL_NOTIFY_DEATH_HELP
-Zobrazн upozornмnн v pшнpadм, ѕe zaшнzenн nereaguje.
+Уведомляет, если устройство долго не отвечает.
 ; Open a requester, if device seems to be dead.
 ;
 MSG_PANEL_NOTIFY_DELAY
-Doba upozornмnн:
+Задержка всплывания:
 ; Popup delay:
 ;
 MSG_PANEL_NOTIFY_DELAY_HELP
-Definuje dobu, po kterou bude upozornмnн zobrazeno.
+Определяет время демонстрации уведомления\nперед тем как его автоматически закрыть.
 ; How long should the requester be displayed\nbefore disappearing automatically.
 ;
 MSG_PANEL_NOTIFY_DELAY_FORMAT
-%ld sek.
+%ld сек.
 ; %ld sec.
 ;
 MSG_PANEL_NOTIFY_ACTIVATE
-Aktivovat okno:
+Активировать окно:
 ; Activate window:
 ;
 MSG_PANEL_NOTIFY_ACTIVATE_HELP
-Pшi otevшenн aktivuje okno.
+Сделать окно активным при открытии.
 ; Make the window active when opening.
 ;
 MSG_PANEL_NOTIFY_TOFRONT
-Pшenйst do popшedн:
+На передний план:
 ; Pop to front:
 ;
 MSG_PANEL_NOTIFY_TOFRONT_HELP
-Pшi zmмnм obsahu pшenese okno do popшedн.
+Переносит окно на передний план,\nесли его содержимое было изменено.
 ; Pop window to front, if content changes.
 ;
 MSG_PANEL_NOTIFY_CONSOUND
-Zvuk pшi pшipojenн:
+Сигнал при подключении:
 ; Connection sound:
 ;
 MSG_PANEL_NOTIFY_CONSOUND_HELP
-Pшehraje definovanэ zvuk pшi pшipojenн novйho zaшнzenн.
+Указанный звуковой файл будет\nвоспроизводиться при подключении\nустройства.
 ; This sound will be replayed everytime\na device is connected to the bus.
 ;
 MSG_PANEL_NOTIFY_CONSOUND_SELECT
-Vyberte poѕadovanэ zvuk...
+Выбор звука при подключении...
 ; Select a sound file to be replayed...
 ;
 MSG_PANEL_NOTIFY_DISCONSOUND
-Zvuk pшi odpojenн:
+Сигнал при отключении:
 ; Disconnect sound:
 ;
 MSG_PANEL_NOTIFY_DISCONSOUND_HELP
-Pшehraje definovanэ zvuk po odpojenн zaшнzenн.
+Указанный звуковой файл будет\nвоспроизводиться при отключении\nустройства.
 ; This sound will be replayed everytime\na device is removed from the bus.
 ;
 MSG_PANEL_NOTIFY_DISCONSOUND_SELECT
-Vyberte poѕadovanэ zvuk...
+Выбор звука при отключении...
 ; Select a sound file to be replayed...
 ;
 MSG_PANEL_CONFIG
-\33c\33bMoѕnosti konfigurace
+\33c\33bУправление сохранёнными настройками
 ; \33c\33bConfiguration management (Use drag & drop)
 ;
 MSG_PANEL_CONFIG_HELP
-Zobrazuje pшehled v№ech konfiguraиnнch souborщ, kterй\nPoseidon zapisuje do ENVARC:.\nLze vyuѕнt ke smazбnн nebo exportu vybranэch souborщ,\npшнp. i zkopнrovбnн nebo nahrazenн (metodou 'tбhnout\na pustit').
+В этом поле вы можете увидеть все настройки, сохранённые в ENVARC:.\nЭту панель можно использовать для удаления и экспорта настроек.\nИспользуйте перетаскивание для копирования и замены конфигураций.\n
 ; In this box you can see all the preferences that are\nsaved along the prefs file in ENVARC:.\nYou can use this panel to delete or export prefs.\n\nUse drag & drop to copy or replace preferences.\n
 ;
 MSG_PANEL_CONFIG_COLS_TYPE
-\33uDruh
+\33uТип
 ; \33uType
 ;
 MSG_PANEL_CONFIG_COLS_DESC
-\33uPopis
+\33uОписание
 ; \33uDescription
 ;
 MSG_PANEL_CONFIG_COLS_OWNER
-\33uZdroj
+\33uВладелец
 ; \33uOwner
 ;
 MSG_PANEL_CONFIG_COLS_SIZE
-\33uVelikost
+\33uРазмер
 ; \33uSize
 ;
 MSG_PANEL_CONFIG_SAVEAS
-\33cUloѕit jako
+\33cСохранить как
 ; \33c Save as
 ;
 MSG_PANEL_CONFIG_SAVEAS_HELP
-Umoѕnн konsolidovat a uloѕit v№echny konfiguraиnн\nsoubory do jednoho pro pozdмj№н pouѕitн.
+Сохраняет ВСЕ настройки USB-стека\nв файл. Загрузить их позже можно\nиз меню командой 'Открыть...'
 ; Save all the prefs under given name\nfor reloading it later.
 ;
 MSG_PANEL_CONFIG_EXPORT
-\33cExportovat
+\33cЭкспортировать
 ; \33c Export
 ;
 MSG_PANEL_CONFIG_EXPORT_HELP
-Umoѕnн vyexportovat vybranэ konfiguraиnн soubor.
+Сохраняет в файл выбранную\nзапись конфигурации.
 ; Allows you to save a selected entry\nto reload it later.
 ;
 MSG_PANEL_CONFIG_IMPORT
-\33cImportovat
+\33cИмпортировать
 ; \33c Import
 ;
 MSG_PANEL_CONFIG_IMPORT_HELP
-Umoѕnн naинst konfiguraиnн soubor.
+Позволяет загрузить конфигурацию\nэкспортированную ранее.
 ; Imports a previously saved piece of prefs.
 ;
 MSG_PANEL_CONFIG_REMOVE
-\33cOdstranit
+\33cУдалить
 ; \33c Remove
 ;
 MSG_PANEL_CONFIG_REMOVE_HELP
-Umoѕnн smazat vybranэ konfiguraиnн soubor.
+Удаляет выбранную запись конфигурации.
 ; Deletes the selected prefs entry.
 ;
 MSG_PANEL_CONFIG_MSGLOG
-Vэpis hlб№enн
+Журнал сообщений
 ; Message Log
 ;
 MSG_PANEL_CONFIG_INFLVL
-Ve vэpisu:
+Уровень тревожности:
 ; Information level:
 ;
 MSG_PANEL_CONFIG_INFLVL_HELP
-Definuje mнru podrobnosti vэpisu hlб№enн programu.
+Этот переключатель определяет тип и\nкол-во сообщений, показанных ниже.
 ; This gadget determines the amount and\ntype of messages shown below.
 ;
 MSG_PANEL_CONFIG_LOGSAVE
-\33cUloѕit na disk
+\33c Сохранить на диск
 ; \33c Save to disk
 ;
 MSG_PANEL_CONFIG_LOGSAVE_HELP
-Umoѕnн uloѕit vэpis hlб№enн programu do souboru.
+Служит для создания журнала ошибок, позволяющего\nотправить разработчикам информацию о произошедшем.
 ; To generate a logfile of the errors,\ne.g. to send the information to me\nfor bug reporting or help.
 ;
 MSG_PANEL_CONFIG_LOGFLUSH
-\33cVymazat v№e
+\33cОчистить всё
 ; \33c Flush all
 ;
 MSG_PANEL_CONFIG_LOGFLUSH_HELP
-Umoѕnн vymazat obsah vэpisu hlб№enн programu.
+Нажатие на эту кнопку удалит все сообщения из стека.\nНет никакой возможности восстановить их потом.
 ; Clicking on this button will remove all\nthe messages in the stack. There's no way\nto get them back.
 ;
 MSG_PANEL_CONFIG_LOGHELP
-Zobrazuje pшehled vэpisu hlб№enн programu. Chcete-li\nvymazat tento seznam, kliknмte na tlaинtko 'Vymazat v№e'.
-; These are the messages of the Poseidon stack\ngenerated so far. If you want to clear this list\njust click on the 'Flush all messages' button.
+Это сообщения USB-стека полученные на данный\nмомент. Если вы хотите очистить список, просто\nнажмите на кнопку 'Очистить всё'.
+; These are the messages of the Neptune stack\ngenerated so far. If you want to clear this list\njust click on the 'Flush all messages' button.
 ;
 MSG_PANEL_CONFIG_ALLONLINE
-\33cV№e online
+\33cВключить всё
 ; \33c All Online
 ;
 MSG_PANEL_CONFIG_ALLONLINE_HELP
-Spustн v№echny ovladaиe hardwaru USB uvedenй v sekci\n'Шadiиe'. V souvislosti s touto akcн se zaktualizujн\nv№echna propojenн.
+Запуск драйверов всех контроллеров.\nКроме того будут проверены привязки\nдля всех подключенных устройств.
 ; Start all USB hardware device drivers that\nhave been entered in the 'Hardware' panel.\nMoreover, the found devices will be checked\nfor possible bindings.
 ;
 MSG_PANEL_CONFIG_ALLOFFLINE
-\33cV№e offline
+\33cВыключить всё
 ; \33c All Offline
 ;
 MSG_PANEL_CONFIG_ALLOFFLINE_HELP
-Ukonин ve№kerй ovladaиe hardwaru USB.
+Выключение подразумевает удаление\nдрайверов всех контроллеров.\nЭто полностью остановит USB-стек.
 ; Using 'Offline' you can take down all the USB\nhardware device drivers.\nThis totally halts the stack.
 ;
 MSG_PANEL_CONFIG_RESTART
-\33cRestartovat
+\33cПерезапустить
 ; \33c Restart
 ;
 MSG_PANEL_CONFIG_RESTART_HELP
-Kliknutнm na toto tlaинtko ukonинte a znovu spustнte\nv№echny ovladaиe hardwaru USB.
+Кнопка 'Перезапустить' приводит\nк остановке и перезапуску\nдрайверов всех контроллеров.
 ; Clicking on 'Restart' will stop and restart\nall hardware device drivers.
 ;
 MSG_PANEL_CONFIG_SAVE
-\33cUloѕit
+\33cСохранить
 ; \33c Save
 ;
 MSG_PANEL_CONFIG_SAVE_HELP
-Umoѕnн trvale uloѕit nastavenн programu.
+Сохраняет текущие настройки на диск.\nКонфигурация будет сохранена, как в\nENVARC:, так и в ENV:.
 ; To save your current prefs to disk, click\non this button. The configuration will be\nstored in both ENVARC: and\n ENV:.
 ;
 MSG_PANEL_CONFIG_USE
-\33cPouѕнt
+\33cИспользовать
 ; \33c Use
 ;
 MSG_PANEL_CONFIG_USE_HELP
-Umoѕnн doиasnм (do pшн№tнho restartu) uloѕit\nnastavenн programu.
+Позволяет использовать настройки до\nперезагрузки ОС. Конфигурация будет\nсохранена в ENV:.
 ; To use, but not permanently save your prefs\nclick this button. The configuration will be\nstored in ENV:.
 ;
 MSG_UNKNOWN
-neznбmй
+неизвестно
 ; unknown
 ;
 MSG_HARDWARE_WINDOW
-Informace o ovladaиi hardwaru
+Окно информации о драйвере
 ; Hardware driver information window
 ;
 MSG_HARDWARE_WINDOW_HELP
-Zobrazн pшehled informacн o vybranйm ovladaиi hardwaru.
+В этих полях отображена общая информация о драйвере.
 ; These fields show some general information\non the USB hardware driver.
 ;
 MSG_HARDWARE_WINDOW_FRAME
-Pшehled informacн o ovladaиi hardwaru
+Общая информация о USB-драйвере
 ; General USB hardware driver information
 ;
 MSG_HARDWARE_WINDOW_LABEL
-Zaшнzenн:\nJednotka:\nVerze:\nProdukt:\nVэrobce:\nPopis:\nCopyright:
+Устройство:\nUnit:\nВерсия:\nОборудование:\nПроизводитель:\nОписание:\nПравообладатель:
 ; Device:\nUnit:\nVersion:\nProduct:\nManufacturer:\nDescription:\nCopyright:
 ;
 MSG_ACTION_SAVE_ERR
-Vyberte soubor pro vэpis hlб№enн...
+Выбор файла для сохранения журнала ошибок...
 ; Select file to save errors to...
 ;
 MSG_ACTION_SAVE_ERR_FILE
@@ -827,15 +827,15 @@ Errors.log
 ; Errors.log
 ;
 MSG_ACTION_ERR_SAVED
-Vэpis hlб№enн uloѕen do souboru %s.
+Журнал ошибок сохранён в %s.
 ; Error log saved to file %s.
 ;
 MSG_ACTION_ERR_SAVED_ERRWRITE
-Chyba pшi zбpisu do souboru %s.
+Ошибка открытия файла %s на запись.
 ; Error opening file %s for writing.
 ;
 MSG_ACTION_SAVE_DEV
-Vyberte soubor pro seznam zaшнzenн...
+Выбор файла для сохранения списка устройств...
 ; Select file to save device list to...
 ;
 MSG_ACTION_SAVE_DEV_FILE
@@ -843,51 +843,51 @@ DevList.log
 ; DevList.log
 ;
 MSG_ACTION_SAVE_DEV_ERREXE
-Chyba pшi provбdмnн funkce PsdDevLister
-; Error executing PsdDevLister
+Ошибка исполнения USBList
+; Error executing USBList
 ;
 MSG_ACTION_DEV_SAVED
-Seznam zaшнzenн uloѕen do souboru %s.
-; DevLister saved to %s.
+Список устройств сохранён в файл %s.
+; Device list saved to %s.
 ;
 MSG_ACTION_PREFS_LOAD
-Vyberte konfiguraиnн soubor...
-; Select a Poseidon Prefs file...
+Выберите конфигурационный файл...
+; Select a Neptune Prefs file...
 ;
 MSG_ACTION_PREFS_LOADED
-Konfigurace naиtena ze souboru %s.
+Конфигурация загружена из файла %s.
 ; Config loaded from %s.
 ;
 MSG_ACTION_PREFS_SAVEAS
-Vyberte konfiguraиnн soubor...
+Укажите файл для сохранения...
 ; Select file to save prefs to...
 ;
 MSG_ACTION_PREFS_SAVED
-Konfigurace uloѕena do souboru %s.
+Конфигурация успешно сохранена в %s.
 ; Configuration successfully saved to %s.
 ;
 MSG_ACTION_PREFS_SAVEDERR
-Konfiguraci nelze uloѕit do souboru %s.
+Не удалось сохранить конфигурацию в %s.
 ; Couldn't save config to %s.
 ;
 MSG_ACTION_PREFS_NOTSAVED
-Konfigurace nebyla uloѕena!
+Настройки не сохранены!
 ; Config not saved!
 ;
 MSG_ACTION_PREFS_SAVEDSUCCESS
-Zmмny v konfiguraci byly uloѕeny.
+Настройки сохранены успешно.
 ; Configuration successfully saved.
 ;
 MSG_ACTION_USEQUIT
-Pouѕнt|Uloѕit|Zru№it
+Использовать|Сохранить|Отмена
 ; Use|Save|Cancel
 ;
 MSG_ACTION_CONFIGCHANGED
-Konfigurace byla zmмnмna. Co si pшejete udмlat?
+Текущая конфигурация была изменена,\nоднако не была сохранена.
 ; The current configuration has been changed\nand not been saved yet.
 ;
 MSG_ACTION_SAVEQUIT
-Zmмny v konfiguraci se nepodaшilo uloѕit.
+Не удалось сохранить изменения в конфигурации.
 ; Couldn't save config.
 ;
 MSG_ACTION_DEV_FORCEBIND_NONE
@@ -895,51 +895,51 @@ MSG_ACTION_DEV_FORCEBIND_NONE
 ; None
 ;
 MSG_ACTION_DEV_FORCE_REQ
-Pokraиovat|Zru№it
+Продолжить|Отмена
 ; Continue|Cancel
 ;
 MSG_ACTION_DEV_FORCE_REQ_TXT
-Chystбte se vytvoшit vynucenй propojenн\n\33bzaшнzenн\33n. Nejde o propojenн rozhranн\na nesprбvnй vynucenй propojenн mщѕe zaшнzenн\nъplnм vyшadit z provozu.\n\nPokraиujte jen tehdy, vнte-li, co dмlбte.
+Вы собираетесь создать принудительную привязку\n\33bустройства\33n. Это не привязка к интерфейсу,\nи неверная принудительная привязка может\nполностью нарушить работу устройства.\n\nПродолжайте, только если знаете, что делаете.
 ; You are about to create a forced \33bdevice\33n binding.\nThis is not an interface binding, and an incorrect\nforced binding can stop the device working entirely.\n\nContinue only if you know what this does.
 ;
 MSG_ACTION_DEV_FORCE
-Vynucenн propojenн %s se zaшнzenнm %s.
+Принудительная привязка %s к устройству %s.
 ; Forcing device binding of %s to %s.
 ;
 MSG_ACTION_DEV_FORCE_REMOVE
-Odstranмno vynucenй propojenн s %s.
+Удалена принудительная привязка %s.
 ; Removed forced device binding of %s.
 ;
 MSG_ACTION_CFG_REMOVE
-Odstranit|Zru№it
+Удалить|Отмена
 ; Remove|Cancel
 ;
 MSG_ACTION_CFG_REMOVE_HELP
-Prбvм se chystбte odstranit konfiguraci zaшнzenн\ns ID \33b%s\33n\na v№echna s nнm souvisejнcн individuбlnн nastavenн\npro danou kategorii.\n\nOpravdu chcete odebrat vэ№e popsanou konfiguraci?
-; You are about to \33bremove\33n the configuration\ndata related to the device with the ID\n\33b%s\33n.\nThis includes all individually saved class\nsetting for the device or interfaces, as well\nas the stuff Trident saves (such as custom name or\npopup inhibit).\n\nAre you sure you want to remove these prefs?
+Вы собираетесь \33bудалить\33n конфигурацию\nданных относящуюся к устройству с ID\n\33b%s\33n.\n\nЭто включает в себя ВСЕ\nперсональные настройки классов для\nэтого устройства или интерфейсов.\n\nВы уверены что хотите это всё удалить?
+; You are about to \33bremove\33n the configuration\ndata related to the device with the ID\n\33b%s\33n.\nThis includes all individually saved class\nsetting for the device or interfaces, as well\nas the stuff Neptune USB saves (such as custom name or\npopup inhibit).\n\nAre you sure you want to remove these prefs?
 ;
 MSG_ACTION_CFG_REMOVE_DEFAULT
-Prбvм se chystбte odstranit (vэchozн) konfiguraci\nkategorie \33b%s\33n.\nPшi pшн№tнm spu№tмnн pouѕije Poseidon internн vэchozн\nnastavenн, coѕ za bмѕnэch podmнnek nemб vliv\nna individuбlnн konfigurace.\n\nOpravdu chcete odebrat vэ№e popsanou konfiguraci?
+Вы собираетесь \33bудалить\33n конфигурацию\nиспользуемую по умолчанию классом\n\33b%s\33n.\n\nПри следующей загрузке классы будут\nиспользовать свои встроенные настройки.\nОбычно это не затрагивает персональные\nнастройки устройств или интерфейсов.\n\nВы уверены, что хотите это сделать?
 ; You are about to \33bremove\33n the (default)\nconfiguration of the class \33b%s\33n.\nThis will set the classes initial prefs to the\ninternal defaults \33bon next boot\33n!\nIt does normally not affect the device or interface\nindividually saved settings.\n\nAre you sure you want to remove these prefs?
 ;
 MSG_ACTION_CFG_REMOVE_CLASS
-Prбvм se chystбte odstranit konfiguraci kategorie\n\33b%s\33n urиenou konkrйtnм pro zaшнzenн\ns ID \33b%s\33n.\n\nOpravdu chcete odebrat vэ№e popsanou konfiguraci?
+Вы собираетесь \33bудалить\33n конфигурацию\nкласса \33b%s\33n,\nспециально сохранённую для устройства с ID\n\33b%s\33n.\n\nВы уверены, что хотите этого удаления?
 ; You are about to \33bremove\33n the class\nconfiguration of the class \33b%s\33n,\nspecifically saved for device with ID\n\33b%s\33n.\n\nAre you sure you want to remove these prefs?
 ;
 MSG_ACTION_CFG_REMOVE_CLASS_DEF
-Prбvм se chystбte odstranit konfiguraci kategorie\n\33b%s\33n urиenou konkrйtnм pro rozhranн\n\33b%s\33n zaшнzenн\ns ID \33b%s\33n.\n\nOpravdu chcete odebrat vэ№e popsanou konfiguraci?
+Вы собираетесь \33bудалить\33n конфигурацию\nкласса \33b%s\33n,\nсохранённую для конкретного интерфейса\n\33b%s\33n устройства с ID\n\33b%s\33n.\n\nВы уверены что хотите этого удаления?
 ; You are about to \33bremove\33n the class\nconfiguration of the class \33b%s\33n\nsaved for the particular interface\n\33b%s\33n of the device with ID\n\33b%s\33n.\n\nAre you sure you want to remove these prefs?
 ;
 MSG_ACTION_CFG_REMOVE_UNKNOWN
-Opravdu chcete odstranit vybranou konfiguraci?
+Вы действительно хотите удалить указанную конфигурацию?
 ; Do you really want to remove this\n\33bunknown prefs data\33n from the preferences?
 ;
 MSG_ACTION_MEMPOOL_FORMAT
-%ld KB
+%ld КБ
 ; %ld KB
 ;
 MSG_ACTION_CFG_EXPORT
-Vyberte soubor pro export...
+Укажите имя файла для экспорта...
 ; Select file to export prefs to...
 ;
 MSG_ACTION_CFG_PREFS_FILE
@@ -967,87 +967,87 @@ ifclscfg.prefs
 ; ifclscfg.prefs
 ;
 MSG_ACTION_CFG_FAIL
-Chyba pшi otevнrбnн souboru %s.
+Ошибка при открытии файла %s.
 ; Failed to open file %s.
 ;
 MSG_ACTION_CFG_IMPORT
-Vyberte konfiguraиnн soubor...
+Выберите файл конфигурации...
 ; Select file to import prefs from...
 ;
 MSG_ACTION_CFGDATA_OOPS_HELP
-Chcete-li naimportovat tento druh konfiguraиnнho\nsouboru, vyberte nejprve poѕadovanй zaшнzenн.
+Чтобы импортировать конфигурацию устройства или интерфейса,\nвам необходимо выбрать запись устройства, в которую они должны\nбыть добавлены.
 ; To import device or interface\nprefs data, you need to select\nthe device entry where it should be added.
 ;
 MSG_ACTION_CFGDATA_ERR
-Vybranэ konfiguraиnн soubor nelze naинst.
+Указанный файл не содержит конфигурации.
 ; I don't know that kind of prefs file.
 ;
 MSG_ACTION_CFGDATA_ERR_READ
-Chyba pшi иtenн konfiguraиnнho souboru %s.
+Ошибка чтения при загрузке конфигурации %s.
 ; Read error on loading prefs file %s.
 ;
 MSG_ACTION_CFGDATA_ERR_ALLOC
-Chyba pшi alokaci pamмti pro soubor %s.
+Ошибка выделения памяти при загрузке %s.
 ; Failed to allocate buffer for loading %s.
 ;
 MSG_ACTION_CFGDATA_ERR_IFF
-Soubor %s nenн konfigurace pro Poseidon.
+Файл %s не является конфигурацией Neptune.
 ; %s does not seem to be an iff file.
 ;
 MSG_ACTION_CFGDATA_ERR_OPEN
-Chyba pшi otevнrбnн souboru %s.
+Ошибка при открытии файла %s.
 ; Failed to open file %s.
 ;
 MSG_APPLYDRAGACTION_DEVICECFG
-Nahradit|Slouиit|Zru№it
+Заменить|Объединить|Отмена
 ; Replace|Merge|Cancel
 ;
 MSG_APPLYDRAGACTION_DEVICECFG_HELP
-Chcete nahradit nebo slouиit konfiguraci zaшнzenн\n%s touto konfiguracн pro %s?
+Вы хотите \33bзаменить\33n или\n\33bобъединить\33n конфигурацию\n\33b%s\33n\nс содержимым из\n\33b%s\33n?
 ; Do you want to \33breplace\33n or \33bmerge\33n the prefs of\n\33b%s\33n\nwith the contents from\n\33b%s\33n?
 ;
 MSG_APPLYDRAGACTION_DEVCFGDATA
-Pшidat|Zru№it
+Добавить устройство|Отмена
 ; Add to device|Cancel
 ;
 MSG_APPLYDRAGACTION_DEVCFGDATA_HELP
-Nahradit lze pouze konfigurace ze stejnйho zdroje.\nChcete danй nastavenн pшidat k zaшнzenн?
+Конфигурации можно заменять только для того же владельца.\n\nВы хотели добавить эту конфигурацию в устройство?
 ; Sorry, but only prefs of the same owner can\nbe replaced.\n\nDo you wish to add this prefs\nto the device instead?
 ;
 MSG_APPLYDRAGACTION_DEVCFGDATA_REPLACE
-Nahradit|Zru№it
+Заменить|Отмена
 ; Replace|Cancel
 ;
 MSG_APPLYDRAGACTION_DEVCFGDATA_REPLACE_HELP
-Chcete nahradit konfiguraci zaшнzenн %s\ntouto konfiguracн pro %s?
+Вы хотите \33bзаменить\33n конфигурацию\n\33b%s\33n\nэтой конфигурацией для\n\33b%s\33n?
 ; Do you want to \33breplace\33n the prefs of\n\33b%s\33n\nby those of\n\33b%s\33n?
 ;
 MSG_APPLYDRAGACTION_DEVICECFG_REPLACE
-Nahradit|Zru№it
+Заменить|Отмена
 ; Replace|Cancel
 ;
 MSG_APPLYDRAGACTION_DEVICECFG_REPLACE_HELP
-Chcete nahradit konfiguraci zaшнzenн %s\njednou z konfiguracн v %s?
+Вы хотите \33bзаменить\33n конфигурацию\n\33b%s\33n\nодной из конфигураций\n\33b%s\33n?
 ; Do you want to \33breplace\33n the prefs of\n\33b%s\33n\nby the one in\n\33b%s\33n?
 ;
 MSG_APPLYDRAGACTION_DEVICECFG_ADD
-Pшidat|Zru№it
+Добавить|Отмена
 ; Add|Cancel
 ;
 MSG_APPLYDRAGACTION_DEVICECFG_ADD_HELP
-Chcete pшidat konfiguraci zaшнzenн %s\nke konfiguracн zaшнzenн %s?
+Вы хотите \33bдобавить\33n конфигурацию\n\33b%s\33n\nк устройству\n\33b%s\33n?
 ; Do you want to \33badd\33n the prefs of\n\33b%s\33n\nto the device\n\33b%s\33n?
 ;
 MSG_CFGLISTDISPATCHER_OOPS_HELP
-Tato operace nenн podporovбna.
+Извините, но перетаскивание\nсюда не поддерживается.
 ; Sorry, drag'n drop operation to\nthat target is not supported.
 ;
 MSG_DEVICE_SPEED_LOW
-USB 1.1 (pomalй)
+USB 1.1 (медленный)
 ; Low
 ;
 MSG_DEVICE_SPEED_HIGH
-USB 1.1 (rychlй)
+USB 1.1 (быстрый)
 ; High
 ;
 MSG_DEVICE_SPEED_FULL
@@ -1059,23 +1059,23 @@ USB 3.0
 ; Super
 ;
 MSG_DEVICE_STATE_SUSPENDED
-uspanй
+останов.
 ; Suspended
 ;
 MSG_DEVICE_STATE_DEAD
-nereaguje
+нет ответа
 ; Dead
 ;
 MSG_DEVICE_STATE_DEADLP
-nereaguje \/ nap.
+Не отвечает \/ спит
 ; Dead \/ LP
 ;
 MSG_DEVICE_STATE_LOWPOWER
-bez napбjenн
+просадка
 ; Low Power
 ;
 MSG_DEVICE_STATE_CONFIGURED
-v poшбdku
+запущено
 ; Running
 ;
 MSG_DEVICE_STATE_DEVDESC
@@ -1087,7 +1087,7 @@ ValidAddr
 ; ValidAddr
 ;
 MSG_DEVICE_STATE_CONNECTED
-pшipojenй
+Подключено
 ; Connected
 ;
 MSG_LOGLEVEL_OK
@@ -1095,15 +1095,15 @@ MSG_LOGLEVEL_OK
 ; 
 ;
 MSG_LOGLEVEL_WARNING
-Upozornмnн
+Предупреждение
 ; Warning
 ;
 MSG_LOGLEVEL_ERROR
-Bмѕnб chyba
+Ошибка
 ; Error
 ;
 MSG_LOGLEVEL_FAILURE
-Zбv. chyba
+Сбой
 ; Failure
 ;
 MSG_LOGLEVEL_OTHER
@@ -1113,11 +1113,11 @@ MSG_LOGLEVEL_OTHER
 ; ***NEW***
 ;
 MSG_PANEL_OPTIONS_LINKPOWER
-Povolit шнzenн spotшeby linky USB:
+Включить управление питанием канала USB:
 ; Enable USB link power management:
 ;
 MSG_PANEL_OPTIONS_LINKPOWER_HELP
-Umoѕnн neиinnй lince pшejнt mezi pшenosy do stavu\nnнzkй spotшeby (U1/U2 na SuperSpeed, L1 na\nHigh-Speed) a povolн Latency Tolerance Messaging.\nVstup a vэstup шнdн шadiи a jsou pro pшenosy\ntransparentnн. Vypnмte, pokud se zaшнzenн pшi\nneиinnosti chovб chybnм.
+Позволяет неактивному каналу переходить\nмежду передачами в состояние пониженного\nэнергопотребления (U1/U2 на SuperSpeed, L1 на\nHigh-Speed) и включает Latency Tolerance Messaging.\nВход и выход выполняет контроллер, это\nпрозрачно. Отключите, если устройство ведёт\nсебя некорректно в простое.
 ; Lets an idle link drop into a low power state\nbetween transfers (U1/U2 on SuperSpeed, L1 on\nHigh-Speed) and enables Latency Tolerance\nMessaging. Entry and exit are handled by the\ncontroller and are transparent to transfers.\nTurn this off if a device misbehaves when idle.
 ;
 MSG_REQ_OK
@@ -1125,11 +1125,11 @@ OK
 ; OK
 ;
 MSG_PANEL_DEVICES_EJECT
-\33cVysunout
+\33cИзвлечь
 ; \33c Eject
 ;
 MSG_PANEL_DEVICES_EJECT_HELP
-Bezpeиnм odebere velkokapacitnн zaшнzenн: uloѕн\na odpojн v№echny jeho svazky (odmнtne, pokud je\nnмkterэ soubor stбle otevшen), zastavн jednotku\na vypne jejн port, aby №lo zaшнzenн odpojit\nbez ztrбty dat.
+Безопасно извлекает накопитель: сбрасывает и\nразмонтирует все его тома (отказывает, если\nкакой-либо файл ещё открыт), останавливает диск\nи отключает его порт, чтобы устройство можно\nбыло отсоединить без потери данных.
 ; Safely removes a mass storage device: flushes and\nunmounts all its volumes (refusing if any file is\nstill open), stops the drive and disables its hub\nport so it can be unplugged without data loss.
 ;
 MSG_ACTION_DEV_EJECT_OK
@@ -1137,10 +1137,10 @@ OK
 ; OK
 ;
 MSG_ACTION_DEV_EJECT_BUSY_TXT
-Nelze vysunout '%s':\n%s se stбle pouѕнvб.\nZavшete na nмm v№echny soubory a zkuste to znovu.
+Невозможно извлечь '%s':\n%s ещё используется.\nЗакройте все файлы на нём и повторите попытку.
 ; Cannot eject '%s':\n%s is still in use.\nClose all files on it and try again.
 ;
 MSG_ACTION_DEV_EJECT_FAILED_TXT
-Vysunutн '%s' selhalo.\nPodнvejte se do zбznamu chyb; moѕnб je\nnutnб aktualizace massstorage.class.
+Не удалось извлечь '%s'.\nСмотрите журнал ошибок; возможно, требуется\nобновление massstorage.class.
 ; Ejecting '%s' failed.\nSee the error log; an updated\nmassstorage.class may be required.
 ;

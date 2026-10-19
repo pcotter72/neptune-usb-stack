@@ -5,10 +5,10 @@
  *----------------------------------------------------------------------------
  *                         Includes for neptune.library
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on Poseidon's poseidon.library.h by Chris Hodges <chrisly@platon42.de>.
  */
 
-/* Release date stamp, exposed as PA_ReleaseVersion. Trident compares it against the
+/* Release date stamp, exposed as PA_ReleaseVersion. NeptuneUSB compares it against the
  * GCA_PrefsVersion stored in the user's config and forces a class DirScan when this is
  * newer - that is how an upgrade picks up new classes. Bump it once per release, by
  * hand: it must stay stable across rebuilds, or every rebuild would force a rescan. */

@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         massstorage class for poseidon
+ *                         massstorage class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon massstorage class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -1403,7 +1403,7 @@ BOOL nStoreConfig(struct Library *ps, struct NepClassMS *ncm)
            freeze those into a per-device record that shadows the real class
            defaults from then on. psdReadCfg() usually discards it when the
            prefs arrive, but on a machine that never loads them the next
-           Trident Save would commit it for good. */
+           NeptuneUSB Save would commit it for good. */
         IPTR cfgread = FALSE;
         psdGetAttrs(PGA_STACK, NULL, PA_ConfigRead, &cfgread, TAG_END);
         if(!cfgread)
@@ -5713,13 +5713,14 @@ void nGUITask()
                 }
 
                 case ID_ABOUT:
-                    MUI_RequestA(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", VERSION_STRING "\n\nAutomounting by the a4091.device mounter,\n(c) Toni Wilen and contributors.\nSee LEGAL for full attribution.", NULL);
+                    NEP_CLASS_ABOUT_EXTRA(ncm->ncm_App, ncm->ncm_MainWindow,
+                                          "\n\nAutomounting by a fork of the a4091.device mounter,\n(c) Toni Wilen and contributors.\nSee LEGAL for full attribution.");
                     break;
 
                 case ID_FORGET_CONFIG:
                     /* Drop this class's record for the device so the class
                        defaults govern it again. Only our own payload goes:
-                       Trident's data for the device (custom name, forced
+                       NeptuneUSB's data for the device (custom name, forced
                        binding) stays. The live units follow through
                        ConfigChangedEvent -> nReapplyConfig(), which runs once
                        this window is gone (it skips units with a window open). */
@@ -5832,7 +5833,7 @@ void AutoDetectMaxTransfer(struct NepClassMS *cncm)
                         ioerr = DoIO((struct IORequest *) ioreq);
                         if(ioerr)
                         {
-                            MUI_Request(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, ">:-{", "Error %ld while reading block %ld!\nAborting process...", ioerr, block);
+                            MUI_Request(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "Error %ld while reading block %ld!\nAborting process...", ioerr, block);
                             bail = TRUE;
                             break;
                         }
@@ -5883,13 +5884,13 @@ void AutoDetectMaxTransfer(struct NepClassMS *cncm)
                             ioerr = DoIO((struct IORequest *) ioreq);
                             if(ioerr)
                             {
-                                MUI_Request(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, ">:-{", "Error %ld while reading at offset %ld!\nAborting process...", ioerr, &ioreq->io_Offset);
+                                MUI_Request(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "Error %ld while reading at offset %ld!\nAborting process...", ioerr, &ioreq->io_Offset);
                                 bail = TRUE;
                                 break;
                             }
                             if(memcmp(&orgbuffer[ioreq->io_Offset], &cmpbuffer[ioreq->io_Offset], (size_t) maxtrans))
                             {
-                                MUI_Request(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "Hmpf!", "Reading failed at MaxTrans = %08lx", maxtrans-1);
+                                MUI_Request(ncm->ncm_App, ncm->ncm_MainWindow, 0, NULL, "OK", "Reading failed at MaxTrans = %08lx", maxtrans-1);
                                 if(ncm->ncm_CDC->cdc_MaxTransfer)
                                 {
                                     ncm->ncm_CDC->cdc_MaxTransfer--;

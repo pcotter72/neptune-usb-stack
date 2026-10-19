@@ -1,33 +1,33 @@
-## version $VER: Trident.catalog 7.0 (19.10.2026)
-## language español
-## codeset 0
+## version $VER: NeptuneUSB.catalog 7.0 (19.10.2026)
+## language polski
+## codeset 5
 ;
 MSG_APP_TITLE
-Trident
-; Trident
+Neptune USB
+; Neptune USB
 ;
 MSG_APP_DESC
-GUI de la pila USB Poseidon
-; Poseidon USB Stack GUI
+Neptune USB Stack GUI
+; Neptune USB Stack GUI
 ;
 MSG_MENU_PROJECT
-Proyecto
+Projekt
 ; Project
 ;
 MSG_MENU_ABOUT
-Sobre...
+O programie...
 ; About...
 ;
 MSG_MENU_ABOUTMUI
-Sobre MUI...
+O MUI...
 ; About MUI...
 ;
 MSG_MENU_HELP
-Ayuda
+Pomoc
 ; Help
 ;
 MSG_MENU_ONLINE
-Conectado
+Online
 ; Online
 ;
 MSG_MENU_SC_ONLINE
@@ -35,7 +35,7 @@ O
 ; O
 ;
 MSG_MENU_OFFLINE
-Desconectado
+Offline
 ; Offline
 ;
 MSG_MENU_SC_OFFLINE
@@ -43,7 +43,7 @@ F
 ; F
 ;
 MSG_MENU_ICONIFY
-Iconificar
+Ikonizuj
 ; Iconify
 ;
 MSG_MENU_SC_ICONIFY
@@ -51,7 +51,7 @@ H
 ; H
 ;
 MSG_MENU_QUIT
-Salir
+Zakoñcz
 ; Quit
 ;
 MSG_MENU_SC_QUIT
@@ -59,27 +59,27 @@ Q
 ; Q
 ;
 MSG_MENU_INFO
-Información
+Informacje
 ; Information
 ;
 MSG_MENU_SAVELOG
-Guardar log de errores...
+Zapisz dziennik b³êdów...
 ; Save error log...
 ;
 MSG_MENU_FLUSH
-Limpiar errores
+Wyczy¶æ b³êdy
 ; Flush errors
 ;
 MSG_MENU_SAVEDEV
-Guardar la lista de periféricos...
+Zapisz listê urz±dzeñ...
 ; Save device list...
 ;
 MSG_MENU_SETTINGS
-Configuración
+Ustawienia
 ; Settings
 ;
 MSG_MENU_LOAD
-Cargar...
+Wczytaj...
 ; Load...
 ;
 MSG_MENU_SC_LOAD
@@ -87,7 +87,7 @@ L
 ; L
 ;
 MSG_MENU_SAVE
-Guardar
+Zapisz
 ; Save
 ;
 MSG_MENU_SC_SAVE
@@ -95,7 +95,7 @@ S
 ; S
 ;
 MSG_MENU_SAVEAS
-Cuardar como...
+Zapisz jako...
 ; Save as...
 ;
 MSG_MENU_SC_SAVEAS
@@ -103,7 +103,7 @@ A
 ; A
 ;
 MSG_MENU_MUISETTINGS
-Configuración MUI
+Ustawienia MUI
 ; MUI Settings
 ;
 MSG_MENU_SC_MUISETTINGS
@@ -111,715 +111,715 @@ M
 ; M
 ;
 MSG_MAINPANEL_GENERAL
-General
+Ogólne
 ; General
 ;
 MSG_MAINPANEL_CONTROLLERS
-Controladores
+Kontrolery
 ; Controllers
 ;
 MSG_MAINPANEL_DEVICES
-Periféricos
+Urz±dzenia
 ; Devices
 ;
 MSG_MAINPANEL_CLASSES
-Clases
+Klasy
 ; Classes
 ;
 MSG_MAINPANEL_OPTIONS
-Opciones
+Opcje
 ; Options
 ;
 MSG_MAINPANEL_POPUPS
-Popups
+Wyskakuj±ce okna
 ; Popups
 ;
 MSG_MAINPANEL_CONFIG
-Configuración
+Konfiguracja
 ; Config
 ;
 MSG_ERRLVL_ALL
-Todos los mensajes
+Wszystkie powiadomienia
 ; All messages
 ;
 MSG_ERRLVL_WARNINGS
-Advertencias y peores
+Ostrze¿enie i gorsze
 ; Warning and worse
 ;
 MSG_ERRLVL_ERRORS
-Errores y fallos
+B³êdy i awarie
 ; Errors and failures
 ;
 MSG_ERRLVL_FAILURES
-Solo fallos
+Tylko awarie
 ; Failures only
 ;
 MSG_POPUP_NEVER
-No abrir una ventana popup
+Nigdy nie otwieraj wyskakuj±cego okna
 ; Never open a popup window
 ;
 MSG_POPUP_ERROR
-Mostrar popup solo si surge un error
+Wyskakuje tylko w przypadku wyst±pienia b³êdu
 ; Only popup on an error condition
 ;
 MSG_POPUP_UNKNOWN
-Mostrar popup con perif. desconocidos
+Wyskakuje na nowych, nieznanych urz±dzeniach
 ; Popup on new, unknown devices
 ;
 MSG_POPUP_NOBINDING
-Mostrar popup si no hay binding
+Wyskakuj±ce okienko, je¶li nie ma powi±zania
 ; Popup, if there is no binding
 ;
 MSG_POPUP_NOCONFIG
-Mostrar popup si no hay configuración
+Wyskakuj±ce okienko, je¶li nie ma jeszcze konfiguracji
 ; Popup, if there is no config yet
 ;
 MSG_POPUP_CONFIGCLASS
-Mostrar popup si la clase es configurable
+Wyskakuj±ce okienko konfigurowalnej klasy
 ; Popup on configurable class
 ;
 MSG_POPUP_BINDING
-Mostrar popup independientemente del binding
+Wyskakuj±ce okienko, niezale¿nie od powi±zania
 ; Popup, regardless of binding
 ;
 MSG_POPUP_ALWAYS
-Abrir siempre una ventana popup
+Zawsze otwieraj wyskakuj±ce okno
 ; Always open a popup window
 ;
 MSG_PANEL_GENERAL_LABEL1
-\33cTrident Graphical User Interface
-; \33cTrident Graphical User Interface
+\33c\33bNeptune USB
+; \33c\33bNeptune USB
 ;
 MSG_PANEL_GENERAL_LABEL2
-\33cfor the Poseidon USB Stack
-; \33cfor the Poseidon USB Stack
+\33cUstawienia stosu USB Neptune,\nniekompatybilnego odga³êzienia stosu USB Poseidon.
+; \33cPreferences for the Neptune USB stack,\nan incompatible fork of the Poseidon USB stack.
 ;
 MSG_PANEL_GENERAL_LABEL3
-\33cCopyright \xa92002-2009 Chris Hodges
-; \33cCopyright \xa92002-2009 Chris Hodges
+\33cNa podstawie programu Trident autorstwa Chrisa Hodgesa.
+; \33cBased on Trident by Chris Hodges.
 ;
 MSG_PANEL_GENERAL_LABEL4
-\33cAll rights reserved.
-; \33cAll rights reserved.
+\33cCopyright (C) 2002-2009 Chris Hodges,\n2009-2026 The AROS Development Team.
+; \33cCopyright (C) 2002-2009 Chris Hodges,\n2009-2026 The AROS Development Team.
 ;
 MSG_PANEL_GENERAL_LABEL5
-\33cLos Iconos Mason son\ncortesia de Martin Merz.
+\33cMason Icons s±\ndziêki uprzejmo¶ci Martina Merza.
 ; \33cMason Icons are\ncourtesy of Martin Merz.
 ;
 MSG_PANEL_HARDWARE_LABEL1
-\33c\33bControladores USB disponibles
+\33c\33bDostêpne kontrolery sprzêtowe USB
 ; \33c\33bUSB Hardware Controllers available
 ;
 MSG_PANEL_HARDWARE_CONTROLLER_HELP
-Esta es la lista de los controladores disponibles. \nVarios controladores diferentes pueden estar en el sistema\nal mismo tiempo.\nPara añadir una entrada, usa el gadget 'Nuevo' de debajo.\nTienes que poner un controlador conectado manualmente\nla primera vez que añades el periférico.
+To jest lista dostêpnych kontrolerów sprzêtowych.\nW systemie mo¿e byæ jednocze¶nie kilka ró¿nych kontrolerów.\nAby dodaæ wpis, u¿yj gad¿etu "Nowy" na dole.\nNale¿y rêcznie ustawiæ kontroler sprzêtowy w trybie online przy pierwszym dodaniu urz±dzenia.
 ; This is the list of available hardware controllers.\nSeveral different controllers can be in the system at\nthe same time.\nTo add an entry, use the 'New' gadget at the bottom.\nYou need to manually set an hardware controller online\nthe first time you add the device.
 ;
 MSG_PANEL_HARDWARE_COLS_NAME
-\33uNombre
+\33uNazwa
 ; \33uName
 ;
 MSG_PANEL_HARDWARE_COLS_UNIT
-\33uUnidad
+\33uJednostka
 ; \33uUnit
 ;
 MSG_PANEL_HARDWARE_COLS_ONLINE
-\33uConectado
+\33uOnline
 ; \33uOnline
 ;
 MSG_PANEL_HARDWARE_COLS_PRODUCT
-\33uProducto
+\33uProdukt
 ; \33uProduct
 ;
 MSG_PANEL_HARDWARE_ONLINE_YES
-Si
+Tak
 ; Yes
 ;
 MSG_PANEL_HARDWARE_ONLINE_NO
-No
+Nie
 ; No
 ;
 MSG_PANEL_HARDWARE_UNKNOWN
-\33idesconocido hasta conectado
+\33inieznany do momentu uruchomienia
 ; \33iunknown until online
 ;
 MSG_PANEL_HARDWARE_LABEL2
-Periférico:
+Urz±dzenie:
 ; Device:
 ;
 MSG_PANEL_HARDWARE_DEVICE_HELP
-Escribe el nombre del driver del controlador\nen este campo. Estos periféricos suelen\nestar guardados en DEVS:USBHardware.
+W tym polu nale¿y podaæ nazwê sterownika urz±dzenia. Urz±dzenia te s± zwykle przechowywane w DEVS:USBHardware.
 ; Give the name of the controller device\ndriver in this field. These devices are\nnormally stored in DEVS:USBHardware.
 ;
 MSG_PANEL_HARDWARE_SELECT
-Seleccionar periférico USBHardware...
+Wybierz urz±dzenie USBHardware...
 ; Select USBHardware device...
 ;
 MSG_PANEL_HARDWARE_UNIT
-Unidad:
+Jednostka:
 ; Unit:
 ;
 MSG_PANEL_HARDWARE_UNIT_HELP
-Si hay varias tarjetas del mismo tipo\nen tu máquina, escribe aqui el numero\nde la que corresponde.
+Je¶li w urz±dzeniu znajduje siê wiele kart tego samego rodzaju,\nwprowad¼ tutaj numer jednostki p³yty.
 ; If there are multiple cards of the\nsame kind in your machine, enter\nthe unit number of the board here.
 ;
 MSG_PANEL_HARDWARE_DRIVER_NEW
-\33c Nuevo
+\33c Nowy
 ; \33c New
 ;
 MSG_PANEL_HARDWARE_DRIVER_NEW_HELP
-Click para crear una nueva\nentrada de driver.
+Kliknij tutaj, aby utworzyæ\nnowy wpis sterownika sprzêtowego.
 ; Click here to create a\nnew hardware driver entry.
 ;
 MSG_PANEL_HARDWARE_DRIVER_COPY
-\33c Copiar
+\33c Kopiuj
 ; \33c Copy
 ;
 MSG_PANEL_HARDWARE_DRIVER_COPY_HELP
-Click para copiar la entrada\n del driver seleccionada.
+Kliknij tutaj, aby skopiowaæ\nwybrany wpis sterownika sprzêtowego.
 ; Click here to copy the selected\nhardware driver entry.
 ;
 MSG_PANEL_HARDWARE_DRIVER_DELETE
-\33c Borrar
+\33c Usuñ
 ; \33c Delete
 ;
 MSG_PANEL_HARDWARE_DRIVER_DELETE_HELP
-Click para borrar la entrada seleccionada.\El hardware se desconectará automáticamente,\njunto con los periferícos conectados a el.
+Kliknij tutaj, aby usun±æ wybrany wpis.\nSprzêt automatycznie przejdzie w tryb offline,\nwy³±czaj±c wszystkie pod³±czone do niego urz±dzenia.
 ; Click here to remove the selected entry.\nThe hardware will automatically go offline,\ntaking all its connected devices down.
 ;
 MSG_PANEL_HARDWARE_DRIVER_ONLINE
-\33c Conectado
+\33c Online
 ; \33c Online
 ;
 MSG_PANEL_HARDWARE_DRIVER_ONLINE_HELP
-Click para activar una entrada\nde driver.
+Kliknij tutaj, aby aktywowaæ\nindywidualny sterownik sprzêtowy.
 ; Click here to activate an\nindividual hardware driver.
 ;
 MSG_PANEL_HARDWARE_DRIVER_OFFLINE
-\33c Desconectado
+\33c Offline
 ; \33c Offline
 ;
 MSG_PANEL_HARDWARE_DRIVER_OFFLINE_HELP
-Click para desactivar una entrada\nde driver.
+Kliknij tutaj, aby dezaktywowaæ\nindywidualny sterownik sprzêtowy.
 ; Click here to deactivate an\nindividual hardware driver.
 ;
 MSG_PANEL_HARDWARE_DRIVER_INFO
-\33c Info
+\33c Informacje
 ; \33c Info
 ;
 MSG_PANEL_HARDWARE_DRIVER_INFO_HELP
-Para obtener información del driver del\nperiférico haz click aquí. El periferico tiene\nque estar conectado para ver la información
+Aby uzyskaæ informacje na temat sterownika urz±dzenia,\nkliknij tutaj. Aby informacje by³y dostêpne, urz±dzenie\nmusi byæ w trybie online.
 ; To get information on the device driver,\nclick here. The device needs to be online\nfor the information to be available.
 ;
 MSG_PANEL_DEVICES_LABEL
-\33c\33bPeriféricos USB en el sistema
+\33c\33bUrz±dzenia USB w systemie
 ; \33c\33bUSB Devices in the system
 ;
 MSG_PANEL_DEVICES_HELP
-Esta es la lista de los periféricos (funciones)\nUSB en el sistema. Tambien muestra los\nperifericos y interfaces existentes.
+Jest to lista urz±dzeñ USB (funkcji) znajduj±cych siê\nobecnie w systemie. Pokazuje równie¿ aktualnie\nistniej±ce powi±zania urz±dzeñ lub interfejsów.
 ; This is the list of USB devices (functions)\ncurrently in the system. It also shows the\ncurrently existing device or interface bindings.
 ;
 MSG_PANEL_DEVICES_COLS_NAME
-\33uNombre
+\33uNazwa
 ; \33uName
 ;
 MSG_PANEL_DEVICES_COLS_SPEED
-\33uVelocidad
+\33uSzybko¶æ
 ; \33uSpeed
 ;
 MSG_PANEL_DEVICES_COLS_STATE
-\33uEstado
+\33uStan
 ; \33uState
 ;
 MSG_PANEL_DEVICES_COLS_CLASS
-\33uClase
+\33uKlasa
 ; \33uClass
 ;
 MSG_PANEL_DEVICES_COLS_BINDINGS
-\33uBindings
+\33uPowi±zania
 ; \33uBindings
 ;
 MSG_PANEL_DEVICES_SCAN
-\33c Escaneo de las clases
+\33c Skanowanie klas
 ; \33c Class Scan
 ;
 MSG_PANEL_DEVICES_SCAN_HELP
-Pulsando este botón se lanzará un escaneo de clase. Esto significa\nque cada periférico será examinado para ver si coincide con alguna\nde las clases en el sistema. En ese caso, se establecerá un binding\n y se añadirá automáticamente la funcionalidad.\n
+Klikniêcie tego przycisku spowoduje rozpoczêcie skanowania klas. Oznacza to,\n¿e ka¿de urz±dzenie zostanie sprawdzone pod k±tem zgodno¶ci z niektórymi standardowymi\nklasami w systemie. W takim przypadku zostanie utworzone powi±zanie,\na funkcjonalno¶æ zostanie automatycznie dodana do systemu.
 ; Clicking on this button will start a class scan. This means that\neach device will be examined if it matches some of the standard\nclasses in the system. In this case, a binding will be established\nand the functionality will be added to the system automatically.\n
 ;
 MSG_PANEL_DEVICES_UNBIND
-\33c Unbind
+\33c Usuñ powi±zanie
 ; \33c Unbind
 ;
 MSG_PANEL_DEVICES_UNBIND_HELP
-Elimina manualmente un binding. Puede ser\nutil para desactivar temporalmente un periférico.\nUsa 'Class Scan' para reactivar el binding.
+Rêcznie usuwa powi±zanie. Mo¿e to byæ\nprzydatne do tymczasowej dezaktywacji urz±dzenia.\nU¿yj "Skanowanie klas", aby ponownie aktywowaæ powi±zanie.
 ; Manually removes a binding. This can be\nuseful to temporarily deactivate a device.\nUse 'Class Scan' to reactivate the binding.
 ;
 MSG_PANEL_DEVICES_INFO
-\33c Información
+\33c Informacje
 ; \33c Information
 ;
 MSG_PANEL_DEVICES_INFO_HELP
-Abre una ventana de información detallada\nPruébala, nada puede ir mal.
+Otwiera okno szczegó³owych informacji.\nPo prostu spróbuj, nic nie mo¿e pój¶æ ¼le.
 ; Opens a detailed information window.\nJust try it, nothing can go wrong.
 ;
 MSG_PANEL_DEVICES_SETTINGS
-\33c Configuración
+\33c Ustawienia
 ; \33c Settings
 ;
 MSG_PANEL_DEVICES_SETTINGS_HELP
-Si hay un binding del periférico y la clase\nsoporta configuración por GUI, pulsando este botón\n abrirá la ventana de preferencias.\n\nEl botón correspondiente a la configuracion del binding\ndel interface puede estar dentro de la ventana\nde información.
+Je¶li istnieje powi±zanie urz±dzenia, a klasa\nobs³uguje GUI konfiguracji, klikniêcie tego\nprzycisku otworzy okno preferencji. Nale¿y pamiêtaæ,\n¿e odpowiedni przycisk dla ustawieñ powi±zania\ninterfejsu mo¿na znale¼æ w oknie informacyjnym.
 ; If there is a device binding and the class\nsupports a configuration GUI, clicking on this\nbutton will open the preferences window.\n\nNote well, that the corresponding button for the\ninterface binding settings can be found inside\nthe information window.
 ;
 MSG_PANEL_DEVICES_SUSPEND
-\33c Suspender
+\33c Wstrzymaj
 ; \33c Suspend
 ;
 MSG_PANEL_DEVICES_SUSPEND_HELP
-Pone el periférico en modo de bajo consumo.\n Si un binding de clase no lo soporta, este \nbotón no hará nada.
+Prze³±cza urz±dzenie w tryb wstrzymania (oszczêdzania energii).\nJe¶li powi±zanie klasy nie obs³uguje trybu wstrzymania,\nten przycisk nic nie da.
 ; Sends device into power saving suspend mode.\nIf a class binding does not support suspend,\nthis button will do nothing.
 ;
 MSG_PANEL_DEVICES_RESUME
-\33c Reanudar
+\33c Wznów
 ; \33c Resume
 ;
 MSG_PANEL_DEVICES_RESUME_HELP
-Reanuda el periférico tras haberse puesto\nen suspensión.\n
+Wznawia pe³ne dzia³anie urz±dzenia po\nprze³±czeniu go w tryb wstrzymania.\n
 ; Resumes the device to full operation after\nit was placed into suspend mode.\n
 ;
 MSG_PANEL_DEVICES_POWERCYCLE
-\33c Reiniciar
+\33c Cykl zasilania
 ; \33c Powercycle
 ;
 MSG_PANEL_DEVICES_POWERCYCLE_HELP
-Reinicia el puerto hub y reenumera el periférico.\n Es útil para reactivar periféricos muertos.\n
+Cykl zasilania portu koncentratora i ponowne wyliczenie\nurz±dzenia. Przydaje siê do reaktywacji martwych urz±dzeñ.\n
 ; Power cycles the hub port and re-enumerates\ndevice. Comes handy to reactivate dead devices.\n
 ;
 MSG_PANEL_DEVICES_DISABLE
-\33c Deshabilitar
+\33c Wy³±cz
 ; \33c Disable
 ;
 MSG_PANEL_DEVICES_DISABLE_HELP
-Apaga el puerto permanentemente. No puede ser\nreactivado desenchufando y volviendo a enchufar el periférico.\n
+Trwale wy³±cza port. Nie mo¿na go ponownie\naktywowaæ przez od³±czenie/pod³±czenie urz±dzenia.\n
 ; Permanently powers off the port. It cannot be\nreactivated by unplugging/replugging the device.\n
 ;
 MSG_PANEL_CLASSES
-\33c\33bClases USB disponibles
+\33c\33bDostêpne klasy USB
 ; \33c\33bUSB Classes available
 ;
 MSG_PANEL_CLASSES_HELP
-Esta es la lista de clases USB disponibles.\nCada clase es un driver de software para un grupo\nde periféricos USB. Se pueden añadir manualmente\nusando el botón 'Añadir' o automáticamente con 'Dir Scan'.
+To jest lista dostêpnych klas USB.\nKa¿da klasa to sterownik programowy dla grupy urz±dzeñ USB.\nKlasy mo¿na dodawaæ rêcznie za pomoc± przycisku "Dodaj"\nlub automatycznie za pomoc± funkcji "Skanuj katalogi".
 ; This is the list of USB classes available.\nEach class is a software driver for a group of\nUSB devices. Classes can be manually added using\nthe 'Add' button or automatically with 'Dir Scan'.
 ;
 MSG_PANEL_CLASSES_COLS_NAME
-\33uNombre
+\33uNazwa
 ; \33uName
 ;
 MSG_PANEL_CLASSES_COLS_USE
-\33uUsa#
+\33uWykorzystanie#
 ; \33uUse#
 ;
 MSG_PANEL_CLASSES_COLS_DESC
-\33uDescripción
+\33uOpis
 ; \33uDescription
 ;
 MSG_PANEL_CLASSES_LABEL
-Librería de clases:
+Biblioteka klas:
 ; Class library:
 ;
 MSG_PANEL_CLASSES_LABEL_HELP
-Para añadir una clase de driver,\introduce su nombre aquí y pulsa 'Añadir'.
+Aby rêcznie dodaæ sterownik klasy USB,\nwprowad¼ jego nazwê i kliknij "Dodaj".
 ; To manually add an usb class driver,\nenter its name here and click on 'Add'.
 ;
 MSG_PANEL_CLASSES_SELECT
-Selecciona librería de clases USB...
+Wybierz bibliotekê klas USB...
 ; Select USB class library...
 ;
 MSG_PANEL_CLASSES_ADD
-\33cAñadir
+\33cDodaj
 ; \33cAdd
 ;
 MSG_PANEL_CLASSES_ADD_HELP
-Para añadir una clase de driver,\introduce su nombre arriba y pulsa este botón.
+Aby rêcznie dodaæ sterownik klasy USB,\nwprowad¼ jego nazwê powy¿ej i kliknij ten przycisk.
 ; To manually add an usb class\ndriver, enter its name above\nand click on this button.
 ;
 MSG_PANEL_CLASSES_REMOVE
-\33c Quitar
+\33c Usuñ
 ; \33c Remove
 ;
 MSG_PANEL_CLASSES_REMOVE_HELP
-Pincha aquí para eliminar una clase de\ndriver y sus bindings.
+Kliknij tutaj, aby usun±æ sterownik klasy\n i wszystkie jego bie¿±ce powi±zania.
 ; Click here to remove a class driver\nand all its current bindings.
 ;
 MSG_PANEL_CLASSES_CONFIG
-\33c Configurar
+\33c Konfiguracja
 ; \33c Configure
 ;
 MSG_PANEL_CLASSES_CONFIG_HELP
-Si una clase de driver es configurable,\nhaz click aquí y se abrirá una ventana\nde configuraciónde la clase.
+Je¶li sterownik klasy obs³uguje jaki¶ rodzaj\nkonfiguracji, kliknij tutaj, a otworzy siê\nokno konfiguracji klasy.
 ; If a class driver supports some kind of\nconfiguration, click here and it will\nopen a configuration window of the class.
 ;
 MSG_PANEL_CLASSES_SCAN
-\33c Escaneo de directorio
+\33c Skanuj katalogi
 ; \33c Dir Scan
 ;
 MSG_PANEL_CLASSES_SCAN_HELP
-Escanear automáticamente clases\nde drivers y\nañadir los drivers encontrados al sistema.
+Automatycznie skanuje w poszukiwaniu sterowników klasy\ni dodaje wszystkie znalezione sterowniki do systemu.
 ; Automatically scans for class\ndrivers and\nadds all drivers found to the system.
 ;
 MSG_PANEL_OPTIONS
-\33c\Varias configuraciones
+\33c\33bRó¿ne ustawienia
 ; \33c\33bVarious Settings
 ;
 MSG_PANEL_OPTIONS_STACK
-Configuración de la pila
+Ustawienia stosu
 ; Stack Settings
 ;
 MSG_PANEL_OPTIONS_PRIORITY
-Prioridad de subtarea:
+Priorytet podzadania:
 ; SubTask priority:
 ;
 MSG_PANEL_OPTIONS_PRIORITY_HELP
-Define la prioridad de todas las\nsubtareas lanzadas por Poseidon.
-; Defines the task priority of all\nsubtasks started by Poseidon.
+Okre¶la priorytet zadania dla wszystkich\nzadañ podrzêdnych uruchomionych przez Neptune.
+; Defines the task priority of all\nsubtasks started by Neptune.
 ;
 MSG_PANEL_OPTIONS_BOOT
-Retardo de arranque:
+Opó¼nienie rozruchu:
 ; Boot delay:
 ;
 MSG_PANEL_OPTIONS_BOOT_HELP
-Si reset es residente, este valor define\n el tiempo que Poseidon debe esperar\npor los periféricos USB, permitiendo arrancar\ndesde dispositivos USB lentos como unidades CD.
-; If reset resident, this value defines,\nhow long Poseidon should wait for USB\ndevices to settle, allowing to boot from\nslow devices such as an USB CD drive.
+W przypadku zresetowania rezydentnego ta warto¶æ okre¶la,\njak d³ugo Neptune powinien czekaæ na ustabilizowanie siê urz±dzeñ USB,\numo¿liwiaj±c rozruch z urz±dzeñ wolniejszych,\ntakich jak napêd CD USB.
+; If reset resident, this value defines,\nhow long Neptune should wait for USB\ndevices to settle, allowing to boot from\nslow devices such as an USB CD drive.
 ;
 MSG_PANEL_OPTIONS_BOOT_FORMAT
-%ld seg.
+%ld sec.
 ; %ld sec.
 ;
 MSG_PANEL_OPTIONS_DISABLELOW
-Deshabilitar automáticamente el hub en condiciones de bajo consumo:
+Automatycznie wy³±cz port koncentratora przy niskim poziomie zasilania:
 ; Automatically disable hub port on low power conditions:
 ;
 MSG_PANEL_OPTIONS_DISABLELOW_HELP
-Si se detecta en un puerto una condición de bajo\nconsumo, seleccionando este conmutador se apagará\nel periférico causante de esa condición.
+W przypadku wykrycia niskiego stanu zasilania na porcie,\nwybranie tego prze³±cznika spowoduje automatyczne wy³±czenie urz±dzenia\npowoduj±cego niski stan zasilania.
 ; If a low power condition is detected at a port,\nselecting this switch will automatically turn off\nthe device causing the low power condition.
 ;
 MSG_PANEL_OPTIONS_DISABLEDEAD
-Deshabilitar automáticamente el puerto hub si un periférico muere:
+Automatycznie wy³±cz port koncentratora, je¶li urz±dzenie padnie:
 ; Automatically disable hub port, if device drops dead:
 ;
 MSG_PANEL_OPTIONS_DISABLEDEAD_HELP
-Si un periférico muere (timeout de trasnferencia),\y este conmutador se selecciona, el puerto del\nhub se deshabilitará automáticamente para evitar\npenalización en el desempeño.
+Je¶li urz±dzenie padnie (przekroczenie limitu czasu\ntransferu), a ten prze³±cznik jest zaznaczony,\nport koncentratora zostanie automatycznie wy³±czony,\naby unikn±æ niepotrzebnych strat wydajno¶ci.
 ; If a device drops dead (transfer timeouts),\nand this switch is selected, then the hub port\nwill be disabled automatically to avoid unnecessary\nperformance penalties.
 ;
 MSG_PANEL_OPTIONS_POWERCYCLE
-Reiniciar automáticamente el puerto hub si un periférico muere:
+Automatyczny cykl zasilania portu koncentratora, je¶li urz±dzenie padnie:
 ; Automatically power cycle hub port, if device drops dead:
 ;
 MSG_PANEL_OPTIONS_POWERCYCLE_HELP
-Reinicia la alimentación de un periférico que ha\ndejado de responder, lo que a menudo basta para\nrecuperarlo. Déjalo activado salvo que algún\nperiférico reaccione mal al corte de alimentación.
+Wy³±cza i ponownie w³±cza zasilanie urz±dzenia,\nktóre przesta³o odpowiadaæ - czêsto to wystarcza,\nby je przywróciæ. Zostaw w³±czone, chyba ¿e jakie¶\nurz±dzenie ¼le znosi odciêcie zasilania.
 ; Power-cycles a device that stopped responding, which\nis often enough to bring it back. Leave this on unless\na device reacts badly to being power-cycled.
 ;
 MSG_PANEL_OPTIONS_POWERSAVE
-Habilitar el modo de bajo consumo:
+W³±cz tryb wstrzymania (oszczêdzania energii):
 ; Enable power-saving suspend mode:
 ;
 MSG_PANEL_OPTIONS_POWERSAVE_HELP
-Los perifñericos se pondrán en modo de suspensión\ntras un tiempo de inactividad especificado.\nEl consumo baja a menos de 1mA.\nLa vuelta al funcionamiento normal usualmente tarda 25ms.
+Urz±dzenia zostan± prze³±czone w tryb wstrzymania po\nup³ywie okre¶lonego czasu bezczynno¶ci.\nZu¿ycie energii spada do mniej ni¿ 1 mA.\nWznowienie dzia³ania nastêpuje zwykle w ci±gu 25 ms.
 ; Devices will be placed into suspend mode after\na specified interval of inactivity.\nPower consumption goes down to less than 1mA.\nResuming of operation usually takes place within 25ms.
 ;
 MSG_PANEL_OPTIONS_FORCESUSPEND
-Forzar suspensión, aunque la clase no lo soporte:
+Wymu¶ tryb wstrzymania, nawet je¶li nie jest obs³ugiwany przez klasê:
 ; Force suspend mode, even if not supported by class:
 ;
 MSG_PANEL_OPTIONS_FORCESUSPEND_HELP
-Las clases deben soportar pasar al modo suspendido.\nSi no, habilitando este conmutador simplemente\nse liberará el binding antes de suspenderse.\nEsto solo se hace en para despertares remotos de\n periféricos, si no, la clase no podría volver a hacer bind.
+Sterowniki klas powinny obs³ugiwaæ przej¶cie do trybu\nwstrzymania. Je¶li nie, w³±czenie tego prze³±cznika spowoduje po prostu\nzwolnienie powi±zania przed zawieszeniem. Jest to\nwykonywane tylko na urz±dzeniach zdalnego wybudzania, w przeciwnym razie\nklasa nie zostanie automatycznie ponownie powi±zana.
 ; Class drivers should support going into suspend\nmode. If they don't, enabling this switch will\nsimply release the binding prior to suspending.\nThis is only performed on remote wakeup devices,\notherwise the class wouldn't rebind automatically.
 ;
 MSG_PANEL_OPTIONS_INACTIVITY
-Periodo de inactividad para suspender:
+Limit czasu nieaktywno¶ci dla wstrzymania:
 ; Inactivity timeout for suspend:
 ;
 MSG_PANEL_OPTIONS_INACTIVITY_HELP
-Tiempo para intentar poner un periférico en\nmodo ahorro de energía.
+Limit czasu przed prób± prze³±czenia urz±dzenia\nw tryb wstrzymania oszczêdzania energii.
 ; Timeout before trying to place a device into\npower saving suspend mode.
 ;
 MSG_PANEL_OPTIONS_INACTIVITY_FORMAT
-%ld seg.
+%ld sec.
 ; %ld sec.
 ;
 MSG_PANEL_OPTIONS_LOGGING
-Opciones de log
+Opcje dziennika zdarzeñ
 ; Logging Options
 ;
 MSG_PANEL_OPTIONS_LOGGING_LABEL
-Mensajes de información de log:
+Zapisywanie w dzienniku komunikatów:
 ; Log info messages:
 ;
 MSG_PANEL_OPTIONS_LOGGING_LABEL_HELP
-Alterna el logeado de mensajes\nnormales e informativos.
+W³±cza rejestrowanie normalnych\nkomunikatów informacyjnych.
 ; Toggles logging of normal\ninformation messages.
 ;
 MSG_PANEL_OPTIONS_LOGGING_WARN
-Log de alertas:
+Zapisywanie w dzienniku ostrze¿eñ:
 ; Log warnings:
 ;
 MSG_PANEL_OPTIONS_LOGGING_WARN_HELP
-Alterna el logeado de alertas.
+W³±cza rejestrowanie ostrze¿eñ.
 ; Toggles logging of warnings.
 ;
 MSG_PANEL_OPTIONS_LOGGING_ERR
-Log de errores:
+Zapisywanie w dzienniku b³êdów:
 ; Log errors:
 ;
 MSG_PANEL_OPTIONS_LOGGING_ERR_HELP
-Alterna el logeado de errores.
+W³±cza rejestrowanie b³êdów.
 ; Toggles logging of errors.
 ;
 MSG_PANEL_OPTIONS_LOGGING_FAIL
-Log de fallos:
+Zapisywanie w dzienniku awarii:
 ; Log failures:
 ;
 MSG_PANEL_OPTIONS_LOGGING_FAIL_HELP
-Alterna el logeado de fallos.
+W³±cza rejestrowanie awarii.
 ; Toggles logging of failures.
 ;
 MSG_PANEL_OPTIONS_MEMORY
-Memoria asignada en el Pool de Poseidon:
-; Memory allocated in Poseidon Pool:
+Pamiêæ przydzielona w puli Neptune:
+; Memory allocated in Neptune Pool:
 ;
 MSG_PANEL_NOTIFY
-\33c\33bConfiguración de Popup
+\33c\33bUstawienia wyskakuj±cych okienek
 ; \33c\33bPopup Settings
 ;
 MSG_PANEL_NOTIFY_LABEL
-Opciones de ventana popup
+Opcje wyskakuj±cego okna
 ; Popup Window Options
 ;
-MSG_PANEL_NOTIFY_CONNECT
-Al conectar:
+MSG_PANEL_NOTIFY_CONNECT 
+Przy pod³±czeniu:
 ; On connecting:
 ;
 MSG_PANEL_NOTIFY_CONNECT_HELP
-Comportamiento de ventana\nemergente al conectar periféricos
+Zachowanie wyskakuj±cego okienka podczas\npod³±czania nowych urz±dzeñ USB
 ; Popup display behaviour on\nconnecting new USB devices
 ;
 MSG_PANEL_NOTIFY_DISCONNECT
-Al desconectar:
+Przy roz³±czeniu:
 ; On disconnect:
 ;
 MSG_PANEL_NOTIFY_DISCONNECT_HELP
-Mostrar ventana emergente\nsi se quita el periférico.
+Czy wy¶wietliæ okno, je¶li urz±dzenie zostanie usuniête.
 ; Whether to popup a window\nif the device is removed.
 ;
 MSG_PANEL_NOTIFY_DEATH
-A la muerte del periférico:
+Przy ¶mierci urz±dzenia:
 ; On device death:
 ;
 MSG_PANEL_NOTIFY_DEATH_HELP
-Abrir un requester si el periférico parece muerto.
+Otwórz requester, je¶li urz±dzenie wydaje siê byæ martwe.
 ; Open a requester, if device seems to be dead.
 ;
 MSG_PANEL_NOTIFY_DELAY
-Retardo de popup;
+Opó¼nienie wyskakuj±cego okienka:
 ; Popup delay:
 ;
 MSG_PANEL_NOTIFY_DELAY_HELP
-Cuanto tiempo se debe mostrar el requester\nantes de que desaparezca.
+Jak d³ugo powinien byæ wy¶wietlany requester,\nzanim zniknie automatycznie.
 ; How long should the requester be displayed\nbefore disappearing automatically.
 ;
 MSG_PANEL_NOTIFY_DELAY_FORMAT
-%ld seg.
+%ld sec.
 ; %ld sec.
 ;
 MSG_PANEL_NOTIFY_ACTIVATE
-Activar ventana:
+Aktywuj okno:
 ; Activate window:
 ;
 MSG_PANEL_NOTIFY_ACTIVATE_HELP
-Activar la ventana al abrir.
+Aktywuj okno podczas otwierania.
 ; Make the window active when opening.
 ;
 MSG_PANEL_NOTIFY_TOFRONT
-Traer al frente:
+Wysuñ na przód:
 ; Pop to front:
 ;
 MSG_PANEL_NOTIFY_TOFRONT_HELP
-Traer ventana al frente si cambia el contenido.
+Wysuñ okno na przód, je¶li zawarto¶æ ulegnie zmianie.
 ; Pop window to front, if content changes.
 ;
 MSG_PANEL_NOTIFY_CONSOUND
-Sonido de conexión:
+D¼wiêk po³±czenia:
 ; Connection sound:
 ;
 MSG_PANEL_NOTIFY_CONSOUND_HELP
-Se reproducirá este sonido cada vez\nque se conecte un periférico al bus.
+Ten d¼wiêk bêdzie odtwarzany za ka¿dym razem, gdy urz±dzenie\nzostanie pod³±czone do magistrali.
 ; This sound will be replayed everytime\na device is connected to the bus.
 ;
 MSG_PANEL_NOTIFY_CONSOUND_SELECT
-Selecciona un fichero de sonido para reproducir...
+Wybierz plik d¼wiêkowy do odtworzenia...
 ; Select a sound file to be replayed...
 ;
 MSG_PANEL_NOTIFY_DISCONSOUND
-Desconectar el sonido:
+D¼wiêk roz³±czenia:
 ; Disconnect sound:
 ;
 MSG_PANEL_NOTIFY_DISCONSOUND_HELP
-Se reproducirá este sonido cada vez\nque se desconecte un periférico del bus.
+Ten d¼wiêk bêdzie odtwarzany za ka¿dym razem,\ngdy urz±dzenie zostanie od³±czone od magistrali.
 ; This sound will be replayed everytime\na device is removed from the bus.
 ;
 MSG_PANEL_NOTIFY_DISCONSOUND_SELECT
-Selecciona un fichero de sonido para reproducir...
+Wybierz plik d¼wiêkowy do odtworzenia...
 ; Select a sound file to be replayed...
 ;
 MSG_PANEL_CONFIG
-\33c\33bGestión de la configuración (Usar drag & drop)
+\33c\33bZarz±dzanie konfiguracj± (U¿yj przeci±gnij i upu¶æ)
 ; \33c\33bConfiguration management (Use drag & drop)
 ;
 MSG_PANEL_CONFIG_HELP
-En esta caja puedes ver todas las preferencias que se\nhansalvado así como el fichero enENVARC:.\nPuedes usar este panel para borrar o exportar prefs.\n\nUsar drag & drop para copiar o reemplazar las preferencias.\n
+W tym polu mo¿na zobaczyæ wszystkie preferencje,\nktóre s± zapisane w pliku prefs w ENVARC:.\nMo¿na u¿yæ tego panelu do usuniêcia lub wyeksportowania prefs.\n\nU¿yj przeci±gnij i upu¶æ, aby skopiowaæ lub zast±piæ preferencje.\n
 ; In this box you can see all the preferences that are\nsaved along the prefs file in ENVARC:.\nYou can use this panel to delete or export prefs.\n\nUse drag & drop to copy or replace preferences.\n
 ;
 MSG_PANEL_CONFIG_COLS_TYPE
-\33uTipo
+\33uTyp
 ; \33uType
 ;
 MSG_PANEL_CONFIG_COLS_DESC
-\33uDescripción
+\33uOpis
 ; \33uDescription
 ;
 MSG_PANEL_CONFIG_COLS_OWNER
-\33uDueño
+\33uW³a¶ciciel
 ; \33uOwner
 ;
 MSG_PANEL_CONFIG_COLS_SIZE
-\33uTamaño
+\33uRozmiar
 ; \33uSize
 ;
 MSG_PANEL_CONFIG_SAVEAS
-\33c Guardar como
+\33c Zapisz jako
 ; \33c Save as
 ;
 MSG_PANEL_CONFIG_SAVEAS_HELP
-Guardar todas las preferencias para\nrecargarlas despues.
+Zapisz wszystkie prefs pod dan± nazw±\ndo pó¼niejszego wczytania.
 ; Save all the prefs under given name\nfor reloading it later.
 ;
 MSG_PANEL_CONFIG_EXPORT
-\33c Exportar
+\33c Eksport
 ; \33c Export
 ;
 MSG_PANEL_CONFIG_EXPORT_HELP
-Te permite guardar una entrada\npara recargarla despues.
+Umo¿liwia zapisanie wybranego wpisu\nw celu jego pó¼niejszego wczytania.
 ; Allows you to save a selected entry\nto reload it later.
 ;
 MSG_PANEL_CONFIG_IMPORT
-\33c Importar
+\33c Import
 ; \33c Import
 ;
 MSG_PANEL_CONFIG_IMPORT_HELP
-Importa preferencias guardadas previamente.
+Importuje poprzednio zapisany element prefs.
 ; Imports a previously saved piece of prefs.
 ;
 MSG_PANEL_CONFIG_REMOVE
-\33c Quitar
+\33c Usuñ
 ; \33c Remove
 ;
 MSG_PANEL_CONFIG_REMOVE_HELP
-Borra la entrada de preferencias seleccionada.
+Usuwa wybrany wpis prefs.
 ; Deletes the selected prefs entry.
 ;
 MSG_PANEL_CONFIG_MSGLOG
-Log de mensaje
+Dziennik komunikatów
 ; Message Log
 ;
 MSG_PANEL_CONFIG_INFLVL
-Nivel de información:
+Poziom informacji:
 ; Information level:
 ;
 MSG_PANEL_CONFIG_INFLVL_HELP
-Este gadget determina la cantidad y tipo\nde los mensajes abajo mostrados.
+Ten gad¿et okre¶la ilo¶æ i rodzaj\nkomunikatów wy¶wietlanych poni¿ej.
 ; This gadget determines the amount and\ntype of messages shown below.
 ;
 MSG_PANEL_CONFIG_LOGSAVE
-\33c Guardar al disco
+\33c Zapisz na dysku
 ; \33c Save to disk
 ;
 MSG_PANEL_CONFIG_LOGSAVE_HELP
-Para generar un fichero log de errores,\np.e. para enviarme informacion para\nreporte de bugs o ayuda.
+Generuje plik dziennika b³êdów,\nnp. aby wys³aæ informacje do mnie\nw celu zg³oszenia b³êdu lub uzyskania pomocy.
 ; To generate a logfile of the errors,\ne.g. to send the information to me\nfor bug reporting or help.
 ;
 MSG_PANEL_CONFIG_LOGFLUSH
-\33c Limpiar todos.
+\33c Wyczy¶æ wszystko
 ; \33c Flush all
 ;
 MSG_PANEL_CONFIG_LOGFLUSH_HELP
-Pinchando este botón se eliminarán todos\nlos mensajes de la pila. No habrá forma\nde recuperarlos.
+Klikniêcie tego przycisku spowoduje usuniêcie\nwszystkich komunikatów ze stosu.\nNie ma mo¿liwo¶ci ich odzyskania.
 ; Clicking on this button will remove all\nthe messages in the stack. There's no way\nto get them back.
 ;
 MSG_PANEL_CONFIG_LOGHELP
-Estos son los mensajes de la pila Poseidon\ngenerados hasta ahora. Si quieres limpiar esta lista\nhaz click en el botón 'Limpiar todos los mensajes'.
-; These are the messages of the Poseidon stack\ngenerated so far. If you want to clear this list\njust click on the 'Flush all messages' button.
+S± to komunikaty stosu Neptune\nwygenerowane do tej pory. Je¶li chcesz wyczy¶ciæ tê listê,\nkliknij przycisk 'Wyczy¶æ wszystkie'.
+; These are the messages of the Neptune stack\ngenerated so far. If you want to clear this list\njust click on the 'Flush all messages' button.
 ;
 MSG_PANEL_CONFIG_ALLONLINE
-Todos conectados
+\33c Wszystkie Online
 ; \33c All Online
 ;
 MSG_PANEL_CONFIG_ALLONLINE_HELP
-Lanzar todos los drivers que han sido\nintriducidos en el panel 'Hardware'.\nAdemás, los periféricos encontrados se comprobarán para\nposibles bindings.
+Uruchamia wszystkie sterowniki urz±dzeñ USB,\nktóre zosta³y wprowadzone w panelu "Sprzêt".\nPonadto znalezione urz±dzenia zostan± sprawdzone pod k±tem mo¿liwych powi±zañ.
 ; Start all USB hardware device drivers that\nhave been entered in the 'Hardware' panel.\nMoreover, the found devices will be checked\nfor possible bindings.
 ;
 MSG_PANEL_CONFIG_ALLOFFLINE
-Todos desconectados
+\33c Wszystkie Offline
 ; \33c All Offline
 ;
 MSG_PANEL_CONFIG_ALLOFFLINE_HELP
-Usando 'Desconectado' puedes apagar todos los\ndrivers de periférico.\nEsto para por completo la pila.
+U¿ywaj±c 'Offline' mo¿na usun±æ wszystkie sterowniki urz±dzeñ USB.\nTo ca³kowicie zatrzymuje stos.
 ; Using 'Offline' you can take down all the USB\nhardware device drivers.\nThis totally halts the stack.
 ;
 MSG_PANEL_CONFIG_RESTART
-\33c Reiniciar
+\33c Restart
 ; \33c Restart
 ;
 MSG_PANEL_CONFIG_RESTART_HELP
-Haciendo click en 'Reiniciar' se reiniciarán\ntodos los drivers de periféricos.
+Klikniêcie przycisku "Restart" spowoduje zatrzymanie i ponowne\nuruchomienie wszystkich sterowników urz±dzeñ sprzêtowych.
 ; Clicking on 'Restart' will stop and restart\nall hardware device drivers.
 ;
 MSG_PANEL_CONFIG_SAVE
-\33c Guardar
+\33c Zapisz
 ; \33c Save
 ;
 MSG_PANEL_CONFIG_SAVE_HELP
-Para guardar en el disco, pulsa este botón.\nLa configuración se guardará en ENVARC:\ny ENV:.
+Aby zapisaæ bie¿±ce ustawienia na dysku, kliknij\nten przycisk. Konfiguracja zostanie\nzapisana zarówno w ENVARC:,\njak i ENV:.
 ; To save your current prefs to disk, click\non this button. The configuration will be\nstored in both ENVARC: and\n ENV:.
 ;
 MSG_PANEL_CONFIG_USE
-\33c Usar
+\33c U¿yj
 ; \33c Use
 ;
 MSG_PANEL_CONFIG_USE_HELP
-Para usar, pero no guardar permanentemente\npulsar este botón. La configuración se\nguardará en ENV:.
+Aby u¿yæ, ale nie zapisaæ ustawieñ na sta³e,\nkliknij ten przycisk. Konfiguracja zostanie\nzapisana w ENV:.
 ; To use, but not permanently save your prefs\nclick this button. The configuration will be\nstored in ENV:.
 ;
 MSG_UNKNOWN
-desconocido
+nieznany
 ; unknown
 ;
 MSG_HARDWARE_WINDOW
-Ventana de información del driver de periférico
+Okno informacji o sterowniku sprzêtu
 ; Hardware driver information window
 ;
 MSG_HARDWARE_WINDOW_HELP
-Estos campos muestran información general\ndel driver de hardware USB.
+W tych polach wy¶wietlane s± ogólne informacje\ndotycz±ce sterownika sprzêtu USB.
 ; These fields show some general information\non the USB hardware driver.
 ;
 MSG_HARDWARE_WINDOW_FRAME
-Información general de driver de hardware USB
+Ogólne informacje o sterowniku sprzêtu USB
 ; General USB hardware driver information
 ;
 MSG_HARDWARE_WINDOW_LABEL
-Periférico:\nUnidad:\nVersión:\nProducto:\nFAbricante:\nDescripción:\nCopyright:
+Urz±dzenie:\nJednostka:\nWersja:\nProdukt:\nProducent:\nOpis:\nPrawa autorskie:
 ; Device:\nUnit:\nVersion:\nProduct:\nManufacturer:\nDescription:\nCopyright:
 ;
 MSG_ACTION_SAVE_ERR
-Selecciona en que fichero guardar los errores...
+Wybierz plik, w którym maj± zostaæ zapisane b³êdy...
 ; Select file to save errors to...
 ;
 MSG_ACTION_SAVE_ERR_FILE
@@ -827,15 +827,15 @@ Errors.log
 ; Errors.log
 ;
 MSG_ACTION_ERR_SAVED
-Log de errores guardado al fichero %s.
+Dziennik b³êdów zapisany do pliku %s.
 ; Error log saved to file %s.
 ;
 MSG_ACTION_ERR_SAVED_ERRWRITE
-Error al abrir el fichero %s para escribir.
+B³±d otwarcia pliku %s do zapisu.
 ; Error opening file %s for writing.
 ;
 MSG_ACTION_SAVE_DEV
-Selecciona fichero para guardar la lista de perifericos...
+Wybierz plik do zapisania listy urz±dzeñ...
 ; Select file to save device list to...
 ;
 MSG_ACTION_SAVE_DEV_FILE
@@ -843,95 +843,95 @@ DevList.log
 ; DevList.log
 ;
 MSG_ACTION_SAVE_DEV_ERREXE
-Error ejecutando PsdDevLister
-; Error executing PsdDevLister
+B³±d wykonania USBList
+; Error executing USBList
 ;
 MSG_ACTION_DEV_SAVED
-DevLister guardado en %s.
-; DevLister saved to %s.
+Lista urz±dzeñ zapisana do %s.
+; Device list saved to %s.
 ;
 MSG_ACTION_PREFS_LOAD
-Selecciona un fichero de Preferencias Poseidon...
-; Select a Poseidon Prefs file...
+Wybierz plik Neptune Prefs....
+; Select a Neptune Prefs file...
 ;
 MSG_ACTION_PREFS_LOADED
-Configuración cargada desde %s.
+Konfiguracja za³adowana z %s.
 ; Config loaded from %s.
 ;
 MSG_ACTION_PREFS_SAVEAS
-Selecciona un fichero para guardar las prefs...
+Wybierz plik, w którym maj± zostaæ zapisane ustawienia...
 ; Select file to save prefs to...
 ;
 MSG_ACTION_PREFS_SAVED
-Configuración correctamente guardad en %s.
+Pomy¶lnie zapisano konfiguracjê do %s.
 ; Configuration successfully saved to %s.
 ;
 MSG_ACTION_PREFS_SAVEDERR
-No se pudo guardar la configuracion en %s.
+Nie mo¿na zapisaæ konfiguracji do %s.
 ; Couldn't save config to %s.
 ;
 MSG_ACTION_PREFS_NOTSAVED
-No se ha guardado la configuración!
+Konfiguracja nie zosta³a zapisana!
 ; Config not saved!
 ;
 MSG_ACTION_PREFS_SAVEDSUCCESS
-Configuración guardada.
+Konfiguracja zosta³a pomy¶lnie zapisana.
 ; Configuration successfully saved.
 ;
 MSG_ACTION_USEQUIT
-Usar|Guardar|Cancelar
+U¿yj|Zapisz|Poniechaj
 ; Use|Save|Cancel
 ;
 MSG_ACTION_CONFIGCHANGED
-La configuración actual se ha cambiado y no\nse ha guardado aun.
+Bie¿±ca konfiguracja zosta³a zmieniona\ni nie zosta³a jeszcze zapisana.
 ; The current configuration has been changed\nand not been saved yet.
 ;
 MSG_ACTION_SAVEQUIT
-No se pudo guardar la configuracion.
+Nie mo¿na zapisaæ konfiguracji.
 ; Couldn't save config.
 ;
 MSG_ACTION_DEV_FORCEBIND_NONE
-Ninguno
+Brak
 ; None
 ;
 MSG_ACTION_DEV_FORCE_REQ
-Continuar|Cancelar
+Kontynuuj|Anuluj
 ; Continue|Cancel
 ;
 MSG_ACTION_DEV_FORCE_REQ_TXT
-Estás a punto de establecer un binding forzado al\n\33bperiférico\33n. Esto no es un binding de interface,\ny un binding forzado incorrecto puede impedir por\ncompleto que el periférico funcione.\n\nContinúa sólo si sabes lo que haces.
+Zamierzasz utworzyæ wymuszone powi±zanie\n\33burz±dzenia\33n. To nie jest powi±zanie interfejsu,\na b³êdne wymuszone powi±zanie mo¿e ca³kowicie\nuniemo¿liwiæ dzia³anie urz±dzenia.\n\nKontynuuj tylko wtedy, gdy wiesz, co robisz.
 ; You are about to create a forced \33bdevice\33n binding.\nThis is not an interface binding, and an incorrect\nforced binding can stop the device working entirely.\n\nContinue only if you know what this does.
 ;
 MSG_ACTION_DEV_FORCE
-Forzando el binding del periférico de %s a %s.
+Wymuszenie powi±zania urz±dzenia %s z %s.
 ; Forcing device binding of %s to %s.
 ;
 MSG_ACTION_DEV_FORCE_REMOVE
-Eliminando el binding forzado de %s.
+Usuniêto wymuszone powi±zanie urz±dzenia %s.
 ; Removed forced device binding of %s.
 ;
 MSG_ACTION_CFG_REMOVE
-Quitar|Cancelar
+Usuñ|Poniechaj
 ; Remove|Cancel
 ;
 MSG_ACTION_CFG_REMOVE_HELP
-Estás a punto de \33bborrar\33n la configuración\nrelativa la periférico con ID\n\33b%s\33n.\nEsto incluye la configuración individual de la asignación\nde clase para el periférico o interfaz, así como a las cosas que Tritent guarda (Como nombre o inhibición de ventanas enemergentes).\n\nSeguro que quieres continuar?
-; You are about to \33bremove\33n the configuration\ndata related to the device with the ID\n\33b%s\33n.\nThis includes all individually saved class\nsetting for the device or interfaces, as well\nas the stuff Trident saves (such as custom name or\npopup inhibit).\n\nAre you sure you want to remove these prefs?
+Zamierzasz \33busun±æ\33n dane konfiguracyjne\nzwi±zane z urz±dzeniem o identyfikatorze\n\33b%s\33n.\nObejmuje to wszystkie indywidualnie zapisane ustawienia klas\ndla urz±dzenia lub interfejsów, a tak¿e\nrzeczy zapisane przez Neptune USB (takie jak niestandardowa nazwa lub\nblokada wyskakuj±cego okienka).\n\nCzy na pewno chcesz usun±æ te ustawienia?
+; You are about to \33bremove\33n the configuration\ndata related to the device with the ID\n\33b%s\33n.\nThis includes all individually saved class\nsetting for the device or interfaces, as well\nas the stuff Neptune USB saves (such as custom name or\npopup inhibit).\n\nAre you sure you want to remove these prefs?
 ;
 MSG_ACTION_CFG_REMOVE_DEFAULT
-Estás a punto de \33bborrar\33n la configuración\n por defecto de la clase \33b%s\33n.\nEsto asignará las prefs iniciales de las clases\na los valores por defecto\33nen el próximo reinicio\33n!\nNormalmente no suele afectar a la configuración\nindividual del periférico o interfaz.\n\nSeguro que quieres continuar?
+Za chwilê zostanie \33busuniêta\33n (domy¶lna) konfiguracja klasy \33b%s\33n.\nSpowoduje to ustawienie domy¶lnych ustawieñ pocz±tkowych klasy na domy¶lne\nustawienia wewnêtrzne \33bprzy nastêpnym uruchomieniu\33n systemu!\nZazwyczaj nie ma to wp³ywu na indywidualnie zapisane\nustawienia urz±dzenia lub interfejsu.\n\nCzy na pewno chcesz usun±æ te ustawienia?
 ; You are about to \33bremove\33n the (default)\nconfiguration of the class \33b%s\33n.\nThis will set the classes initial prefs to the\ninternal defaults \33bon next boot\33n!\nIt does normally not affect the device or interface\nindividually saved settings.\n\nAre you sure you want to remove these prefs?
 ;
 MSG_ACTION_CFG_REMOVE_CLASS
-Estás a punto de \33bborrar\33n la configuración\nde la clase \33b%s\33n\nguardada para el periférico con ID\n\33b%s\33n.\n\nSeguro que quieres continuar?
+Zamierzasz \33busun±æ\33n konfiguracjê klasy\n\33b%s\33n,\nspecyficznie zapisan± dla urz±dzenia z ID\n\33b%s\33n.\n\nCzy na pewno chcesz usun±æ te ustawienia?
 ; You are about to \33bremove\33n the class\nconfiguration of the class \33b%s\33n,\nspecifically saved for device with ID\n\33b%s\33n.\n\nAre you sure you want to remove these prefs?
 ;
 MSG_ACTION_CFG_REMOVE_CLASS_DEF
-Estás a punto de \33bborrar\33n la configuración\nde la clase \33b%s\33n\nguardada para el interface\n\33b%s\33n del periférico con ID\n\33b%s\33n.\n\nSeguro que quieres continuar?
+Zamierzasz \33busun±æ\33n konfiguracjê klasy \33b%s\33n\nzapisan± dla okre¶lonego interfejsu\n\33b%s\33n urz±dzenia o ID\n\33b%s\33n.\n\nCzy na pewno chcesz usun±æ te ustawienia?
 ; You are about to \33bremove\33n the class\nconfiguration of the class \33b%s\33n\nsaved for the particular interface\n\33b%s\33n of the device with ID\n\33b%s\33n.\n\nAre you sure you want to remove these prefs?
 ;
 MSG_ACTION_CFG_REMOVE_UNKNOWN
-Seguro que quieres eliminar estos\n\33bdatos desconocidos de prefs\33n de las preferencias?
+Czy na pewno chcesz usun±æ te\n\33bnieznane preferencje\33n z preferencji?
 ; Do you really want to remove this\n\33bunknown prefs data\33n from the preferences?
 ;
 MSG_ACTION_MEMPOOL_FORMAT
@@ -939,7 +939,7 @@ MSG_ACTION_MEMPOOL_FORMAT
 ; %ld KB
 ;
 MSG_ACTION_CFG_EXPORT
-Selecciona un fichero para exportar las prefs...
+Wybierz plik, do którego chcesz wyeksportowaæ preferencje...
 ; Select file to export prefs to...
 ;
 MSG_ACTION_CFG_PREFS_FILE
@@ -967,91 +967,91 @@ ifclscfg.prefs
 ; ifclscfg.prefs
 ;
 MSG_ACTION_CFG_FAIL
-FAllo al abrir el fichero %s.
+Nie uda³o siê otworzyæ pliku %s.
 ; Failed to open file %s.
 ;
 MSG_ACTION_CFG_IMPORT
-Selecciona un fichero del que importar las prefs...
+Wybierz plik, z którego chcesz zaimportowaæ preferencje...
 ; Select file to import prefs from...
 ;
 MSG_ACTION_CFGDATA_OOPS_HELP
-Para importar las prefs de un\nperiférico o interface se debe\nseleccionar la entrada donde se añadirá.
+Aby zaimportowaæ preferencje urz±dzenia\nlub interfejsu, nale¿y wybraæ wpis\nurz±dzenia, do którego maj± one zostaæ dodane.
 ; To import device or interface\nprefs data, you need to select\nthe device entry where it should be added.
 ;
 MSG_ACTION_CFGDATA_ERR
-No conozco ese tipo de fichero de preferencias.
+Nie znam tego rodzaju pliku prefs.
 ; I don't know that kind of prefs file.
 ;
 MSG_ACTION_CFGDATA_ERR_READ
-Error de lectura cargando el fichero %s.
+B³±d odczytu przy ³adowaniu pliku prefs %s.
 ; Read error on loading prefs file %s.
 ;
 MSG_ACTION_CFGDATA_ERR_ALLOC
-Fallo al asignar buffer para cargar %s.
+Nie uda³o siê przydzieliæ bufora do za³adowania %s.
 ; Failed to allocate buffer for loading %s.
 ;
 MSG_ACTION_CFGDATA_ERR_IFF
-%s no parece ser un fichero iff.
+%s nie wydaje siê byæ plikiem iff.
 ; %s does not seem to be an iff file.
 ;
 MSG_ACTION_CFGDATA_ERR_OPEN
-Fallo al cargar el fichero %s.
+Nie uda³o siê otworzyæ pliku %s.
 ; Failed to open file %s.
 ;
 MSG_APPLYDRAGACTION_DEVICECFG
-Remplazar|Fusionar|Cancelar
+Zast±p|Scal|Poniechaj
 ; Replace|Merge|Cancel
 ;
 MSG_APPLYDRAGACTION_DEVICECFG_HELP
-Quieres \33bremplazar\33n o \33bfusionar\33n las preferencias de\n\33b%s\33n\ncon el contenido de\n\33b%s\33n?
+Czy chcesz \33bzast±piæ\33n lub \33bscaliæ\33n preferencje\n\33b%s\33n\nz zawarto¶ci± z\n\33b%s\33n?
 ; Do you want to \33breplace\33n or \33bmerge\33n the prefs of\n\33b%s\33n\nwith the contents from\n\33b%s\33n?
 ;
 MSG_APPLYDRAGACTION_DEVCFGDATA
-Añadir al periférico|Cancelar
+Dodaj do urz±dzenia|Poniechaj
 ; Add to device|Cancel
 ;
 MSG_APPLYDRAGACTION_DEVCFGDATA_HELP
-Lo siento, solo se pueden guardar las prefs\ndel mismo dueño.\nEn su lugar, quieres añadirlas al periférico\n?
+Przepraszamy, ale tylko preferencje tego samego w³a¶ciciela\nmog± zostaæ zast±pione.\n\nCzy chcesz zamiast tego dodaæ\nte preferencje do urz±dzenia?
 ; Sorry, but only prefs of the same owner can\nbe replaced.\n\nDo you wish to add this prefs\nto the device instead?
 ;
 MSG_APPLYDRAGACTION_DEVCFGDATA_REPLACE
-Remplazar|Cancelar
+Zast±p|Poniechaj
 ; Replace|Cancel
 ;
 MSG_APPLYDRAGACTION_DEVCFGDATA_REPLACE_HELP
-Quieres \33bremplazar\33n las preferencias de\n\33b%s\33n\npor las de\n\33b%s\33n?
+Czy chcesz \33bzast±piæ\33n preferencje\n\33b%s\33n\ntymi z\n\33b%s\33n?
 ; Do you want to \33breplace\33n the prefs of\n\33b%s\33n\nby those of\n\33b%s\33n?
 ;
 MSG_APPLYDRAGACTION_DEVICECFG_REPLACE
-Remplazar|Cancelar
+Zast±p|Poniechaj
 ; Replace|Cancel
 ;
 MSG_APPLYDRAGACTION_DEVICECFG_REPLACE_HELP
-Quieres \33bremplazar\33n las preferencias de\n\33b%s\33n\npor la que hay en\n\33b%s\33n?
+Czy chcesz \33bzast±piæ\33n preferencje\n\33b%s\33n\ntym z\n\33b%s\33n?
 ; Do you want to \33breplace\33n the prefs of\n\33b%s\33n\nby the one in\n\33b%s\33n?
 ;
 MSG_APPLYDRAGACTION_DEVICECFG_ADD
-Añadir|Cancelar
+Dodaj|Poniechaj
 ; Add|Cancel
 ;
 MSG_APPLYDRAGACTION_DEVICECFG_ADD_HELP
-Quieres \33bañadir\33n las preferencias de\n\33b%s\33n\nen el periférico\n\33b%s\33n?
+Czy chcesz \33bdodaæ\33n preferencje z\n\33b%s\33n\ndo urz±dzenia\n\33b%s\33n?
 ; Do you want to \33badd\33n the prefs of\n\33b%s\33n\nto the device\n\33b%s\33n?
 ;
 MSG_CFGLISTDISPATCHER_OOPS_HELP
-Lo siento, a ese destino no se le\npuede hacer drag'n drop.
+Przepraszamy, operacja przeci±gnij i upu¶æ\ndo tego celu nie jest obs³ugiwana.
 ; Sorry, drag'n drop operation to\nthat target is not supported.
 ;
 MSG_DEVICE_SPEED_LOW
-Bajo
+Niska
 ; Low
 ;
 MSG_DEVICE_SPEED_HIGH
-Alto
+Wysoka
 ; High
 ;
 MSG_DEVICE_SPEED_FULL
-Lleno
+Pe³na
 ; Full
 ;
 MSG_DEVICE_SPEED_SUPER
@@ -1059,23 +1059,23 @@ Super
 ; Super
 ;
 MSG_DEVICE_STATE_SUSPENDED
-Suspender
+Wstrzymany
 ; Suspended
 ;
 MSG_DEVICE_STATE_DEAD
-Muerto
+Martwy
 ; Dead
 ;
 MSG_DEVICE_STATE_DEADLP
-Muerto \/ LP
+Martwy \/ LP
 ; Dead \/ LP
 ;
 MSG_DEVICE_STATE_LOWPOWER
-Baja Potencia
+Niski pobór mocy
 ; Low Power
 ;
 MSG_DEVICE_STATE_CONFIGURED
-Corriendo
+Uruchomione
 ; Running
 ;
 MSG_DEVICE_STATE_DEVDESC
@@ -1087,23 +1087,23 @@ ValidAddr
 ; ValidAddr
 ;
 MSG_DEVICE_STATE_CONNECTED
-Conectado
+Pod³±czone
 ; Connected
 ;
 MSG_LOGLEVEL_OK
-Ok
-; 
+
+;
 ;
 MSG_LOGLEVEL_WARNING
-Advertencia
+Ostrze¿enie
 ; Warning
 ;
 MSG_LOGLEVEL_ERROR
-Error
+B³±d
 ; Error
 ;
 MSG_LOGLEVEL_FAILURE
-Fallo
+Awaria
 ; Failure
 ;
 MSG_LOGLEVEL_OTHER
@@ -1111,11 +1111,11 @@ MSG_LOGLEVEL_OTHER
 ; ???
 ;
 MSG_PANEL_OPTIONS_LINKPOWER
-Habilitar la gestión de energía del enlace USB:
+W³±cz zarz±dzanie energi± ³±cza USB:
 ; Enable USB link power management:
 ;
 MSG_PANEL_OPTIONS_LINKPOWER_HELP
-Permite que un enlace inactivo pase a un estado de\nbajo consumo entre transferencias (U1/U2 en\nSuperSpeed, L1 en High-Speed) y habilita el Latency\nTolerance Messaging. La entrada y la salida las\ngestiona el controlador y son transparentes para las\ntransferencias. Desactívelo si un dispositivo\nfunciona mal cuando está inactivo.
+Pozwala bezczynnemu ³±czu przej¶æ miêdzy transferami\nw stan niskiego poboru mocy (U1/U2 w SuperSpeed,\nL1 w High-Speed) i w³±cza Latency Tolerance\nMessaging. Wej¶ciem i wyj¶ciem zarz±dza kontroler,\njest to przezroczyste dla transferów. Wy³±cz, je¶li\nurz±dzenie dzia³a nieprawid³owo w bezczynno¶ci.
 ; Lets an idle link drop into a low power state\nbetween transfers (U1/U2 on SuperSpeed, L1 on\nHigh-Speed) and enables Latency Tolerance\nMessaging. Entry and exit are handled by the\ncontroller and are transparent to transfers.\nTurn this off if a device misbehaves when idle.
 ;
 MSG_REQ_OK
@@ -1123,11 +1123,11 @@ OK
 ; OK
 ;
 MSG_PANEL_DEVICES_EJECT
-\33c Expulsar
+\33c Wysuñ
 ; \33c Eject
 ;
 MSG_PANEL_DEVICES_EJECT_HELP
-Retira con seguridad un dispositivo de almacenamiento:\nvacía y desmonta todos sus volúmenes (se niega si\nalgún archivo sigue abierto), detiene la unidad y\ndesactiva su puerto para poder desconectarlo sin\npérdida de datos.
+Bezpiecznie usuwa urz±dzenie pamiêci masowej: zapisuje\ni odmontowuje wszystkie jego wolumeny (odmawia, gdy\njaki¶ plik jest wci±¿ otwarty), zatrzymuje napêd\ni wy³±cza jego port, aby mo¿na by³o je od³±czyæ\nbez utraty danych.
 ; Safely removes a mass storage device: flushes and\nunmounts all its volumes (refusing if any file is\nstill open), stops the drive and disables its hub\nport so it can be unplugged without data loss.
 ;
 MSG_ACTION_DEV_EJECT_OK
@@ -1135,10 +1135,10 @@ OK
 ; OK
 ;
 MSG_ACTION_DEV_EJECT_BUSY_TXT
-No se puede expulsar '%s':\n%s todavía está en uso.\nCierre todos los archivos y vuelva a intentarlo.
+Nie mo¿na wysun±æ '%s':\n%s jest wci±¿ w u¿yciu.\nZamknij wszystkie pliki na nim i spróbuj ponownie.
 ; Cannot eject '%s':\n%s is still in use.\nClose all files on it and try again.
 ;
 MSG_ACTION_DEV_EJECT_FAILED_TXT
-La expulsión de '%s' ha fallado.\nConsulte el registro de errores; puede ser necesario\nactualizar massstorage.class.
+Wysuwanie '%s' nie powiod³o siê.\nSprawd¼ dziennik b³êdów; mo¿e byæ wymagana\naktualizacja massstorage.class.
 ; Ejecting '%s' failed.\nSee the error log; an updated\nmassstorage.class may be required.
 ;

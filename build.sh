@@ -21,7 +21,7 @@
 #     --build     build the stack in the toolchain container (debug backend/level below)
 #     --package   build, then create <build dir>/Neptune-<ver>-<cpu>[-<backend>]-<stamp>.lha
 #     --upload    push the built binaries to the Amiga: the library, the classes, the
-#                 commands, Trident, USBEject and the VHI driver (to LIBS:VHI/)
+#                 commands, NeptuneUSB, USBEject and the VHI driver (to LIBS:VHI/)
 #     (none of --build/--package/--upload => --build --upload)
 #     --tools     also upload the optional per-gadget tools to SYS:Tools/, and the test
 #                 tools that no archive has (UVCTest)
@@ -145,12 +145,12 @@ cpu_setup "$CPU"
 # Deploy table - "<source under build/>|<Amiga destination>".  Mirrors dist/Install:
 CORE=(
     "neptune.library/neptune.library|LIBS:neptune.library"
-    "c/PsdStackLoader|C:PsdStackLoader"
+    "c/USBStart|C:USBStart"
     "c/AddUSBHardware|C:AddUSBHardware"
     "c/AddUSBClasses|C:AddUSBClasses"
-    "c/PsdDevLister|C:PsdDevLister"
-    "c/PsdErrorlog|C:PsdErrorlog"
-    "trident/Trident|SYS:Prefs/Trident"
+    "c/USBList|C:USBList"
+    "c/USBErrorlog|C:USBErrorlog"
+    "neptuneusb/NeptuneUSB|SYS:Prefs/NeptuneUSB"
     "usbeject/USBEject|SYS:WBStartup/USBEject"
     "vhi/usbvideo.vhi|LIBS:VHI/usbvideo.vhi"
 )
@@ -307,7 +307,7 @@ if (( DO_UPLOAD )); then
     else
         echo "done: $ok copied, $fail failed."
         echo "Note: neptune.library / *.class are loaded into memory at boot - reboot"
-        echo "      (or unload the stack and re-run PsdStackLoader / AddUSBClasses) to pick up changes."
+        echo "      (or unload the stack and re-run USBStart / AddUSBClasses) to pick up changes."
     fi
 fi
 (( fail == 0 ))

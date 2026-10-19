@@ -35,6 +35,6 @@ Nelze vysunout '%s':\nnainstalovaná massstorage.class je pro bezpeèné\nvysunutí 
 ; Cannot eject '%s':\nthe installed massstorage.class is too old\nfor safe eject - please update it.
 ;
 MSG_REQ_FAILED
-Vysunutí '%s' selhalo.\nViz záznam chyb Poseidonu (Trident).
-; Ejecting '%s' failed.\nSee the Poseidon error log (Trident).
+Vysunutí '%s' selhalo.\nViz záznam chyb Neptunu (Neptune USB).
+; Ejecting '%s' failed.\nSee the Neptune error log (Neptune USB).
 ;

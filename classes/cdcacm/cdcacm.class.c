@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         cdcacm class for poseidon
+ *                         cdcacm class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon cdcacm class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"

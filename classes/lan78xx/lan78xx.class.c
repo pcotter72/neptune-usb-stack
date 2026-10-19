@@ -1,7 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                        lan78xx class for poseidon
+ *                        lan78xx class for Neptune
  *----------------------------------------------------------------------------
+ * Based on the Poseidon lan78xx class.
  * Copyright (C) 2026, The AROS Development Team.
  *
  * Substantial portions of the chip-init, MII access, RX/TX framing and

@@ -225,7 +225,7 @@ static void MenuSync(void)
             nomenuwarned = TRUE;
             psdAddErrorMsg(RETURN_WARN, LOGNAME,
                            "Workbench is not open - no USB eject menu yet (retrying every %ld seconds). "
-                           "Trident's Eject button works regardless.",
+                           "Neptune USB's Eject button works regardless.",
                            (ULONG) RETRY_SECS);
         }
         MenuTeardown();   /* nothing published yet, so this just drops the list */

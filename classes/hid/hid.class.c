@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         hid class for poseidon
+ *                         hid class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon hid class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"

@@ -1,8 +1,9 @@
 /*
  *----------------------------------------------------------------------------
- *                         cdceth class for poseidon
+ *                         cdceth class for Neptune
  *----------------------------------------------------------------------------
- *                   Copyright (C) 2025, The AROS Development Team.
+ * Based on the Poseidon cdceth class.
+ * Copyright (C) 2025, The AROS Development Team.
  */
 
 #include "debug.h"
@@ -2071,7 +2072,7 @@ void nGUITask()
                 }
 
                 case ID_ABOUT:
-                    MUI_RequestA(ncp->ncp_App, ncp->ncp_MainWindow, 0, NULL, "Groovy!", VERSION_STRING, NULL);
+                    NEP_CLASS_ABOUT(ncp->ncp_App, ncp->ncp_MainWindow);
                     break;
             }
             if(retid == MUIV_Application_ReturnID_Quit)

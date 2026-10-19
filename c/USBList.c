@@ -1,5 +1,6 @@
 /*
-** PsdDevLister by Chris Hodges <chrisly@platon42.de>
+** USBList - lists the connected USB devices.
+** Based on Poseidon's PsdDevLister by Chris Hodges <chrisly@platon42.de>.
 */
 
 #include <stdio.h>
@@ -21,7 +22,7 @@
 #define ARGS_SIZEOF   4
 
 static const char *template = "SHOWROOT/S,QUICK/S,STRINGS/S,TOPOLOGY/S";
-const char *version = NEP_VER("PsdDevLister") ", by Chris Hodges <chrisly@platon42.de>";
+const char *version = NEP_VER("USBList");
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 
@@ -301,7 +302,7 @@ int main(int argc, char *argv[])
                         break;
                 }
             }
-            Printf("  Poseidon DevID  : '%s'\n"
+            Printf("  Neptune DevID   : '%s'\n"
                    "  Product Name    : '%s' (ID: %04lx, Vers: %04lx)\n"
                    "  Manufacturer    : '%s' (Vendor: %04lx (%s))\n"
                    "  Serial Number   : '%s' (USBVers: %04lx)\n"

@@ -1,7 +1,8 @@
 /*
     Copyright (C) 2014-2025, The AROS Development Team. All rights reserved.
 
-    Desc: SuperSpeed USB3.0 hub for Neptune (based upon hub.class.c by Chris Hodges <chrisly@platon42.de>)
+    Desc: SuperSpeed USB3.0 hub class for Neptune, based on the Poseidon hubss class
+          (itself based upon hub.class.c by Chris Hodges <chrisly@platon42.de>)
 */
 
 #include "debug.h"

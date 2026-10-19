@@ -8,7 +8,7 @@
 #define CATCOMP_ARRAY
 #include "strings.h"
 
-#define CATALOG_NAME     "System/Prefs/Trident.catalog"
+#define CATALOG_NAME     "System/Prefs/NeptuneUSB.catalog"
 #include "catalogs/catalog_version.h"
 
 /*** Variables **************************************************************/

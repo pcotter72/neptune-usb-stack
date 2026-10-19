@@ -1,5 +1,5 @@
 /* neptune_version.h - the $VER cookie builder shared by every component of the
- * distribution (the library, the 29 classes, Trident and the CLI tools).
+ * distribution (the library, the 29 classes, NeptuneUSB and the CLI tools).
  *
  * The numbers live in exactly one place: project(VERSION) in the top-level
  * CMakeLists.txt, which injects NEPTUNE_VERSION / NEPTUNE_REVISION / NEPTUNE_DATE /
@@ -38,10 +38,13 @@
     "$VER: " name " " _NEP_STR(NEPTUNE_VERSION) "." _NEP_STR(NEPTUNE_REVISION) \
     " (" NEPTUNE_DATE ") " NEPTUNE_DIST_NAME " " NEPTUNE_CPU NEPTUNE_BUILD_TAIL
 
-/* Short display form for window titles and the like: NEP_NAME_VER("Trident") ->
- * "Trident <ver>". Use this instead of putting a version in a locale catalog - a
+/* Short display form for window titles and the like: NEP_NAME_VER("Neptune USB") ->
+ * "Neptune USB <ver>". Use this instead of putting a version in a locale catalog - a
  * translated version number can only ever drift. */
 #define NEP_NAME_VER(name) \
     name " " _NEP_STR(NEPTUNE_VERSION) "." _NEP_STR(NEPTUNE_REVISION)
+
+/* Fork statement shown in the About boxes. */
+#define NEP_FORK_TXT "Part of Neptune, an incompatible fork\nof the Poseidon USB stack."
 
 #endif /* NEPTUNE_VERSION_H */

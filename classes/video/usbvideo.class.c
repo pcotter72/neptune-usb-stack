@@ -1,6 +1,6 @@
 /*
  *----------------------------------------------------------------------------
- *                        usbvideo class for poseidon
+ *                        usbvideo class for Neptune
  *----------------------------------------------------------------------------
  * USB Video Class (UVC 1.0 / 1.1 / 1.5) cameras.
  *
@@ -247,7 +247,7 @@ void usbReleaseInterfaceBinding(struct NepVideoBase *nh, struct NepClassVideo *n
 /* \\\ */
 
 /* /// "usbGetAttrsA()" */
-/* What Neptune and Trident want to know of the class and of a binding.
+/* What Neptune and NeptuneUSB want to know of the class and of a binding.
    Returns the number of tags answered. */
 LONG (usbGetAttrsA)(ULONG type asm("d0"), APTR usbstruct asm("a0"), struct TagItem * tags asm("a1"), struct NepVideoBase * nh asm("a6"))
 {

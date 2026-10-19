@@ -2,7 +2,7 @@
 #define NEPTUNE_CLASSDIR_H
 /*
  * One definition of "load every class driver in the class drawer", shared by
- * PsdStackLoader, AddUSBClasses and Trident.
+ * USBStart, AddUSBClasses and NeptuneUSB.
  *
  * A class already in the stack is left alone, so this is safe to run on a
  * stack that came up from ROM with some classes resident, or more than once.

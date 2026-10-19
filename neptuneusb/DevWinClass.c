@@ -16,7 +16,9 @@
 #include <proto/icon.h>
 #include <proto/utility.h>
 
-#include "Trident.h"
+#include <nep_paths.h>   /* NEP_PREFS_OWNER */
+
+#include "NeptuneUSB.h"
 #include "ActionClass.h"
 #include "IconListClass.h"
 #include "DevWinClass.h"
@@ -453,7 +455,7 @@ IPTR DevWinDispatcher(struct IClass * cl asm("a0"), Object * obj asm("a2"), Msg 
                                 End,
                             Child, data->resetnameobj = TextObject,
                                 MUIA_ShortHelp, "Removes the custom name and restores\n"
-                                                "the original one that Poseidon generated.",
+                                                "the original one that Neptune generated.",
                                 ButtonFrame,
                                 MUIA_Background, MUII_ButtonBack,
                                 MUIA_CycleChain, 1,
@@ -865,9 +867,9 @@ IPTR DevWinDispatcher(struct IClass * cl asm("a0"), Object * obj asm("a2"), Msg 
                 {
                     if(name)
                     {
-                        psdAddErrorMsg(RETURN_OK, "Trident", "Forcing interface binding of %s to %s.", devname, name);
+                        psdAddErrorMsg(RETURN_OK, "NeptuneUSB", "Forcing interface binding of %s to %s.", devname, name);
                     } else {
-                        psdAddErrorMsg(RETURN_OK, "Trident", "Removed forced interface binding of %s.", devname);
+                        psdAddErrorMsg(RETURN_OK, "NeptuneUSB", "Removed forced interface binding of %s.", devname);
                     }
                 }
             }
@@ -899,17 +901,17 @@ IPTR DevWinDispatcher(struct IClass * cl asm("a0"), Object * obj asm("a2"), Msg 
             {
                 return(FALSE);
             }
-            pic = psdGetUsbDevCfg("Trident", devidstr, NULL);
+            pic = psdGetUsbDevCfg(NEP_PREFS_OWNER, devidstr, NULL);
             if(!pic)
             {
-                psdSetUsbDevCfg("Trident", devidstr, NULL, NULL);
-                pic = psdGetUsbDevCfg("Trident", devidstr, NULL);
+                psdSetUsbDevCfg(NEP_PREFS_OWNER, devidstr, NULL, NULL);
+                pic = psdGetUsbDevCfg(NEP_PREFS_OWNER, devidstr, NULL);
             }
             if(pic)
             {
                 if(psdAddStringChunk(pic, IFFCHNK_NAME, newname))
                 {
-                    psdAddErrorMsg(RETURN_OK, "Trident", "Set new custom name '%s'.", newname);
+                    psdAddErrorMsg(RETURN_OK, "NeptuneUSB", "Set new custom name '%s'.", newname);
                     newnewname = psdCopyStr(newname);
                     if(newnewname)
                     {
@@ -942,12 +944,12 @@ IPTR DevWinDispatcher(struct IClass * cl asm("a0"), Object * obj asm("a2"), Msg 
             {
                 return(FALSE);
             }
-            pic = psdGetUsbDevCfg("Trident", devidstr, NULL);
+            pic = psdGetUsbDevCfg(NEP_PREFS_OWNER, devidstr, NULL);
             if(pic)
             {
                 if(psdRemCfgChunk(pic, IFFCHNK_NAME))
                 {
-                    psdAddErrorMsg(RETURN_OK, "Trident", "Custom name '%s' removed.", oldname);
+                    psdAddErrorMsg(RETURN_OK, "NeptuneUSB", "Custom name '%s' removed.", oldname);
                     if(origname)
                     {
                         newname = psdCopyStr(origname);

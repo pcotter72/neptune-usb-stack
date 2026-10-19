@@ -191,7 +191,7 @@ void pNotifyGUITask()
                 End,
             Child, (IPTR)MenuObjectT((IPTR)"Settings"),
                 Child, (IPTR)(ntf->nt_PrefsMI = MenuitemObject,
-                    MUIA_Menuitem_Title, (IPTR)"Open Trident",
+                    MUIA_Menuitem_Title, (IPTR)"Open Neptune USB",
                     MUIA_Menuitem_Shortcut, (IPTR)"O",
                     End),
                 Child, (IPTR)MenuitemObject,
@@ -206,7 +206,7 @@ void pNotifyGUITask()
 
         SubWindow, (IPTR)(ntf->nt_WindowObj = WindowObject,
             MUIA_Window_ID   , MAKE_ID('P','O','P','O'),
-            MUIA_Window_Title, (IPTR)"Poseidon Popups",
+            MUIA_Window_Title, (IPTR)"USB device notifications",
             MUIA_HelpNode, (IPTR)"main",
 
             WindowContents, (IPTR)VGroup,
@@ -1561,7 +1561,7 @@ IPTR DevNotifyDispatcher(struct IClass * cl asm("a0"), Object * obj asm("a2"), M
 
         case MUIM_DevNotify_About:
             MUI_RequestA(ntf->nt_AppObj, ntf->nt_WindowObj, 0, NULL, "OK",
-                         "Neptune USB device notifications\n\nBased on PoPo by Chris Hodges.", NULL);
+                         "Neptune USB device notifications\n\n" NEP_FORK_TXT "\n\nBased on PoPo by Chris Hodges.", NULL);
             return(0);
 
         case MUIM_DevNotify_OpenPrefs:
@@ -1572,8 +1572,8 @@ IPTR DevNotifyDispatcher(struct IClass * cl asm("a0"), Object * obj asm("a2"), M
                 BPTR fhandle;
                 if((fhandle = Open("NIL:", MODE_READWRITE)))
                 {
-                    /* Same stack the Trident icon asks for (dist/icons/Trident.info.src). */
-                    if(SystemTags("Trident",
+                    /* Same stack the NeptuneUSB icon asks for (dist/icons/NeptuneUSB.info.src). */
+                    if(SystemTags("NeptuneUSB",
                                   NP_StackSize, 57344,
                                   SYS_Input, fhandle,
                                   SYS_Output, NULL,
@@ -1582,7 +1582,7 @@ IPTR DevNotifyDispatcher(struct IClass * cl asm("a0"), Object * obj asm("a2"), M
                     {
                         Close(fhandle);
                         MUI_RequestA(ntf->nt_AppObj, ntf->nt_WindowObj, 0, NULL, "OK",
-                                     "Could not start Trident.", NULL);
+                                     "Could not start Neptune USB.", NULL);
                     }
                 }
                 CloseLibrary(DOSBase);

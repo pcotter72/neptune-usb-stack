@@ -1,5 +1,5 @@
 /****************************************************************************
- * Neptune - a fork of the Poseidon USB stack.
+ * Neptune - an incompatible fork of the Poseidon USB stack.
  *
  * Poseidon: designed and written by
  *   Chris Hodges <chrisly@platon42.de>
@@ -11,7 +11,7 @@
  *----------------------------------------------------------------------------
  *                         Includes for neptune.library
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on Poseidon's libraries/poseidon.h by Chris Hodges <chrisly@platon42.de>.
  *
  */
 

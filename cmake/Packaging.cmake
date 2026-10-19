@@ -9,11 +9,11 @@
 #         LIBS/neptune.library
 #         LIBS/VHI/usbvideo.vhi            VHI driver for USB cameras -> LIBS:VHI/ (opt-in)
 #         DEVS/USBClasses/*.class
-#         C/PsdStackLoader AddUSBHardware AddUSBClasses PsdDevLister PsdErrorlog
-#         Prefs/Trident  Prefs/Trident.info
+#         C/USBStart AddUSBHardware AddUSBClasses USBList USBErrorlog
+#         Prefs/NeptuneUSB  Prefs/NeptuneUSB.info
 #         WBStartup/USBEject  WBStartup/USBEject.info  (safe-eject Workbench menu, opt-in)
 #         Tools/<shellapps>                (optional group, opt-in at install)
-#         Catalogs/<lang>/System/Prefs/Trident.catalog  Catalogs/<lang>/USBEject.catalog
+#         Catalogs/<lang>/System/Prefs/NeptuneUSB.catalog  Catalogs/<lang>/USBEject.catalog
 #         DEVS/DataTypes/PSD               PSD datatype descriptor  -> DEVS:DataTypes/
 #         Icons/def_PSD.info               preset-file deficon      -> ENV(ARC):SYS/
 
@@ -35,7 +35,7 @@ install(TARGETS neptune_library RUNTIME DESTINATION LIBS)
 get_property(_neptune_classes GLOBAL PROPERTY NEPTUNE_CLASS_TARGETS)
 install(TARGETS ${_neptune_classes} RUNTIME DESTINATION DEVS/USBClasses)
 
-install(TARGETS PsdStackLoader AddUSBHardware AddUSBClasses PsdDevLister PsdErrorlog
+install(TARGETS USBStart AddUSBHardware AddUSBClasses USBList USBErrorlog
         RUNTIME DESTINATION C)
 
 # --- ROM/ : the Kickstart-image kit ---------------------------------------------------
@@ -50,11 +50,11 @@ if(NOT NEPTUNE_DEBUG_BACKEND STREQUAL "serial")
     install(FILES ${CMAKE_SOURCE_DIR}/dist/ROM-ReadMe.md DESTINATION ROM)
 endif()
 
-install(TARGETS Trident RUNTIME DESTINATION Prefs)
+install(TARGETS NeptuneUSB RUNTIME DESTINATION Prefs)
 
-# Trident's own Workbench icon (a ColorIcon - the AROS Gorilla USB-plug, GPL; see LEGAL).
-# Lands next to the Trident executable; the Install script's `copyfiles Prefs (all)` carries it.
-install(FILES ${CMAKE_SOURCE_DIR}/dist/Trident.info DESTINATION Prefs)
+# NeptuneUSB's own Workbench icon (a ColorIcon - the AROS Gorilla USB-plug, GPL; see LEGAL).
+# Lands next to the NeptuneUSB executable; the Install script's `copyfiles Prefs (all)` carries it.
+install(FILES ${CMAKE_SOURCE_DIR}/dist/NeptuneUSB.info DESTINATION Prefs)
 
 # Poseidon prefs-file datatype + default icon. DefIcons (a standard 3.2 WBStartup component)
 # identifies FORM..PSLC config files via the PSD datatype and paints def_PSD.info on the ones
@@ -70,7 +70,7 @@ install(FILES ${CMAKE_SOURCE_DIR}/presets/Neptune/connect.iff
 install(FILES ${CMAKE_SOURCE_DIR}/presets/Neptune/disconnect.iff
         DESTINATION Prefs/Presets/Neptune RENAME Disconnect.iff)
 
-# Trident catalogs (built by the trident_catalogs target) → Catalogs/<locale-language>/System/Prefs/
+# NeptuneUSB catalogs (built by the neptuneusb_catalogs target) → Catalogs/<locale-language>/System/Prefs/
 # so the Install script's `copyfiles Catalogs → LOCALE:Catalogs` lands them where OpenCatalog looks.
 # Language dir = the .ct's `## language` name, which is what locale.library looks up - and on an
 # Amiga that name is latin-1 (français = 0xE7, español = 0xF1), matching the .ct `## language`
@@ -78,7 +78,7 @@ install(FILES ${CMAKE_SOURCE_DIR}/presets/Neptune/disconnect.iff
 # too; the single point of correctness is the lha charset transform (LHA_FILENAME_ARGS, below),
 # which stores latin-1 names in the archive. `cmake --install` has no such transform and stages raw
 # UTF-8 - fine for the CI artifacts that use it, but never a release path. English defaults are
-# built into Trident, so a mis-named or missing catalog just falls back.
+# built into NeptuneUSB, so a mis-named or missing catalog just falls back.
 set(_cat_files   czech    french     italian  polish  russian  spanish)
 set(_cat_langs   czech   "français"  italiano polski  russian "español")
 list(LENGTH _cat_files _n)
@@ -86,9 +86,9 @@ math(EXPR _n "${_n} - 1")
 foreach(i RANGE ${_n})
     list(GET _cat_files ${i} _f)
     list(GET _cat_langs ${i} _l)
-    install(FILES ${CMAKE_BINARY_DIR}/trident/catalogs/${_f}.catalog
+    install(FILES ${CMAKE_BINARY_DIR}/neptuneusb/catalogs/${_f}.catalog
             DESTINATION "Catalogs/${_l}/System/Prefs"
-            RENAME Trident.catalog)
+            RENAME NeptuneUSB.catalog)
     # USBEject lives in SYS:WBStartup, so its catalog goes by plain name:
     # OpenCatalog(NULL, "USBEject.catalog") -> LOCALE:Catalogs/<lang>/USBEject.catalog
     install(FILES ${CMAKE_BINARY_DIR}/usbeject/catalogs/${_f}.catalog
@@ -162,7 +162,7 @@ install(FILES "${CMAKE_BINARY_DIR}/ReadMe" DESTINATION .)
 
 # Licensing in the drawer root: LICENSE is the full AROS Public License text;
 # LEGAL records the primary license + third-party attributions (lan78xx ISC, the
-# mounter submodule, the GPL Trident icon). The whole stack is one license, so a
+# mounter submodule, the GPL NeptuneUSB icon). The whole stack is one license, so a
 # single pair of files at the root suffices (no per-component summary needed).
 install(FILES ${CMAKE_SOURCE_DIR}/LICENSE
               ${CMAKE_SOURCE_DIR}/LEGAL

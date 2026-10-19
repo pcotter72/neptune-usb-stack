@@ -1,9 +1,9 @@
 set(SHELLCMDS
-    PsdStackLoader
+    USBStart
     AddUSBHardware
     AddUSBClasses
-    PsdDevLister
-    PsdErrorlog)
+    USBList
+    USBErrorlog)
 
 foreach(t ${SHELLCMDS})
     add_executable(${t} ${t}.c)

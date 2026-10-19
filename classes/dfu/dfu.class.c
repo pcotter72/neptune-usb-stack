@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         dfu class for poseidon
+ *                         dfu class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon dfu class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -586,7 +586,7 @@ void nGUITask()
                     break;
 
                 case ID_ABOUT:
-                    MUI_RequestA(nch->nch_App, nch->nch_MainWindow, 0, NULL, "OK", VERSION_STRING, NULL);
+                    NEP_CLASS_ABOUT(nch->nch_App, nch->nch_MainWindow);
                     break;
             }
             if(retid == MUIV_Application_ReturnID_Quit)

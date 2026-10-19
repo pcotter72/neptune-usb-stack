@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         serialpl2303 class for poseidon
+ *                         serialpl2303 class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon serialpl2303 class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"

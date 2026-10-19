@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         printer class for poseidon
+ *                         printer class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon printer class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -1059,7 +1059,7 @@ void nGUITask()
                     break;
 
                case ID_ABOUT:
-                    MUI_RequestA(nh->nh_App, nh->nh_MainWindow, 0, NULL, "OK", VERSION_STRING, NULL);
+                    NEP_CLASS_ABOUT(nh->nh_App, nh->nh_MainWindow);
                     break;
             }
             if(retid == MUIV_Application_ReturnID_Quit)

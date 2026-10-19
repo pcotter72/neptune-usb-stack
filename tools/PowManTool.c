@@ -2,7 +2,7 @@
  *----------------------------------------------------------------------------
  *                     Power Management Tool for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon Power Management Tool by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -27,7 +27,7 @@
 
 const char PowManTool_prgname[] = "PowManTool";
 static const char *template = "SOCKET=OUTLET/N,ON/S,OFF/S,TOGGLE/S,STATUS/S,UNIT/N/K";
-const char PowManTool_version[] = NEP_VER("PowManTool") ", by Chris Hodges <chrisly@platon42.de>";
+const char PowManTool_version[] = NEP_VER("PowManTool");
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 

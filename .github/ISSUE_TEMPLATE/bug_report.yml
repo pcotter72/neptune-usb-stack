@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a problem with the Poseidon stack, a class driver, or Trident
+description: Report a problem with the Neptune stack, a class driver, or Neptune USB
 labels: ["bug"]
 body:
   - type: markdown
@@ -25,17 +25,17 @@ body:
       description: What you did, in order, leading up to the problem.
       placeholder: |
         1. Plugged in ...
-        2. Opened Trident and ...
+        2. Opened Neptune USB and ...
         3. ...
     validations:
       required: true
 
   - type: input
-    id: poseidon-version
+    id: neptune-version
     attributes:
-      label: Poseidon version
-      description: Shown in Trident's about box, or by `PsdDevLister`/the library `$VER`.
-      placeholder: "5.3"
+      label: Neptune version
+      description: Shown in Neptune USB's about box, or by `Version LIBS:neptune.library`.
+      placeholder: "6.3"
     validations:
       required: true
 
@@ -79,7 +79,7 @@ body:
     attributes:
       label: Debug log
       description: |
-        Output from `PsdErrorlog`, and/or a serial/Sashimi capture from a debug
+        Output from `USBErrorlog`, and/or a serial/Sashimi capture from a debug
         build (`-DNEPTUNE_DEBUG_BACKEND=serial`). This will be formatted as code.
       render: text
     validations:

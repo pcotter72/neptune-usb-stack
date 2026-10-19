@@ -1,5 +1,5 @@
 /****************************************************************************
- * Neptune - a fork of the Poseidon USB stack.
+ * Neptune - an incompatible fork of the Poseidon USB stack.
  *
  * Poseidon: designed and written by
  *   Chris Hodges <chrisly@platon42.de>
@@ -11,7 +11,7 @@
  *----------------------------------------------------------------------------
  *                          Neptune main library
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon main library by Chris Hodges <chrisly@platon42.de>.
  */
 
 #define EXEC_BASE_NAME (*(struct ExecBase **)4UL)
@@ -3911,7 +3911,7 @@ LONG (psdSetAttrsA)(ULONG type asm("d0"), APTR psdstruct asm("a0"), struct TagIt
         }
         if(FindTagItem(DA_LinkPowerOverride, tags)) {
             savenotifycfg = TRUE;
-            /* snapshot before the pack: Trident rewrites every per-device
+            /* snapshot before the pack: NeptuneUSB rewrites every per-device
                setting on each gadget click, and only a real change should
                cost a wire round trip */
             oldlinkpower = ((struct PsdDevice *) psdstruct)->pd_NotifyCfg.ntc_LinkPowerOverride;
@@ -4145,10 +4145,10 @@ LONG (psdSetAttrsA)(ULONG type asm("d0"), APTR psdstruct asm("a0"), struct TagIt
         struct PsdDevice *pd = (struct PsdDevice *) psdstruct;
         struct PsdIFFContext *pic;
 
-        pic = psdGetUsbDevCfg("Trident", pd->pd_IDString, NULL);
+        pic = psdGetUsbDevCfg(NEP_PREFS_OWNER, pd->pd_IDString, NULL);
         if(!pic) {
-            psdSetUsbDevCfg("Trident", pd->pd_IDString, NULL, NULL);
-            pic = psdGetUsbDevCfg("Trident", pd->pd_IDString, NULL);
+            psdSetUsbDevCfg(NEP_PREFS_OWNER, pd->pd_IDString, NULL, NULL);
+            pic = psdGetUsbDevCfg(NEP_PREFS_OWNER, pd->pd_IDString, NULL);
         }
         if(pic) {
             pAddCfgChunk(ps, pic, &pd->pd_NotifyCfg);
@@ -4169,7 +4169,7 @@ LONG (psdSetAttrsA)(ULONG type asm("d0"), APTR psdstruct asm("a0"), struct TagIt
         if(newlinkpower != oldlinkpower) {
             /* Applying the new policy is a series of blocking control transfers
                per device, and this call arrives on the caller's context - the
-               MUI task, for Trident.  Hand the work to the event handler task,
+               MUI task, for NeptuneUSB.  Hand the work to the event handler task,
                which is built to block; it picks the request up on its next
                500ms tick. */
             ps->ps_LinkPowerReq = TRUE;
@@ -4527,7 +4527,7 @@ struct PsdDevice * (psdEnumerateDevice)(struct PsdPipe * pp asm("a1"), struct Ps
     pd->pd_OldProductStr = pd->pd_ProductStr;
     pd->pd_ProductStr = NULL;
     haspopupinhibit = FALSE;
-    pic = psdGetUsbDevCfg("Trident", pd->pd_IDString, NULL);
+    pic = psdGetUsbDevCfg(NEP_PREFS_OWNER, pd->pd_IDString, NULL);
     if(pic) {
         pd->pd_IsNewToMe = FALSE;
         if((pd->pd_ProductStr = pGetStringChunk(ps, pic, IFFCHNK_NAME))) {
@@ -4541,7 +4541,7 @@ struct PsdDevice * (psdEnumerateDevice)(struct PsdPipe * pp asm("a1"), struct Ps
         }
     } else {
         pd->pd_IsNewToMe = TRUE;
-        psdSetUsbDevCfg("Trident", pd->pd_IDString, NULL, NULL);
+        psdSetUsbDevCfg(NEP_PREFS_OWNER, pd->pd_IDString, NULL, NULL);
     }
     if(!pd->pd_ProductStr) {
         pd->pd_ProductStr = psdCopyStr(pd->pd_OldProductStr);
@@ -5331,7 +5331,7 @@ struct PsdDevice * (psdFindDeviceA)(struct PsdDevice * pd asm("a0"), struct TagI
 /* /// "pFindHardware()" */
 /* The hardware entry for this name and unit, or NULL.
  *
- * Identity comes from <hwmatch.h>, shared with Trident and the CLI tools: the
+ * Identity comes from <hwmatch.h>, shared with NeptuneUSB and the CLI tools: the
  * trailing path component, compared case-insensitively. This used to strip the
  * *query* progressively and compare each suffix against the unstripped stored
  * name, which matched "DEVS:USBHardware/xhci.device" against a stored bare
@@ -5534,7 +5534,7 @@ void (psdRemHardware)(struct PsdHardware * phw asm("a0"), struct PsdBase * ps as
 
     KPRINTF(5, ("FreeHardware(0x%08lx)\n", phw));
 
-    /* A caller that cached a PsdHardware pointer can outlive it -- Trident keeps
+    /* A caller that cached a PsdHardware pointer can outlive it -- NeptuneUSB keeps
        one per GUI row -- and everything below dereferences it. Addresses only, so
        a stale pointer is never followed. Forbid() rather than the PBase semaphore,
        for the same reason pFindHardware() walks this list that way: it cannot
@@ -8185,61 +8185,78 @@ BOOL (psdReadCfg)(struct PsdIFFContext * pic asm("a0"), APTR formdata asm("a1"),
 }
 /* \\\ */
 
-/* /// "pMigrateCfgPrefix()" */
-/* Replace the drawer prefix oldp of the path held in string chunk chnkid of
-   pic with newp: "SYS:Classes/USB/hid.class" -> "DEVS:USBClasses/hid.class".
-   The prefix must match a whole path component (case-insensitive, as AmigaDOS
-   is); a missing chunk or any other path is left alone. */
-static void pMigrateCfgPrefix(struct PsdBase *ps, struct PsdIFFContext *pic, ULONG chnkid,
+/* /// "pMigrateCfgString()" */
+/* Replace the leading oldp of the string held in chunk chnkid of pic with newp:
+   a drawer prefix ("SYS:Classes/USB/hid.class" -> "DEVS:USBClasses/hid.class")
+   or a whole value ("Trident" -> "NeptuneUSB"). oldp must match a whole path
+   component (case-insensitive, as AmigaDOS is); a missing chunk or any other
+   string is left alone. Returns TRUE if the chunk was rewritten. */
+static BOOL pMigrateCfgString(struct PsdBase *ps, struct PsdIFFContext *pic, ULONG chnkid,
                               STRPTR oldp, STRPTR newp)
 {
     ULONG *chnk = pFindCfgChunk(ps, pic, chnkid);
     if(!chnk) {
-        return;
+        return(FALSE);
     }
     /* chunk layout: ULONG id, ULONG length, then the NUL-terminated string */
-    STRPTR path = (STRPTR) &chnk[2];
+    STRPTR str = (STRPTR) &chnk[2];
     ULONG oldlen = strlen(oldp);
-    if(strnicmp((const char *) path, (const char *) oldp, oldlen)) {
-        return;                         /* different drawer */
+    if(strnicmp((const char *) str, (const char *) oldp, oldlen)) {
+        return(FALSE);                  /* different drawer or value */
     }
-    STRPTR rest = &path[oldlen];        /* "/hid.class", or "" for the drawer itself */
+    STRPTR rest = &str[oldlen];         /* "/hid.class", or "" for an exact match */
     if(*rest && (*rest != '/')) {
-        return;                         /* only a partial name match, e.g. "SYS:Classes/USBx" */
+        return(FALSE);                  /* only a partial name match, e.g. "SYS:Classes/USBx" */
     }
     /* pAddStringChunk() removes the old chunk by compacting (or reallocating)
-       pic's chunk buffer, which overwrites `rest`, so build the new path first */
-    STRPTR newpath = psdCopyStrFmt("%s%s", newp, rest);
-    if(newpath) {
-        pAddStringChunk(ps, pic, chnkid, newpath);
-        psdFreeVec(newpath);
+       pic's chunk buffer, which overwrites `rest`, so build the new string first */
+    STRPTR newstr = psdCopyStrFmt("%s%s", newp, rest);
+    if(!newstr) {
+        return(FALSE);
     }
+    BOOL done = pAddStringChunk(ps, pic, chnkid, newstr);
+    psdFreeVec(newstr);
+    return(done);
 }
 /* \\\ */
 
-/* /// "pMigrateCfgPaths()" */
-/* Point an imported poseidon.prefs at Neptune's drawers: the class paths of
-   the UCLS forms and the attach/detach sound paths of the stack form. */
-static void pMigrateCfgPaths(struct PsdBase *ps)
+/* /// "pMigrateCfg()" */
+/* Rewrite what Poseidon prefs data carries over in Poseidon's names: the class
+   paths of the UCLS forms and the attach/detach sound paths of the stack form,
+   and the prefs editor's owner key on the per-device and per-interface data.
+   Idempotent, so it runs wherever outside data enters the config. Returns TRUE
+   if anything was rewritten. */
+static BOOL pMigrateCfg(struct PsdBase *ps)
 {
+    BOOL changed = FALSE;
+
     pLockSemExcl(ps, &ps->ps_ConfigLock);
     struct PsdIFFContext *pic = psdFindCfgForm(NULL, IFFFORM_STACKCFG);
     if(pic) {
         for(struct PsdIFFContext *subpic = psdFindCfgForm(pic, IFFFORM_USBCLASS); subpic; subpic = psdNextCfgForm(subpic)) {
-            pMigrateCfgPrefix(ps, subpic, IFFCHNK_NAME, NEP_OLDCLASSDRAWER, NEP_CLASSDRAWER);
+            changed |= pMigrateCfgString(ps, subpic, IFFCHNK_NAME, NEP_OLDCLASSDRAWER, NEP_CLASSDRAWER);
         }
-        pMigrateCfgPrefix(ps, pic, IFFCHNK_INSERTSND, NEP_OLDPRESETDRAWER, NEP_PRESETDRAWER);
-        pMigrateCfgPrefix(ps, pic, IFFCHNK_REMOVESND, NEP_OLDPRESETDRAWER, NEP_PRESETDRAWER);
+        changed |= pMigrateCfgString(ps, pic, IFFCHNK_INSERTSND, NEP_OLDPRESETDRAWER, NEP_PRESETDRAWER);
+        changed |= pMigrateCfgString(ps, pic, IFFCHNK_REMOVESND, NEP_OLDPRESETDRAWER, NEP_PRESETDRAWER);
+    }
+    for(struct PsdIFFContext *dev = psdFindCfgForm(NULL, IFFFORM_DEVICECFG); dev; dev = psdNextCfgForm(dev)) {
+        for(struct PsdIFFContext *data = psdFindCfgForm(dev, IFFFORM_DEVCFGDATA); data; data = psdNextCfgForm(data)) {
+            changed |= pMigrateCfgString(ps, data, IFFCHNK_OWNER, NEP_OLDPREFS_OWNER, NEP_PREFS_OWNER);
+        }
+        for(struct PsdIFFContext *data = psdFindCfgForm(dev, IFFFORM_IFCFGDATA); data; data = psdNextCfgForm(data)) {
+            changed |= pMigrateCfgString(ps, data, IFFCHNK_OWNER, NEP_OLDPREFS_OWNER, NEP_PREFS_OWNER);
+        }
     }
     pUnlockSem(ps, &ps->ps_ConfigLock);
+    return(changed);
 }
 /* \\\ */
 
 /* /// "pLoadCfgFile()" */
-/* Load and apply one prefs file; with migrate, rewrite Poseidon drawer paths
-   before applying. Returns RETURN_OK, RETURN_WARN (no such file) or
-   RETURN_ERROR (not a usable prefs file). */
-static UWORD pLoadCfgFile(struct PsdBase *ps, STRPTR filename, BOOL migrate)
+/* Load and apply one prefs file, migrating Poseidon names first (pMigrateCfg()).
+   Returns RETURN_OK, RETURN_WARN (no such file) or RETURN_ERROR (not a usable
+   prefs file). */
+static UWORD pLoadCfgFile(struct PsdBase *ps, STRPTR filename)
 {
     XPRINTF(10, ("Loading config file: %s\n", filename));
 
@@ -8265,16 +8282,14 @@ static UWORD pLoadCfgFile(struct PsdBase *ps, STRPTR filename, BOOL migrate)
                 KPRINTF(1, ("Data read OK\n"));
 
                 psdReadCfg(NULL, buf);
-                if(migrate) {
-                    pMigrateCfgPaths(ps);
-                }
+                BOOL migrated = pMigrateCfg(ps);
                 psdParseCfg();
 
                 KPRINTF(1, ("All done\n"));
                 level = RETURN_OK;
                 /* the live config now matches this file; a migrated
                    one matches no file until it is saved */
-                if(!migrate) {
+                if(!migrated) {
                     ps->ps_SavedConfigHash = ps->ps_ConfigHash;
                 }
             }
@@ -8302,10 +8317,10 @@ BOOL (psdLoadCfgFromDisk)(STRPTR filename asm("a1"), struct PsdBase * ps asm("a6
         STRPTR names[4] = { NEP_PREFS_ENV, NEP_PREFS_ENVARC, NEP_OLDPREFS_ENV, NEP_OLDPREFS_ENVARC };
 
         for(ULONG i = 0; i < 4; i++) {
-            BOOL migrate = (i >= 2);
-            UWORD level = pLoadCfgFile(ps, names[i], migrate);
+            BOOL imported = (i >= 2);
+            UWORD level = pLoadCfgFile(ps, names[i]);
             if(level == RETURN_OK) {
-                if(migrate && psdSaveCfgToDisk(NULL)) {
+                if(imported && psdSaveCfgToDisk(NULL)) {
                     psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
                                    "Settings imported from '%s' and saved to '%s'.",
                                    names[i], NEP_PREFS_ENVARC);
@@ -8320,7 +8335,7 @@ BOOL (psdLoadCfgFromDisk)(STRPTR filename asm("a1"), struct PsdBase * ps asm("a6
         return(FALSE);
     }
 
-    UWORD level = pLoadCfgFile(ps, filename, FALSE);
+    UWORD level = pLoadCfgFile(ps, filename);
     if(level != RETURN_OK) {
         psdAddErrorMsg(level, (STRPTR) libname,
                        "Failed to %s '%s'!", (level == RETURN_ERROR) ? "load config from" : "find config file",
@@ -8507,6 +8522,7 @@ struct PsdIFFContext * (psdAddCfgEntry)(struct PsdIFFContext * pic asm("a0"), AP
     }
     res = pAddCfgChunk(ps, pic, formdata);
     pUnlockSem(ps, &ps->ps_ConfigLock);
+    pMigrateCfg(ps);    /* an imported entry may come from Poseidon prefs */
     ps->ps_CheckConfigReq = TRUE;
     return(res);
 }
@@ -9498,7 +9514,7 @@ BOOL pCheckCfgChanged(struct PsdBase * ps)
             if((chnk = pFindCfgChunk(ps, subpic, IFFCHNK_GLOBALCFG))) {
                 /* Loading prefs writes the live config behind psdSetAttrs()'s
                    back, so the link power policy has to be re-checked here too
-                   - this is the "Load"/"Use" path in Trident. */
+                   - this is the "Load"/"Use" path in NeptuneUSB. */
                 BOOL oldlinkpower = ps->ps_GlobalCfg->pgc_LinkPowerMgmt;
                 CopyMem(&chnk[2], ((UBYTE *) ps->ps_GlobalCfg) + 8, min(AROS_LONG2BE(chnk[1]), AROS_LONG2BE(ps->ps_GlobalCfg->pgc_Length)));
                 if(ps->ps_GlobalCfg->pgc_LinkPowerMgmt != oldlinkpower) {

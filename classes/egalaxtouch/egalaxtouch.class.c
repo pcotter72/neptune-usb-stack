@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         egalaxtouch class for poseidon
+ *                         egalaxtouch class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon egalaxtouch class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -1275,7 +1275,7 @@ void nGUITask()
                     break;
 
                 case ID_ABOUT:
-                    MUI_RequestA(nch->nch_App, nch->nch_MainWindow, 0, NULL, "OK", VERSION_STRING, NULL);
+                    NEP_CLASS_ABOUT(nch->nch_App, nch->nch_MainWindow);
                     break;
             }
             if(nch->nch_TrackDims)

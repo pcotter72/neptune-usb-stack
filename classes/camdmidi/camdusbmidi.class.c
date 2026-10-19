@@ -1,8 +1,8 @@
 /*
  *----------------------------------------------------------------------------
- *                         camdusbmidi class for poseidon
+ *                         camdusbmidi class for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon camdusbmidi class by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"

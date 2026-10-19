@@ -1,11 +1,13 @@
 /*
-** PsdStackLoader starts the stack: it is the one command the startup needs.
+** USBStart starts the stack: it is the one command the startup needs.
 **
 ** What should run comes from ENVARC:Sys/neptune.prefs (on first start, imported
 ** from poseidon.prefs and saved). Where the prefs say nothing, defaults stand in:
 ** every class in DEVS:USBClasses, and the host controller named on the command
 ** line. AddUSBClasses and AddUSBHardware do those two jobs by hand; they are not
 ** needed at startup.
+**
+** Based on Poseidon's PsdStackLoader by Chris Hodges <chrisly@platon42.de>.
 */
 
 #include <string.h>
@@ -24,7 +26,7 @@
 #define ARGS_SIZEOF   2
 
 static const char *template = "DEVICE,UNIT/N";
-const char *nep_version = NEP_VER("PsdStackLoader") ", by Chris Hodges <chrisly@platon42.de>";
+const char *nep_version = NEP_VER("USBStart");
 
 /* TRUE if no host controller is attached to the stack. */
 static BOOL noHardware(struct Library *ps)
@@ -59,7 +61,7 @@ int main(void)
         psdLoadCfgFromDisk(NULL);
 
         /* "The prefs exist" does not mean "the prefs say what to run". The
-           controller and class lists are written by Trident only; prefs saved
+           controller and class lists are written by NeptuneUSB only; prefs saved
            from a class settings window carry neither. So the defaults are
            keyed on what the config lists, not on whether a file was found. */
         APTR pic = psdFindCfgForm(NULL, IFFFORM_STACKCFG);

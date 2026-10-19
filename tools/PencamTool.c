@@ -2,7 +2,7 @@
  *----------------------------------------------------------------------------
  *                         Pencam Tool for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon Pencam Tool by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -35,7 +35,7 @@
 
 const char PencamTool_prgname[] = "PencamTool";
 static const char *template = "TO/A,PICNUM/N,INTERVAL/N,UPTO/N/K,NOBEEP/S,GAMMA/K,SHARPEN/S,TEXT/K,FONT/K,FONTSIZE/N/K,UNIT/N/K";
-const char PencamTool_version[] = NEP_VER("PencamTool") ", by Chris Hodges <chrisly@platon42.de>";
+const char PencamTool_version[] = NEP_VER("PencamTool");
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 

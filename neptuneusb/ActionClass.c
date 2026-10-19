@@ -18,7 +18,7 @@
 #include <hwmatch.h>
 #include <classdir.h>
 
-#include "Trident.h"
+#include "NeptuneUSB.h"
 #include "ActionClass.h"
 #include "IconListClass.h"
 #include "DevWinClass.h"
@@ -942,24 +942,24 @@ void RecursePrefsForm(struct ActionData *data, ULONG *form, ULONG depth, STRPTR 
     if(AROS_LONG2BE(*((ULONG *) newstack)) != IFFFORM_PSDCFG)
     {
         owner = GetStringChunk(form, IFFCHNK_OWNER, "Unknown");
-        id = psdCopyStr("This is not a poseidon config!");
+        id = psdCopyStr("This is not a Neptune prefs file!");
         plnode = AllocPrefsEntry(data, formid, formsize, id, owner);
     }
     else if(!strcmp(newstack + 4, "STKC"))
     {
-        plnode = AllocPrefsEntry(data, formid, formsize, psdCopyStr("Global Stack Configuration"), psdCopyStr("Trident"));
+        plnode = AllocPrefsEntry(data, formid, formsize, psdCopyStr("Global Stack Configuration"), psdCopyStr(NEP_PREFS_OWNER));
     }
     else if(!strcmp(newstack + 4, "DEVC"))
     {
         id = GetStringChunk(form, IFFCHNK_DEVID, "Unknown");
         data->devidstr = psdCopyStr(id);
         allocdevid = TRUE;
-        plnode = AllocPrefsEntry(data, formid, formsize, id, psdCopyStr("Trident"));
+        plnode = AllocPrefsEntry(data, formid, formsize, id, psdCopyStr(NEP_PREFS_OWNER));
     }
     else if(!strcmp(newstack + 4, "DEVCDCFG"))
     {
         owner = GetStringChunk(form, IFFCHNK_OWNER, "Unknown");
-        if(!strcmp(owner, "Trident"))
+        if(!strcmp(owner, NEP_PREFS_OWNER))
         {
             id = psdCopyStr("Generic Prefs");
         } else {
@@ -1904,13 +1904,13 @@ void UpdateConfigToGUI(struct ActionData *data)
 
     if(relversion > prefsversion)
     {
-        psdAddErrorMsg(RETURN_WARN, "Trident", "Forcing a DirScan for (new) classes, as you probably updated to a newer version.");
+        psdAddErrorMsg(RETURN_WARN, "NeptuneUSB", "Forcing a DirScan for (new) classes, as you probably updated to a newer version.");
         psdSetAttrs(PGA_STACKCFG, stackcfg, GCA_PrefsVersion, relversion, TAG_END);
         DoMethod(data->selfobj, MUIM_Action_Cls_Scan);
     }
     else if(!(numclasses || data->autoclassesadded))
     {
-        psdAddErrorMsg(RETURN_WARN, "Trident", "Doing a DirScan for classes, because none were in config.");
+        psdAddErrorMsg(RETURN_WARN, "NeptuneUSB", "Doing a DirScan for classes, because none were in config.");
         DoMethod(data->selfobj, MUIM_Action_Cls_Scan);
     }
     data->autoclassesadded = TRUE;
@@ -2117,7 +2117,7 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
 
     /* General panel */
     data->cfgcntobj[0] = ScrollgroupObject,
-        MUIA_HelpNode, "tridentgeneral",
+        MUIA_HelpNode, "neptuneusbgeneral",
         MUIA_Scrollgroup_Contents, VirtgroupObject,
             Child, VGroup,
                 Child, VSpace(0),
@@ -2143,7 +2143,7 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
 
     /* Hardware panel */
     data->cfgcntobj[1] = VGroup,
-        MUIA_HelpNode, "tridenthardware",
+        MUIA_HelpNode, "neptuneusbhardware",
         Child, Label(__(MSG_PANEL_HARDWARE_LABEL1)),
         Child, ListviewObject,
             MUIA_CycleChain, 1,
@@ -2189,7 +2189,7 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
 
     /* Devices panel */
     data->cfgcntobj[2] = VGroup,
-        MUIA_HelpNode, "tridentdevices",
+        MUIA_HelpNode, "neptuneusbdevices",
         Child, Label(__(MSG_PANEL_DEVICES_LABEL)),
         Child, ListviewObject,
             MUIA_CycleChain, 1,
@@ -2220,7 +2220,7 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
 
     /* Classes panel */
     data->cfgcntobj[3] = VGroup,
-        MUIA_HelpNode, "tridentclasses",
+        MUIA_HelpNode, "neptuneusbclasses",
         Child, Label(__(MSG_PANEL_CLASSES)),
         Child, data->clslistobj = ListviewObject,
             MUIA_CycleChain, 1,
@@ -2258,7 +2258,7 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
 
     /* Options panel */
     data->cfgcntobj[4] = VGroup,
-        MUIA_HelpNode, "tridentoptions",
+        MUIA_HelpNode, "neptuneusboptions",
         Child, Label(__(MSG_PANEL_OPTIONS)),
         Child, VSpace(0),
         Child, VGroup, GroupFrameT(__(MSG_PANEL_OPTIONS_STACK)),
@@ -2462,7 +2462,7 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
 
     /* Notifier panel */
     data->cfgcntobj[5] = VGroup,
-        MUIA_HelpNode, "tridentpopups",
+        MUIA_HelpNode, "neptuneusbpopups",
         Child, Label(__(MSG_PANEL_NOTIFY)),
         Child, VSpace(0),
         Child, VGroup, GroupFrameT(__(MSG_PANEL_NOTIFY_LABEL)),
@@ -2570,7 +2570,7 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
 
     /* Configuration panel */
     data->cfgcntobj[6] = VGroup,
-        MUIA_HelpNode, "tridentconfig",
+        MUIA_HelpNode, "neptuneusbconfig",
         Child, Label(__(MSG_PANEL_CONFIG)),
         Child, data->prefslistobj = ListviewObject,
             MUIA_CycleChain, 1,
@@ -3371,7 +3371,7 @@ IPTR Action_SaveDeviceList(struct IClass *cl, Object *obj, Msg msg)
             AddPart(path, aslreq->fr_File, 256);
             if((fh = Open(path, MODE_NEWFILE)))
             {
-                if(SystemTags("PsdDevLister", SYS_Output, fh, TAG_END))
+                if(SystemTags("USBList", SYS_Output, fh, TAG_END))
                 {
                     psdAddErrorMsg(RETURN_ERROR,_(MSG_APP_TITLE), _(MSG_ACTION_SAVE_DEV_ERREXE));
                 } else {

@@ -2,7 +2,7 @@
  *----------------------------------------------------------------------------
  *                         Sonixcam Tool for Neptune
  *----------------------------------------------------------------------------
- *                   By Chris Hodges <chrisly@platon42.de>
+ * Based on the Poseidon Sonixcam Tool by Chris Hodges <chrisly@platon42.de>.
  */
 
 #include "debug.h"
@@ -33,7 +33,7 @@
 
 const char SonixcamTool_prgname[] = "SonixcamTool";
 static const char *template = "TO/A,INTERVAL/N,UPTO/N/K,GAMMA/K,SHARPEN/S,TEXT/K,FONT/K,FONTSIZE/N/K,UNIT/N/K";
-const char SonixcamTool_version[] = NEP_VER("SonixcamTool") ", by Chris Hodges <chrisly@platon42.de>";
+const char SonixcamTool_version[] = NEP_VER("SonixcamTool");
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 
