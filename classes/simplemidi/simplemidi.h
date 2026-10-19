@@ -18,7 +18,7 @@ struct ClsGlobalCfg
     ULONG cgc_AutoKeyUp;
 };
 
-struct NepHidBase
+struct NepSimpleMidiBase
 {
     struct Library      nh_Library;       /* standard */
     UWORD               nh_Flags;         /* various flags */
@@ -47,18 +47,17 @@ struct NepHidBase
     Object             *nh_MUIPrefsMI;
 };
 
-struct NepClassHid
+struct NepClassSimpleMidi
 {
     struct Node         nch_Node;         /* Node linkage */
-    struct NepHidBase  *nch_ClsBase;      /* Up linkage */
+    struct NepSimpleMidiBase  *nch_ClsBase;      /* Up linkage */
     struct Library     *nch_Base;         /* Poseidon base */
     struct PsdDevice   *nch_Device;       /* Up linkage */
     struct PsdConfig   *nch_Config;       /* Up linkage */
     struct PsdInterface *nch_Interface;   /* Up linkage */
-    struct PsdPipe     *nch_EP0Pipe;      /* Endpoint 0 pipe */
-    struct PsdEndpoint *nch_EPIn;         /* Endpoint 1 */
-    struct PsdPipe     *nch_EPInPipe;     /* Endpoint 1 pipe */
-    UBYTE              *nch_EPInBuf;      /* Packet buffer for EP1 */
+    struct PsdEndpoint *nch_EPIn;         /* Bulk IN endpoint (MIDI data from the device) */
+    struct PsdPipe     *nch_EPInPipe;     /* its pipe */
+    UBYTE              *nch_EPInBuf;      /* Packet buffer for bulk IN */
     struct Task        *nch_ReadySigTask; /* Task to send ready signal to */
     LONG                nch_ReadySignal;  /* Signal to send when ready */
     struct Task        *nch_Task;         /* Subtask */
@@ -74,7 +73,7 @@ struct NepClassHid
 
 
 /* ROM-safe per-instance MUI base (GUI subtask tc_UserData) + the MUI_NewObject fix. */
-#define MUI_BASE_USERDATA struct NepHidBase
+#define MUI_BASE_USERDATA struct NepSimpleMidiBase
 #define MUI_BASE_FIELD    nh_MUIBase
 #include "mui_base.h"
 

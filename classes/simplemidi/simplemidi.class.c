@@ -12,7 +12,7 @@
 /* /// "Lib Stuff" */
 static const STRPTR libname = CLASS_NAME;
 
-int libInit(struct NepHidBase * nh)
+int libInit(struct NepSimpleMidiBase * nh)
 {
     KPRINTF(10, ("libInit nh: 0x%08lx SysBase: 0x%08lx\n", nh, EXEC_BASE_NAME));
 
@@ -37,14 +37,14 @@ int libInit(struct NepHidBase * nh)
     return(nh ? TRUE : FALSE);
 }
 
-int libOpen(struct NepHidBase * nh)
+int libOpen(struct NepSimpleMidiBase * nh)
 {
     KPRINTF(10, ("libOpen nh: 0x%08lx\n", nh));
     nLoadClassConfig(nh);
     return(TRUE);
 }
 
-int libExpunge(struct NepHidBase * nh)
+int libExpunge(struct NepSimpleMidiBase * nh)
 {
     KPRINTF(10, ("libExpunge nh: 0x%08lx\n", nh));
     CloseLibrary((struct Library *) UtilityBase);
@@ -62,14 +62,15 @@ int libExpunge(struct NepHidBase * nh)
 #define ps ps
 
 /* /// "usbAttemptInterfaceBinding()" */
-struct NepClassHid * usbAttemptInterfaceBinding(struct NepHidBase *nh, struct PsdInterface *pif)
+struct NepClassSimpleMidi * usbAttemptInterfaceBinding(struct NepSimpleMidiBase *nh, struct PsdInterface *pif)
 {
     struct Library *ps;
     IPTR ifclass;
     IPTR subclass;
     IPTR proto;
+    BOOL ismidi = FALSE;
 
-    KPRINTF(1, ("nepHidAttemptInterfaceBinding(%08lx)\n", pif));
+    KPRINTF(1, ("nepSimpleMidiAttemptInterfaceBinding(%08lx)\n", pif));
     if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
     {
         psdGetAttrs(PGA_INTERFACE, pif,
@@ -77,31 +78,28 @@ struct NepClassHid * usbAttemptInterfaceBinding(struct NepHidBase *nh, struct Ps
                     IFA_SubClass, &subclass,
                     IFA_Protocol, &proto,
                     TAG_DONE);
+        ismidi = (ifclass == AUDIO_CLASSCODE) && (subclass == AUDIO_MIDI_SUBCLASS) && nIsMidi10(ps, pif, (STRPTR) libname);
         CloseLibrary(ps);
-        if((ifclass == AUDIO_CLASSCODE) && (subclass == AUDIO_MIDI_SUBCLASS))
-        {
-            return(usbForceInterfaceBinding(nh, pif));
-        }
     }
-    return(NULL);
+    return(ismidi ? usbForceInterfaceBinding(nh, pif) : NULL);
 }
 /* \\\ */
 
 /* /// "usbForceInterfaceBinding()" */
-struct NepClassHid * usbForceInterfaceBinding(struct NepHidBase *nh, struct PsdInterface *pif)
+struct NepClassSimpleMidi * usbForceInterfaceBinding(struct NepSimpleMidiBase *nh, struct PsdInterface *pif)
 {
     struct Library *ps;
-    struct NepClassHid *nch;
+    struct NepClassSimpleMidi *nch;
     struct PsdConfig *pc;
     struct PsdDevice *pd;
     STRPTR devname;
     UBYTE buf[64];
     struct Task *tmptask;
 
-    KPRINTF(1, ("nepHidAttemptInterfaceBinding(%08lx)\n", pif));
+    KPRINTF(1, ("nepSimpleMidiAttemptInterfaceBinding(%08lx)\n", pif));
     if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
     {
-        if((nch = psdAllocVec(sizeof(struct NepClassHid))))
+        if((nch = psdAllocVec(sizeof(struct NepClassSimpleMidi))))
         {
             nch->nch_ClsBase = nh;
             nch->nch_Device = NULL;
@@ -113,7 +111,7 @@ struct NepClassHid * usbForceInterfaceBinding(struct NepHidBase *nh, struct PsdI
             nch->nch_ReadySignal = SIGB_SINGLE;
             nch->nch_ReadySigTask = FindTask(NULL);
             SetSignal(0, SIGF_SINGLE);
-            if((tmptask = psdSpawnSubTask(buf, nHidTask, nch)))
+            if((tmptask = psdSpawnSubTask(buf, nMidiTask, nch)))
             {
                 psdBorrowLocksWait(tmptask, 1UL<<nch->nch_ReadySignal);
                 if(nch->nch_Task)
@@ -142,14 +140,14 @@ struct NepClassHid * usbForceInterfaceBinding(struct NepHidBase *nh, struct PsdI
 /* \\\ */
 
 /* /// "usbReleaseInterfaceBinding()" */
-void usbReleaseInterfaceBinding(struct NepHidBase *nh, struct NepClassHid *nch)
+void usbReleaseInterfaceBinding(struct NepSimpleMidiBase *nh, struct NepClassSimpleMidi *nch)
 {
     struct Library *ps;
     struct PsdConfig *pc;
     struct PsdDevice *pd;
     STRPTR devname;
 
-    KPRINTF(1, ("nepHidReleaseInterfaceBinding(%08lx)\n", nch));
+    KPRINTF(1, ("nepSimpleMidiReleaseInterfaceBinding(%08lx)\n", nch));
     if((ps = OpenLibrary("poseidon.library", POSEIDON_LIB_MIN_VERSION)))
     {
         Forbid();
@@ -178,13 +176,13 @@ void usbReleaseInterfaceBinding(struct NepHidBase *nh, struct NepClassHid *nch)
 /* \\\ */
 
 /* /// "usbGetAttrsA()" */
-LONG (usbGetAttrsA)(ULONG type asm("d0"), APTR usbstruct asm("a0"), struct TagItem * tags asm("a1"), struct NepHidBase * nh asm("a6"))
+LONG (usbGetAttrsA)(ULONG type asm("d0"), APTR usbstruct asm("a0"), struct TagItem * tags asm("a1"), struct NepSimpleMidiBase * nh asm("a6"))
 {
 
     struct TagItem *ti;
     LONG count = 0;
 
-    KPRINTF(1, ("nepHidGetAttrsA(%ld, %08lx, %08lx)\n", type, usbstruct, tags));
+    KPRINTF(1, ("nepSimpleMidiGetAttrsA(%ld, %08lx, %08lx)\n", type, usbstruct, tags));
     switch(type)
     {
         case UGA_CLASS:
@@ -233,14 +231,14 @@ LONG (usbGetAttrsA)(ULONG type asm("d0"), APTR usbstruct asm("a0"), struct TagIt
 /* \\\ */
 
 /* /// "usbSetAttrsA()" */
-LONG (usbSetAttrsA)(ULONG type asm("d0"), APTR usbstruct asm("a0"), struct TagItem * tags asm("a1"), struct NepHidBase * nh asm("a6"))
+LONG (usbSetAttrsA)(ULONG type asm("d0"), APTR usbstruct asm("a0"), struct TagItem * tags asm("a1"), struct NepSimpleMidiBase * nh asm("a6"))
 {
     return(0);
 }
 /* \\\ */
 
 /* /// "usbDoMethodA()" */
-IPTR (usbDoMethodA)(ULONG methodid asm("d0"), IPTR * methoddata asm("a1"), struct NepHidBase * nh asm("a6"))
+IPTR (usbDoMethodA)(ULONG methodid asm("d0"), IPTR * methoddata asm("a1"), struct NepSimpleMidiBase * nh asm("a6"))
 {
 
     KPRINTF(10, ("Do Method %ld\n", methodid));
@@ -253,7 +251,7 @@ IPTR (usbDoMethodA)(ULONG methodid asm("d0"), IPTR * methoddata asm("a1"), struc
             return((IPTR) usbForceInterfaceBinding(nh, (struct PsdInterface *) methoddata[0]));
 
         case UCM_ReleaseInterfaceBinding:
-            usbReleaseInterfaceBinding(nh, (struct NepClassHid *) methoddata[0]);
+            usbReleaseInterfaceBinding(nh, (struct NepClassSimpleMidi *) methoddata[0]);
             return(TRUE);
 
         case UCM_OpenCfgWindow:
@@ -284,14 +282,16 @@ static const UBYTE highoctave[] =
     0x17, 0x09, 0x18, 0x0a, 0x19, 0x1a, 0x0b, 0x1b, 0xff, 0xff, 0xff, 0xff  /* C-3 - F-3 */
 };
 
+#define INBUF_SIZE 512      /* bulk IN buffer: 128 event packets */
+
 #undef  ps
 #define ps nch->nch_Base
 
-/* /// "nHidTask()" */
-void nHidTask()
+/* /// "nMidiTask()" */
+void nMidiTask()
 {
 
-    struct NepClassHid *nch;
+    struct NepClassSimpleMidi *nch;
     struct PsdPipe *pp;
     ULONG sigmask;
     ULONG sigs;
@@ -299,7 +299,8 @@ void nHidTask()
     LONG ioerr;
     ULONG len;
 
-    if((nch = nAllocHid()))
+    nApplyInputTaskPriFloor();      /* feeds input.device: stay above the DOS handlers */
+    if((nch = nAllocMidi()))
     {
         Forbid();
         if(nch->nch_ReadySigTask)
@@ -309,7 +310,7 @@ void nHidTask()
         Permit();
         sigmask = (1L<<nch->nch_TaskMsgPort->mp_SigBit)|SIGBREAKF_CTRL_C;
         buf = nch->nch_EPInBuf;
-        psdSendPipe(nch->nch_EPInPipe, buf, 512);
+        psdSendPipe(nch->nch_EPInPipe, buf, INBUF_SIZE);
         do
         {
             sigs = Wait(sigmask);
@@ -325,7 +326,7 @@ void nHidTask()
                         KPRINTF(1, ("Int Pipe failed %ld\n", ioerr));
                         psdDelayMS(200);
                     }
-                    psdSendPipe(nch->nch_EPInPipe, buf, 512);
+                    psdSendPipe(nch->nch_EPInPipe, buf, INBUF_SIZE);
                     break;
                 }
             }
@@ -333,14 +334,14 @@ void nHidTask()
         KPRINTF(20, ("Going down the river!\n"));
         psdAbortPipe(nch->nch_EPInPipe);
         psdWaitPipe(nch->nch_EPInPipe);
-        nFreeHid(nch);
+        nFreeMidi(nch);
     }
     
 }
 /* \\\ */
 
 /* /// "nSendKey()" */
-void nSendKey(struct NepClassHid *nch, UWORD code)
+void nSendKey(struct NepClassSimpleMidi *nch, UWORD code)
 {
     nch->nch_FakeEvent.ie_Class = IECLASS_RAWKEY;
     nch->nch_FakeEvent.ie_SubClass = 0;
@@ -355,10 +356,9 @@ void nSendKey(struct NepClassHid *nch, UWORD code)
 /* \\\ */
 
 /* /// "nParseMidi()" */
-void nParseMidi(struct NepClassHid *nch, UBYTE *buf, ULONG len)
+void nParseMidi(struct NepClassSimpleMidi *nch, UBYTE *buf, ULONG len)
 {
     UWORD iecode = 0xff;
-    UWORD chan;
     UWORD note;
     UWORD velocity;
     UWORD octave;
@@ -369,34 +369,25 @@ void nParseMidi(struct NepClassHid *nch, UBYTE *buf, ULONG len)
     while(len > 3)
     {
         KPRINTF(1, ("Msg: %02lx %02lx %02lx %02lx\n", buf[0], buf[1], buf[2], buf[3]));
-        chan = buf[0] >> 4;
-        (void)chan; /* FIXME: Why is 'chan' ignored? */
-        cmd = buf[0] & 0x0f;
+        /* the cable number (USBMIDI_CABLE) is ignored on purpose: every cable plays the keyboard */
+        cmd = USBMIDI_CIN_OF(buf[0]);
         switch(cmd)
         {
-            case 0x0: // Miscellaneous function codes. Reserved for future extensions.
-            case 0x1: // Cable events. Reserved for future expansion.
-            case 0x2: // Two-byte System Common messages like MTC, SongSelect, etc.
-            case 0x3: // Three-byte System Common messages like SPP, etc.
-            case 0x4: // SysEx starts or continues
-            case 0x5: // Single-byte System Common Message or SysEx ends with following single byte.
-            case 0x6: // SysEx ends with following two bytes.
-            case 0x7: // SysEx ends with following three bytes.
+            case USBMIDI_CIN_MISC: // Miscellaneous function codes. Reserved for future extensions.
+            case USBMIDI_CIN_CABLE: // Cable events. Reserved for future expansion.
+            case USBMIDI_CIN_SYSCOM2: // Two-byte System Common messages like MTC, SongSelect, etc.
+            case USBMIDI_CIN_SYSCOM3: // Three-byte System Common messages like SPP, etc.
+            case USBMIDI_CIN_SYSEX: // SysEx starts or continues
+            case USBMIDI_CIN_SYSEX_END1: // Single-byte System Common Message or SysEx ends with following single byte.
+            case USBMIDI_CIN_SYSEX_END2: // SysEx ends with following two bytes.
+            case USBMIDI_CIN_SYSEX_END3: // SysEx ends with following three bytes.
                 break;
 
-            case 0x8: // Note-off
-                KPRINTF(1, ("Note %ld up with speed %ld\n", note, velocity));
-                // fall through
-
-            case 0x9: // Note-on
+            case USBMIDI_CIN_NOTEOFF: // Note-off
+            case USBMIDI_CIN_NOTEON: // Note-on
                 note = buf[2];
-                if(cmd == 0x9)
-                {
-                    KPRINTF(1, ("Note %ld down with speed %ld\n", note, velocity));
-                    velocity = buf[3];
-                } else {
-                    velocity = 0;
-                }
+                velocity = (cmd == USBMIDI_CIN_NOTEON) ? buf[3] : 0;   /* note-on with velocity 0 is a note-off too */
+                KPRINTF(1, ("Note %ld %s with speed %ld\n", (ULONG) note, velocity ? "down" : "up", (ULONG) velocity));
                 if(note < 12 * cgc->cgc_MidiMinOctave)
                 {
                     octave = 0;
@@ -441,12 +432,12 @@ void nParseMidi(struct NepClassHid *nch, UBYTE *buf, ULONG len)
                 }
                 break;
 
-            case 0xA: // Poly-KeyPress
-            case 0xB: // Control Change
-            case 0xC: // Program Change
-            case 0xD: // Channel Pressure
-            case 0xE: // PitchBend Change
-            case 0xF: // Single Byte
+            case USBMIDI_CIN_POLYPRESS: // Poly-KeyPress
+            case USBMIDI_CIN_CTRL: // Control Change
+            case USBMIDI_CIN_PROG: // Program Change
+            case USBMIDI_CIN_CHANPRESS: // Channel Pressure
+            case USBMIDI_CIN_PITCHBEND: // PitchBend Change
+            case USBMIDI_CIN_SINGLEBYTE: // Single Byte
                 break;
 
         }
@@ -471,11 +462,11 @@ void nParseMidi(struct NepClassHid *nch, UBYTE *buf, ULONG len)
 }
 /* \\\ */
 
-/* /// "nAllocHid()" */
-struct NepClassHid * nAllocHid(void)
+/* /// "nAllocMidi()" */
+struct NepClassSimpleMidi * nAllocMidi(void)
 {
     struct Task *thistask;
-    struct NepClassHid *nch;
+    struct NepClassSimpleMidi *nch;
 
     thistask = FindTask(NULL);
     nch = thistask->tc_UserData;
@@ -514,23 +505,19 @@ struct NepClassHid * nAllocHid(void)
                     nch->nch_InputBase = (struct Library *) nch->nch_InpIOReq->io_Device;
                     if((nch->nch_TaskMsgPort = CreateMsgPort()))
                     {
-                        if((nch->nch_EP0Pipe = psdAllocPipe(nch->nch_Device, nch->nch_TaskMsgPort, NULL)))
+                        if((nch->nch_EPInPipe = psdAllocPipe(nch->nch_Device, nch->nch_TaskMsgPort, nch->nch_EPIn)))
                         {
-                            if((nch->nch_EPInPipe = psdAllocPipe(nch->nch_Device, nch->nch_TaskMsgPort, nch->nch_EPIn)))
-                            {
-                                psdSetAttrs(PGA_PIPE, nch->nch_EPInPipe,
-                                            PPA_NakTimeout, FALSE,
-                                            PPA_AllowRuntPackets, TRUE,
-                                            TAG_END);
+                            psdSetAttrs(PGA_PIPE, nch->nch_EPInPipe,
+                                        PPA_NakTimeout, FALSE,
+                                        PPA_AllowRuntPackets, TRUE,
+                                        TAG_END);
 
-                                if((nch->nch_EPInBuf = psdAllocVec(1024)))
-                                {
-                                    nch->nch_Task = thistask;
-                                    return(nch);
-                                }
-                                psdFreePipe(nch->nch_EPInPipe);
+                            if((nch->nch_EPInBuf = psdAllocVec(INBUF_SIZE)))
+                            {
+                                nch->nch_Task = thistask;
+                                return(nch);
                             }
-                            psdFreePipe(nch->nch_EP0Pipe);
+                            psdFreePipe(nch->nch_EPInPipe);
                         }
                         DeleteMsgPort(nch->nch_TaskMsgPort);
                     }
@@ -552,12 +539,11 @@ struct NepClassHid * nAllocHid(void)
 }
 /* \\\ */
 
-/* /// "nFreeHid()" */
-void nFreeHid(struct NepClassHid *nch)
+/* /// "nFreeMidi()" */
+void nFreeMidi(struct NepClassSimpleMidi *nch)
 {
     psdFreeVec(nch->nch_EPInBuf);
     psdFreePipe(nch->nch_EPInPipe);
-    psdFreePipe(nch->nch_EP0Pipe);
     DeleteMsgPort(nch->nch_TaskMsgPort);
     CloseDevice((struct IORequest *) nch->nch_InpIOReq);
     DeleteIORequest((struct IORequest *) nch->nch_InpIOReq);
@@ -577,7 +563,7 @@ void nFreeHid(struct NepClassHid *nch)
 #undef ps
 
 /* /// "nLoadClassConfig()" */
-BOOL nLoadClassConfig(struct NepHidBase *nh)
+BOOL nLoadClassConfig(struct NepSimpleMidiBase *nh)
 {
     struct Library *ps;
     struct ClsGlobalCfg *cgc;
@@ -607,7 +593,7 @@ BOOL nLoadClassConfig(struct NepHidBase *nh)
 /* \\\ */
 
 /* /// "nOpenCfgWindow()" */
-LONG nOpenCfgWindow(struct NepHidBase *nh)
+LONG nOpenCfgWindow(struct NepSimpleMidiBase *nh)
 {
     struct Library *ps;
     KPRINTF(10, ("Opening GUI...\n"));
@@ -636,7 +622,7 @@ void nGUITask()
 {
 
     struct Task *thistask;
-    struct NepHidBase *nh;
+    struct NepSimpleMidiBase *nh;
     APTR pic;
 
     thistask = FindTask(NULL);
@@ -848,7 +834,7 @@ void nGUITask()
 /* \\\ */
 
 /* /// "nGUITaskCleanup()" */
-void nGUITaskCleanup(struct NepHidBase *nh)
+void nGUITaskCleanup(struct NepSimpleMidiBase *nh)
 {
     if(nh->nh_App)
     {

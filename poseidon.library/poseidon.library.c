@@ -100,8 +100,9 @@ int libInit(struct PsdBase * ps)
         InitSemaphore(&ps->ps_ReentrantLock);
         InitSemaphore(&ps->ps_PoPoLock);
         InitSemaphore(&ps->ps_StallRecoverySem);
+        InitSemaphore(&ps->ps_MemPoolSem);
 
-        if((ps->ps_MemPool = CreatePool(MEMF_CLEAR|MEMF_PUBLIC|MEMF_SEM_PROTECTED, 16384, 1024))) {
+        if((ps->ps_MemPool = CreatePool(MEMF_CLEAR|MEMF_PUBLIC, 16384, 1024))) {
             if((ps->ps_SemaMemPool = CreatePool(MEMF_CLEAR|MEMF_PUBLIC, 16*sizeof(struct PsdReadLock), sizeof(struct PsdBorrowLock)))) {
                 pInitSem(ps, &ps->ps_Lock, "PBase");
                 pInitSem(ps, &ps->ps_ConfigLock, "ConfigLock");
@@ -287,6 +288,15 @@ struct psdMemHeader
     ULONG size;      /* Size requested by caller */
 };
 
+/* Debug builds guard every block: a pattern follows it and is checked when
+   the block is freed, and a block that is freed twice is refused. Both are
+   reported with the block's size and the task that frees it. */
+#ifdef DEBUG
+#define PSD_MEM_TAIL        16
+#define PSD_MEM_TAILBYTE(n) ((UBYTE) (0xa5 ^ (n)))
+#else
+#define PSD_MEM_TAIL        0
+#endif
 /* /// "psdAllocVec()" */
 APTR (psdAllocVec)(ULONG size asm("d0"), struct PsdBase * ps asm("a6"))
 {
@@ -300,14 +310,16 @@ APTR (psdAllocVec)(ULONG size asm("d0"), struct PsdBase * ps asm("a6"))
 
     KPRINTF(1, ("psdAllocVec(%ld)\n", size));
 
-    /* Space = requested size + header + alignment slop + optional MEMDEBUG tail */
-#ifdef MEMDEBUG
-    alloc_size = size + sizeof(struct psdMemHeader) + (AROS_WORSTALIGN - 1) + 1024;
-#else
-    alloc_size = size + sizeof(struct psdMemHeader) + (AROS_WORSTALIGN - 1);
-#endif
+    /* Space = requested size + header + alignment slop + the debug tail */
+    alloc_size = size + sizeof(struct psdMemHeader) + (AROS_WORSTALIGN - 1) + PSD_MEM_TAIL;
 
+    ObtainSemaphore(&ps->ps_MemPoolSem);
     raw = AllocPooled(ps->ps_MemPool, alloc_size);
+    if (raw)
+    {
+        ps->ps_MemAllocated += size;
+    }
+    ReleaseSemaphore(&ps->ps_MemPoolSem);
     if (raw)
     {
         /* Start alignment after the header */
@@ -320,22 +332,13 @@ APTR (psdAllocVec)(ULONG size asm("d0"), struct PsdBase * ps asm("a6"))
         hdr->pmem_raw = raw;
         hdr->size     = size;
 
-#ifdef MEMDEBUG
+#ifdef DEBUG
+        for (ULONG cnt = 0; cnt < PSD_MEM_TAIL; cnt++)
         {
-            /* Fill 1024 bytes after the user area for overrun detection */
-            ULONG upos = size;
-            UWORD unum = 1024;
-            UBYTE *dbptr = (UBYTE *)aligned;
-
-            while (unum--)
-            {
-                dbptr[upos] = (UBYTE)upos;
-                upos++;
-            }
+            aligned[size + cnt] = PSD_MEM_TAILBYTE(cnt);
         }
 #endif
 
-        ps->ps_MemAllocated += size;
         result = (APTR)aligned;
         return result;
     }
@@ -358,17 +361,36 @@ void (psdFreeVec)(APTR pmem asm("a1"), struct PsdBase * ps asm("a6"))
         /* Header is located immediately before the returned aligned pointer */
         hdr  = ((struct psdMemHeader *)pmem) - 1;
         size = hdr->size;
+        APTR raw = hdr->pmem_raw;
 
-        ps->ps_MemAllocated -= size;
+#ifdef DEBUG
+        STRPTR taskname = FindTask(NULL)->tc_Node.ln_Name;
 
-#ifdef MEMDEBUG
-        alloc_size = size + sizeof(struct psdMemHeader) + (AROS_WORSTALIGN - 1) + 1024;
-#else
-        alloc_size = size + sizeof(struct psdMemHeader) + (AROS_WORSTALIGN - 1);
+        if (!raw)
+        {
+            KPRINTF(200, ("memory: 0x%08lx (%ld bytes) is freed twice, by %s\n",
+                          pmem, size, taskname ? taskname : (STRPTR) "?"));
+            return;
+        }
+        for (ULONG cnt = 0; cnt < PSD_MEM_TAIL; cnt++)
+        {
+            if (((UBYTE *)pmem)[size + cnt] != PSD_MEM_TAILBYTE(cnt))
+            {
+                KPRINTF(200, ("memory: 0x%08lx (%ld bytes) was written past its end (byte +%ld), freed by %s\n",
+                              pmem, size, cnt, taskname ? taskname : (STRPTR) "?"));
+                break;
+            }
+        }
+        hdr->pmem_raw = NULL;
 #endif
 
+        alloc_size = size + sizeof(struct psdMemHeader) + (AROS_WORSTALIGN - 1) + PSD_MEM_TAIL;
+
         /* Free using the original pointer from AllocPooled() and the original size */
-        FreePooled(ps->ps_MemPool, hdr->pmem_raw, alloc_size);
+        ObtainSemaphore(&ps->ps_MemPoolSem);
+        ps->ps_MemAllocated -= size;
+        FreePooled(ps->ps_MemPool, raw, alloc_size);
+        ReleaseSemaphore(&ps->ps_MemPoolSem);
     }
 
 }
@@ -701,8 +723,9 @@ ULONG (psdBorrowLocksWait)(struct Task * task asm("a1"), ULONG signals asm("d0")
     struct List reclaims;
     BOOL moveowner;
 
-    XPRINTF(10, ("Borrowing locks from 0x%08lx (%s) to 0x%08lx (%s)!\n",
-                 thistask, thistask->tc_Node.ln_Name, task, task->tc_Node.ln_Name));
+    /* the target's name is not printed: a short-lived subtask may already be gone */
+    XPRINTF(10, ("Borrowing locks from 0x%08lx (%s) to 0x%08lx!\n",
+                 thistask, thistask->tc_Node.ln_Name, task));
 
     Forbid();
     psi = (struct PsdSemaInfo *) ps->ps_DeadlockDebug.lh_Head;
@@ -2037,7 +2060,7 @@ BOOL (psdSetAltInterface)(struct PsdPipe * pp asm("a1"), struct PsdInterface * p
     if(pp) {
         /* backend adjusts endpoint contexts first (context HCDs: add/drop
            sets; legacy: no-op) - the wire SET_INTERFACE follows */
-        ioerr = pd->pd_Hardware->phw_HCDOps->hop_SetInterface(ps, pp, pif);
+        ioerr = pd->pd_Hardware->phw_HCDOps->hop_SetInterface(ps, pp, curif, pif);
         if(ioerr) {
             psdAddErrorMsg(RETURN_ERROR, (STRPTR) libname,
                            "Endpoint reconfiguration (if %ld alt %ld) failed: %s (%ld)",
@@ -2110,6 +2133,19 @@ BOOL (psdSetAltInterface)(struct PsdPipe * pp asm("a1"), struct PsdInterface * p
                        ifnum, altnum,
                        psdNumToStr(NTS_IOERR, ioerr, "unknown"), ioerr);
         KPRINTF(15, ("SET_INTERFACE failed %ld!\n", ioerr));
+    }
+    if(pp) {
+        /* The switch did not take place, or cannot be told to have: the old
+           alternate stays the current one here, so the controller takes its
+           endpoints back - otherwise the two disagree on which endpoints
+           exist, and the next call for the old alternate changes nothing. */
+        ioerr = pd->pd_Hardware->phw_HCDOps->hop_SetInterface(ps, pp, pif, curif);
+        if(ioerr) {
+            psdAddErrorMsg(RETURN_ERROR, (STRPTR) libname,
+                           "Endpoint reconfiguration back to (if %ld alt %ld) failed: %s (%ld)",
+                           ifnum, (ULONG) curif->pif_Alternate,
+                           psdNumToStr(NTS_IOERR, ioerr, "unknown"), ioerr);
+        }
     }
     psdUnlockDevice(pd);
     return(FALSE);
@@ -2674,7 +2710,7 @@ static LONG pLegacyConfigureEndpoints(struct PsdBase *ps, struct PsdPipe *pp, UW
     return(0);
 }
 
-static LONG pLegacySetInterface(struct PsdBase *ps, struct PsdPipe *pp, struct PsdInterface *pif)
+static LONG pLegacySetInterface(struct PsdBase *ps, struct PsdPipe *pp, struct PsdInterface *curif, struct PsdInterface *pif)
 {
     /* implicit on the legacy edge */
     return(0);
@@ -2760,6 +2796,11 @@ static LONG pCtxDoOpOnDevice(struct PsdBase *ps, struct PsdDevice *pd, UWORD cmd
     return(ioerr);
 }
 
+/* SetAddress recovery (USB 2.0 9.2.6.3: 2 ms). The HCD's Address Device puts
+   SET_ADDRESS on the wire and completes right after its status stage; a device
+   need not answer at the new address before the interval is over. */
+#define CTX_SETADDRESS_RECOVERY_MS 10
+
 static LONG pContextAddressDevice(struct PsdBase *ps, struct PsdPipe *pp, struct UsbStdDevDesc *usdd)
 {
     struct PsdDevice *pd = pp->pp_Device;
@@ -2811,6 +2852,10 @@ static LONG pContextAddressDevice(struct PsdBase *ps, struct PsdPipe *pp, struct
     pd->pd_Ep0Token = cdo.cdo_Ep0Token;
     pd->pd_DevAddr = 0; /* no bus address on this backend */
     pd->pd_Flags |= PDFF_HASDEVADDR|PDFF_CONNECTED;
+
+    if(pd->pd_Hub) { /* root hubs are emulated: no SET_ADDRESS on a wire */
+        psdDelayMS(CTX_SETADDRESS_RECOVERY_MS);
+    }
 
     KPRINTF(1, ("Created device handle 0x%08lx, reading first 8 descriptor bytes...\n", pd->pd_Handle));
     psdPipeSetup(pp, URTF_IN|URTF_STANDARD|URTF_DEVICE, USR_GET_DESCRIPTOR, UDT_DEVICE<<8, 0);
@@ -2976,30 +3021,19 @@ static LONG pContextConfigureEndpoints(struct PsdBase *ps, struct PsdPipe *pp, U
     return(ioerr);
 }
 
-static LONG pContextSetInterface(struct PsdBase *ps, struct PsdPipe *pp, struct PsdInterface *pif)
+/* The controller drops the endpoints of curif and gets those of pif */
+static LONG pContextSetInterface(struct PsdBase *ps, struct PsdPipe *pp, struct PsdInterface *curif, struct PsdInterface *pif)
 {
     struct PsdConfig *pc = pif->pif_Config;
     struct PsdDevice *pd = pc->pc_Device;
-    struct PsdInterface *curif;
     struct PsdEndpoint *pep;
     struct UhcdEndpointDesc *eds = NULL;
     UBYTE *drops = NULL;
     struct UhcdConfigureEndpoints ceo;
     UWORD nadd = pif->pif_NumEPs;
-    UWORD ndrop = 0;
+    UWORD ndrop = curif->pif_NumEPs;
     UWORD cnt;
     LONG ioerr;
-
-    /* the currently active alternate for this interface number */
-    curif = (struct PsdInterface *) pc->pc_Interfaces.lh_Head;
-    while(curif->pif_Node.ln_Succ && (curif->pif_IfNum != pif->pif_IfNum)) {
-        curif = (struct PsdInterface *) curif->pif_Node.ln_Succ;
-    }
-    if(curif->pif_Node.ln_Succ) {
-        ndrop = curif->pif_NumEPs;
-    } else {
-        curif = NULL;
-    }
 
     if(!(nadd || ndrop)) {
         return(0); /* both alternates are endpoint-less: nothing to reconfigure */
@@ -4694,9 +4728,10 @@ BOOL (psdSuspendBindings)(struct PsdDevice * pd asm("a0"), struct PsdBase * ps a
                 if(suspendable) {
                     res = usbDoMethod(UCM_AttemptSuspendDevice, pd->pd_DevBinding);
                     if(!res) {
-                        // didn't want to suspend
-                        psdAddErrorMsg(RETURN_ERROR, (STRPTR) libname,
-                                       "Class '%s' failed to suspend device '%s'.",
+                        /* the class said no - it is using the device. That is
+                           an answer, not a failure. */
+                        psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
+                                       "Class '%s' declined to suspend device '%s'.",
                                        puc->puc_Node.ln_Name, pd->pd_ProductStr);
                         return FALSE;
                     }
@@ -4728,9 +4763,9 @@ BOOL (psdSuspendBindings)(struct PsdDevice * pd asm("a0"), struct PsdBase * ps a
                         if(suspendable) {
                             res = usbDoMethod(UCM_AttemptSuspendDevice, pif->pif_IfBinding);
                             if(!res) {
-                                // didn't want to suspend
-                                psdAddErrorMsg(RETURN_ERROR, (STRPTR) libname,
-                                               "%s failed to suspend device '%s'.",
+                                /* said no, as above: an answer, not a failure */
+                                psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
+                                               "%s declined to suspend device '%s'.",
                                                puc->puc_Node.ln_Name, pd->pd_ProductStr);
                                 return FALSE;
                             }
@@ -4817,6 +4852,7 @@ BOOL (psdSuspendDevice)(struct PsdDevice * pd asm("a0"), struct PsdBase * ps asm
     struct PsdDevice *hubpd;
     APTR binding;
     BOOL res = FALSE;
+    BOOL agreed = FALSE;
 
     KPRINTF(5, ("psdSuspendDevice(0x%08lx)\n", pd));
     if(pd) {
@@ -4835,7 +4871,7 @@ BOOL (psdSuspendDevice)(struct PsdDevice * pd asm("a0"), struct PsdBase * ps asm
         hubpd = pd->pd_Hub;
 
         psdLockWriteDevice(pd);
-        res = psdSuspendBindings(pd);
+        res = agreed = psdSuspendBindings(pd);
         psdUnlockDevice(pd);
         if(res && hubpd) {
             /* wake arming needs a live EP0 - before the ring quiesce below.
@@ -4918,7 +4954,9 @@ BOOL (psdSuspendDevice)(struct PsdDevice * pd asm("a0"), struct PsdBase * ps asm
             psdResumeBindings(pd);
         }
     }
-    if(pd && !res) {
+    /* A binding that would not have it has said so itself
+       (psdSuspendBindings); what failed after the bindings agreed has not. */
+    if(pd && agreed && !res) {
         psdAddErrorMsg(RETURN_ERROR, (STRPTR) libname,
                        "Suspending of device '%s' failed.",
                        pd->pd_ProductStr);
@@ -5186,6 +5224,7 @@ BOOL (psdResetDevice)(struct PsdDevice * pd asm("a0"), struct PsdBase * ps asm("
                        psdNumToStr(NTS_IOERR, ioerr, "unknown"), ioerr);
         return FALSE;
     }
+    psdDelayMS(CTX_SETADDRESS_RECOVERY_MS); /* RESET_DEVICE re-addressed it on the wire */
 
     /* 3. restore the configuration */
     res = FALSE;
@@ -5946,7 +5985,7 @@ static struct IORequest * pCtxMarshalIsoHooks(struct PsdPipe *pp)
     uih->uih_InDoneHook = prt->prt_RTIso.urti_InDoneHook;
     uih->uih_ReleaseHook = NULL;
     uih->uih_MaxPrefetch = prt->prt_RTIso.urti_OutPrefetch;
-    uih->uih_Flags = 0;
+    uih->uih_Flags = prt->prt_HookFlags;
     uih->uih_Pad = 0;
     uih->uih_Object = &prt->prt_RTIso; /* class hooks see their classic object */
 
@@ -6007,9 +6046,12 @@ static inline void pActivityEnd(struct PsdPipe *pp, struct PsdBase *ps)
  * event handler task clears it on their behalf (pStallRecoverySweep).  The
  * device halted it (STALL), or the host controller did (BABBLE, XACTERROR,
  * SPLITERROR - usbhcd_common.h): then the device's endpoint runs, but its data
- * toggle no longer matches the one the HCD just reset, and the clear resyncs
- * it.  Not on a stream pipe: that clear would reset every stream's sequence
- * state under traffic, and UAS recovers per tag instead.  EP0 protocol stalls
+ * toggle or sequence number no longer matches the one the HCD just reset, and
+ * the clear resyncs it.  A stream pipe is no exception: an error halts the
+ * whole pipe and every stream on it, and the halt is removed the same way
+ * (USB 3.2 4.4.6.4); the clear also puts the device's stream state machine
+ * back to its start.  A context HCD sends nothing on the endpoint until the
+ * clear has completed, so it never lands under traffic.  EP0 protocol stalls
  * clear themselves on the next SETUP and iso endpoints have no halt state, so
  * both stay out; so do root hubs (HCD-emulated endpoints).
  * Non-blocking: runs on whatever task delivers the completion. */
@@ -6019,9 +6061,8 @@ static void pMarkStalledPipe(struct PsdPipe *pp)
     struct PsdDevice *pd = pp->pp_Device;
     struct PsdBase *ps = pd->pd_Hardware->phw_Base;
     LONG ioerr = pp->pp_IOReq.iouh_Req.io_Error;
-    BOOL hosthalt = (ioerr == UHIOERR_BABBLE) || (ioerr == UHIOERR_XACTERROR) ||
-                    (ioerr == UHIOERR_SPLITERROR);
-    BOOL halted = (ioerr == UHIOERR_STALL) || (hosthalt && !pp->pp_StreamID);
+    BOOL halted = (ioerr == UHIOERR_STALL) || (ioerr == UHIOERR_BABBLE) ||
+                  (ioerr == UHIOERR_XACTERROR) || (ioerr == UHIOERR_SPLITERROR);
 
     if(!halted || !pep || pp->pp_AbortPipe) {
         return;
@@ -6233,7 +6274,7 @@ static void pSubmitPipe(struct PsdPipe *pp, struct PsdBase *ps)
 LONG (psdDoPipe)(struct PsdPipe * pp asm("a1"), APTR data asm("a0"), ULONG len asm("d0"), struct PsdBase * ps asm("a6"))
 {
     struct PsdDevice *pd = pp->pp_Device;
-    KPRINTF(200, ("psdDoPipe(0x%08lx, 0x%08lx, %ld)\n", pp, data, len));
+    KPRINTF(2, ("psdDoPipe(0x%08lx, 0x%08lx, %ld)\n", pp, data, len));
 
     if(pd->pd_Flags & PDFF_CONNECTED) {
         if(pd->pd_Flags & PDFF_SUSPENDED) {
@@ -6264,7 +6305,7 @@ LONG (psdDoPipe)(struct PsdPipe * pp asm("a1"), APTR data asm("a0"), ULONG len a
 void (psdSendPipe)(struct PsdPipe * pp asm("a1"), APTR data asm("a0"), ULONG len asm("d0"), struct PsdBase * ps asm("a6"))
 {
     struct PsdDevice *pd = pp->pp_Device;
-    KPRINTF(200, ("psdSendPipe(0x%08lx, 0x%08lx, %ld)\n", pp, data, len));
+    KPRINTF(2, ("psdSendPipe(0x%08lx, 0x%08lx, %ld)\n", pp, data, len));
     if(pd->pd_Flags & PDFF_CONNECTED) {
         if(pd->pd_Flags & PDFF_SUSPENDED) {
             // make sure the device is up and running before trying to send a new pipe
@@ -6383,7 +6424,7 @@ LONG (psdWaitPipe)(struct PsdPipe * pp asm("a1"), struct PsdBase * ps asm("a6"))
                            psdNumToStr(NTS_IOERR, ioerr, "unknown"), ioerr);*/
         }
     }
-    KPRINTF(200, ("psdWaitPipe(0x%08lx)=%ld\n", pp, ioerr));
+    KPRINTF(2, ("psdWaitPipe(0x%08lx)=%ld\n", pp, ioerr));
 
     if((pd->pd_DeadCount > 19) || ((pd->pd_DeadCount > 14) && (pd->pd_Flags & (PDFF_HASDEVADDR|PDFF_HASDEVDESC)))) {
         if(!(pd->pd_Flags & PDFF_DEAD)) {
@@ -9577,6 +9618,21 @@ BOOL pGetDevConfig(struct PsdPipe *pp)
         memcpy(&uscd, tempbuf, 9);*/
         ioerr = psdDoPipe(pp, &uscd, 9);//sizeof(struct UsbStdCfgDesc));
         if(!ioerr) {
+            /* some firmware (Behringer UMC204HD) serves the same configuration for
+               every index; a second copy would get bound twice by the class scan,
+               on endpoints the HCD never configured */
+            struct PsdConfig *parsedpc = (struct PsdConfig *) pd->pd_Configs.lh_Head;
+            while(parsedpc->pc_Node.ln_Succ && (parsedpc->pc_CfgNum != uscd.bConfigurationValue)) {
+                parsedpc = (struct PsdConfig *) parsedpc->pc_Node.ln_Succ;
+            }
+            if(parsedpc->pc_Node.ln_Succ) {
+                psdAddErrorMsg(RETURN_WARN, (STRPTR) libname,
+                               "%s: configuration index %ld repeats configuration %ld, ignored.",
+                               pd->pd_ProductStr ? pd->pd_ProductStr : (STRPTR) "new device",
+                               (ULONG) curcfg, (ULONG) uscd.bConfigurationValue);
+                curcfg++;
+                continue;
+            }
             KPRINTF(1, ("Config type: %ld\n", (ULONG) uscd.bDescriptorType));
             len = (ULONG) AROS_LE2WORD(uscd.wTotalLength);
             KPRINTF(1, ("Configsize %ld, total size %ld\n", (ULONG) uscd.bLength, len));
@@ -11130,6 +11186,7 @@ static const ULONG PsdRTIsoHandlerPT[] = {
     PACK_ENTRY(RTA_Dummy, RTA_OutDoneHook, PsdRTIsoHandler, prt_RTIso.urti_OutDoneHook, PKCTRL_IPTR|PKCTRL_PACKUNPACK),
     PACK_ENTRY(RTA_Dummy, RTA_ReleaseHook, PsdRTIsoHandler, prt_ReleaseHook, PKCTRL_IPTR|PKCTRL_PACKUNPACK),
     PACK_ENTRY(RTA_Dummy, RTA_OutPrefetchSize, PsdRTIsoHandler, prt_RTIso.urti_OutPrefetch, PKCTRL_ULONG|PKCTRL_PACKUNPACK),
+    PACK_WORDBIT(RTA_Dummy, RTA_ReportInErrors, PsdRTIsoHandler, prt_HookFlags, PKCTRL_BIT|PKCTRL_PACKUNPACK, UHCD_IHF_IN_ERRORS),
     PACK_ENDTABLE
 };
 

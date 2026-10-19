@@ -10,9 +10,8 @@
 
 #include "common.h"
 
-#include <libraries/gadtools.h>
-
 #include <devices/usb_audio.h>
+#include "usbmidi.h"
 
 #include <string.h>
 #include <stddef.h>
@@ -22,22 +21,18 @@
 
 /* Protos */
 
-struct NepClassHid * usbAttemptInterfaceBinding(struct NepHidBase *nh, struct PsdInterface *pif);
-struct NepClassHid * usbForceInterfaceBinding(struct NepHidBase *nh, struct PsdInterface *pif);
-void usbReleaseInterfaceBinding(struct NepHidBase *nh, struct NepClassHid *nch);
+struct NepClassMidi * usbAttemptInterfaceBinding(struct NepMidiBase *nh, struct PsdInterface *pif);
+struct NepClassMidi * usbForceInterfaceBinding(struct NepMidiBase *nh, struct PsdInterface *pif);
+void usbReleaseInterfaceBinding(struct NepMidiBase *nh, struct NepClassMidi *nch);
 
-void nParseMidi(struct NepClassHid *nch, UBYTE *buf, ULONG len);
-void nParseMidiOut(struct NepClassHid *nch);
+void nParseMidi(struct NepClassMidi *nch, UBYTE *buf, ULONG len);
+void nTransmit(struct NepClassMidi *nch);
+void nWriteDriver(struct NepClassMidi *nch);
+UWORD nCableCount(struct NepClassMidi *nch, struct PsdEndpoint *pep);
 
-struct NepClassHid * nAllocHid(void);
-void nFreeHid(struct NepClassHid *nch);
+struct NepClassMidi * nAllocMidi(void);
+void nFreeMidi(struct NepClassMidi *nch);
 
-BOOL nLoadClassConfig(struct NepHidBase *nh);
-LONG nOpenCfgWindow(struct NepHidBase *nh);
-
-void nGUITaskCleanup(struct NepHidBase *nh);
-
-void nHidTask();
-void nGUITask();
+void nMidiTask();
 
 #endif /* CAMDUSBMIDI_CLASS_H */

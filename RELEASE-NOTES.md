@@ -1,3 +1,79 @@
+# Release notes - Poseidon for AmigaOS 6.3
+
+Everything in this archive - `poseidon.library`, all 30 class drivers, Trident, USBEject
+and the command-line tools - reports version **6.3**, followed by the CPU it was built
+for.
+
+**Upgrading from 6.2:** install the whole archive. Your settings are untouched.
+
+## USB cameras
+
+The new `usbvideo.class` drives webcams that follow the USB Video Class standard (UVC 1.0,
+1.1 and 1.5). It needs `xhci.device` 6.4 from the Emu68 driver stack on a Pi 4 or CM4.
+Tested with a Logitech C930e, up to 1920x1080 at 30 frames a second.
+
+* **Formats:** Motion-JPEG and uncompressed (YUY2, NV12 and others) in every size and rate
+  the camera offers, and H.264 from cameras that carry it inside Motion-JPEG, such as the
+  C930e. Other H.264 and VP8 cameras and bulk-transfer cameras should work but are untested.
+* **cAMIra and other VHI programs:** the Installer offers to put `usbvideo.vhi` into
+  `LIBS:VHI/`. Each camera is one input.
+* **Camera settings** in Trident: brightness, exposure, focus, white balance and the other
+  standard controls, applied at once and saved per camera.
+* **`UVCTool`** (optional tools) lists a camera's modes and saves pictures or H.264 video,
+  e.g. `UVCTool TO=RAM:shot`.
+* **The camera's microphone** shows up as an AHI recording mode, and an idle camera is
+  suspended when power saving is on.
+
+Not yet supported: choosing the frame rate from a VHI program, still images, and
+maker-specific controls.
+
+Programmers: see `<devices/usbvideodevice.h>`.
+
+## USB audio
+
+* **Record-only devices** such as webcam microphones now get their own AHI modes, named
+  "Rec".
+* **Devices with several outputs** (loudspeaker and headphones, say): AHI's output choice
+  now works - "All outputs", or a single output by name if the device can mute each one.
+* **Volume and gain sliders** now follow the device's range evenly instead of losing most of
+  the level in the first steps, and the volume no longer lands on the wrong control.
+* **Fixed:** 24 bit mono recording, 8 bit recordings that were far too quiet, timing on high
+  speed devices, and the sample rate set on the device.
+
+Only the USB Audio 1.0 standard is supported.
+
+## USB MIDI
+
+* **Plugging in a MIDI interface no longer crashes the machine.**
+* **Sending and receiving MIDI now work**, including System Exclusive of any length.
+* **One CAMD device per interface**, with as many ports as the interface really has, so the
+  MIDI Ports editor shows the right number. Two identical interfaces each get their own name,
+  and every port can be used at once.
+* **USB MIDI 2.0 devices** are used in their MIDI 1.0 mode.
+* The settings window is gone - it had nothing to set. Name ports in the MIDI Ports editor.
+
+**Upgrading:** the new CAMD driver is written to `DEVS:Midi/` the first time you plug the
+interface in. Quit your CAMD programs and reboot, then, with camd.library 37, add the
+interface once in the MIDI Ports editor.
+
+## USB in ROM
+
+* The custom Kickstart holds 1.5 MB of modules instead of 1 MB.
+* The build script is now `python3 ROM/build-kickstart.py`, with the same arguments.
+
+## Bug fixes
+
+* Rare crashes and freezes under heavy load.
+* **Behringer UMC204HD** now works, and its MIDI port appears once instead of twice.
+* **NTFS and exFAT:** The filesystem stack size is now a setting in the mass storage settings.
+* A busy device is no longer logged as a failed suspend.
+* No more "Adding RT Iso Handler failed" and silent audio after a device refused a setting
+  change.
+* A hub could stop seeing new devices after one was unplugged, until a reboot.
+* Possible crash when a class driver was unloaded while still in use.
+* Better recovery from errors on UAS disks.
+* Possible crash on disk change with several partitions.
+
 # Release notes - Poseidon for AmigaOS 6.2
 
 Everything in this archive - `poseidon.library`, all 29 class drivers, Trident, USBEject
