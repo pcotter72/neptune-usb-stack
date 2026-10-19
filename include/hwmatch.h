@@ -12,16 +12,14 @@
  * before) by that name, anything else from NEP_HWDRAWER -- a bare name alone
  * would only ever be looked for in DEVS:.
  *
- * Paths still arrive from outside: an older poseidon.prefs, a command line, an
+ * Paths still arrive from outside: an imported poseidon.prefs, a command line, an
  * ASL pick. So matching compares trailing path components, and a stored
  * "DEVS:USBHardware/xhci.device" and a live "xhci.device" stay one controller.
  */
 
 #include <exec/types.h>
 #include <string.h>     /* stricmp() */
-
-/* The one drawer host-controller drivers are loaded from. */
-#define NEP_HWDRAWER "DEVS:USBHardware"
+#include <nep_paths.h>  /* NEP_HWDRAWER */
 
 /* The trailing path component: what follows the last '/' or ':'. */
 static inline CONST_STRPTR psdHwFilePart(CONST_STRPTR s)

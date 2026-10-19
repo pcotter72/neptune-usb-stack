@@ -135,7 +135,7 @@ void pGetTTInfo(struct PsdDevice *pd, UWORD *ttHubAddr, UWORD *ttHubPort, UWORD 
 #define psdAddErrorMsg0(level, origin, fmtstr) psdAddErrorMsgA(level, origin, fmtstr, NULL)
 
 void pDeviceTask();
-void pPoPoGUITask();
+void pNotifyGUITask();
 void pEventHandlerTask();
 
 void pPutChar(char ch asm("d0"), struct PsdRawDoFmt * rdf asm("a3"));

@@ -394,7 +394,7 @@ int main(int argc, char *argv[])
         MUIA_Application_Base       , "TRIDENT",
         MUIA_Application_SingleTask , TRUE,
         MUIA_Application_DiskObject , IconObject,
-        MUIA_Application_HelpFile   , "HELP:Poseidon.guide",
+        MUIA_Application_HelpFile   , "HELP:Neptune.guide",
         MUIA_Application_Menustrip  , MenustripObject,
             Child, MenuObjectT(_(MSG_MENU_PROJECT)),
                 Child, mi_about = MenuitemObject,

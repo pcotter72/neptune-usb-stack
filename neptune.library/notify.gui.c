@@ -19,18 +19,18 @@
 
 /* ROM-safe per-instance MUI base. MUI's __inline object constructors (the `…End`
  * idiom) resolve MUIMASTER_BASE_NAME at *file* scope, so the per-call-site
- * `#define MUIMasterBase po->po_MUIBase` below - fine for the OpenLibrary/CloseLibrary
- * sites that have `po` in scope - is invisible to them. Recover the base from the
- * running task instead: the PoPo GUI subtask is spawned (psdSpawnSubTask) with the
+ * `#define MUIMasterBase ntf->nt_MUIBase` below - fine for the OpenLibrary/CloseLibrary
+ * sites that have `ntf` in scope - is invisible to them. Recover the base from the
+ * running task instead: the notifier GUI subtask is spawned (psdSpawnSubTask) with the
  * libbase in tc_UserData. Read exec from $4 ($NOLIBBASE suppresses the SysBase global
  * here. */
 #include <exec/execbase.h>
 #include <exec/tasks.h>
-static inline struct Library *_popo_mui_base(void)
+static inline struct Library *_notify_mui_base(void)
 {
-    return ((struct PsdBase *) (*(struct ExecBase **)4UL)->ThisTask->tc_UserData)->ps_PoPo.po_MUIBase;
+    return ((struct PsdBase *) (*(struct ExecBase **)4UL)->ThisTask->tc_UserData)->ps_Notify.nt_MUIBase;
 }
-#define MUIMASTER_BASE_NAME (_popo_mui_base())
+#define MUIMASTER_BASE_NAME (_notify_mui_base())
 
 #include <proto/muimaster.h>
 /* SDK's __inline MUI_NewObject is broken; shadow it with a va_list version.
@@ -46,20 +46,20 @@ static inline struct Library *_popo_mui_base(void)
 
 #define NewList NEWLIST
 
-#include "popo.gui.h"
+#include "notify.gui.h"
 
 #include <stdarg.h>
 
-#define MUIMasterBase po->po_MUIBase
-#define DataTypesBase po->po_DTBase
-#define IntuitionBase po->po_IntBase
+#define MUIMasterBase ntf->nt_MUIBase
+#define DataTypesBase ntf->nt_DTBase
+#define IntuitionBase ntf->nt_IntBase
 
-/* /// "pPoPoGUITask()" */
-void pPoPoGUITask()
+/* /// "pNotifyGUITask()" */
+void pNotifyGUITask()
 {
     struct Task *thistask;
     struct PsdBase * ps;
-    struct PsdPoPo *po;
+    struct PsdNotify *ntf;
     struct List *scrlist;
     struct PubScreenNode *pubscr;
     BOOL hasworkbench = FALSE;
@@ -68,15 +68,15 @@ void pPoPoGUITask()
 
     ps = thistask->tc_UserData;
     SetTaskPri(thistask, 0);
-    po = &ps->ps_PoPo;
+    ntf = &ps->ps_Notify;
 
-    NewList(&po->po_GadgetList);
-    NewList(&po->po_Sounds);
+    NewList(&ntf->nt_GadgetList);
+    NewList(&ntf->nt_Sounds);
 
     if(!(IntuitionBase = OpenLibrary("intuition.library", 39)))
     {
         KPRINTF(10, ("Couldn't open intuition.library.\n"));
-        pPoPoGUITaskCleanup(ps);
+        pNotifyGUITaskCleanup(ps);
         return;
     }
 
@@ -99,14 +99,14 @@ void pPoPoGUITask()
     if(!hasworkbench)
     {
         KPRINTF(10, ("No screen open yet.\n"));
-        pPoPoGUITaskCleanup(ps);
+        pNotifyGUITaskCleanup(ps);
         return;
     }
 
     if(!(MUIMasterBase = OpenLibrary(MUIMASTER_NAME, MUIMASTER_VMIN)))
     {
         KPRINTF(10, ("Couldn't open muimaster.library.\n"));
-        pPoPoGUITaskCleanup(ps);
+        pNotifyGUITaskCleanup(ps);
         return;
     }
     /* 19 = MUI 3.8, 20 = MUI 4.0, 21 = MUI 5.x. The fleet runs on all three; this is
@@ -116,102 +116,102 @@ void pPoPoGUITask()
     if(!(DataTypesBase = OpenLibrary("datatypes.library", 39)))
     {
         KPRINTF(10, ("Couldn't open datatypes.library.\n"));
-        pPoPoGUITaskCleanup(ps);
+        pNotifyGUITaskCleanup(ps);
         return;
     }
 
-    if(!(po->po_MsgPort = CreateMsgPort()))
+    if(!(ntf->nt_MsgPort = CreateMsgPort()))
     {
         KPRINTF(10, ("Couldn't create MsgPort.\n"));
-        pPoPoGUITaskCleanup(ps);
+        pNotifyGUITaskCleanup(ps);
         return;
     }
 
-    po->po_EventHandler = psdAddEventHandler(po->po_MsgPort, EHMF_ADDDEVICE|EHMF_REMDEVICE|EHMF_ADDBINDING|EHMF_CONFIGCHG|EHMF_DEVICEDEAD|EHMF_DEVICELOWPW);
-    if(!po->po_EventHandler)
+    ntf->nt_EventHandler = psdAddEventHandler(ntf->nt_MsgPort, EHMF_ADDDEVICE|EHMF_REMDEVICE|EHMF_ADDBINDING|EHMF_CONFIGCHG|EHMF_DEVICEDEAD|EHMF_DEVICELOWPW);
+    if(!ntf->nt_EventHandler)
     {
         KPRINTF(10, ("Couldn't add EventHandler.\n"));
-        pPoPoGUITaskCleanup(ps);
+        pNotifyGUITaskCleanup(ps);
         return;
     }
 
-    if(!(po->po_TimerMsgPort = CreateMsgPort()))
+    if(!(ntf->nt_TimerMsgPort = CreateMsgPort()))
     {
         KPRINTF(10, ("Couldn't create MsgPort.\n"));
-        pPoPoGUITaskCleanup(ps);
+        pNotifyGUITaskCleanup(ps);
         return;
     }
 
-    if(!(po->po_TimerIOReq = (struct timerequest *) CreateIORequest(po->po_TimerMsgPort, sizeof(struct timerequest))))
+    if(!(ntf->nt_TimerIOReq = (struct timerequest *) CreateIORequest(ntf->nt_TimerMsgPort, sizeof(struct timerequest))))
     {
         KPRINTF(10, ("Couldn't create TimerIOReq.\n"));
-        pPoPoGUITaskCleanup(ps);
+        pNotifyGUITaskCleanup(ps);
         return;
     }
 
-    if(OpenDevice("timer.device", UNIT_VBLANK, (struct IORequest *) po->po_TimerIOReq, 0))
+    if(OpenDevice("timer.device", UNIT_VBLANK, (struct IORequest *) ntf->nt_TimerIOReq, 0))
     {
         KPRINTF(10, ("Couldn't open timer.device.\n"));
-        pPoPoGUITaskCleanup(ps);
+        pNotifyGUITaskCleanup(ps);
         return;
     }
-    po->po_TimerIOReq->tr_node.io_Message.mn_Node.ln_Type = NT_REPLYMSG;
-    po->po_TimerIOReq->tr_node.io_Message.mn_Node.ln_Name = "PoPo";
-    po->po_TimerIOReq->tr_node.io_Command = TR_ADDREQUEST;
+    ntf->nt_TimerIOReq->tr_node.io_Message.mn_Node.ln_Type = NT_REPLYMSG;
+    ntf->nt_TimerIOReq->tr_node.io_Message.mn_Node.ln_Name = "Neptune Notifier";
+    ntf->nt_TimerIOReq->tr_node.io_Command = TR_ADDREQUEST;
 
-    if(!(po->po_PoPoClass = MUI_CreateCustomClass(NULL, MUIC_Area, NULL, sizeof(struct PoPoData), PoPoDispatcher)))
+    if(!(ntf->nt_NotifyClass = MUI_CreateCustomClass(NULL, MUIC_Area, NULL, sizeof(struct DevNotifyData), DevNotifyDispatcher)))
     {
-        KPRINTF(10, ("Couldn't create PoPo Class\n"));
-        pPoPoGUITaskCleanup(ps);
+        KPRINTF(10, ("Couldn't create notifier class\n"));
+        pNotifyGUITaskCleanup(ps);
         return;
     }
-    po->po_PoPoClass->mcc_Class->cl_UserData = (IPTR) ps;
+    ntf->nt_NotifyClass->mcc_Class->cl_UserData = (IPTR) ps;
 
-    po->po_AppObj = ApplicationObject,
-        MUIA_Application_Title      , (IPTR)"PoPo -- Poseidon Popup Provider",
+    ntf->nt_AppObj = ApplicationObject,
+        MUIA_Application_Title      , (IPTR)"Neptune USB device notifications",
         MUIA_Application_Version    , (IPTR)VERSION_STRING,
         MUIA_Application_Copyright  , (IPTR)"(C) 2004-2009 Chris Hodges",
         MUIA_Application_Author     , (IPTR)"Chris Hodges <chrisly@platon42.de>",
         MUIA_Application_Description, (IPTR)"Shows USB device notifications",
-        MUIA_Application_Base       , (IPTR)"POPO",
-        MUIA_Application_HelpFile   , (IPTR)"HELP:Poseidon.guide",
+        MUIA_Application_Base       , (IPTR)"NEPTUNENOTIFY",
+        MUIA_Application_HelpFile   , (IPTR)"HELP:Neptune.guide",
         MUIA_Application_Menustrip  , (IPTR)MenustripObject,
             Child, (IPTR)MenuObjectT((IPTR)"Project"),
-                Child, (IPTR)(po->po_AboutMI = MenuitemObject,
+                Child, (IPTR)(ntf->nt_AboutMI = MenuitemObject,
                     MUIA_Menuitem_Title, (IPTR)"About...",
                     MUIA_Menuitem_Shortcut, (IPTR)"?",
                     End),
                 Child, (IPTR)MenuitemObject,
                     MUIA_Menuitem_Title, (IPTR)NM_BARLABEL,
                     End,
-                Child, (IPTR)(po->po_CloseMI = MenuitemObject,
+                Child, (IPTR)(ntf->nt_CloseMI = MenuitemObject,
                     MUIA_Menuitem_Title, (IPTR)"Close",
                     MUIA_Menuitem_Shortcut, (IPTR)"Q",
                     End),
                 End,
             Child, (IPTR)MenuObjectT((IPTR)"Settings"),
-                Child, (IPTR)(po->po_TridentMI = MenuitemObject,
+                Child, (IPTR)(ntf->nt_PrefsMI = MenuitemObject,
                     MUIA_Menuitem_Title, (IPTR)"Open Trident",
                     MUIA_Menuitem_Shortcut, (IPTR)"O",
                     End),
                 Child, (IPTR)MenuitemObject,
                     MUIA_Menuitem_Title, (IPTR)NM_BARLABEL,
                     End,
-                Child, (IPTR)(po->po_MUIPrefsMI = MenuitemObject,
+                Child, (IPTR)(ntf->nt_MUIPrefsMI = MenuitemObject,
                     MUIA_Menuitem_Title, (IPTR)"MUI Settings",
                     MUIA_Menuitem_Shortcut, (IPTR)"M",
                     End),
                 End,
             End,
 
-        SubWindow, (IPTR)(po->po_WindowObj = WindowObject,
+        SubWindow, (IPTR)(ntf->nt_WindowObj = WindowObject,
             MUIA_Window_ID   , MAKE_ID('P','O','P','O'),
             MUIA_Window_Title, (IPTR)"Poseidon Popups",
             MUIA_HelpNode, (IPTR)"main",
 
             WindowContents, (IPTR)VGroup,
-                Child, (IPTR)(po->po_PoPoObj = NewObject(po->po_PoPoClass->mcc_Class, 0, MUIA_ShowMe, FALSE, TAG_END)),
-                Child, (IPTR)(po->po_GroupObj = VGroup,
+                Child, (IPTR)(ntf->nt_NotifyObj = NewObject(ntf->nt_NotifyClass->mcc_Class, 0, MUIA_ShowMe, FALSE, TAG_END)),
+                Child, (IPTR)(ntf->nt_GroupObj = VGroup,
                     Child, (IPTR)HGroup,
                         Child, (IPTR)HSpace(0),
                         Child, (IPTR)Label("Messages"),
@@ -219,7 +219,7 @@ void pPoPoGUITask()
                         End,
                     End),
                 Child, (IPTR)HGroup,
-                    Child, (IPTR)(po->po_StickyObj = ImageObject, ImageButtonFrame,
+                    Child, (IPTR)(ntf->nt_StickyObj = ImageObject, ImageButtonFrame,
                         MUIA_Background, MUII_ButtonBack,
                         MUIA_CycleChain, 1,
                         MUIA_InputMode, MUIV_InputMode_Toggle,
@@ -231,14 +231,14 @@ void pPoPoGUITask()
                     Child, (IPTR)Label("Hold on"),
                     Child, (IPTR)HGroup,
                         MUIA_Group_SameWidth, TRUE,
-                        Child, (IPTR)(po->po_SaveObj = TextObject, ButtonFrame,
+                        Child, (IPTR)(ntf->nt_SaveObj = TextObject, ButtonFrame,
                             MUIA_Disabled, (ps->ps_SavedConfigHash == ps->ps_ConfigHash),
                             MUIA_Background, MUII_ButtonBack,
                             MUIA_CycleChain, 1,
                             MUIA_InputMode, MUIV_InputMode_RelVerify,
                             MUIA_Text_Contents, (IPTR)"\33c Save Prefs ",
                             End),
-                        Child, (IPTR)(po->po_CloseObj = TextObject, ButtonFrame,
+                        Child, (IPTR)(ntf->nt_CloseObj = TextObject, ButtonFrame,
                             MUIA_Background, MUII_ButtonBack,
                             MUIA_CycleChain, 1,
                             MUIA_InputMode, MUIV_InputMode_RelVerify,
@@ -250,30 +250,30 @@ void pPoPoGUITask()
             End),
         End;
 
-    if(!po->po_AppObj)
+    if(!ntf->nt_AppObj)
     {
         KPRINTF(10, ("Couldn't create application\n"));
-        pPoPoGUITaskCleanup(ps);
+        pNotifyGUITaskCleanup(ps);
         return;
     }
 
-    DoMethod(po->po_WindowObj, MUIM_Notify, MUIA_Window_CloseRequest, TRUE,
-             po->po_AppObj, 2, MUIM_Application_ReturnID, MUIV_Application_ReturnID_Quit);
-    DoMethod(po->po_SaveObj, MUIM_Notify, MUIA_Pressed, FALSE,
-             po->po_PoPoObj, 1, MUIM_PoPo_SavePrefs);
-    DoMethod(po->po_CloseObj, MUIM_Notify, MUIA_Pressed, FALSE,
-             po->po_AppObj, 2, MUIM_Application_ReturnID, MUIV_Application_ReturnID_Quit);
-    DoMethod(po->po_StickyObj, MUIM_Notify, MUIA_Selected, MUIV_EveryTime,
-             po->po_PoPoObj, 1, MUIM_PoPo_Sticky);
+    DoMethod(ntf->nt_WindowObj, MUIM_Notify, MUIA_Window_CloseRequest, TRUE,
+             ntf->nt_AppObj, 2, MUIM_Application_ReturnID, MUIV_Application_ReturnID_Quit);
+    DoMethod(ntf->nt_SaveObj, MUIM_Notify, MUIA_Pressed, FALSE,
+             ntf->nt_NotifyObj, 1, MUIM_DevNotify_SavePrefs);
+    DoMethod(ntf->nt_CloseObj, MUIM_Notify, MUIA_Pressed, FALSE,
+             ntf->nt_AppObj, 2, MUIM_Application_ReturnID, MUIV_Application_ReturnID_Quit);
+    DoMethod(ntf->nt_StickyObj, MUIM_Notify, MUIA_Selected, MUIV_EveryTime,
+             ntf->nt_NotifyObj, 1, MUIM_DevNotify_Sticky);
 
-    DoMethod(po->po_AboutMI, MUIM_Notify, MUIA_Menuitem_Trigger, MUIV_EveryTime,
-             po->po_PoPoObj, 1, MUIM_PoPo_About);
-    DoMethod(po->po_CloseMI, MUIM_Notify, MUIA_Menuitem_Trigger, MUIV_EveryTime,
-             po->po_AppObj, 2, MUIM_Application_ReturnID, MUIV_Application_ReturnID_Quit);
-    DoMethod(po->po_TridentMI, MUIM_Notify, MUIA_Menuitem_Trigger, MUIV_EveryTime,
-             po->po_PoPoObj, 1, MUIM_PoPo_OpenTrident);
-    DoMethod(po->po_MUIPrefsMI, MUIM_Notify, MUIA_Menuitem_Trigger, MUIV_EveryTime,
-             po->po_AppObj, 2, MUIM_Application_OpenConfigWindow, 0);
+    DoMethod(ntf->nt_AboutMI, MUIM_Notify, MUIA_Menuitem_Trigger, MUIV_EveryTime,
+             ntf->nt_NotifyObj, 1, MUIM_DevNotify_About);
+    DoMethod(ntf->nt_CloseMI, MUIM_Notify, MUIA_Menuitem_Trigger, MUIV_EveryTime,
+             ntf->nt_AppObj, 2, MUIM_Application_ReturnID, MUIV_Application_ReturnID_Quit);
+    DoMethod(ntf->nt_PrefsMI, MUIM_Notify, MUIA_Menuitem_Trigger, MUIV_EveryTime,
+             ntf->nt_NotifyObj, 1, MUIM_DevNotify_OpenPrefs);
+    DoMethod(ntf->nt_MUIPrefsMI, MUIM_Notify, MUIA_Menuitem_Trigger, MUIV_EveryTime,
+             ntf->nt_AppObj, 2, MUIM_Application_OpenConfigWindow, 0);
 
 
     {
@@ -281,75 +281,75 @@ void pPoPoGUITask()
         ULONG sigs;
         ULONG sigmask;
         LONG retid;
-        struct PsdPoPoGadgets *pog;
+        struct PsdNotifyGadgets *pog;
         struct timeval currtime;
 
-        po->po_Task = thistask;
+        ntf->nt_Task = thistask;
         Forbid();
-        if(po->po_ReadySigTask)
+        if(ntf->nt_ReadySigTask)
         {
-            Signal(po->po_ReadySigTask, 1L<<po->po_ReadySignal);
+            Signal(ntf->nt_ReadySigTask, 1L<<ntf->nt_ReadySignal);
         }
         Permit();
 
-        //set(po->po_WindowObj, MUIA_Window_Open, TRUE);
-        po->po_TimerIOReq->tr_time.tv_micro = 500*1000;
-        SendIO(&po->po_TimerIOReq->tr_node);
-        sigmask = (1UL<<po->po_MsgPort->mp_SigBit)|(1UL<<po->po_TimerMsgPort->mp_SigBit);
+        //set(ntf->nt_WindowObj, MUIA_Window_Open, TRUE);
+        ntf->nt_TimerIOReq->tr_time.tv_micro = 500*1000;
+        SendIO(&ntf->nt_TimerIOReq->tr_node);
+        sigmask = (1UL<<ntf->nt_MsgPort->mp_SigBit)|(1UL<<ntf->nt_TimerMsgPort->mp_SigBit);
         do
         {
-            retid = DoMethod(po->po_AppObj, MUIM_Application_NewInput, &sigs);
+            retid = DoMethod(ntf->nt_AppObj, MUIM_Application_NewInput, &sigs);
             if(sigs)
             {
                 pEventHandler(ps);
-                if(CheckIO(&po->po_TimerIOReq->tr_node))
+                if(CheckIO(&ntf->nt_TimerIOReq->tr_node))
                 {
-                    WaitIO(&po->po_TimerIOReq->tr_node);
-                    po->po_TimerIOReq->tr_time.tv_micro = 500*1000;
-                    SendIO(&po->po_TimerIOReq->tr_node);
+                    WaitIO(&ntf->nt_TimerIOReq->tr_node);
+                    ntf->nt_TimerIOReq->tr_time.tv_micro = 500*1000;
+                    SendIO(&ntf->nt_TimerIOReq->tr_node);
                 }
                 CurrentTime((ULONG *)&currtime.tv_secs, (ULONG *)&currtime.tv_micro);
-                pog = (struct PsdPoPoGadgets *) po->po_GadgetList.lh_Head;
+                pog = (struct PsdNotifyGadgets *) ntf->nt_GadgetList.lh_Head;
                 while(pog->pog_Node.ln_Succ)
                 {
                     if((currtime.tv_secs > pog->pog_TimeoutTime.tv_secs) ||
                        ((currtime.tv_secs == pog->pog_TimeoutTime.tv_secs) &&
                         (currtime.tv_micro > pog->pog_TimeoutTime.tv_micro)))
                     {
-                        pFreePoPoGadgets(ps, pog);
-                        pog = (struct PsdPoPoGadgets *) po->po_GadgetList.lh_Head;
+                        pFreeNotifyGadgets(ps, pog);
+                        pog = (struct PsdNotifyGadgets *) ntf->nt_GadgetList.lh_Head;
                     } else {
-                        pog = (struct PsdPoPoGadgets *) pog->pog_Node.ln_Succ;
+                        pog = (struct PsdNotifyGadgets *) pog->pog_Node.ln_Succ;
                     }
                 }
 
-                if(po->po_GadgetList.lh_Head->ln_Succ)
+                if(ntf->nt_GadgetList.lh_Head->ln_Succ)
                 {
-                    if(po->po_OpenRequest)
+                    if(ntf->nt_OpenRequest)
                     {
                         if(!isopen)
                         {
                             if(ps->ps_GlobalCfg->pgc_PopupActivateWin)
                             {
-                                set(po->po_WindowObj, MUIA_Window_Activate, TRUE);
+                                set(ntf->nt_WindowObj, MUIA_Window_Activate, TRUE);
                             } else {
-                                set(po->po_WindowObj, MUIA_Window_Activate, FALSE);
+                                set(ntf->nt_WindowObj, MUIA_Window_Activate, FALSE);
                             }
-                            set(po->po_StickyObj, MUIA_Selected, FALSE);
-                            set(po->po_WindowObj, MUIA_Window_Open, TRUE);
+                            set(ntf->nt_StickyObj, MUIA_Selected, FALSE);
+                            set(ntf->nt_WindowObj, MUIA_Window_Open, TRUE);
                             isopen = TRUE;
                         } else {
                             if(ps->ps_GlobalCfg->pgc_PopupWinToFront)
                             {
-                                DoMethod(po->po_WindowObj, MUIM_Window_ToFront);
+                                DoMethod(ntf->nt_WindowObj, MUIM_Window_ToFront);
                             }
                         }
-                        po->po_OpenRequest = FALSE;
+                        ntf->nt_OpenRequest = FALSE;
                     }
                 } else {
                     if(isopen)
                     {
-                        set(po->po_WindowObj, MUIA_Window_Open, FALSE);
+                        set(ntf->nt_WindowObj, MUIA_Window_Open, FALSE);
                         isopen = FALSE;
                     }
                 }
@@ -362,87 +362,87 @@ void pPoPoGUITask()
             }
             if(retid == MUIV_Application_ReturnID_Quit)
             {
-                set(po->po_WindowObj, MUIA_Window_Open, FALSE);
+                set(ntf->nt_WindowObj, MUIA_Window_Open, FALSE);
                 /* remove all thingies */
-                pog = (struct PsdPoPoGadgets *) po->po_GadgetList.lh_Head;
+                pog = (struct PsdNotifyGadgets *) ntf->nt_GadgetList.lh_Head;
                 while(pog->pog_Node.ln_Succ)
                 {
-                    pFreePoPoGadgets(ps, pog);
-                    pog = (struct PsdPoPoGadgets *) po->po_GadgetList.lh_Head;
+                    pFreeNotifyGadgets(ps, pog);
+                    pog = (struct PsdNotifyGadgets *) ntf->nt_GadgetList.lh_Head;
                 }
             }
             if((ps->ps_GlobalCfg->pgc_PopupDeviceNew == PGCP_NEVER) &&
                (!ps->ps_GlobalCfg->pgc_PopupDeviceDeath) &&
                (!ps->ps_GlobalCfg->pgc_PopupDeviceGone))
             {
-                psdAddErrorMsg0(RETURN_OK, (STRPTR) "PoPo", "PoPo has no popups left to show; exiting.");
+                psdAddErrorMsg0(RETURN_OK, (STRPTR) "Neptune Notifier", "No notifications left to show; exiting.");
                 break;
             }
 
         } while(TRUE);
-        set(po->po_WindowObj, MUIA_Window_Open, FALSE);
+        set(ntf->nt_WindowObj, MUIA_Window_Open, FALSE);
     }
-    pPoPoGUITaskCleanup(ps);
+    pNotifyGUITaskCleanup(ps);
 }
 /* \\\ */
 
-/* /// "pPoPoGUITaskCleanup()" */
-void pPoPoGUITaskCleanup(struct PsdBase * ps)
+/* /// "pNotifyGUITaskCleanup()" */
+void pNotifyGUITaskCleanup(struct PsdBase * ps)
 {
-    struct PsdPoPo *po = &ps->ps_PoPo;
-    struct PsdPoPoGadgets *pog;
-    struct PsdPoPoSound *pps;
+    struct PsdNotify *ntf = &ps->ps_Notify;
+    struct PsdNotifyGadgets *pog;
+    struct PsdNotifySound *pps;
 
-    pog = (struct PsdPoPoGadgets *) po->po_GadgetList.lh_Head;
+    pog = (struct PsdNotifyGadgets *) ntf->nt_GadgetList.lh_Head;
     while(pog->pog_Node.ln_Succ)
     {
-        pFreePoPoGadgets(ps, pog);
-        pog = (struct PsdPoPoGadgets *) po->po_GadgetList.lh_Head;
+        pFreeNotifyGadgets(ps, pog);
+        pog = (struct PsdNotifyGadgets *) ntf->nt_GadgetList.lh_Head;
     }
 
-    pps = (struct PsdPoPoSound *) po->po_Sounds.lh_Head;
+    pps = (struct PsdNotifySound *) ntf->nt_Sounds.lh_Head;
     while(pps->pps_Node.ln_Succ)
     {
-        pPoPoFreeSound(ps, pps);
-        pps = (struct PsdPoPoSound *) po->po_Sounds.lh_Head;
+        pNotifyFreeSound(ps, pps);
+        pps = (struct PsdNotifySound *) ntf->nt_Sounds.lh_Head;
     }
 
-    if(po->po_TimerIOReq)
+    if(ntf->nt_TimerIOReq)
     {
-        if(po->po_TimerIOReq->tr_node.io_Device)
+        if(ntf->nt_TimerIOReq->tr_node.io_Device)
         {
-            AbortIO(&po->po_TimerIOReq->tr_node);
-            WaitIO(&po->po_TimerIOReq->tr_node);
-            CloseDevice((struct IORequest *) po->po_TimerIOReq);
+            AbortIO(&ntf->nt_TimerIOReq->tr_node);
+            WaitIO(&ntf->nt_TimerIOReq->tr_node);
+            CloseDevice((struct IORequest *) ntf->nt_TimerIOReq);
         }
-        DeleteIORequest((struct IORequest *) po->po_TimerIOReq);
-        po->po_TimerIOReq = NULL;
+        DeleteIORequest((struct IORequest *) ntf->nt_TimerIOReq);
+        ntf->nt_TimerIOReq = NULL;
     }
-    if(po->po_TimerMsgPort)
+    if(ntf->nt_TimerMsgPort)
     {
-        DeleteMsgPort(po->po_TimerMsgPort);
-        po->po_TimerMsgPort = NULL;
+        DeleteMsgPort(ntf->nt_TimerMsgPort);
+        ntf->nt_TimerMsgPort = NULL;
     }
 
-    if(po->po_EventHandler)
+    if(ntf->nt_EventHandler)
     {
-        psdRemEventHandler(po->po_EventHandler);
-        po->po_EventHandler = NULL;
+        psdRemEventHandler(ntf->nt_EventHandler);
+        ntf->nt_EventHandler = NULL;
     }
-    if(po->po_MsgPort)
+    if(ntf->nt_MsgPort)
     {
-        DeleteMsgPort(po->po_MsgPort);
-        po->po_MsgPort = NULL;
+        DeleteMsgPort(ntf->nt_MsgPort);
+        ntf->nt_MsgPort = NULL;
     }
-    if(po->po_AppObj)
+    if(ntf->nt_AppObj)
     {
-        MUI_DisposeObject(po->po_AppObj);
-        po->po_AppObj = NULL;
+        MUI_DisposeObject(ntf->nt_AppObj);
+        ntf->nt_AppObj = NULL;
     }
-    if(po->po_PoPoClass)
+    if(ntf->nt_NotifyClass)
     {
-        MUI_DeleteCustomClass(po->po_PoPoClass);
-        po->po_PoPoClass = NULL;
+        MUI_DeleteCustomClass(ntf->nt_NotifyClass);
+        ntf->nt_NotifyClass = NULL;
     }
     if(DataTypesBase)
     {
@@ -460,24 +460,24 @@ void pPoPoGUITaskCleanup(struct PsdBase * ps)
         IntuitionBase = NULL;
     }
     Forbid();
-    po->po_Task = NULL;
-    if(po->po_ReadySigTask)
+    ntf->nt_Task = NULL;
+    if(ntf->nt_ReadySigTask)
     {
-        Signal(po->po_ReadySigTask, 1L<<po->po_ReadySignal);
+        Signal(ntf->nt_ReadySigTask, 1L<<ntf->nt_ReadySignal);
     }
 }
 /* \\\ */
 
-/* /// "pPoPoLoadSound()" */
-struct PsdPoPoSound * pPoPoLoadSound(struct PsdBase * ps, STRPTR name)
+/* /// "pNotifyLoadSound()" */
+struct PsdNotifySound * pNotifyLoadSound(struct PsdBase * ps, STRPTR name)
 {
-    struct PsdPoPo *po = &ps->ps_PoPo;
-    struct PsdPoPoSound *pps;
-    if((pps = psdAllocVec(sizeof(struct PsdPoPoSound))))
+    struct PsdNotify *ntf = &ps->ps_Notify;
+    struct PsdNotifySound *pps;
+    if((pps = psdAllocVec(sizeof(struct PsdNotifySound))))
     {
         if((pps->pps_Node.ln_Name = psdCopyStr(name)))
         {
-            AddTail(&po->po_Sounds, &pps->pps_Node);
+            AddTail(&ntf->nt_Sounds, &pps->pps_Node);
             pps->pps_DTHandle = NewDTObject(name,
                                         DTA_SourceType, DTST_FILE,
                                         DTA_GroupID, GID_SOUND,
@@ -485,7 +485,7 @@ struct PsdPoPoSound * pPoPoLoadSound(struct PsdBase * ps, STRPTR name)
                                         TAG_END);
             if(!pps->pps_DTHandle)
             {
-                psdAddErrorMsg(RETURN_ERROR, "PoPo", "Could not load soundfile '%s'.", name);
+                psdAddErrorMsg(RETURN_ERROR, "Neptune Notifier", "Could not load soundfile '%s'.", name);
             }
             return(pps);
         }
@@ -495,17 +495,17 @@ struct PsdPoPoSound * pPoPoLoadSound(struct PsdBase * ps, STRPTR name)
 }
 /* \\\ */
 
-/* /// "pPoPoPlaySound()" */
-BOOL pPoPoPlaySound(struct PsdBase * ps, STRPTR name)
+/* /// "pNotifyPlaySound()" */
+BOOL pNotifyPlaySound(struct PsdBase * ps, STRPTR name)
 {
-    struct PsdPoPo *po = &ps->ps_PoPo;
-    struct PsdPoPoSound *pps;
+    struct PsdNotify *ntf = &ps->ps_Notify;
+    struct PsdNotifySound *pps;
     struct dtTrigger playmsg;
 
-    pps = (struct PsdPoPoSound *) FindName(&po->po_Sounds, name);
+    pps = (struct PsdNotifySound *) FindName(&ntf->nt_Sounds, name);
     if(!pps)
     {
-        pps = pPoPoLoadSound(ps, name);
+        pps = pNotifyLoadSound(ps, name);
     }
     if(!pps)
     {
@@ -528,10 +528,10 @@ BOOL pPoPoPlaySound(struct PsdBase * ps, STRPTR name)
 }
 /* \\\ */
 
-/* /// "pPoPoFreeSound()" */
-void pPoPoFreeSound(struct PsdBase * ps, struct PsdPoPoSound *pps)
+/* /// "pNotifyFreeSound()" */
+void pNotifyFreeSound(struct PsdBase * ps, struct PsdNotifySound *pps)
 {
-    struct PsdPoPo *po = &ps->ps_PoPo;
+    struct PsdNotify *ntf = &ps->ps_Notify;
     Remove(&pps->pps_Node);
     if(pps->pps_DTHandle)
     {
@@ -576,27 +576,27 @@ BOOL pIsClassStillValid(struct PsdBase * ps, struct Library *ucb)
 /* /// "pRemoveOldBox()" */
 void pRemoveOldBox(struct PsdBase * ps, struct PsdDevice *pd)
 {
-    struct PsdPoPo *po = &ps->ps_PoPo;
-    struct PsdPoPoGadgets *pog;
+    struct PsdNotify *ntf = &ps->ps_Notify;
+    struct PsdNotifyGadgets *pog;
     // try to remove adding message, if it still existing
-    pog = (struct PsdPoPoGadgets *) po->po_GadgetList.lh_Head;
+    pog = (struct PsdNotifyGadgets *) ntf->nt_GadgetList.lh_Head;
     while(pog->pog_Node.ln_Succ)
     {
         if(pog->pog_Device == pd)
         {
-            pFreePoPoGadgets(ps, pog);
-            pog = (struct PsdPoPoGadgets *) po->po_GadgetList.lh_Head;
+            pFreeNotifyGadgets(ps, pog);
+            pog = (struct PsdNotifyGadgets *) ntf->nt_GadgetList.lh_Head;
         } else {
-            pog = (struct PsdPoPoGadgets *) pog->pog_Node.ln_Succ;
+            pog = (struct PsdNotifyGadgets *) pog->pog_Node.ln_Succ;
         }
     }
 }
 /* \\\ */
 
 /* /// "pGenerateAddBox()" */
-struct PsdPoPoGadgets * pGenerateAddBox(struct PsdBase * ps, struct PsdDevice *pd, struct PsdPoPoGadgets *pog)
+struct PsdNotifyGadgets * pGenerateAddBox(struct PsdBase * ps, struct PsdDevice *pd, struct PsdNotifyGadgets *pog)
 {
-    struct PsdPoPo *po = &ps->ps_PoPo;
+    struct PsdNotify *ntf = &ps->ps_Notify;
     STRPTR body = NULL;
     STRPTR bindingsstr;
     STRPTR bindinginfo;
@@ -611,7 +611,7 @@ struct PsdPoPoGadgets * pGenerateAddBox(struct PsdBase * ps, struct PsdDevice *p
     BOOL   updatetime = FALSE;
     STRPTR oldbody = NULL;
     UWORD  cnt;
-    ULONG  methods[4] = { MUIM_PoPo_ConfigureBinding, MUIM_PoPo_ConfigureClass, MUIM_PoPo_ShutUp, MUIM_PoPo_RemInfo };
+    ULONG  methods[4] = { MUIM_DevNotify_ConfigureBinding, MUIM_DevNotify_ConfigureClass, MUIM_DevNotify_ShutUp, MUIM_DevNotify_RemInfo };
 
     bindingsstr = pBindingsString(ps, pd);
     configstate = pCheckConfigurable(ps, pd);
@@ -676,19 +676,19 @@ struct PsdPoPoGadgets * pGenerateAddBox(struct PsdBase * ps, struct PsdDevice *p
     if(isdead || lowpower)
     {
         gad[0] = "Disable Port";
-        methods[0] = MUIM_PoPo_DisablePort;
+        methods[0] = MUIM_DevNotify_DisablePort;
         gad[1] = NULL;
     }
     if(isdead && (!lowpower))
     {
         gad[1] = "Powercycle Port";
-        methods[1] = MUIM_PoPo_PowerCyclePort;
+        methods[1] = MUIM_DevNotify_PowerCyclePort;
     }
     gad[2] = "No PopUps!";
     gad[3] = "Continue";
     if(!pog)
     {
-        pog = pAllocPoPoGadgets(ps, wholebodyinfo, gad);
+        pog = pAllocNotifyGadgets(ps, wholebodyinfo, gad);
         if(pog)
         {
             pog->pog_Device = pd;
@@ -719,8 +719,8 @@ struct PsdPoPoGadgets * pGenerateAddBox(struct PsdBase * ps, struct PsdDevice *p
             if(gad[cnt])
             {
                 DoMethod(pog->pog_GadgetObj[cnt], MUIM_Notify, MUIA_Pressed,
-                    FALSE, po->po_AppObj, 5, MUIM_Application_PushMethod,
-                    po->po_PoPoObj, 2, methods[cnt], pog);
+                    FALSE, ntf->nt_AppObj, 5, MUIM_Application_PushMethod,
+                    ntf->nt_NotifyObj, 2, methods[cnt], pog);
        	    }
         }
     }
@@ -813,10 +813,10 @@ struct PsdPoPoGadgets * pGenerateAddBox(struct PsdBase * ps, struct PsdDevice *p
 /* /// "pEventHandler()" */
 void pEventHandler(struct PsdBase * ps)
 {
-    struct PsdPoPo *po = &ps->ps_PoPo;
+    struct PsdNotify *ntf = &ps->ps_Notify;
     struct PsdDevice *pd;
     struct PsdEventNote *pen;
-    struct PsdPoPoGadgets *pog;
+    struct PsdNotifyGadgets *pog;
     ULONG  eventmask;
     STRPTR body = NULL;
     BOOL   addsound = FALSE;
@@ -826,7 +826,7 @@ void pEventHandler(struct PsdBase * ps)
     /* delete removed devices first */
     psdLockReadPBase();
 
-    pog = (struct PsdPoPoGadgets *) po->po_GadgetList.lh_Head;
+    pog = (struct PsdNotifyGadgets *) ntf->nt_GadgetList.lh_Head;
     while(pog->pog_Node.ln_Succ)
     {
         if(pog->pog_Device)
@@ -835,16 +835,16 @@ void pEventHandler(struct PsdBase * ps)
             if(!pIsDeviceStillValid(ps, pog->pog_Device))
             {
                 /* huh, gone! */
-                pFreePoPoGadgets(ps, pog);
-                pog = (struct PsdPoPoGadgets *) po->po_GadgetList.lh_Head;
+                pFreeNotifyGadgets(ps, pog);
+                pog = (struct PsdNotifyGadgets *) ntf->nt_GadgetList.lh_Head;
                 continue;
             }
         }
-        pog = (struct PsdPoPoGadgets *) pog->pog_Node.ln_Succ;
+        pog = (struct PsdNotifyGadgets *) pog->pog_Node.ln_Succ;
     }
 
     eventmask = 0;
-    while((pen = (struct PsdEventNote *) GetMsg(po->po_MsgPort)))
+    while((pen = (struct PsdEventNote *) GetMsg(ntf->nt_MsgPort)))
     {
         eventmask |= (1L<<pen->pen_Event);
         switch(pen->pen_Event)
@@ -855,7 +855,7 @@ void pEventHandler(struct PsdBase * ps)
                 if(pIsDeviceStillValid(ps, pd))
                 {
                     pRemoveOldBox(ps, pd);
-                    if(pd->pd_PoPoCfg.poc_InhibitPopup)
+                    if(pd->pd_NotifyCfg.ntc_InhibitPopup)
                     {
                         break;
                     }
@@ -868,7 +868,7 @@ void pEventHandler(struct PsdBase * ps)
                     pog->pog_Device = pd;
                     if(pog->pog_ShowMe && (!pog->pog_WaitBinding))
                     {
-                        po->po_OpenRequest = TRUE;
+                        ntf->nt_OpenRequest = TRUE;
                     }
                 }
                 break;
@@ -927,7 +927,7 @@ void pEventHandler(struct PsdBase * ps)
                     }
                     Permit();
                 }
-                if(pd->pd_PoPoCfg.poc_InhibitPopup)
+                if(pd->pd_NotifyCfg.ntc_InhibitPopup)
                 {
                     break;
                 }
@@ -956,7 +956,7 @@ void pEventHandler(struct PsdBase * ps)
                     body = psdCopyStrFmt("\33bWARNING: DEAD DEVICE!\33n\n\nUSB device\n\n\33b%s\33n\n\ndropped dead for no apparent reason!%s", devname, autodismsg);
                     gads[1] = "Powercycle Port";
                 }
-                pog = pAllocPoPoGadgets(ps, body, gads);
+                pog = pAllocNotifyGadgets(ps, body, gads);
                 psdFreeVec(body);
                 if(!pog)
                 {
@@ -971,15 +971,15 @@ void pEventHandler(struct PsdBase * ps)
                     pog->pog_Device = pd;
                 }
                 DoMethod(pog->pog_GadgetObj[0], MUIM_Notify, MUIA_Pressed, FALSE,
-                         po->po_AppObj, 5, MUIM_Application_PushMethod, po->po_PoPoObj, 2, MUIM_PoPo_DisablePort, pog);
+                         ntf->nt_AppObj, 5, MUIM_Application_PushMethod, ntf->nt_NotifyObj, 2, MUIM_DevNotify_DisablePort, pog);
                 if(gads[1])
                 {
                     DoMethod(pog->pog_GadgetObj[1], MUIM_Notify, MUIA_Pressed, FALSE,
-                             po->po_AppObj, 5, MUIM_Application_PushMethod, po->po_PoPoObj, 2, MUIM_PoPo_PowerCyclePort, pog);
+                             ntf->nt_AppObj, 5, MUIM_Application_PushMethod, ntf->nt_NotifyObj, 2, MUIM_DevNotify_PowerCyclePort, pog);
                 }
                 DoMethod(pog->pog_GadgetObj[3], MUIM_Notify, MUIA_Pressed, FALSE,
-                         po->po_AppObj, 5, MUIM_Application_PushMethod, po->po_PoPoObj, 2, MUIM_PoPo_RemInfo, pog);
-                po->po_OpenRequest = TRUE;
+                         ntf->nt_AppObj, 5, MUIM_Application_PushMethod, ntf->nt_NotifyObj, 2, MUIM_DevNotify_RemInfo, pog);
+                ntf->nt_OpenRequest = TRUE;
                 break;
             }
 
@@ -987,7 +987,7 @@ void pEventHandler(struct PsdBase * ps)
             {
                 pd = (struct PsdDevice *) pen->pen_Param1;
                 pRemoveOldBox(ps, pd);
-                if(pd->pd_PoPoCfg.poc_InhibitPopup)
+                if(pd->pd_NotifyCfg.ntc_InhibitPopup)
                 {
                     break;
                 }
@@ -1008,15 +1008,15 @@ void pEventHandler(struct PsdBase * ps)
                 if(body)
                 {
                     STRPTR gads[4] = { NULL, NULL, NULL, "OK" };
-                    pog = pAllocPoPoGadgets(ps, body, gads);
+                    pog = pAllocNotifyGadgets(ps, body, gads);
                     psdFreeVec(body);
                     if(!pog)
                     {
                         break;
                     }
                     DoMethod(pog->pog_GadgetObj[3], MUIM_Notify, MUIA_Pressed, FALSE,
-                             po->po_AppObj, 5, MUIM_Application_PushMethod, po->po_PoPoObj, 2, MUIM_PoPo_RemInfo, pog);
-                    po->po_OpenRequest = TRUE;
+                             ntf->nt_AppObj, 5, MUIM_Application_PushMethod, ntf->nt_NotifyObj, 2, MUIM_DevNotify_RemInfo, pog);
+                    ntf->nt_OpenRequest = TRUE;
                 }
                 break;
             }
@@ -1024,7 +1024,7 @@ void pEventHandler(struct PsdBase * ps)
             case EHMB_ADDBINDING:
             case EHMB_REMBINDING:
             {
-                pog = (struct PsdPoPoGadgets *) po->po_GadgetList.lh_Head;
+                pog = (struct PsdNotifyGadgets *) ntf->nt_GadgetList.lh_Head;
                 while(pog->pog_Node.ln_Succ)
                 {
                     if(pog->pog_Device == (struct PsdDevice *) pen->pen_Param1)
@@ -1033,18 +1033,18 @@ void pEventHandler(struct PsdBase * ps)
                         {
                             break;
                         }
-                        if(pog->pog_Device->pd_PoPoCfg.poc_InhibitPopup)
+                        if(pog->pog_Device->pd_NotifyCfg.ntc_InhibitPopup)
                         {
                             break;
                         }
                         pGenerateAddBox(ps, pog->pog_Device, pog);
                         if(pog->pog_ShowMe)
                         {
-                            po->po_OpenRequest = TRUE;
+                            ntf->nt_OpenRequest = TRUE;
                         }
                         break;
                     }
-                    pog = (struct PsdPoPoGadgets *) pog->pog_Node.ln_Succ;
+                    pog = (struct PsdNotifyGadgets *) pog->pog_Node.ln_Succ;
                 }
                 break;
             }
@@ -1063,27 +1063,27 @@ void pEventHandler(struct PsdBase * ps)
     psdUnlockPBase();
     if(addsound)
     {
-        if(po->po_InsertSndFile)
+        if(ntf->nt_InsertSndFile)
         {
-            if(*po->po_InsertSndFile)
+            if(*ntf->nt_InsertSndFile)
             {
-                pPoPoPlaySound(ps, po->po_InsertSndFile);
+                pNotifyPlaySound(ps, ntf->nt_InsertSndFile);
             }
         }
     }
     if(remsound)
     {
-        if(po->po_RemoveSndFile)
+        if(ntf->nt_RemoveSndFile)
         {
-            if(*po->po_RemoveSndFile)
+            if(*ntf->nt_RemoveSndFile)
             {
-                pPoPoPlaySound(ps, po->po_RemoveSndFile);
+                pNotifyPlaySound(ps, ntf->nt_RemoveSndFile);
             }
         }
     }
     if(cfgchanged)
     {
-        set(po->po_SaveObj, MUIA_Disabled, (ps->ps_SavedConfigHash == ps->ps_ConfigHash));
+        set(ntf->nt_SaveObj, MUIA_Disabled, (ps->ps_SavedConfigHash == ps->ps_ConfigHash));
     }
 }
 /* \\\ */
@@ -1363,12 +1363,12 @@ void pDisableDevicePopup(struct PsdBase * ps, struct PsdDevice *pd)
 }
 /* \\\ */
 
-/* /// "pAllocPoPoGadgets()" */
-struct PsdPoPoGadgets * pAllocPoPoGadgets(struct PsdBase * ps, STRPTR body, STRPTR *gad)
+/* /// "pAllocNotifyGadgets()" */
+struct PsdNotifyGadgets * pAllocNotifyGadgets(struct PsdBase * ps, STRPTR body, STRPTR *gad)
 {
-    struct PsdPoPo *po = &ps->ps_PoPo;
-    struct PsdPoPoGadgets *pog;
-    if((pog = (struct PsdPoPoGadgets *) psdAllocVec(sizeof(struct PsdPoPoGadgets))))
+    struct PsdNotify *ntf = &ps->ps_Notify;
+    struct PsdNotifyGadgets *pog;
+    if((pog = (struct PsdNotifyGadgets *) psdAllocVec(sizeof(struct PsdNotifyGadgets))))
     {
         pog->pog_GroupObj =
             VGroup,
@@ -1424,12 +1424,12 @@ struct PsdPoPoGadgets * pAllocPoPoGadgets(struct PsdBase * ps, STRPTR body, STRP
             psdFreeVec(pog);
             return(NULL);
         }
-        DoMethod(po->po_GroupObj, MUIM_Group_InitChange);
-        DoMethod(po->po_GroupObj, OM_ADDMEMBER, pog->pog_GroupObj);
-        DoMethod(po->po_GroupObj, MUIM_Group_ExitChange);
-        AddTail(&po->po_GadgetList, &pog->pog_Node);
+        DoMethod(ntf->nt_GroupObj, MUIM_Group_InitChange);
+        DoMethod(ntf->nt_GroupObj, OM_ADDMEMBER, pog->pog_GroupObj);
+        DoMethod(ntf->nt_GroupObj, MUIM_Group_ExitChange);
+        AddTail(&ntf->nt_GadgetList, &pog->pog_Node);
         CurrentTime((ULONG *)&pog->pog_TimeoutTime.tv_secs, (ULONG *)&pog->pog_TimeoutTime.tv_micro);
-        if(ps->ps_GlobalCfg->pgc_PopupCloseDelay && (!po->po_Sticky))
+        if(ps->ps_GlobalCfg->pgc_PopupCloseDelay && (!ntf->nt_Sticky))
         {
             pog->pog_TimeoutTime.tv_secs += ps->ps_GlobalCfg->pgc_PopupCloseDelay;
         } else {
@@ -1440,26 +1440,26 @@ struct PsdPoPoGadgets * pAllocPoPoGadgets(struct PsdBase * ps, STRPTR body, STRP
 }
 /* \\\ */
 
-/* /// "pFreePoPoGadgets()" */
-void pFreePoPoGadgets(struct PsdBase * ps, struct PsdPoPoGadgets *pog)
+/* /// "pFreeNotifyGadgets()" */
+void pFreeNotifyGadgets(struct PsdBase * ps, struct PsdNotifyGadgets *pog)
 {
-    struct PsdPoPo *po = &ps->ps_PoPo;
+    struct PsdNotify *ntf = &ps->ps_Notify;
     Remove(&pog->pog_Node);
-    DoMethod(po->po_GroupObj, MUIM_Group_InitChange);
-    DoMethod(po->po_GroupObj, OM_REMMEMBER, pog->pog_GroupObj);
-    DoMethod(po->po_GroupObj, MUIM_Group_ExitChange);
+    DoMethod(ntf->nt_GroupObj, MUIM_Group_InitChange);
+    DoMethod(ntf->nt_GroupObj, OM_REMMEMBER, pog->pog_GroupObj);
+    DoMethod(ntf->nt_GroupObj, MUIM_Group_ExitChange);
     MUI_DisposeObject(pog->pog_GroupObj);
     psdFreeVec(pog);
 }
 /* \\\ */
 
-/* /// "PoPoDispatcher()" */
-IPTR PoPoDispatcher(struct IClass * cl asm("a0"), Object * obj asm("a2"), Msg msg asm("a1"))
+/* /// "DevNotifyDispatcher()" */
+IPTR DevNotifyDispatcher(struct IClass * cl asm("a0"), Object * obj asm("a2"), Msg msg asm("a1"))
 {
-    struct PsdPoPoGadgets *pog;
-    struct PsdPoPoGadgets *tmppog;
+    struct PsdNotifyGadgets *pog;
+    struct PsdNotifyGadgets *tmppog;
     struct PsdBase * ps = (struct PsdBase *) cl->cl_UserData;
-    struct PsdPoPo *po = &ps->ps_PoPo;
+    struct PsdNotify *ntf = &ps->ps_Notify;
     ULONG sticky = 0;
 
     switch(msg->MethodID)
@@ -1469,71 +1469,71 @@ IPTR PoPoDispatcher(struct IClass * cl asm("a0"), Object * obj asm("a2"), Msg ms
                 return(0);
             return((IPTR)obj);
 
-        case MUIM_PoPo_SavePrefs:
+        case MUIM_DevNotify_SavePrefs:
             psdSaveCfgToDisk(NULL);
-            set(po->po_SaveObj, MUIA_Disabled, (ps->ps_SavedConfigHash == ps->ps_ConfigHash));
+            set(ntf->nt_SaveObj, MUIA_Disabled, (ps->ps_SavedConfigHash == ps->ps_ConfigHash));
             return(0);
 
-        case MUIM_PoPo_Sticky:
-            get(po->po_StickyObj, MUIA_Selected, &sticky);
-            po->po_Sticky = sticky;
-            pog = (struct PsdPoPoGadgets *) po->po_GadgetList.lh_Head;
+        case MUIM_DevNotify_Sticky:
+            get(ntf->nt_StickyObj, MUIA_Selected, &sticky);
+            ntf->nt_Sticky = sticky;
+            pog = (struct PsdNotifyGadgets *) ntf->nt_GadgetList.lh_Head;
             while(pog->pog_Node.ln_Succ)
             {
                 CurrentTime((ULONG *)&pog->pog_TimeoutTime.tv_secs, (ULONG *)&pog->pog_TimeoutTime.tv_micro);
-                if(ps->ps_GlobalCfg->pgc_PopupCloseDelay && (!po->po_Sticky))
+                if(ps->ps_GlobalCfg->pgc_PopupCloseDelay && (!ntf->nt_Sticky))
                 {
                     pog->pog_TimeoutTime.tv_secs += ps->ps_GlobalCfg->pgc_PopupCloseDelay;
                 } else {
                     pog->pog_TimeoutTime.tv_secs += 60*60*24;
                 }
-                pog = (struct PsdPoPoGadgets *) pog->pog_Node.ln_Succ;
+                pog = (struct PsdNotifyGadgets *) pog->pog_Node.ln_Succ;
             }
             return(0);
 
-        case MUIM_PoPo_ConfigureBinding:
-            pog = (struct PsdPoPoGadgets *) ((IPTR *) msg)[1];
-            //KPRINTF(20, ("Config Po=%08lx, Pog=%08lx, PS=%08lx\n", po, pog, ps));
+        case MUIM_DevNotify_ConfigureBinding:
+            pog = (struct PsdNotifyGadgets *) ((IPTR *) msg)[1];
+            //KPRINTF(20, ("Config ntf=%08lx, pog=%08lx, ps=%08lx\n", ntf, pog, ps));
             pog->pog_TimeoutTime.tv_secs += 60*60*24;
             pOpenBindingsConfigGUI(ps, pog->pog_Device);
             return(0);
 
-        case MUIM_PoPo_ConfigureClass:
-            pog = (struct PsdPoPoGadgets *) ((IPTR *) msg)[1];
-            //KPRINTF(20, ("Config Po=%08lx, Pog=%08lx, PS=%08lx\n", po, pog, ps));
+        case MUIM_DevNotify_ConfigureClass:
+            pog = (struct PsdNotifyGadgets *) ((IPTR *) msg)[1];
+            //KPRINTF(20, ("Config ntf=%08lx, pog=%08lx, ps=%08lx\n", ntf, pog, ps));
             pog->pog_TimeoutTime.tv_secs += 60*60*24;
             pOpenClassesConfigGUI(ps, pog->pog_Device);
             return(0);
 
-        case MUIM_PoPo_ShutUp:
-            pog = (struct PsdPoPoGadgets *) ((IPTR *) msg)[1];
+        case MUIM_DevNotify_ShutUp:
+            pog = (struct PsdNotifyGadgets *) ((IPTR *) msg)[1];
             pDisableDevicePopup(ps, pog->pog_Device);
             pRemoveOldBox(ps, pog->pog_Device);
             return(0);
 
-        case MUIM_PoPo_RemInfo:
-            pog = (struct PsdPoPoGadgets *) ((IPTR *) msg)[1];
-            //KPRINTF(20, ("RemInfo Po=%08lx, Pog=%08lx, PS=%08lx\n", po, pog, ps));
-            tmppog = (struct PsdPoPoGadgets *) po->po_GadgetList.lh_Head;
+        case MUIM_DevNotify_RemInfo:
+            pog = (struct PsdNotifyGadgets *) ((IPTR *) msg)[1];
+            //KPRINTF(20, ("RemInfo ntf=%08lx, pog=%08lx, ps=%08lx\n", ntf, pog, ps));
+            tmppog = (struct PsdNotifyGadgets *) ntf->nt_GadgetList.lh_Head;
             while(tmppog->pog_Node.ln_Succ)
             {
                 if(tmppog == pog)
                 {
-                    pFreePoPoGadgets(ps, pog);
+                    pFreeNotifyGadgets(ps, pog);
                     break;
                 }
-                tmppog = (struct PsdPoPoGadgets *) tmppog->pog_Node.ln_Succ;
+                tmppog = (struct PsdNotifyGadgets *) tmppog->pog_Node.ln_Succ;
             }
             return(0);
 
-        case MUIM_PoPo_DisablePort:
-        case MUIM_PoPo_PowerCyclePort:
+        case MUIM_DevNotify_DisablePort:
+        case MUIM_DevNotify_PowerCyclePort:
         {
             struct PsdDevice *pd;
             struct Library *UsbClsBase;
-            BOOL disable = (msg->MethodID == MUIM_PoPo_DisablePort);
+            BOOL disable = (msg->MethodID == MUIM_DevNotify_DisablePort);
 
-            pog = (struct PsdPoPoGadgets *) ((IPTR *) msg)[1];
+            pog = (struct PsdNotifyGadgets *) ((IPTR *) msg)[1];
             pd = pog->pog_Device;
             set(pog->pog_GadgetObj[0], MUIA_Disabled, TRUE);
             if(pog->pog_GadgetObj[1] && (!disable))
@@ -1559,12 +1559,12 @@ IPTR PoPoDispatcher(struct IClass * cl asm("a0"), Object * obj asm("a2"), Msg ms
             return(0);
         }
 
-        case MUIM_PoPo_About:
-            MUI_RequestA(po->po_AppObj, po->po_WindowObj, 0, NULL, "OK",
-                         "PoPo -- The Poseidon Popup Provider\n\nWritten by Chris Hodges.", NULL);
+        case MUIM_DevNotify_About:
+            MUI_RequestA(ntf->nt_AppObj, ntf->nt_WindowObj, 0, NULL, "OK",
+                         "Neptune USB device notifications\n\nBased on PoPo by Chris Hodges.", NULL);
             return(0);
 
-        case MUIM_PoPo_OpenTrident:
+        case MUIM_DevNotify_OpenPrefs:
         {
             struct Library *DOSBase;
             if((DOSBase = OpenLibrary("dos.library", 39)))
@@ -1581,7 +1581,7 @@ IPTR PoPoDispatcher(struct IClass * cl asm("a0"), Object * obj asm("a2"), Msg ms
                                   TAG_END))
                     {
                         Close(fhandle);
-                        MUI_RequestA(po->po_AppObj, po->po_WindowObj, 0, NULL, "OK",
+                        MUI_RequestA(ntf->nt_AppObj, ntf->nt_WindowObj, 0, NULL, "OK",
                                      "Could not start Trident.", NULL);
                     }
                 }

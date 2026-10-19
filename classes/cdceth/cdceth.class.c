@@ -1902,7 +1902,7 @@ void nGUITask()
         MUIA_Application_Author     , (IPTR)"The AROS Development Team",
         MUIA_Application_Description, (IPTR)"Settings for the cdceth.class",
         MUIA_Application_Base       , (IPTR)"CDCETH",
-        MUIA_Application_HelpFile   , (IPTR)"HELP:Poseidon.guide",
+        MUIA_Application_HelpFile   , (IPTR)"HELP:Neptune.guide",
         MUIA_Application_Menustrip  , (IPTR)MenustripObject,
             Child, (IPTR)MenuObjectT((IPTR)"Project"),
                 Child, (IPTR)(ncp->ncp_AboutMI = MenuitemObject,

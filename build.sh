@@ -199,7 +199,7 @@ copy_one() {                               # copy_one <src-under-build> <amiga-d
 
 deploy_group() { local e; for e in "$@"; do copy_one "${e%%|*}" "${e#*|}"; done; }
 
-# Every built class under build/classes/*/*.class -> SYS:Classes/USB/<file> (output names
+# Every built class under build/classes/*/*.class -> DEVS:USBClasses/<file> (output names
 # differ from dir names - pegasus.class, dm9601eth.class, usbaudio.class, … - so glob the
 # actual artifacts rather than the source-dir names).
 deploy_classes() {
@@ -211,7 +211,7 @@ deploy_classes() {
     fi
     for f in "${list[@]}"; do
         rel="${f#"$BUILD_DIR"/}"
-        copy_one "$rel" "SYS:Classes/USB/$(basename "$f")"
+        copy_one "$rel" "DEVS:USBClasses/$(basename "$f")"
     done
 }
 
@@ -286,8 +286,8 @@ if (( DO_UPLOAD )); then
         fi
     fi
 
-    echo ">> deploying core to LIBS: / LIBS:VHI / SYS:Classes/USB / C: / SYS:Prefs ..."
-    (( DRY )) || ensure_dir "SYS:Classes/USB"
+    echo ">> deploying core to LIBS: / LIBS:VHI / DEVS:USBClasses / C: / SYS:Prefs ..."
+    (( DRY )) || ensure_dir "DEVS:USBClasses"
     (( DRY )) || ensure_dir "LIBS:VHI"
     deploy_classes
     deploy_group "${CORE[@]}"

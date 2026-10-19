@@ -11,7 +11,7 @@ add_executable(neptune_library
     neptune_main.c
     neptune.library.c
     numtostr.c
-    popo.gui.c
+    notify.gui.c
 )
 
 # Headers must exist before we compile: our own neptune.sfd + usbclass's (we call usbDoMethodA).
@@ -28,8 +28,8 @@ target_include_directories(neptune_library PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR})         # neptune_intern.h, debug.h, ...
 
 # neptune_headers + usbclass_headers (INTERFACE) bring the generated-include dirs;
-# mui_headers brings the MUI 5 SDK include dir (popo.gui.c). -lc (libnix string fns),
-# -lamiga (BOOPSI DoMethod/set/get used by popo's MUI tree), -lgcc (intrinsics). The
+# mui_headers brings the MUI 5 SDK include dir (notify.gui.c). -lc (libnix string fns),
+# -lamiga (BOOPSI DoMethod/set/get used by the notifier's MUI tree), -lgcc (intrinsics). The
 # serial debug backend appends -ldebug (+ a weak __divsi3 glue object) via
 # nep_debug_finalize() below; pistorm/off link neither.
 target_link_libraries(neptune_library PRIVATE

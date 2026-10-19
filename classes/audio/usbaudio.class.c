@@ -2548,7 +2548,7 @@ void nGUITask()
         MUIA_Application_Author     , (IPTR)"Chris Hodges <chrisly@platon42.de>",
         MUIA_Application_Description, (IPTR)"Settings for the usbaudio.class",
         MUIA_Application_Base       , (IPTR)"USBAUDIO",
-        MUIA_Application_HelpFile   , (IPTR)"HELP:Poseidon.guide",
+        MUIA_Application_HelpFile   , (IPTR)"HELP:Neptune.guide",
         MUIA_Application_Menustrip  , (IPTR)MenustripObject,
             Child, (IPTR)MenuObjectT((IPTR)"Project"),
                 Child, (IPTR)(nh->nh_AboutMI = MenuitemObject,

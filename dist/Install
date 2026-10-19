@@ -3,7 +3,7 @@
 ;
 ; Installs (into the running system):
 ;   neptune.library              -> LIBS:
-;   the USB device classes        -> SYS:Classes/USB/
+;   the USB device classes        -> DEVS:USBClasses/
 ;   the CLI tools                 -> C:
 ;   Trident (the control panel)   -> SYS:Prefs/
 ;   USBEject (safe-eject menu)    -> SYS:WBStartup/     (optional)
@@ -55,19 +55,19 @@
 )
 
 ;==========================================================================
-; USB device classes -> SYS:Classes/USB/   (version-checked, never downgraded)
+; USB device classes -> DEVS:USBClasses/   (version-checked, never downgraded)
 ;   foreach over the packaged classes + copylib each, so a class already present in a
 ;   newer version is kept. Driven off the drawer's contents, so new classes need no edit.
 ;==========================================================================
 (complete 20)
 (makedir "SYS:Classes"     (prompt "Creating SYS:Classes")     (help @makedir-help))
-(makedir "SYS:Classes/USB" (prompt "Creating SYS:Classes/USB") (help @makedir-help))
-(foreach "Classes/USB" "#?.class"
+(makedir "DEVS:USBClasses" (prompt "Creating DEVS:USBClasses") (help @makedir-help))
+(foreach "DEVS/USBClasses" "#?.class"
     (copylib
-        (prompt ("Installing " @each-name " into SYS:Classes/USB/"))
+        (prompt ("Installing " @each-name " into DEVS:USBClasses/"))
         (help @copylib-help)
-        (source (tackon "Classes/USB" @each-name))
-        (dest "SYS:Classes/USB")
+        (source (tackon "DEVS/USBClasses" @each-name))
+        (dest "DEVS:USBClasses")
         (confirm "expert")
     )
 )
@@ -82,7 +82,7 @@
         (help ("These commands bring the stack up and inspect it:\n\n"
                "  PsdStackLoader  - start the stack (the one startup command)\n"
                "  AddUSBHardware  - attach a host-controller device by hand\n"
-               "  AddUSBClasses   - load the classes from SYS:Classes/USB/ by hand\n"
+               "  AddUSBClasses   - load the classes from DEVS:USBClasses/ by hand\n"
                "  PsdDevLister    - list the connected USB devices\n"
                "  PsdErrorlog     - show the stack error log\n\n" @copylib-help))
         (source (tackon "C" @each-name))
@@ -109,7 +109,7 @@
 (copyfiles
     (prompt "Installing Trident's icon and the USB attach/detach sounds into SYS:Prefs/")
     (help ("Connect.iff / Disconnect.iff are the default sounds played when a USB device is "
-           "plugged in or removed (SYS:Prefs/Presets/Poseidon/).\n\n" @copyfiles-help))
+           "plugged in or removed (SYS:Prefs/Presets/Neptune/).\n\n" @copyfiles-help))
     (source "Prefs")
     (dest "SYS:Prefs")
     (pattern "~(Trident)")

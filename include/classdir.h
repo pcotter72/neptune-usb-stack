@@ -17,9 +17,8 @@
 #include <dos/dos.h>
 #include <dos/exall.h>
 #include <string.h>
+#include <nep_paths.h>  /* NEP_CLASSDRAWER */
 
-/* The one drawer class drivers are loaded from. */
-#define NEP_CLASSDRAWER  "SYS:Classes/USB"
 #define NEP_CLASSNAMEMAX 128
 
 /* Returns FALSE if the drawer could not be read. `verbose` prints one line

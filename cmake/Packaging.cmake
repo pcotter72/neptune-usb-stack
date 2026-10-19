@@ -8,7 +8,7 @@
 #         Install  Install.info            the Installer script (dist/)
 #         LIBS/neptune.library
 #         LIBS/VHI/usbvideo.vhi            VHI driver for USB cameras -> LIBS:VHI/ (opt-in)
-#         Classes/USB/*.class
+#         DEVS/USBClasses/*.class
 #         C/PsdStackLoader AddUSBHardware AddUSBClasses PsdDevLister PsdErrorlog
 #         Prefs/Trident  Prefs/Trident.info
 #         WBStartup/USBEject  WBStartup/USBEject.info  (safe-eject Workbench menu, opt-in)
@@ -33,7 +33,7 @@ install(TARGETS neptune_library RUNTIME DESTINATION LIBS)
 # Every USB class - the full fleet, gathered from the global list add_neptune_class()
 # appends to (CMakeLists.txt). No hand-maintained roster: add a class, it ships.
 get_property(_neptune_classes GLOBAL PROPERTY NEPTUNE_CLASS_TARGETS)
-install(TARGETS ${_neptune_classes} RUNTIME DESTINATION Classes/USB)
+install(TARGETS ${_neptune_classes} RUNTIME DESTINATION DEVS/USBClasses)
 
 install(TARGETS PsdStackLoader AddUSBHardware AddUSBClasses PsdDevLister PsdErrorlog
         RUNTIME DESTINATION C)
@@ -41,7 +41,7 @@ install(TARGETS PsdStackLoader AddUSBHardware AddUSBClasses PsdDevLister PsdErro
 # --- ROM/ : the Kickstart-image kit ---------------------------------------------------
 # For the PC, not the Amiga - the Installer never touches it. The startup resident has no
 # home on disk (it only ever runs from ROM), and build-kickstart.py finds the rest of the
-# ROM set beside this drawer, in LIBS/ and Classes/USB/. Only when the modules are
+# ROM set beside this drawer, in LIBS/ and DEVS/USBClasses/. Only when the modules are
 # ROM-clean: a serial build links debug.lib, whose writable _SysBase would be lost in a
 # read-only bank, and the script no longer checks - the build is the check.
 if(NOT NEPTUNE_DEBUG_BACKEND STREQUAL "serial")
@@ -62,13 +62,13 @@ install(FILES ${CMAKE_SOURCE_DIR}/dist/Trident.info DESTINATION Prefs)
 install(FILES ${CMAKE_SOURCE_DIR}/dist/datatypes/PSD DESTINATION DEVS/DataTypes)
 install(FILES ${CMAKE_SOURCE_DIR}/dist/def_PSD.info DESTINATION Icons)
 
-# Default USB attach/detach sounds → SYS:Prefs/Presets/Poseidon/ (neptune.library.c:198-199 points
-# its default Insert/Remove sound files here). Capitalised to match the code's path (FFS is
+# Default USB attach/detach sounds → SYS:Prefs/Presets/Neptune/ (NEP_PRESETDRAWER, include/nep_paths.h:
+# the library's default Insert/Remove sound files). Capitalised to match the code's path (FFS is
 # case-insensitive, but keep it tidy).
-install(FILES ${CMAKE_SOURCE_DIR}/presets/Poseidon/connect.iff
-        DESTINATION Prefs/Presets/Poseidon RENAME Connect.iff)
-install(FILES ${CMAKE_SOURCE_DIR}/presets/Poseidon/disconnect.iff
-        DESTINATION Prefs/Presets/Poseidon RENAME Disconnect.iff)
+install(FILES ${CMAKE_SOURCE_DIR}/presets/Neptune/connect.iff
+        DESTINATION Prefs/Presets/Neptune RENAME Connect.iff)
+install(FILES ${CMAKE_SOURCE_DIR}/presets/Neptune/disconnect.iff
+        DESTINATION Prefs/Presets/Neptune RENAME Disconnect.iff)
 
 # Trident catalogs (built by the trident_catalogs target) → Catalogs/<locale-language>/System/Prefs/
 # so the Install script's `copyfiles Catalogs → LOCALE:Catalogs` lands them where OpenCatalog looks.

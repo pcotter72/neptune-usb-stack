@@ -586,87 +586,87 @@ MSG_PANEL_OPTIONS_MEMORY
 Память занятая пулом USB-стека:
 ; Memory allocated in Poseidon Pool:
 ;
-MSG_PANEL_POPO
+MSG_PANEL_NOTIFY
 \33c\33bНастройка уведомлений
 ; \33c\33bPopup Settings
 ;
-MSG_PANEL_POPO_LABEL
+MSG_PANEL_NOTIFY_LABEL
 Настройки всплывающих окон
 ; Popup Window Options
 ;
-MSG_PANEL_POPO_CONNECT
+MSG_PANEL_NOTIFY_CONNECT
 При подключении:
 ; On connecting:
 ;
-MSG_PANEL_POPO_CONNECT_HELP
+MSG_PANEL_NOTIFY_CONNECT_HELP
 Поведение всплывающего окна при\nподключении новых USB-устройств.
 ; Popup display behaviour on\nconnecting new USB devices
 ;
-MSG_PANEL_POPO_DISCONNECT
+MSG_PANEL_NOTIFY_DISCONNECT
 При отключении:
 ; On disconnect:
 ;
-MSG_PANEL_POPO_DISCONNECT_HELP
+MSG_PANEL_NOTIFY_DISCONNECT_HELP
 Производить уведомление\nпри отключении устройства.
 ; Whether to popup a window\nif the device is removed.
 ;
-MSG_PANEL_POPO_DEATH
+MSG_PANEL_NOTIFY_DEATH
 При потере устройства:
 ; On device death:
 ;
-MSG_PANEL_POPO_DEATH_HELP
+MSG_PANEL_NOTIFY_DEATH_HELP
 Уведомляет, если устройство долго не отвечает.
 ; Open a requester, if device seems to be dead.
 ;
-MSG_PANEL_POPO_DELAY
+MSG_PANEL_NOTIFY_DELAY
 Задержка всплывания:
 ; Popup delay:
 ;
-MSG_PANEL_POPO_DELAY_HELP
+MSG_PANEL_NOTIFY_DELAY_HELP
 Определяет время демонстрации уведомления\nперед тем как его автоматически закрыть.
 ; How long should the requester be displayed\nbefore disappearing automatically.
 ;
-MSG_PANEL_POPO_DELAY_FORMAT
+MSG_PANEL_NOTIFY_DELAY_FORMAT
 %ld сек.
 ; %ld sec.
 ;
-MSG_PANEL_POPO_ACTIVATE
+MSG_PANEL_NOTIFY_ACTIVATE
 Активировать окно:
 ; Activate window:
 ;
-MSG_PANEL_POPO_ACTIVATE_HELP
+MSG_PANEL_NOTIFY_ACTIVATE_HELP
 Сделать окно активным при открытии.
 ; Make the window active when opening.
 ;
-MSG_PANEL_POPO_TOFRONT
+MSG_PANEL_NOTIFY_TOFRONT
 На передний план:
 ; Pop to front:
 ;
-MSG_PANEL_POPO_TOFRONT_HELP
+MSG_PANEL_NOTIFY_TOFRONT_HELP
 Переносит окно на передний план,\nесли его содержимое было изменено.
 ; Pop window to front, if content changes.
 ;
-MSG_PANEL_POPO_CONSOUND
+MSG_PANEL_NOTIFY_CONSOUND
 Сигнал при подключении:
 ; Connection sound:
 ;
-MSG_PANEL_POPO_CONSOUND_HELP
+MSG_PANEL_NOTIFY_CONSOUND_HELP
 Указанный звуковой файл будет\nвоспроизводиться при подключении\nустройства.
 ; This sound will be replayed everytime\na device is connected to the bus.
 ;
-MSG_PANEL_POPO_CONSOUND_SELECT
+MSG_PANEL_NOTIFY_CONSOUND_SELECT
 Выбор звука при подключении...
 ; Select a sound file to be replayed...
 ;
-MSG_PANEL_POPO_DISCONSOUND
+MSG_PANEL_NOTIFY_DISCONSOUND
 Сигнал при отключении:
 ; Disconnect sound:
 ;
-MSG_PANEL_POPO_DISCONSOUND_HELP
+MSG_PANEL_NOTIFY_DISCONSOUND_HELP
 Указанный звуковой файл будет\nвоспроизводиться при отключении\nустройства.
 ; This sound will be replayed everytime\na device is removed from the bus.
 ;
-MSG_PANEL_POPO_DISCONSOUND_SELECT
+MSG_PANEL_NOTIFY_DISCONSOUND_SELECT
 Выбор звука при отключении...
 ; Select a sound file to be replayed...
 ;

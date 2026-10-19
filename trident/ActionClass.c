@@ -32,8 +32,6 @@ extern struct DosLibrary *DOSBase;
 
 #define NewList(list) NEWLIST(list)
 
-#define STACKLOADER     "Sys/poseidon.prefs"
-
 /* /// "Some strings" */
 static STRPTR mainpanels[] =
 {
@@ -559,7 +557,7 @@ LONG IconListDisplayHook(struct Hook * hook asm("a0"), char ** strarr asm("a2"),
 
         if(pos == 5)
         {
-            pos = 24; // fix for PoPo
+            pos = 24; // fix for the notifier
         }
         else if(pos == 6)
         {
@@ -609,7 +607,7 @@ struct HWListEntry * AllocHWEntry(struct ActionData *data, struct Node *phw)
  * psdMatchStringChunk() compares the stored name byte for byte, but the same
  * controller is spelled differently depending on who wrote the entry down: a
  * Kickstart-resident stack adds a bare "xhci.device" (romstartup/), while a
- * saved poseidon.prefs keeps whichever was current when it was written.
+ * saved neptune.prefs keeps whichever was current when it was written.
  * The library's pFindHardware() compares through <hwmatch.h> too, so every
  * place that asks "is this the same controller?" agrees by construction -
  * where it did not, a live entry and its own saved config read as two
@@ -2462,27 +2460,27 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
             End,
         End;
 
-    /* PoPo panel */
+    /* Notifier panel */
     data->cfgcntobj[5] = VGroup,
         MUIA_HelpNode, "tridentpopups",
-        Child, Label(__(MSG_PANEL_POPO)),
+        Child, Label(__(MSG_PANEL_NOTIFY)),
         Child, VSpace(0),
-        Child, VGroup, GroupFrameT(__(MSG_PANEL_POPO_LABEL)),
+        Child, VGroup, GroupFrameT(__(MSG_PANEL_NOTIFY_LABEL)),
             Child, VSpace(0),
             Child, ColGroup(2),
-                Child, Label(__(MSG_PANEL_POPO_CONNECT)),
+                Child, Label(__(MSG_PANEL_NOTIFY_CONNECT)),
                 Child, HGroup,
                     Child, data->cfgpopupnewobj = CycleObject,
-                        MUIA_ShortHelp, __(MSG_PANEL_POPO_CONNECT_HELP),
+                        MUIA_ShortHelp, __(MSG_PANEL_NOTIFY_CONNECT_HELP),
                         MUIA_CycleChain, 1,
                         MUIA_Cycle_Entries, popupnewdevicestrings,
                         MUIA_Cycle_Active, popupnew,
                         End,
                     End,
-                Child, Label(__(MSG_PANEL_POPO_DISCONNECT)),
+                Child, Label(__(MSG_PANEL_NOTIFY_DISCONNECT)),
                 Child, HGroup,
                     Child, data->cfgpopupgoneobj = ImageObject, ImageButtonFrame,
-                        MUIA_ShortHelp, _(MSG_PANEL_POPO_DISCONNECT_HELP),
+                        MUIA_ShortHelp, _(MSG_PANEL_NOTIFY_DISCONNECT_HELP),
                         MUIA_Background, MUII_ButtonBack,
                         MUIA_CycleChain, 1,
                         MUIA_InputMode, MUIV_InputMode_Toggle,
@@ -2492,9 +2490,9 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
                         MUIA_ShowSelState, FALSE,
                         End,
                     Child, HSpace(0),
-                    Child, Label(__(MSG_PANEL_POPO_DEATH)),
+                    Child, Label(__(MSG_PANEL_NOTIFY_DEATH)),
                     Child, data->cfgpopupdeathobj = ImageObject, ImageButtonFrame,
-                        MUIA_ShortHelp, __(MSG_PANEL_POPO_DEATH_HELP),
+                        MUIA_ShortHelp, __(MSG_PANEL_NOTIFY_DEATH_HELP),
                         MUIA_Background, MUII_ButtonBack,
                         MUIA_CycleChain, 1,
                         MUIA_InputMode, MUIV_InputMode_Toggle,
@@ -2504,19 +2502,19 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
                         MUIA_ShowSelState, FALSE,
                         End,
                     End,
-                Child, Label(__(MSG_PANEL_POPO_DELAY)),
+                Child, Label(__(MSG_PANEL_NOTIFY_DELAY)),
                 Child, data->cfgpopupdelayobj = SliderObject, SliderFrame,
-                    MUIA_ShortHelp, __(MSG_PANEL_POPO_DELAY_HELP),
+                    MUIA_ShortHelp, __(MSG_PANEL_NOTIFY_DELAY_HELP),
                     MUIA_CycleChain, 1,
                     MUIA_Numeric_Min, 0,
                     MUIA_Numeric_Max, 25,
                     MUIA_Numeric_Value, popupdelay,
-                    MUIA_Numeric_Format, __(MSG_PANEL_POPO_DELAY_FORMAT),
+                    MUIA_Numeric_Format, __(MSG_PANEL_NOTIFY_DELAY_FORMAT),
                     End,
-                Child, Label(__(MSG_PANEL_POPO_ACTIVATE)),
+                Child, Label(__(MSG_PANEL_NOTIFY_ACTIVATE)),
                 Child, HGroup,
                     Child, data->cfgpopupactivateobj = ImageObject, ImageButtonFrame,
-                        MUIA_ShortHelp, __(MSG_PANEL_POPO_ACTIVATE_HELP),
+                        MUIA_ShortHelp, __(MSG_PANEL_NOTIFY_ACTIVATE_HELP),
                         MUIA_Background, MUII_ButtonBack,
                         MUIA_CycleChain, 1,
                         MUIA_InputMode, MUIV_InputMode_Toggle,
@@ -2526,9 +2524,9 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
                         MUIA_ShowSelState, FALSE,
                         End,
                     Child, HSpace(0),
-                    Child, Label(__(MSG_PANEL_POPO_TOFRONT)),
+                    Child, Label(__(MSG_PANEL_NOTIFY_TOFRONT)),
                     Child, data->cfgpopuptofrontobj = ImageObject, ImageButtonFrame,
-                        MUIA_ShortHelp, __(MSG_PANEL_POPO_TOFRONT_HELP),
+                        MUIA_ShortHelp, __(MSG_PANEL_NOTIFY_TOFRONT_HELP),
                         MUIA_Background, MUII_ButtonBack,
                         MUIA_CycleChain, 1,
                         MUIA_InputMode, MUIV_InputMode_Toggle,
@@ -2538,10 +2536,10 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
                         MUIA_ShowSelState, FALSE,
                         End,
                     End,
-                Child, Label(__(MSG_PANEL_POPO_CONSOUND)),
+                Child, Label(__(MSG_PANEL_NOTIFY_CONSOUND)),
                 Child, PopaslObject,
                     MUIA_CycleChain, 1,
-                    MUIA_ShortHelp, __(MSG_PANEL_POPO_CONSOUND_HELP),
+                    MUIA_ShortHelp, __(MSG_PANEL_NOTIFY_CONSOUND_HELP),
                     MUIA_Popstring_String, data->cfgdevdtxsoundobj = StringObject,
                         StringFrame,
                         MUIA_CycleChain, 1,
@@ -2549,12 +2547,12 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
                         MUIA_String_Contents, devdtxsoundfile,
                         End,
                     MUIA_Popstring_Button, PopButton(MUII_PopFile),
-                    ASLFR_TitleText, __(MSG_PANEL_POPO_CONSOUND_SELECT),
+                    ASLFR_TitleText, __(MSG_PANEL_NOTIFY_CONSOUND_SELECT),
                     End,
-                Child, Label(__(MSG_PANEL_POPO_DISCONSOUND)),
+                Child, Label(__(MSG_PANEL_NOTIFY_DISCONSOUND)),
                 Child, PopaslObject,
                     MUIA_CycleChain, 1,
-                    MUIA_ShortHelp, __(MSG_PANEL_POPO_DISCONSOUND_HELP),
+                    MUIA_ShortHelp, __(MSG_PANEL_NOTIFY_DISCONSOUND_HELP),
                     MUIA_Popstring_String, data->cfgdevremsoundobj = StringObject,
                         StringFrame,
                         MUIA_CycleChain, 1,
@@ -2562,7 +2560,7 @@ Object * Action_OM_NEW(struct IClass *cl, Object *obj, Msg msg)
                         MUIA_String_Contents, devremsoundfile,
                         End,
                     MUIA_Popstring_Button, PopButton(MUII_PopFile),
-                    ASLFR_TitleText, __(MSG_PANEL_POPO_DISCONSOUND_SELECT),
+                    ASLFR_TitleText, __(MSG_PANEL_NOTIFY_DISCONSOUND_SELECT),
                     End,
                 End,
             Child, VSpace(0),
@@ -3397,7 +3395,7 @@ IPTR Action_LoadPrefs(struct IClass *cl, Object *obj, Msg msg)
     struct FileRequester *aslreq;
     char   path[256];
     struct TagItem asltags[] = { { ASLFR_InitialDrawer, (IPTR) "ENVARC:Sys" },
-                                 { ASLFR_InitialFile, (IPTR) "Poseidon.prefs" },
+                                 { ASLFR_InitialFile, (IPTR) "Neptune.prefs" },
                                  { ASLFR_TitleText, __(MSG_ACTION_PREFS_LOAD) },
                                  { TAG_END, (IPTR) NULL } };
 
@@ -3427,7 +3425,7 @@ IPTR Action_SavePrefsAs(struct IClass *cl, Object *obj, Msg msg)
     struct FileRequester *aslreq;
     char   path[256];
     struct TagItem asltags[] = { { ASLFR_InitialDrawer, (IPTR) "ENVARC:Sys" },
-                                 { ASLFR_InitialFile, (IPTR) "Poseidon.prefs" },
+                                 { ASLFR_InitialFile, (IPTR) "Neptune.prefs" },
                                  { ASLFR_TitleText, __(MSG_ACTION_PREFS_SAVEAS) },
                                  { ASLFR_DoSaveMode, (IPTR) TRUE },
                                  { TAG_END, (IPTR) NULL } };
@@ -4430,7 +4428,7 @@ IPTR Action_Cfg_Export(struct IClass *cl, Object *obj, Msg msg)
     struct FileRequester *aslreq;
     char   path[256];
     struct TagItem asltags[] = { { ASLFR_InitialFile, __(MSG_ACTION_CFG_PREFS_FILE) },
-                                 { ASLFR_InitialDrawer, (IPTR) "SYS:Prefs/Presets/Poseidon" },
+                                 { ASLFR_InitialDrawer, (IPTR) NEP_PRESETDRAWER },
                                  { ASLFR_TitleText, __(MSG_ACTION_CFG_EXPORT) },
                                  { ASLFR_DoSaveMode, (IPTR) TRUE },
                                  { TAG_END, (IPTR) NULL } };
@@ -4576,7 +4574,7 @@ IPTR Action_Cfg_Import(struct IClass *cl, Object *obj, Msg msg)
     ULONG *buff;
     APTR pic;
 
-    struct TagItem asltags[] = { { ASLFR_InitialDrawer, (IPTR) "SYS:Prefs/Presets/Poseidon" },
+    struct TagItem asltags[] = { { ASLFR_InitialDrawer, (IPTR) NEP_PRESETDRAWER },
                                  { ASLFR_TitleText, __(MSG_ACTION_CFG_IMPORT) },
                                  { TAG_END, (IPTR) NULL } };
 
@@ -4776,7 +4774,7 @@ IPTR ActionDispatcher(struct IClass * cl asm("a0"), Object * obj asm("a2"), Msg 
 
         case MUIM_Action_Use:
             InternalCreateConfigGUI(data);
-            psdSaveCfgToDisk("ENV:Sys/poseidon.prefs");
+            psdSaveCfgToDisk(NEP_PREFS_ENV);
             return(TRUE);
 
         case MUIM_Action_LoadPrefs:

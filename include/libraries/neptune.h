@@ -533,15 +533,15 @@ struct PsdGlobalCfg
 #define POCL_DISABLE      1               /* never allow low power link states */
 #define POCL_ENABLE       2               /* always allow them */
 
-struct PsdPoPoCfg
+struct PsdNotifyCfg
 {
-    ULONG poc_ChunkID;                    /* ChunkID=IFFCHNK_POPO */
-    ULONG poc_Length;                     /* sizeof(struct PsdPopoCfg)-8 */
-    BOOL  poc_InhibitPopup;               /* Inhibit opening of popup window */
-    BOOL  poc_NoClassBind;                /* Inhibit class scan */
-    UWORD poc_OverridePowerInfo;          /* 0=keep, 1=buspowered, 2=selfpowered */
-    UWORD poc_LinkPowerOverride;          /* POCL_*: per device link power policy */
-    BOOL  poc_NoAutoSuspend;              /* never suspend this device from the idle sweep */
+    ULONG ntc_ChunkID;                    /* ChunkID=IFFCHNK_POPUP */
+    ULONG ntc_Length;                     /* sizeof(struct PsdNotifyCfg)-8 */
+    BOOL  ntc_InhibitPopup;               /* Inhibit opening of popup window */
+    BOOL  ntc_NoClassBind;                /* Inhibit class scan */
+    UWORD ntc_OverridePowerInfo;          /* 0=keep, 1=buspowered, 2=selfpowered */
+    UWORD ntc_LinkPowerOverride;          /* POCL_*: per device link power policy */
+    BOOL  ntc_NoAutoSuspend;              /* never suspend this device from the idle sweep */
     /* APPEND ONLY - same min(saved, current) merge rule as PsdGlobalCfg above.
        Both new fields are deliberately zero-valued by default, so an existing
        per-device chunk needs no migration. */

@@ -133,36 +133,36 @@ struct PsdBorrowLock
     struct PsdReadLock *pbl_ReadLock;     /* Readlock that was changed */
 };
 
-struct PsdPoPo
+struct PsdNotify
 {
-    struct Task        *po_Task;          /* PoPo Task */
-    struct MsgPort     *po_MsgPort;       /* Port for EventNote messages */
-    LONG                po_ReadySignal;   /* Signal to respond to task changes */
-    struct Task        *po_ReadySigTask;  /* task to signal */
-    struct Library     *po_IntBase;       /* Intuition base for PoPo Task */
-    struct Library     *po_MUIBase;       /* MUI base for PoPo Task */
-    struct Library     *po_DTBase;        /* DataTypes base for PoPo Task */
-    struct MsgPort     *po_TimerMsgPort;  /* Standard timer MsgPort */
-    struct timerequest *po_TimerIOReq;    /* Standard timer request */
-    struct MUI_CustomClass *po_PoPoClass; /* PoPo Action Class */
-    ULONG              *po_PoPoObj;       /* PoPo Action Object */
-    ULONG              *po_AppObj;        /* App Object */
-    ULONG              *po_WindowObj;     /* Window Object */
-    ULONG              *po_GroupObj;      /* Group Object */
-    ULONG              *po_SaveObj;       /* Save Button Object */
-    ULONG              *po_CloseObj;      /* Close Button Object */
-    ULONG              *po_StickyObj;     /* Sticky Object */
-    ULONG              *po_AboutMI;       /* About MenuItem */
-    ULONG              *po_CloseMI;       /* Close MenuItem */
-    ULONG              *po_TridentMI;     /* Trident MenuItem */
-    ULONG              *po_MUIPrefsMI;    /* MUI Prefs MenuItem */
-    struct PsdEventHook *po_EventHandler; /* Event handler */
-    struct List         po_GadgetList;    /* List of gadgets for a device */
-    BOOL                po_OpenRequest;   /* open window requested */
-    BOOL                po_Sticky;        /* sticky entries */
-    STRPTR              po_InsertSndFile; /* Path to insertion sound file */
-    STRPTR              po_RemoveSndFile; /* Path to removal sound file */
-    struct List         po_Sounds;        /* List of loaded soundfiles */
+    struct Task        *nt_Task;          /* Notifier task */
+    struct MsgPort     *nt_MsgPort;       /* Port for EventNote messages */
+    LONG                nt_ReadySignal;   /* Signal to respond to task changes */
+    struct Task        *nt_ReadySigTask;  /* task to signal */
+    struct Library     *nt_IntBase;       /* Intuition base for notifier task */
+    struct Library     *nt_MUIBase;       /* MUI base for notifier task */
+    struct Library     *nt_DTBase;        /* DataTypes base for notifier task */
+    struct MsgPort     *nt_TimerMsgPort;  /* Standard timer MsgPort */
+    struct timerequest *nt_TimerIOReq;    /* Standard timer request */
+    struct MUI_CustomClass *nt_NotifyClass; /* Notifier action class */
+    ULONG              *nt_NotifyObj;       /* Notifier action object */
+    ULONG              *nt_AppObj;        /* App Object */
+    ULONG              *nt_WindowObj;     /* Window Object */
+    ULONG              *nt_GroupObj;      /* Group Object */
+    ULONG              *nt_SaveObj;       /* Save Button Object */
+    ULONG              *nt_CloseObj;      /* Close Button Object */
+    ULONG              *nt_StickyObj;     /* Sticky Object */
+    ULONG              *nt_AboutMI;       /* About MenuItem */
+    ULONG              *nt_CloseMI;       /* Close MenuItem */
+    ULONG              *nt_PrefsMI;     /* Prefs editor MenuItem */
+    ULONG              *nt_MUIPrefsMI;    /* MUI Prefs MenuItem */
+    struct PsdEventHook *nt_EventHandler; /* Event handler */
+    struct List         nt_GadgetList;    /* List of gadgets for a device */
+    BOOL                nt_OpenRequest;   /* open window requested */
+    BOOL                nt_Sticky;        /* sticky entries */
+    STRPTR              nt_InsertSndFile; /* Path to insertion sound file */
+    STRPTR              nt_RemoveSndFile; /* Path to removal sound file */
+    struct List         nt_Sounds;        /* List of loaded soundfiles */
 };
 
 struct PsdHandlerTask
@@ -219,7 +219,7 @@ struct PsdBase
     struct List         ps_AlienConfigs;  /* Configuration FORM from outer space */
     BOOL                ps_CfgChangeMute; /* Don't generate config changed events */
     struct SignalSemaphore ps_ReentrantLock; /* Lock for non-reentrant stuff */
-    struct SignalSemaphore ps_PoPoLock;   /* Lock for non-reentrant stuff */
+    struct SignalSemaphore ps_NotifyLock;   /* Lock for non-reentrant stuff */
     struct SignalSemaphore ps_StallRecoverySem; /* Guards pd_EpHaltMask (every device).  Leaf-level:
                                              held only for the mask reads/writes themselves, never
                                              across a wire transfer or while taking another lock. */
@@ -236,7 +236,7 @@ struct PsdBase
     ULONG               ps_ConfigHash;    /* Last config hash value */
     ULONG               ps_SavedConfigHash; /* Hash sum of last saved config */
     struct PsdGlobalCfg *ps_GlobalCfg;    /* Global Config structure */
-    struct PsdPoPo      ps_PoPo;
+    struct PsdNotify      ps_Notify;
     ULONG               ps_ReleaseVersion; /* Release Version for update info */
     ULONG               ps_OSVersion;     /* Internal OS Version descriptor */
     BOOL                ps_StartedAsTask; /* Did we start in Task Mode before DOS was available? */
@@ -491,7 +491,7 @@ struct PsdDevice
     STRPTR              pd_IDString;      /* Whole Device ID string */
     struct List         pd_Configs;       /* List of configurations */
     BOOL                pd_IsNewToMe;     /* Whether the device is connected the first time */
-    struct PsdPoPoCfg   pd_PoPoCfg;       /* Inhibit PopUp and Class scan Config */
+    struct PsdNotifyCfg   pd_NotifyCfg;       /* Inhibit PopUp and Class scan Config */
     struct List         pd_Descriptors;   /* Descriptors collected */
     struct List         pd_RTIsoHandlers; /* List of RTIsoHandlers */
 

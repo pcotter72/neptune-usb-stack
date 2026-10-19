@@ -66,7 +66,7 @@
  * checks it occurs exactly once, and overwrites the 32 bytes that follow.  A byte
  * signature rather than a symbol because the module is linked -s.
  */
-#define ROMSTART_HCD_COOKIE "PSDHCD\1"   /* 8 bytes with the NUL; \1 = layout version */
+#define ROMSTART_HCD_COOKIE "NEPHCD\1"   /* 8 bytes with the NUL; \1 = layout version */
 
 static const struct {
     char cookie[8];
@@ -109,8 +109,8 @@ static ULONG initUsbRom(ULONG            dummy   asm("d0"),
 
 /* `residentId` feeds the shared $VER cookie (include/neptune_version.h), so this
    module carries the same version identity as the rest of the distribution. */
-static const char residentName[] = "Poseidon ROM Init";
-static const char residentId[]   = NEP_VER("Poseidon ROM Startup");
+static const char residentName[] = "Neptune ROM Init";
+static const char residentId[]   = NEP_VER("Neptune ROM Startup");
 
 const struct Resident romTag __attribute__((used, section(".text.modhdr"))) = {
     RTC_MATCHWORD,

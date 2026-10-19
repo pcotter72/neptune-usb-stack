@@ -1,10 +1,11 @@
 /*
 ** PsdStackLoader starts the stack: it is the one command the startup needs.
 **
-** What should run comes from ENVARC:Sys/poseidon.prefs. Where the prefs say
-** nothing, defaults stand in: every class in SYS:Classes/USB, and the host
-** controller named on the command line. AddUSBClasses and AddUSBHardware do
-** those two jobs by hand; they are not needed at startup.
+** What should run comes from ENVARC:Sys/neptune.prefs (on first start, imported
+** from poseidon.prefs and saved). Where the prefs say nothing, defaults stand in:
+** every class in DEVS:USBClasses, and the host controller named on the command
+** line. AddUSBClasses and AddUSBHardware do those two jobs by hand; they are not
+** needed at startup.
 */
 
 #include <string.h>

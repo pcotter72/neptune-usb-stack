@@ -586,87 +586,87 @@ MSG_PANEL_OPTIONS_MEMORY
 Pamiêæ przydzielona w puli Poseidon:
 ; Memory allocated in Poseidon Pool:
 ;
-MSG_PANEL_POPO
+MSG_PANEL_NOTIFY
 \33c\33bUstawienia wyskakuj±cych okienek
 ; \33c\33bPopup Settings
 ;
-MSG_PANEL_POPO_LABEL
+MSG_PANEL_NOTIFY_LABEL
 Opcje wyskakuj±cego okna
 ; Popup Window Options
 ;
-MSG_PANEL_POPO_CONNECT 
+MSG_PANEL_NOTIFY_CONNECT 
 Przy pod³±czeniu:
 ; On connecting:
 ;
-MSG_PANEL_POPO_CONNECT_HELP
+MSG_PANEL_NOTIFY_CONNECT_HELP
 Zachowanie wyskakuj±cego okienka podczas\npod³±czania nowych urz±dzeñ USB
 ; Popup display behaviour on\nconnecting new USB devices
 ;
-MSG_PANEL_POPO_DISCONNECT
+MSG_PANEL_NOTIFY_DISCONNECT
 Przy roz³±czeniu:
 ; On disconnect:
 ;
-MSG_PANEL_POPO_DISCONNECT_HELP
+MSG_PANEL_NOTIFY_DISCONNECT_HELP
 Czy wy¶wietliæ okno, je¶li urz±dzenie zostanie usuniête.
 ; Whether to popup a window\nif the device is removed.
 ;
-MSG_PANEL_POPO_DEATH
+MSG_PANEL_NOTIFY_DEATH
 Przy ¶mierci urz±dzenia:
 ; On device death:
 ;
-MSG_PANEL_POPO_DEATH_HELP
+MSG_PANEL_NOTIFY_DEATH_HELP
 Otwórz requester, je¶li urz±dzenie wydaje siê byæ martwe.
 ; Open a requester, if device seems to be dead.
 ;
-MSG_PANEL_POPO_DELAY
+MSG_PANEL_NOTIFY_DELAY
 Opó¼nienie wyskakuj±cego okienka:
 ; Popup delay:
 ;
-MSG_PANEL_POPO_DELAY_HELP
+MSG_PANEL_NOTIFY_DELAY_HELP
 Jak d³ugo powinien byæ wy¶wietlany requester,\nzanim zniknie automatycznie.
 ; How long should the requester be displayed\nbefore disappearing automatically.
 ;
-MSG_PANEL_POPO_DELAY_FORMAT
+MSG_PANEL_NOTIFY_DELAY_FORMAT
 %ld sec.
 ; %ld sec.
 ;
-MSG_PANEL_POPO_ACTIVATE
+MSG_PANEL_NOTIFY_ACTIVATE
 Aktywuj okno:
 ; Activate window:
 ;
-MSG_PANEL_POPO_ACTIVATE_HELP
+MSG_PANEL_NOTIFY_ACTIVATE_HELP
 Aktywuj okno podczas otwierania.
 ; Make the window active when opening.
 ;
-MSG_PANEL_POPO_TOFRONT
+MSG_PANEL_NOTIFY_TOFRONT
 Wysuñ na przód:
 ; Pop to front:
 ;
-MSG_PANEL_POPO_TOFRONT_HELP
+MSG_PANEL_NOTIFY_TOFRONT_HELP
 Wysuñ okno na przód, je¶li zawarto¶æ ulegnie zmianie.
 ; Pop window to front, if content changes.
 ;
-MSG_PANEL_POPO_CONSOUND
+MSG_PANEL_NOTIFY_CONSOUND
 D¼wiêk po³±czenia:
 ; Connection sound:
 ;
-MSG_PANEL_POPO_CONSOUND_HELP
+MSG_PANEL_NOTIFY_CONSOUND_HELP
 Ten d¼wiêk bêdzie odtwarzany za ka¿dym razem, gdy urz±dzenie\nzostanie pod³±czone do magistrali.
 ; This sound will be replayed everytime\na device is connected to the bus.
 ;
-MSG_PANEL_POPO_CONSOUND_SELECT
+MSG_PANEL_NOTIFY_CONSOUND_SELECT
 Wybierz plik d¼wiêkowy do odtworzenia...
 ; Select a sound file to be replayed...
 ;
-MSG_PANEL_POPO_DISCONSOUND
+MSG_PANEL_NOTIFY_DISCONSOUND
 D¼wiêk roz³±czenia:
 ; Disconnect sound:
 ;
-MSG_PANEL_POPO_DISCONSOUND_HELP
+MSG_PANEL_NOTIFY_DISCONSOUND_HELP
 Ten d¼wiêk bêdzie odtwarzany za ka¿dym razem,\ngdy urz±dzenie zostanie od³±czone od magistrali.
 ; This sound will be replayed everytime\na device is removed from the bus.
 ;
-MSG_PANEL_POPO_DISCONSOUND_SELECT
+MSG_PANEL_NOTIFY_DISCONSOUND_SELECT
 Wybierz plik d¼wiêkowy do odtworzenia...
 ; Select a sound file to be replayed...
 ;

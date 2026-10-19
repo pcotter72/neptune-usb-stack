@@ -14,7 +14,7 @@ You do this on a **PC** (Linux, or Windows with WSL), not on the Amiga.
 
 * **Python 3 and amitools.** Install amitools with `pipx install amitools`.
 * **This archive, unpacked.** Keep its drawers together; the script takes files from `LIBS/` and
-  `Classes/` next to this one.
+  `DEVS/` next to this one.
 * **Your Kickstart.** The AmigaOS 3.2 ROM file that is on your SD card now (512 KB). Copy it to
   the PC. It must be the original file, not one that was already modified.
 * **The Emu68 driver archive**, unpacked:
@@ -46,7 +46,7 @@ The script lists what it put in, with version numbers:
 ```
    -41   NT_LIBRARY   bcmpcie.library    $VER: bcmpcie.library 2.5 ...
    -42   NT_DEVICE    xhci.device        $VER: emu68-xhci-driver 6.4 ...
-   -44   NT_LIBRARY   poseidon.library   ...
+   -44   NT_LIBRARY   neptune.library    ...
 ```
 
 Check that `bcmpcie.library` and `xhci.device` are in that list.

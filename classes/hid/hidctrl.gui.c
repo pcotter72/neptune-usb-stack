@@ -76,7 +76,7 @@ void nHIDCtrlGUITask()
         MUIA_Application_Author     , (IPTR)"Chris Hodges <chrisly@platon42.de>",
         MUIA_Application_Description, (IPTR)"HID Device Output Control",
         MUIA_Application_Base       , (IPTR)nch->nch_CDC->cdc_HIDCtrlRexx,
-        MUIA_Application_HelpFile   , (IPTR)"HELP:Poseidon.guide",
+        MUIA_Application_HelpFile   , (IPTR)"HELP:Neptune.guide",
         MUIA_Application_Menustrip  , (IPTR)MenustripObject,
             Child, (IPTR)MenuObjectT((IPTR)"Project"),
                 Child, (IPTR)(nch->nch_HCAboutMI = MenuitemObject,

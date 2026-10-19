@@ -805,7 +805,7 @@ void nGUITask()
         MUIA_Application_Copyright  , (IPTR)NEPTUNE_DIST_NAME,
         MUIA_Application_Description, (IPTR)"Settings for a USB camera",
         MUIA_Application_Base       , (IPTR)"USBVIDEO",
-        MUIA_Application_HelpFile   , (IPTR)"HELP:Poseidon.guide",
+        MUIA_Application_HelpFile   , (IPTR)"HELP:Neptune.guide",
         MUIA_Application_Menustrip  , (IPTR)MenustripObject,
             Child, (IPTR)MenuObjectT((IPTR)"Project"),
                 Child, (IPTR)(gui->ug_AboutMI = MenuitemObject,

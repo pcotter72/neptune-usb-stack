@@ -68,6 +68,8 @@ renamed=(
     "poseidon.library.c  neptune.library.c"
     "poseidon.library.h  neptune.library.h"
     "poseidon_intern.h   neptune_intern.h"
+    "popo.gui.c          notify.gui.c"
+    "popo.gui.h          notify.gui.h"
 )
 
 # Our path for an upstream file, or nothing if we have no place for it.

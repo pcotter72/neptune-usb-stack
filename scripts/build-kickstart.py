@@ -7,7 +7,7 @@ This is an advanced, entirely optional path. It does not replace, and does not t
 the normal filesystem installation - see ROM-ReadMe.md.
 
 The seven Neptune ROM modules are found automatically - from the archive this script
-ships in (the ROM/ drawer of Neptune-<ver>-<cpu>.lha, beside LIBS/ and Classes/), or
+ships in (the ROM/ drawer of Neptune-<ver>-<cpu>.lha, beside LIBS/ and DEVS/), or
 from the build tree when run out of a source checkout. Anything else is passed on the
 command line, so this stays driver-agnostic: on PiStorm/Emu68 that is normally
 bcmpcie.library + xhci.device, plus nvme.device if you want to boot from NVMe.
@@ -211,7 +211,7 @@ def patch_kickstart(stock, banks):
 # sizeof(romstartHcd.name) there. The trailing \x01 is the layout version: bump it there
 # and here together if the field ever moves or changes size, so an old script cannot
 # silently mis-patch a new module.
-HCD_COOKIE = b"PSDHCD\x01\x00"
+HCD_COOKIE = b"NEPHCD\x01\x00"
 HCD_NAME_LEN = 32
 
 
@@ -323,7 +323,7 @@ def neptune_modules(build_dir):
     if (here / "usbromstart").is_file():
         kit = here.parent
         library = kit / "LIBS" / "neptune.library"
-        classes = [kit / "Classes" / "USB" / f"{c}.class" for c in ROM_CLASSES]
+        classes = [kit / "DEVS" / "USBClasses" / f"{c}.class" for c in ROM_CLASSES]
         romstart = here / "usbromstart"
         out_dir = Path.cwd()
         hint = "the archive is incomplete; unpack Neptune-<ver>-<cpu>.lha again"

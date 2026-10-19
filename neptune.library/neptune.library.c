@@ -81,7 +81,7 @@ int libInit(struct PsdBase * ps)
         NewList(&ps->ps_DeadlockDebug);
 
         InitSemaphore(&ps->ps_ReentrantLock);
-        InitSemaphore(&ps->ps_PoPoLock);
+        InitSemaphore(&ps->ps_NotifyLock);
         InitSemaphore(&ps->ps_StallRecoverySem);
         InitSemaphore(&ps->ps_MemPoolSem);
 
@@ -115,7 +115,7 @@ int libOpen(struct PsdBase * ps)
         ps->ps_TimerIOReq.tr_node.io_Message.mn_ReplyPort    = NULL;
         ps->ps_TimerIOReq.tr_node.io_Message.mn_Length       = sizeof(struct timerequest);
         if(!OpenDevice("timer.device", UNIT_MICROHZ, (struct IORequest *) &ps->ps_TimerIOReq, 0)) {
-            ps->ps_TimerIOReq.tr_node.io_Message.mn_Node.ln_Name = "Poseidon";
+            ps->ps_TimerIOReq.tr_node.io_Message.mn_Node.ln_Name = "Neptune";
             ps->ps_TimerIOReq.tr_node.io_Command = TR_ADDREQUEST;
 
             ps->ps_ReleaseVersion = RELEASEVERSION;
@@ -155,8 +155,8 @@ int libOpen(struct PsdBase * ps)
                         pAddCfgChunk(ps, pic, ps->ps_GlobalCfg);
                     }
                 }
-                ps->ps_PoPo.po_InsertSndFile = psdCopyStr("SYS:Prefs/Presets/Poseidon/Connect.iff");
-                ps->ps_PoPo.po_RemoveSndFile = psdCopyStr("SYS:Prefs/Presets/Poseidon/Disconnect.iff");
+                ps->ps_Notify.nt_InsertSndFile = psdCopyStr(NEP_PRESETDRAWER "/Connect.iff");
+                ps->ps_Notify.nt_RemoveSndFile = psdCopyStr(NEP_PRESETDRAWER "/Disconnect.iff");
 
                 /* VERSION_STRING is the $VER cookie ("$VER: neptune.library <ver> (date) ...");
                  * skip the 6-char "$VER: " tag for the welcome banner. */
@@ -208,15 +208,15 @@ int libExpunge(struct PsdBase * ps)
         pic = (struct PsdIFFContext *) ps->ps_ConfigRoot.lh_Head;
     }
 
-    if(ps->ps_PoPo.po_Task) {
-        ps->ps_PoPo.po_ReadySignal = SIGB_SINGLE;
-        ps->ps_PoPo.po_ReadySigTask = FindTask(NULL);
-        Signal(ps->ps_PoPo.po_Task, SIGBREAKF_CTRL_C);
-        while(ps->ps_PoPo.po_Task) {
-            Wait(1L<<ps->ps_PoPo.po_ReadySignal);
+    if(ps->ps_Notify.nt_Task) {
+        ps->ps_Notify.nt_ReadySignal = SIGB_SINGLE;
+        ps->ps_Notify.nt_ReadySigTask = FindTask(NULL);
+        Signal(ps->ps_Notify.nt_Task, SIGBREAKF_CTRL_C);
+        while(ps->ps_Notify.nt_Task) {
+            Wait(1L<<ps->ps_Notify.nt_ReadySignal);
         }
-        ps->ps_PoPo.po_ReadySigTask = NULL;
-        //FreeSignal(ps->ps_PoPo.po_ReadySignal);
+        ps->ps_Notify.nt_ReadySigTask = NULL;
+        //FreeSignal(ps->ps_Notify.nt_ReadySignal);
     }
     if(ps->ps_EventHandler.ph_Task) {
         ps->ps_EventHandler.ph_ReadySignal = SIGB_SINGLE;
@@ -228,8 +228,8 @@ int libExpunge(struct PsdBase * ps)
         ps->ps_EventHandler.ph_ReadySigTask = NULL;
         //FreeSignal(ps->ps_EventHandler.ph_ReadySignal);
     }
-    psdFreeVec(ps->ps_PoPo.po_InsertSndFile);
-    psdFreeVec(ps->ps_PoPo.po_RemoveSndFile);
+    psdFreeVec(ps->ps_Notify.nt_InsertSndFile);
+    psdFreeVec(ps->ps_Notify.nt_RemoveSndFile);
     pGarbageCollectEvents(ps);
 
     CloseDevice((struct IORequest *) &ps->ps_TimerIOReq);
@@ -1014,7 +1014,7 @@ void (psdDelayMS)(ULONG milli asm("d0"), struct PsdBase * ps asm("a6"))
 /* /// "psdSpawnSubTask()" */
 struct Task * (psdSpawnSubTask)(STRPTR name asm("a0"), APTR initpc asm("a1"), APTR userdata asm("a2"), struct PsdBase * ps asm("a6"))
 {
-    /* PoPo and every class GUI run MUI on these stacks, and MUI 5 warns below
+    /* The notifier and every class GUI run MUI on these stacks, and MUI 5 warns below
        32K. Not AROS_STACKSIZE: that stays the shell-command default. */
 #define SUBTASKSTACKSIZE 32768
     struct {
@@ -1682,7 +1682,7 @@ void pFreeDevice(struct PsdBase * ps, struct PsdDevice *pd)
         pd->pd_LangIDArray = NULL;
         psdFreeVec(pd->pd_MnfctrStr);
         pd->pd_MnfctrStr = NULL;
-        /*if(!ps->ps_PoPo.po_Task) // keep name at least
+        /*if(!ps->ps_Notify.nt_Task) // keep name at least
         {
             psdFreeVec(pd->pd_ProductStr);
             pd->pd_ProductStr = NULL;
@@ -1778,13 +1778,13 @@ struct PsdDevice * (psdAllocDevice)(struct PsdHardware * phw asm("a0"), struct P
         NewList(&pd->pd_RTIsoHandlers);
 
         // init prefs
-        pd->pd_PoPoCfg.poc_ChunkID = AROS_LONG2BE(IFFCHNK_POPUP);
-        pd->pd_PoPoCfg.poc_Length = AROS_LONG2BE(sizeof(struct PsdPoPoCfg) - 8);
-        pd->pd_PoPoCfg.poc_InhibitPopup = FALSE;
-        pd->pd_PoPoCfg.poc_NoClassBind = FALSE;
-        pd->pd_PoPoCfg.poc_OverridePowerInfo = POCP_TRUST_DEVICE;
-        pd->pd_PoPoCfg.poc_LinkPowerOverride = POCL_INHERIT;
-        pd->pd_PoPoCfg.poc_NoAutoSuspend = FALSE;
+        pd->pd_NotifyCfg.ntc_ChunkID = AROS_LONG2BE(IFFCHNK_POPUP);
+        pd->pd_NotifyCfg.ntc_Length = AROS_LONG2BE(sizeof(struct PsdNotifyCfg) - 8);
+        pd->pd_NotifyCfg.ntc_InhibitPopup = FALSE;
+        pd->pd_NotifyCfg.ntc_NoClassBind = FALSE;
+        pd->pd_NotifyCfg.ntc_OverridePowerInfo = POCP_TRUST_DEVICE;
+        pd->pd_NotifyCfg.ntc_LinkPowerOverride = POCL_INHERIT;
+        pd->pd_NotifyCfg.ntc_NoAutoSuspend = FALSE;
 
         psdLockWritePBase();
         AddTail(&phw->phw_Devices, &pd->pd_Node);
@@ -3225,7 +3225,7 @@ static LONG pSetHubPortTimeout(struct PsdBase *ps, struct PsdDevice *pd,
    the user drives, and conflating the two would hide one behind the other. */
 static BOOL pLinkPowerWanted(struct PsdBase *ps, struct PsdDevice *pd)
 {
-    switch(pd->pd_PoPoCfg.poc_LinkPowerOverride) {
+    switch(pd->pd_NotifyCfg.ntc_LinkPowerOverride) {
         case POCL_DISABLE:
             return FALSE;
 
@@ -3861,11 +3861,11 @@ LONG (psdGetAttrsA)(ULONG type asm("d0"), APTR psdstruct asm("a0"), struct TagIt
     case PGA_STACKCFG:
         if((ti = FindTagItem(GCA_InsertionSound, tags))) {
             count++;
-            *((STRPTR *) ti->ti_Data) = ps->ps_PoPo.po_InsertSndFile;
+            *((STRPTR *) ti->ti_Data) = ps->ps_Notify.nt_InsertSndFile;
         }
         if((ti = FindTagItem(GCA_RemovalSound, tags))) {
             count++;
-            *((STRPTR *) ti->ti_Data) = ps->ps_PoPo.po_RemoveSndFile;
+            *((STRPTR *) ti->ti_Data) = ps->ps_Notify.nt_RemoveSndFile;
         }
         break;
     }
@@ -3883,7 +3883,7 @@ LONG (psdSetAttrsA)(ULONG type asm("d0"), APTR psdstruct asm("a0"), struct TagIt
     struct TagItem *ti;
     ULONG count = 0;
     ULONG *packtab = NULL;
-    BOOL savepopocfg = FALSE;
+    BOOL savenotifycfg = FALSE;
     BOOL checkcfgupdate = FALSE;
     BOOL powercalc = FALSE;
     BOOL updatehub = FALSE;
@@ -3900,21 +3900,21 @@ LONG (psdSetAttrsA)(ULONG type asm("d0"), APTR psdstruct asm("a0"), struct TagIt
     switch(type) {
     case PGA_DEVICE:
         if(FindTagItem(DA_InhibitPopup, tags) || FindTagItem(DA_InhibitClassBind, tags)) {
-            savepopocfg = TRUE;
+            savenotifycfg = TRUE;
         }
         if(FindTagItem(DA_OverridePowerInfo, tags)) {
-            savepopocfg = TRUE;
+            savenotifycfg = TRUE;
             powercalc = TRUE;
         }
         if(FindTagItem(DA_NoAutoSuspend, tags)) {
-            savepopocfg = TRUE;
+            savenotifycfg = TRUE;
         }
         if(FindTagItem(DA_LinkPowerOverride, tags)) {
-            savepopocfg = TRUE;
+            savenotifycfg = TRUE;
             /* snapshot before the pack: Trident rewrites every per-device
                setting on each gadget click, and only a real change should
                cost a wire round trip */
-            oldlinkpower = ((struct PsdDevice *) psdstruct)->pd_PoPoCfg.poc_LinkPowerOverride;
+            oldlinkpower = ((struct PsdDevice *) psdstruct)->pd_NotifyCfg.ntc_LinkPowerOverride;
             checklinkpower = TRUE;
         }
         if(FindTagItem(DA_HubNumPorts, tags)) {
@@ -3933,16 +3933,16 @@ LONG (psdSetAttrsA)(ULONG type asm("d0"), APTR psdstruct asm("a0"), struct TagIt
     case PGA_STACKCFG:
         if((ti = FindTagItem(GCA_InsertionSound, tags))) {
             count++;
-            if(strcmp(ps->ps_PoPo.po_InsertSndFile, (STRPTR) ti->ti_Data)) {
-                psdFreeVec(ps->ps_PoPo.po_InsertSndFile);
-                ps->ps_PoPo.po_InsertSndFile = psdCopyStr((STRPTR) ti->ti_Data);
+            if(strcmp(ps->ps_Notify.nt_InsertSndFile, (STRPTR) ti->ti_Data)) {
+                psdFreeVec(ps->ps_Notify.nt_InsertSndFile);
+                ps->ps_Notify.nt_InsertSndFile = psdCopyStr((STRPTR) ti->ti_Data);
             }
         }
         if((ti = FindTagItem(GCA_RemovalSound, tags))) {
             count++;
-            if(strcmp(ps->ps_PoPo.po_RemoveSndFile, (STRPTR) ti->ti_Data)) {
-                psdFreeVec(ps->ps_PoPo.po_RemoveSndFile);
-                ps->ps_PoPo.po_RemoveSndFile = psdCopyStr((STRPTR) ti->ti_Data);
+            if(strcmp(ps->ps_Notify.nt_RemoveSndFile, (STRPTR) ti->ti_Data)) {
+                psdFreeVec(ps->ps_Notify.nt_RemoveSndFile);
+                ps->ps_Notify.nt_RemoveSndFile = psdCopyStr((STRPTR) ti->ti_Data);
             }
         }
         if(FindTagItem(GCA_LinkPowerMgmt, tags)) {
@@ -4141,7 +4141,7 @@ LONG (psdSetAttrsA)(ULONG type asm("d0"), APTR psdstruct asm("a0"), struct TagIt
     } else {
         res = -1;
     }
-    if(savepopocfg) {
+    if(savenotifycfg) {
         struct PsdDevice *pd = (struct PsdDevice *) psdstruct;
         struct PsdIFFContext *pic;
 
@@ -4151,7 +4151,7 @@ LONG (psdSetAttrsA)(ULONG type asm("d0"), APTR psdstruct asm("a0"), struct TagIt
             pic = psdGetUsbDevCfg("Trident", pd->pd_IDString, NULL);
         }
         if(pic) {
-            pAddCfgChunk(ps, pic, &pd->pd_PoPoCfg);
+            pAddCfgChunk(ps, pic, &pd->pd_NotifyCfg);
             checkcfgupdate = TRUE;
         }
     }
@@ -4165,7 +4165,7 @@ LONG (psdSetAttrsA)(ULONG type asm("d0"), APTR psdstruct asm("a0"), struct TagIt
     if(checklinkpower) {
         UWORD newlinkpower = (type == PGA_STACKCFG)
                              ? (UWORD) ps->ps_GlobalCfg->pgc_LinkPowerMgmt
-                             : ((struct PsdDevice *) psdstruct)->pd_PoPoCfg.poc_LinkPowerOverride;
+                             : ((struct PsdDevice *) psdstruct)->pd_NotifyCfg.ntc_LinkPowerOverride;
         if(newlinkpower != oldlinkpower) {
             /* Applying the new policy is a series of blocking control transfers
                per device, and this call arrives on the caller's context - the
@@ -4534,9 +4534,9 @@ struct PsdDevice * (psdEnumerateDevice)(struct PsdPipe * pp asm("a1"), struct Ps
             hasprodname = TRUE;
         }
         if((chnk = pFindCfgChunk(ps, pic, IFFCHNK_POPUP))) {
-            struct PsdPoPoCfg *poc = (struct PsdPoPoCfg *) chnk;
-            CopyMem(((UBYTE *) poc) + 8, ((UBYTE *) &pd->pd_PoPoCfg) + 8,
-                    min(AROS_LONG2BE(poc->poc_Length), AROS_LONG2BE(pd->pd_PoPoCfg.poc_Length)));
+            struct PsdNotifyCfg *poc = (struct PsdNotifyCfg *) chnk;
+            CopyMem(((UBYTE *) poc) + 8, ((UBYTE *) &pd->pd_NotifyCfg) + 8,
+                    min(AROS_LONG2BE(poc->ntc_Length), AROS_LONG2BE(pd->pd_NotifyCfg.ntc_Length)));
             haspopupinhibit = TRUE;
         }
     } else {
@@ -4548,7 +4548,7 @@ struct PsdDevice * (psdEnumerateDevice)(struct PsdPipe * pp asm("a1"), struct Ps
     }
     if(!haspopupinhibit) {
         if(pd->pd_DevClass == HUB_CLASSCODE) { // hubs default to true
-            pd->pd_PoPoCfg.poc_InhibitPopup = TRUE;
+            pd->pd_NotifyCfg.ntc_InhibitPopup = TRUE;
         }
     }
     pUnlockSem(ps, &ps->ps_ConfigLock);
@@ -7498,7 +7498,7 @@ void (psdClassScan)(struct PsdBase * ps asm("a6"))
      * the boot classes only bridged the gap, so release their bindings now and
      * let the classes that are available by now (hid.class) take the devices
      * over. This used to happen only in psdParseCfg(), i.e. only when a saved
-     * poseidon.prefs existed, leaving bootmouse/bootkeyboard in charge forever
+     * prefs file existed, leaving bootmouse/bootkeyboard in charge forever
      * on systems without one.
      */
     Forbid();
@@ -7746,7 +7746,7 @@ void (psdHubClassScan)(struct PsdDevice * pd asm("a0"), struct PsdBase * ps asm(
     }
     psdLockReadPBase();
     psdLockWriteDevice(pd);
-    while(!(pd->pd_PoPoCfg.poc_NoClassBind || pd->pd_DevBinding)) {
+    while(!(pd->pd_NotifyCfg.ntc_NoClassBind || pd->pd_DevBinding)) {
         if(!(pp = psdAllocPipe(pd, mp, NULL))) {
             break;
         }
@@ -8185,78 +8185,148 @@ BOOL (psdReadCfg)(struct PsdIFFContext * pic asm("a0"), APTR formdata asm("a1"),
 }
 /* \\\ */
 
+/* /// "pMigrateCfgPrefix()" */
+/* Replace the drawer prefix oldp of the path held in string chunk chnkid of
+   pic with newp: "SYS:Classes/USB/hid.class" -> "DEVS:USBClasses/hid.class".
+   The prefix must match a whole path component (case-insensitive, as AmigaDOS
+   is); a missing chunk or any other path is left alone. */
+static void pMigrateCfgPrefix(struct PsdBase *ps, struct PsdIFFContext *pic, ULONG chnkid,
+                              STRPTR oldp, STRPTR newp)
+{
+    ULONG *chnk = pFindCfgChunk(ps, pic, chnkid);
+    if(!chnk) {
+        return;
+    }
+    /* chunk layout: ULONG id, ULONG length, then the NUL-terminated string */
+    STRPTR path = (STRPTR) &chnk[2];
+    ULONG oldlen = strlen(oldp);
+    if(strnicmp((const char *) path, (const char *) oldp, oldlen)) {
+        return;                         /* different drawer */
+    }
+    STRPTR rest = &path[oldlen];        /* "/hid.class", or "" for the drawer itself */
+    if(*rest && (*rest != '/')) {
+        return;                         /* only a partial name match, e.g. "SYS:Classes/USBx" */
+    }
+    /* pAddStringChunk() removes the old chunk by compacting (or reallocating)
+       pic's chunk buffer, which overwrites `rest`, so build the new path first */
+    STRPTR newpath = psdCopyStrFmt("%s%s", newp, rest);
+    if(newpath) {
+        pAddStringChunk(ps, pic, chnkid, newpath);
+        psdFreeVec(newpath);
+    }
+}
+/* \\\ */
+
+/* /// "pMigrateCfgPaths()" */
+/* Point an imported poseidon.prefs at Neptune's drawers: the class paths of
+   the UCLS forms and the attach/detach sound paths of the stack form. */
+static void pMigrateCfgPaths(struct PsdBase *ps)
+{
+    pLockSemExcl(ps, &ps->ps_ConfigLock);
+    struct PsdIFFContext *pic = psdFindCfgForm(NULL, IFFFORM_STACKCFG);
+    if(pic) {
+        for(struct PsdIFFContext *subpic = psdFindCfgForm(pic, IFFFORM_USBCLASS); subpic; subpic = psdNextCfgForm(subpic)) {
+            pMigrateCfgPrefix(ps, subpic, IFFCHNK_NAME, NEP_OLDCLASSDRAWER, NEP_CLASSDRAWER);
+        }
+        pMigrateCfgPrefix(ps, pic, IFFCHNK_INSERTSND, NEP_OLDPRESETDRAWER, NEP_PRESETDRAWER);
+        pMigrateCfgPrefix(ps, pic, IFFCHNK_REMOVESND, NEP_OLDPRESETDRAWER, NEP_PRESETDRAWER);
+    }
+    pUnlockSem(ps, &ps->ps_ConfigLock);
+}
+/* \\\ */
+
+/* /// "pLoadCfgFile()" */
+/* Load and apply one prefs file; with migrate, rewrite Poseidon drawer paths
+   before applying. Returns RETURN_OK, RETURN_WARN (no such file) or
+   RETURN_ERROR (not a usable prefs file). */
+static UWORD pLoadCfgFile(struct PsdBase *ps, STRPTR filename, BOOL migrate)
+{
+    XPRINTF(10, ("Loading config file: %s\n", filename));
+
+    BPTR filehandle = Open(filename, MODE_OLDFILE);
+    KPRINTF(1, ("File handle 0x%08lx\n", filehandle));
+    if(!filehandle) {
+        return(RETURN_WARN);
+    }
+
+    UWORD level = RETURN_ERROR;
+    ULONG formhead[3];
+    if((Read(filehandle, formhead, 12) == 12) &&
+       (AROS_LONG2BE(formhead[0]) == ID_FORM) && (AROS_LONG2BE(formhead[2]) == IFFFORM_PSDCFG)) {
+        ULONG formlen = AROS_LONG2BE(formhead[1]);
+        KPRINTF(1, ("Header OK, %lu bytes\n", formlen));
+
+        ULONG *buf = (ULONG *) psdAllocVec(formlen + 8);
+        if(buf) {
+            buf[0] = formhead[0];
+            buf[1] = formhead[1];
+            buf[2] = formhead[2];
+            if(Read(filehandle, &buf[3], formlen - 4) == formlen - 4) {
+                KPRINTF(1, ("Data read OK\n"));
+
+                psdReadCfg(NULL, buf);
+                if(migrate) {
+                    pMigrateCfgPaths(ps);
+                }
+                psdParseCfg();
+
+                KPRINTF(1, ("All done\n"));
+                level = RETURN_OK;
+                /* the live config now matches this file; a migrated
+                   one matches no file until it is saved */
+                if(!migrate) {
+                    ps->ps_SavedConfigHash = ps->ps_ConfigHash;
+                }
+            }
+            psdFreeVec(buf);
+        }
+    }
+    Close(filehandle);
+    return(level);
+}
+/* \\\ */
+
 /* /// "psdLoadCfgFromDisk()" */
 BOOL (psdLoadCfgFromDisk)(STRPTR filename asm("a1"), struct PsdBase * ps asm("a6"))
 {
-    ULONG *buf;
-    BPTR filehandle;
-    UWORD level;
-    BOOL loaded = FALSE;
-
-    XPRINTF(10, ("Loading config file: %s\n", filename));
-
-    if(!filename) {
-        loaded = psdLoadCfgFromDisk("ENV:Sys/poseidon.prefs");
-        if(loaded) {
-            return(TRUE);
-        }
-
-        loaded = psdLoadCfgFromDisk("ENVARC:Sys/poseidon.prefs");
-
-        return(loaded);
-    }
-
     if(!pOpenDOS(ps)) {
         KPRINTF(1, ("dos.library not available yet\n"));
         return(FALSE);
     }
 
-    filehandle = Open(filename, MODE_OLDFILE);
-    KPRINTF(1, ("File handle 0x%08lx\n", filehandle));
-    if(filehandle) {
-        ULONG formhead[3];
-        ULONG formlen;
+    if(!filename) {
+        /* Neptune's own prefs first; without them, a one-time import of
+           Poseidon's, saved straight away as neptune.prefs so it is not
+           repeated. A missing file is only reported if all are missing.
+           Local array: a static pointer table would need a .data section. */
+        STRPTR names[4] = { NEP_PREFS_ENV, NEP_PREFS_ENVARC, NEP_OLDPREFS_ENV, NEP_OLDPREFS_ENVARC };
 
-        level = RETURN_ERROR;
-
-        if(Read(filehandle, formhead, 12) == 12) {
-            KPRINTF(1, ("Read header\n"));
-            if((AROS_LONG2BE(formhead[0]) == ID_FORM) && (AROS_LONG2BE(formhead[2]) == IFFFORM_PSDCFG)) {
-                formlen = AROS_LONG2BE(formhead[1]);
-                KPRINTF(1, ("Header OK, %lu bytes\n", formlen));
-
-                buf = (ULONG *) psdAllocVec(formlen + 8);
-                if(buf) {
-                    buf[0] = formhead[0];
-                    buf[1] = formhead[1];
-                    buf[2] = formhead[2];
-                    if(Read(filehandle, &buf[3], formlen - 4) == formlen - 4) {
-                        KPRINTF(1, ("Data read OK\n"));
-
-                        psdReadCfg(NULL, buf);
-                        psdParseCfg();
-
-                        KPRINTF(1, ("All done\n"));
-                        loaded = TRUE;
-                        level = RETURN_OK;
-                    }
-                    psdFreeVec(buf);
+        for(ULONG i = 0; i < 4; i++) {
+            BOOL migrate = (i >= 2);
+            UWORD level = pLoadCfgFile(ps, names[i], migrate);
+            if(level == RETURN_OK) {
+                if(migrate && psdSaveCfgToDisk(NULL)) {
+                    psdAddErrorMsg(RETURN_OK, (STRPTR) libname,
+                                   "Settings imported from '%s' and saved to '%s'.",
+                                   names[i], NEP_PREFS_ENVARC);
                 }
+                return(TRUE);
+            }
+            if(level == RETURN_ERROR) {
+                psdAddErrorMsg(RETURN_ERROR, (STRPTR) libname, "Failed to load config from '%s'!", names[i]);
             }
         }
-        Close(filehandle);
-    } else
-        level = RETURN_WARN;
+        psdAddErrorMsg(RETURN_WARN, (STRPTR) libname, "Failed to find config file '%s'!", NEP_PREFS_ENVARC);
+        return(FALSE);
+    }
 
-    if (level != RETURN_OK) {
+    UWORD level = pLoadCfgFile(ps, filename, FALSE);
+    if(level != RETURN_OK) {
         psdAddErrorMsg(level, (STRPTR) libname,
                        "Failed to %s '%s'!", (level == RETURN_ERROR) ? "load config from" : "find config file",
                        filename);
     }
-    if(loaded) {
-        ps->ps_SavedConfigHash = ps->ps_ConfigHash;
-    }
-    return(loaded);
+    return((BOOL) (level == RETURN_OK));
 }
 /* \\\ */
 
@@ -8268,8 +8338,8 @@ BOOL (psdSaveCfgToDisk)(STRPTR filename asm("a1"), struct PsdBase * ps asm("a6")
     BPTR filehandle;
 
     if(!filename) {
-        saved = psdSaveCfgToDisk("ENVARC:Sys/poseidon.prefs");
-        saved &= psdSaveCfgToDisk("ENV:Sys/poseidon.prefs");
+        saved = psdSaveCfgToDisk(NEP_PREFS_ENVARC);
+        saved &= psdSaveCfgToDisk(NEP_PREFS_ENV);
         return(saved);
     }
 
@@ -9435,16 +9505,16 @@ BOOL pCheckCfgChanged(struct PsdBase * ps)
                     ps->ps_LinkPowerReq = TRUE;
                 }
             }
-            if(!pMatchStringChunk(ps, subpic, IFFCHNK_INSERTSND, ps->ps_PoPo.po_InsertSndFile)) {
+            if(!pMatchStringChunk(ps, subpic, IFFCHNK_INSERTSND, ps->ps_Notify.nt_InsertSndFile)) {
                 if((tmpstr = pGetStringChunk(ps, subpic, IFFCHNK_INSERTSND))) {
-                    psdFreeVec(ps->ps_PoPo.po_InsertSndFile);
-                    ps->ps_PoPo.po_InsertSndFile = tmpstr;
+                    psdFreeVec(ps->ps_Notify.nt_InsertSndFile);
+                    ps->ps_Notify.nt_InsertSndFile = tmpstr;
                 }
             }
-            if(!pMatchStringChunk(ps, subpic, IFFCHNK_REMOVESND, ps->ps_PoPo.po_RemoveSndFile)) {
+            if(!pMatchStringChunk(ps, subpic, IFFCHNK_REMOVESND, ps->ps_Notify.nt_RemoveSndFile)) {
                 if((tmpstr = pGetStringChunk(ps, subpic, IFFCHNK_REMOVESND))) {
-                    psdFreeVec(ps->ps_PoPo.po_RemoveSndFile);
-                    ps->ps_PoPo.po_RemoveSndFile = tmpstr;
+                    psdFreeVec(ps->ps_Notify.nt_RemoveSndFile);
+                    ps->ps_Notify.nt_RemoveSndFile = tmpstr;
                 }
             }
         }
@@ -9521,8 +9591,8 @@ void pUpdateGlobalCfg(struct PsdBase * ps, struct PsdIFFContext *pic)
     if(pic == (struct PsdIFFContext *) ps->ps_ConfigRoot.lh_Head) {
         if((tmppic = psdFindCfgForm(NULL, IFFFORM_STACKCFG))) {
             pAddCfgChunk(ps, tmppic, ps->ps_GlobalCfg);
-            pAddStringChunk(ps, tmppic, IFFCHNK_INSERTSND, ps->ps_PoPo.po_InsertSndFile);
-            pAddStringChunk(ps, tmppic, IFFCHNK_REMOVESND, ps->ps_PoPo.po_RemoveSndFile);
+            pAddStringChunk(ps, tmppic, IFFCHNK_INSERTSND, ps->ps_Notify.nt_InsertSndFile);
+            pAddStringChunk(ps, tmppic, IFFCHNK_REMOVESND, ps->ps_Notify.nt_RemoveSndFile);
         }
     }
 }
@@ -9983,8 +10053,8 @@ ULONG pPowerRecurseDrain(struct PsdBase * ps, struct PsdDevice *pd)
             pd->pd_PowerDrain = (pc->pc_MaxPower >= 100) ? 3 : 1;
             return(pd->pd_PowerDrain);
         }
-        selfpwd = ((pc->pc_Attr & USCAF_SELF_POWERED) && (pd->pd_PoPoCfg.poc_OverridePowerInfo != POCP_BUS_POWERED)) ||
-                  (pd->pd_PoPoCfg.poc_OverridePowerInfo == POCP_SELF_POWERED);
+        selfpwd = ((pc->pc_Attr & USCAF_SELF_POWERED) && (pd->pd_NotifyCfg.ntc_OverridePowerInfo != POCP_BUS_POWERED)) ||
+                  (pd->pd_NotifyCfg.ntc_OverridePowerInfo == POCP_SELF_POWERED);
         maxdrain = selfpwd ? 500 : 100;
     }
 
@@ -10020,8 +10090,8 @@ void pPowerRecurseSupply(struct PsdBase * ps, struct PsdDevice *pd)
 
     /* look at config */
     if((pc = pd->pd_CurrentConfig)) {
-        selfpwd = ((pc->pc_Attr & USCAF_SELF_POWERED) && (pd->pd_PoPoCfg.poc_OverridePowerInfo != POCP_BUS_POWERED)) ||
-                  (pd->pd_PoPoCfg.poc_OverridePowerInfo == POCP_SELF_POWERED);
+        selfpwd = ((pc->pc_Attr & USCAF_SELF_POWERED) && (pd->pd_NotifyCfg.ntc_OverridePowerInfo != POCP_BUS_POWERED)) ||
+                  (pd->pd_NotifyCfg.ntc_OverridePowerInfo == POCP_SELF_POWERED);
     }
 
     /* count children */
@@ -10280,25 +10350,25 @@ BOOL pStartEventHandler(struct PsdBase * ps)
 {
     struct PsdHandlerTask *ph = &ps->ps_EventHandler;
 
-    ObtainSemaphore(&ps->ps_PoPoLock);
+    ObtainSemaphore(&ps->ps_NotifyLock);
     if(ph->ph_Task) {
-        ReleaseSemaphore(&ps->ps_PoPoLock);
+        ReleaseSemaphore(&ps->ps_NotifyLock);
         return(TRUE);
     }
     ph->ph_ReadySignal = SIGB_SINGLE;
     ph->ph_ReadySigTask = FindTask(NULL);
     SetSignal(0, SIGF_SINGLE); // clear single bit
-    if(psdSpawnSubTask("Poseidon Event Broadcast", pEventHandlerTask, ps)) {
+    if(psdSpawnSubTask("Neptune Event Broadcast", pEventHandlerTask, ps)) {
         Wait(1UL<<ph->ph_ReadySignal);
     }
     ph->ph_ReadySigTask = NULL;
     //FreeSignal(ph->ph_ReadySignal);
     if(ph->ph_Task) {
-        ReleaseSemaphore(&ps->ps_PoPoLock);
+        ReleaseSemaphore(&ps->ps_NotifyLock);
         psdAddErrorMsg0(RETURN_OK, (STRPTR) libname, "Event broadcaster started.");
         return(TRUE);
     }
-    ReleaseSemaphore(&ps->ps_PoPoLock);
+    ReleaseSemaphore(&ps->ps_NotifyLock);
     return(FALSE);
 }
 /* \\\ */
@@ -10665,7 +10735,7 @@ static void pIdleSuspendSweep(struct PsdBase *ps)
                ((pd->pd_Flags & (PDFF_CONFIGURED|PDFF_DEAD|PDFF_SUSPENDED|PDFF_APPBINDING|PDFF_DELEXPUNGE)) != PDFF_CONFIGURED)) {
                 continue;
             }
-            if(pd->pd_PoPoCfg.poc_NoAutoSuspend) {
+            if(pd->pd_NotifyCfg.ntc_NoAutoSuspend) {
                 continue; /* the user pinned this one awake */
             }
             if(pd->pd_IOBusyCount) {
@@ -10780,30 +10850,30 @@ void pEventHandlerTask()
                                 ReplyMsg(&pen->pen_Msg);
                             }
                             if(CheckIO(&ph->ph_TimerIOReq->tr_node)) {
-                                BOOL startpopo;
+                                BOOL startnotify;
                                 WaitIO(&ph->ph_TimerIOReq->tr_node);
                                 ph->ph_TimerIOReq->tr_time.tv_micro = 500*1000;
                                 SendIO(&ph->ph_TimerIOReq->tr_node);
                                 counter++;
-                                startpopo = !((counter & 3) || ps->ps_PoPo.po_Task);
+                                startnotify = !((counter & 3) || ps->ps_Notify.nt_Task);
                                 if((ps->ps_GlobalCfg->pgc_PopupDeviceNew == PGCP_NEVER) &&
                                         (!ps->ps_GlobalCfg->pgc_PopupDeviceDeath) &&
                                         (!ps->ps_GlobalCfg->pgc_PopupDeviceGone)) {
-                                    startpopo = FALSE; // no need to start popo, no windows wanted
+                                    startnotify = FALSE; // no windows wanted, so no notifier
                                 }
-                                if(startpopo) {
-                                    struct PsdPoPo *po = &ps->ps_PoPo;
+                                if(startnotify) {
+                                    struct PsdNotify *ntf = &ps->ps_Notify;
 
-                                    po->po_ReadySignal = SIGB_SINGLE;
-                                    po->po_ReadySigTask = FindTask(NULL);
+                                    ntf->nt_ReadySignal = SIGB_SINGLE;
+                                    ntf->nt_ReadySigTask = FindTask(NULL);
                                     SetSignal(0, SIGF_SINGLE); // clear single bit
-                                    if(psdSpawnSubTask("PoPo (Poseidon Popups)", pPoPoGUITask, ps)) {
-                                        Wait(1UL<<po->po_ReadySignal);
+                                    if(psdSpawnSubTask("Neptune Notifier", pNotifyGUITask, ps)) {
+                                        Wait(1UL<<ntf->nt_ReadySignal);
                                     }
-                                    po->po_ReadySigTask = NULL;
-                                    //FreeSignal(po->po_ReadySignal);
-                                    if(po->po_Task) {
-                                        psdAddErrorMsg0(RETURN_OK, (STRPTR) libname, "PoPo started.");
+                                    ntf->nt_ReadySigTask = NULL;
+                                    //FreeSignal(ntf->nt_ReadySignal);
+                                    if(ntf->nt_Task) {
+                                        psdAddErrorMsg0(RETURN_OK, (STRPTR) libname, "Notifier started.");
                                     }
                                 }
                                 if((cfgchanged + 2) == counter) {
@@ -10932,11 +11002,11 @@ static const ULONG PsdDevicePT[] = {
     PACK_ENTRY(DA_Dummy, DA_PowerDrained, PsdDevice, pd_PowerDrain, PKCTRL_UWORD|PKCTRL_UNPACKONLY),
     PACK_ENTRY(DA_Dummy, DA_PowerSupply, PsdDevice, pd_PowerSupply, PKCTRL_UWORD|PKCTRL_UNPACKONLY),
     PACK_ENTRY(DA_Dummy, DA_IsNewToMe, PsdDevice, pd_IsNewToMe, PKCTRL_UWORD|PKCTRL_UNPACKONLY),
-    PACK_ENTRY(DA_Dummy, DA_InhibitPopup, PsdDevice, pd_PoPoCfg.poc_InhibitPopup, PKCTRL_UWORD|PKCTRL_PACKUNPACK),
-    PACK_ENTRY(DA_Dummy, DA_InhibitClassBind, PsdDevice, pd_PoPoCfg.poc_NoClassBind, PKCTRL_UWORD|PKCTRL_PACKUNPACK),
-    PACK_ENTRY(DA_Dummy, DA_OverridePowerInfo, PsdDevice, pd_PoPoCfg.poc_OverridePowerInfo, PKCTRL_UWORD|PKCTRL_PACKUNPACK),
-    PACK_ENTRY(DA_Dummy, DA_LinkPowerOverride, PsdDevice, pd_PoPoCfg.poc_LinkPowerOverride, PKCTRL_UWORD|PKCTRL_PACKUNPACK),
-    PACK_ENTRY(DA_Dummy, DA_NoAutoSuspend, PsdDevice, pd_PoPoCfg.poc_NoAutoSuspend, PKCTRL_UWORD|PKCTRL_PACKUNPACK),
+    PACK_ENTRY(DA_Dummy, DA_InhibitPopup, PsdDevice, pd_NotifyCfg.ntc_InhibitPopup, PKCTRL_UWORD|PKCTRL_PACKUNPACK),
+    PACK_ENTRY(DA_Dummy, DA_InhibitClassBind, PsdDevice, pd_NotifyCfg.ntc_NoClassBind, PKCTRL_UWORD|PKCTRL_PACKUNPACK),
+    PACK_ENTRY(DA_Dummy, DA_OverridePowerInfo, PsdDevice, pd_NotifyCfg.ntc_OverridePowerInfo, PKCTRL_UWORD|PKCTRL_PACKUNPACK),
+    PACK_ENTRY(DA_Dummy, DA_LinkPowerOverride, PsdDevice, pd_NotifyCfg.ntc_LinkPowerOverride, PKCTRL_UWORD|PKCTRL_PACKUNPACK),
+    PACK_ENTRY(DA_Dummy, DA_NoAutoSuspend, PsdDevice, pd_NotifyCfg.ntc_NoAutoSuspend, PKCTRL_UWORD|PKCTRL_PACKUNPACK),
     PACK_ENTRY(DA_Dummy, DA_HubThinkTime, PsdDevice, pd_HubThinkTime, PKCTRL_UWORD|PKCTRL_PACKUNPACK),
     PACK_ENTRY(DA_Dummy, DA_HubNumPorts, PsdDevice, pd_HubNumPorts, PKCTRL_UWORD|PKCTRL_PACKUNPACK),
     PACK_ENTRY(DA_Dummy, DA_HubHdrDecLat, PsdDevice, pd_HubHdrDecLat, PKCTRL_UWORD|PKCTRL_PACKUNPACK),

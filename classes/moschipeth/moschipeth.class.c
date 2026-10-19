@@ -1687,7 +1687,7 @@ void nGUITask()
         MUIA_Application_Author     , (IPTR)"Harry Sintonen <sintonen@iki.fi> & Chris Hodges <chrisly@platon42.de>",
         MUIA_Application_Description, (IPTR)"Settings for the moschipeth.class",
         MUIA_Application_Base       , (IPTR)"MOSCHIPETH",
-        MUIA_Application_HelpFile   , (IPTR)"HELP:Poseidon.guide",
+        MUIA_Application_HelpFile   , (IPTR)"HELP:Neptune.guide",
         MUIA_Application_Menustrip  , (IPTR)MenustripObject,
             Child, (IPTR)MenuObjectT((IPTR)"Project"),
                 Child, (IPTR)(ncp->ncp_AboutMI = MenuitemObject,
