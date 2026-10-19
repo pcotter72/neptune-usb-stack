@@ -13,7 +13,7 @@
 
 #include "DRadioTool.h"
 #include <string.h>
-#include <poseidon_version.h>
+#include <neptune_version.h>
 
 #define ARGS_ON       0
 #define ARGS_OFF      1
@@ -26,7 +26,7 @@
 
 const char DRadioTool_prgname[] = "DRadioTool";
 static const char *template = "ON/S,OFF/S,FREQ/K/N,SCAN/S,AUTO/S,SIGNAL/S,UNIT/N/K";
-const char DRadioTool_version[] = PSD_VER("DRadioTool") ", by Chris Hodges <chrisly@platon42.de>";
+const char DRadioTool_version[] = NEP_VER("DRadioTool") ", by Chris Hodges <chrisly@platon42.de>";
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 

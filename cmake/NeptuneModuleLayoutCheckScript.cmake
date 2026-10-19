@@ -1,5 +1,5 @@
-# PoseidonModuleLayoutCheckScript.cmake
-# Helper for psd_module_layout(): assert the linked module really starts with the
+# NeptuneModuleLayoutCheckScript.cmake
+# Helper for nep_module_layout(): assert the linked module really starts with the
 # do-not-execute stub.  Invoked as: cmake -DBINARY=... -DEXPECT=... -P <this>.
 #
 # ldscripts/module.lds places .text.entry first, but only if something is IN it -- a new
@@ -19,5 +19,5 @@ if(NOT _got STREQUAL "${EXPECT}")
         "${BINARY}: module starts with ${_got}, expected ${EXPECT} "
         "(moveq #-1,d0; rts).\n"
         "  LoadSeg() runs offset 0, so the do-not-execute stub must be there.  Give it\n"
-        "  __attribute__((used, section(\".text.entry\"))) -- see PoseidonModuleLayout.cmake.")
+        "  __attribute__((used, section(\".text.entry\"))) -- see NeptuneModuleLayout.cmake.")
 endif()

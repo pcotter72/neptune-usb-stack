@@ -44,4 +44,4 @@ target_include_directories(USBEject PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}/generated)   # the flexcat-generated strings.h
 target_link_libraries(USBEject PRIVATE poseidon_headers usbclass_headers -lamiga)
-psd_debug_finalize(USBEject)
+nep_debug_finalize(USBEject)

@@ -54,7 +54,7 @@
 
 #include <string.h>
 
-#include <poseidon_version.h>
+#include <neptune_version.h>
 
 #include <vhi/vhi.h>
 #include "mjpegdht.h"
@@ -131,7 +131,7 @@ static struct VhiBase * LibInit(struct VhiBase *base asm("d0"), BPTR seglist asm
 {
     base->vb_SegList = seglist;
     base->vb_SysBase = sysbase;
-    base->vb_Library.lib_Revision = POSEIDON_REVISION;
+    base->vb_Library.lib_Revision = NEPTUNE_REVISION;
     return base;
 }
 
@@ -192,7 +192,7 @@ static const APTR initTable[4] =
 };
 
 static const char libName[]     = VHI_NAME;
-static const char libIdString[] = PSD_VER(VHI_NAME);
+static const char libIdString[] = NEP_VER(VHI_NAME);
 
 const struct Resident romTag __attribute__((used, section(".text.modhdr"))) =
 {
@@ -200,7 +200,7 @@ const struct Resident romTag __attribute__((used, section(".text.modhdr"))) =
     (struct Resident *) &romTag,
     (APTR) &endOfCode,
     RTF_AUTOINIT,
-    POSEIDON_VERSION,
+    NEPTUNE_VERSION,
     NT_LIBRARY,
     0,
     (char *) libName,
@@ -793,7 +793,7 @@ static ULONG vhiGet(struct VhiHandle *vh, ULONG submethod, APTR attr, ULONG *err
             return (ULONG) vhiString(vh, (const char *) uvi.uvi_Manufacturer, "", errcode);
 
         case VHI_CARD_DRIVERAUTHOR:
-            return (ULONG) vhiString(vh, POSEIDON_DIST_NAME, "", errcode);
+            return (ULONG) vhiString(vh, NEPTUNE_DIST_NAME, "", errcode);
 
         /* the "card" is the camera: its version is the revision of the USB
            video class it follows, which is binary coded decimal */
@@ -807,10 +807,10 @@ static ULONG vhiGet(struct VhiHandle *vh, ULONG submethod, APTR attr, ULONG *err
                    : (ULONG) (((uvi.uvi_Version >> 4) & 15) * 10 + (uvi.uvi_Version & 15));
 
         case VHI_CARD_DRIVERVERSION:
-            return POSEIDON_VERSION;
+            return NEPTUNE_VERSION;
 
         case VHI_CARD_DRIVERREVISION:
-            return POSEIDON_REVISION;
+            return NEPTUNE_REVISION;
 
         case VHI_SUPPORTED_MODES:
             return VHI_MODE_COLOR;

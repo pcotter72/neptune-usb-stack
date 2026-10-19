@@ -11,7 +11,7 @@
 #include <proto/poseidon.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
-#include <poseidon_version.h>
+#include <neptune_version.h>
 
 #define ARGS_NOFLUSH  0
 #define ARGS_DEBUG    1
@@ -19,7 +19,7 @@
 #define ARGS_SIZEOF   3
 
 static const char *template = "NOFLUSH/S,DEBUG/S,NOTIMESTAMPS=NOTS/S";
-const char *version = PSD_VER("PsdErrorlog") ", by Chris Hodges <chrisly@platon42.de>";
+const char *version = NEP_VER("PsdErrorlog") ", by Chris Hodges <chrisly@platon42.de>";
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 

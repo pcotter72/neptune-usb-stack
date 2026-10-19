@@ -14,7 +14,7 @@
 #include <proto/poseidon.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
-#include <poseidon_version.h>
+#include <neptune_version.h>
 #include <classdir.h>
 
 #define ARGS_QUIET      0
@@ -22,7 +22,7 @@
 #define ARGS_SIZEOF     2
 
 static const char *template = "QUIET/S,REMOVE/S";
-const char *version = PSD_VER("AddUSBClasses") ", (C) The AROS Development Team";
+const char *version = NEP_VER("AddUSBClasses") ", (C) The AROS Development Team";
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 

@@ -86,12 +86,12 @@ SECTIONS
   /* A ROM module is mapped read-only, so a writable static is a cold-boot crash rather
    * than a bug you can print.  Fail the link instead.  Targets that legitimately carry
    * writable data (camdusbmidi's CAMD driver blob, which camd.library LoadSeg's) opt out with
-   * psd_module_layout(<t> WRITABLE), which defines __psd_writable_ok. */
+   * nep_module_layout(<t> WRITABLE), which defines __nep_writable_ok. */
   /* PROVIDE, not DEFINED(): ld's DEFINED() does not see a --defsym symbol, but PROVIDE
    * leaves an existing one alone, so this reads 1 exactly when the target opted out. */
-  PROVIDE(__psd_writable_ok = 0);
-  ASSERT(__psd_writable_ok != 0 || SIZEOF(.data) == 0,
+  PROVIDE(__nep_writable_ok = 0);
+  ASSERT(__nep_writable_ok != 0 || SIZEOF(.data) == 0,
     "module has a non-empty .data section - not ROM-able. Move the static into the device/library base, or const-ify it.")
-  ASSERT(__psd_writable_ok != 0 || SIZEOF(.bss) == 0,
+  ASSERT(__nep_writable_ok != 0 || SIZEOF(.bss) == 0,
     "module has a non-empty .bss section - not ROM-able. Move the static into the device/library base, or const-ify it.")
 }

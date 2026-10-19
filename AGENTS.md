@@ -21,7 +21,7 @@ The AROS baseline SHA is in `AROS-BASELINE` and the verbatim extraction is tagge
 
 ```sh
 ./build.sh --build          # container build (image auto-pulled; no local toolchain needed)
-./build.sh --package        # + build/Poseidon-<ver>-<cpu>.lha (use BACKEND=off for a release)
+./build.sh --package        # + build/Neptune-<ver>-<cpu>.lha (use BACKEND=off for a release)
 ./build.sh --package --all-cpus   # one archive per released CPU (68020/68040/68060)
 ./build.sh --upload         # push binaries to a live Amiga via Cloanto AE.exe
 ./build.sh                  # = --build --upload (the edit-build-test loop)
@@ -38,7 +38,7 @@ same wrapper.
 
 Every build ends with `scripts/check-mui38.py`, which fails the build if the GUI fleet reaches outside the
 MUI 3.8 subset it is supposed to run on - a MUI 4/5-only tag compiles fine against the MUI 5 SDK and
-is simply ignored by `muimaster.library` 19. `POSEIDON_SKIP_MUI38_CHECK=1` skips it; see
+is simply ignored by `muimaster.library` 19. `NEPTUNE_SKIP_MUI38_CHECK=1` skips it; see
 `docs/porting-playbook.md` §4.2 for the floor and how it is held.
 
 Optimization is per tier, set in each target's `CMakeLists.txt`; everything else
@@ -47,7 +47,7 @@ Optimization is per tier, set in each target's `CMakeLists.txt`; everything else
 `add_compile_options()` in the root `CMakeLists.txt`. Don't re-state any of those per target.
 The CPU/FPU pair defaults to `68040`/`hard`; the release sweeps 68020-soft, 68040-hard and
 68060-hard into one archive each, and `M68K_CPU` also lands in every `$VER` cookie
-(`POSEIDON_CPU`) so an installed system says which variant it is.
+(`NEPTUNE_CPU`) so an installed system says which variant it is.
 
 | Tier | Targets | Flags |
 |---|---|---|
@@ -58,11 +58,11 @@ The CPU/FPU pair defaults to `68040`/`hard`; the release sweeps 68020-soft, 6804
 `-ffreestanding` must stay a **compile** option - as a link-only flag it is silently inert.
 
 Two per-target calls are **not** flag levels, so they do not break the rule above:
-`psd_module_layout(<t>)` (links through `ldscripts/module.lds`: `doNotExecute` at offset 0 via
+`nep_module_layout(<t>)` (links through `ldscripts/module.lds`: `doNotExecute` at offset 0 via
 `.text.entry`, romtag via `.text.modhdr`, `_endOfCode` for `RT_ENDSKIP`, and a link-time assert that
-the module has no writable sections) and `psd_enable_lto(<t>)` (CMake's
+the module has no writable sections) and `nep_enable_lto(<t>)` (CMake's
 `INTERPROCEDURAL_OPTIMIZATION` property - **never write `-flto` by hand**). A TU whose payload is
-file-scope `asm()` must opt out with `psd_lto_keep_real_objects(<t> <src>)`: LTO cannot see a symbol
+file-scope `asm()` must opt out with `nep_lto_keep_real_objects(<t> <src>)`: LTO cannot see a symbol
 defined only inside an asm string. `Trident`, `USBEject`, `c/`, `tools/` and the single-TU CAMD blob
 stay out of LTO - nothing to inline across.
 

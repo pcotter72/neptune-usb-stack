@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(poseidon_backport VERSION 6.3 LANGUAGES C ASM)
+project(neptune VERSION 6.3 LANGUAGES C ASM)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/install" CACHE PATH "" FORCE)
@@ -9,30 +9,30 @@ endif()
 # The project() version above is the ONE place the shipping version is written: the
 # library, all 29 classes, Trident and every tool report it, and Packaging names the
 # archive after it. These six defines are global (they must reach every TU); the
-# $VER cookie itself is assembled by PSD_VER() in include/poseidon_version.h.
+# $VER cookie itself is assembled by NEP_VER() in include/neptune_version.h.
 # The date is the configure timestamp.
 #
-# POSEIDON_CPU is the target CPU (M68K_CPU, from cmake/toolchain.cmake) and is the only
+# NEPTUNE_CPU is the target CPU (M68K_CPU, from cmake/toolchain.cmake) and is the only
 # part of the cookie that differs between the released 68020/68040/68060 archives - the
 # numbers are the library/romtag ABI version and are identical across all three.
 #
-# POSEIDON_BUILD_STAMP marks a local (non-release) build: build.sh sets it, once per run,
+# NEPTUNE_BUILD_STAMP marks a local (non-release) build: build.sh sets it, once per run,
 # to dev-<YYYYMMDD>-<HHMMSS>-g<hash>[-dirty], and it rides at the end of every $VER cookie
-# (POSEIDON_BUILD_TAIL), in the .lha name and in the ReadMe. Release archives come from CI,
+# (NEPTUNE_BUILD_TAIL), in the .lha name and in the ReadMe. Release archives come from CI,
 # which never sets it - empty means release, and leaves every output exactly as before.
-set(POSEIDON_BUILD_STAMP "" CACHE STRING "Local-build marker (build.sh sets it); empty = release")
-set(_psd_build_tail "")
-if(POSEIDON_BUILD_STAMP)
-    set(_psd_build_tail " ${POSEIDON_BUILD_STAMP}")
+set(NEPTUNE_BUILD_STAMP "" CACHE STRING "Local-build marker (build.sh sets it); empty = release")
+set(_nep_build_tail "")
+if(NEPTUNE_BUILD_STAMP)
+    set(_nep_build_tail " ${NEPTUNE_BUILD_STAMP}")
 endif()
 string(TIMESTAMP CURRENT_DATE "%d.%m.%Y")
 add_compile_definitions(
-    POSEIDON_VERSION=${PROJECT_VERSION_MAJOR}
-    POSEIDON_REVISION=${PROJECT_VERSION_MINOR}
-    POSEIDON_DATE="${CURRENT_DATE}"
-    POSEIDON_DIST_NAME="Poseidon for AmigaOS"
-    POSEIDON_CPU="${M68K_CPU}"
-    POSEIDON_BUILD_TAIL="${_psd_build_tail}")
+    NEPTUNE_VERSION=${PROJECT_VERSION_MAJOR}
+    NEPTUNE_REVISION=${PROJECT_VERSION_MINOR}
+    NEPTUNE_DATE="${CURRENT_DATE}"
+    NEPTUNE_DIST_NAME="Neptune"
+    NEPTUNE_CPU="${M68K_CPU}"
+    NEPTUNE_BUILD_TAIL="${_nep_build_tail}")
 
 find_program(SFDC_EXECUTABLE NAMES sfdc HINTS /opt/m68k-amigaos/bin REQUIRED)
 
@@ -77,9 +77,9 @@ endfunction()
 # Shared helper: define a USB class driver - a freestanding .class library built from the
 # shared classes/class_main.c skeleton + <name>.class.c. Call from the class's dir:
 #
-#   add_poseidon_class(bootmouse BASETYPE NepHidBase GUI DEFINES HAS_LIBOPEN)
+#   add_neptune_class(bootmouse BASETYPE NepHidBase GUI DEFINES HAS_LIBOPEN)
 #
-# The class version is the distribution version (POSEIDON_VERSION/REVISION, global) -
+# The class version is the distribution version (NEPTUNE_VERSION/REVISION, global) -
 # the fleet ships in lockstep, so there is nothing to state per class.
 #
 # Every class is held to the ROM-cleanliness rule - no writable data at all - by
@@ -99,7 +99,7 @@ endfunction()
 #           DEPS      extra link targets (e.g. sana2_headers for the ethernet family)
 set(PSD_CLASS_PRI -45)
 
-function(add_poseidon_class name)
+function(add_neptune_class name)
     cmake_parse_arguments(PC "GUI;AMIGALIB" "BASETYPE;PRI;INCLUDE" "SOURCES;DEFINES;DEPS" ${ARGN})
     if(NOT PC_INCLUDE)
         set(PC_INCLUDE "${name}.h")
@@ -111,7 +111,7 @@ function(add_poseidon_class name)
 
     # Register every class target in one global list so Packaging (and anything else)
     # installs the whole fleet without a hand-maintained roster. See cmake/Packaging.cmake.
-    set_property(GLOBAL APPEND PROPERTY POSEIDON_CLASS_TARGETS ${tgt})
+    set_property(GLOBAL APPEND PROPERTY NEPTUNE_CLASS_TARGETS ${tgt})
 
     add_executable(${tgt}
         ${name}.class.c ${PC_SOURCES}
@@ -153,9 +153,9 @@ function(add_poseidon_class name)
         -nostdlib -nostartfiles -s)
 
     set_target_properties(${tgt} PROPERTIES OUTPUT_NAME ${name} SUFFIX ".class")
-    psd_debug_finalize(${tgt})                 # links -ldebug only for the serial backend
-    psd_enable_lto(${tgt})
-    psd_module_layout(${tgt})                  # entry at 0, RT_ENDSKIP, no writable data
+    nep_debug_finalize(${tgt})                 # links -ldebug only for the serial backend
+    nep_enable_lto(${tgt})
+    nep_module_layout(${tgt})                  # entry at 0, RT_ENDSKIP, no writable data
 endfunction()
 
 # --- Compile flags ---------------------------------------------------------------
@@ -176,21 +176,21 @@ add_compile_options(-Wno-int-conversion
 # --- Debug logging -------------------------------------------------------------
 # Switchable output backend (pistorm | serial | off) + verbosity level, shared by every
 # component via include/debug.h. Compile defs are applied globally here (before the
-# subdirs); per-target -ldebug linking (serial only) is done by psd_debug_finalize() in
-# each component. See cmake/PoseidonDebug.cmake.
-include(cmake/PoseidonDebug.cmake)
-psd_debug_definitions()
-message(STATUS "Poseidon: debug backend = ${POSEIDON_DEBUG_BACKEND}, level = ${POSEIDON_DEBUG_LEVEL}")
+# subdirs); per-target -ldebug linking (serial only) is done by nep_debug_finalize() in
+# each component. See cmake/NeptuneDebug.cmake.
+include(cmake/NeptuneDebug.cmake)
+nep_debug_definitions()
+message(STATUS "Neptune: debug backend = ${NEPTUNE_DEBUG_BACKEND}, level = ${NEPTUNE_DEBUG_LEVEL}")
 
 # The ROM-ability guard (no writable sections) used to be a POST_BUILD objdump pass here;
-# it is now an ASSERT in ldscripts/module.lds, applied by psd_module_layout() below, so it
+# it is now an ASSERT in ldscripts/module.lds, applied by nep_module_layout() below, so it
 # fails at link time and cannot be skipped.
 
 # Module layout contract (entry stub at offset 0, RT_ENDSKIP, no writable sections).
-include(cmake/PoseidonModuleLayout.cmake)
+include(cmake/NeptuneModuleLayout.cmake)
 
 # Link-time optimization, opted in per target.
-include(cmake/PoseidonLto.cmake)
+include(cmake/NeptuneLto.cmake)
 
 # --- Components (usbclass first: poseidon + the classes consume its headers) ---
 add_subdirectory(usbclass.library)

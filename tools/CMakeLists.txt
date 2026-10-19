@@ -14,7 +14,7 @@ foreach(t ${SHELLAPPS})
         ${CMAKE_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR})        # local <Tool>.h
     target_link_libraries(${t} PRIVATE poseidon_headers -lm)  # -lm: pow/atof (camera tools)
-    psd_debug_finalize(${t})   # links -ldebug only for the serial backend (tools have no log sites)
+    nep_debug_finalize(${t})   # links -ldebug only for the serial backend (tools have no log sites)
 endforeach()
 
 # uvc_client.c: what a client of usbvideo.device does (commands, mode list, reads, files).

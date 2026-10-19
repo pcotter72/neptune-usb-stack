@@ -42,7 +42,7 @@ component (`include/debug.h`):
 
 ```sh
 BACKEND=serial ./build.sh --build      # backend: pistorm (default) | serial | off
-#   (native cmake: -DPOSEIDON_DEBUG_BACKEND=serial)
+#   (native cmake: -DNEPTUNE_DEBUG_BACKEND=serial)
 ```
 
 Don't add unconditional serial/`kprintf` debug to source - route it through the

@@ -33,11 +33,11 @@
 #include <proto/poseidon.h>
 #include <proto/usbclass.h>
 
-#include <poseidon_version.h>
+#include <neptune_version.h>
 
 #include "locale.h"
 
-static const char version[] __attribute__((used)) = PSD_VER("USBEject");
+static const char version[] __attribute__((used)) = NEP_VER("USBEject");
 
 #define PORTNAME       "USBEject"
 #define LOGNAME        ((STRPTR) "USBEject")   /* originator in the Poseidon error log */

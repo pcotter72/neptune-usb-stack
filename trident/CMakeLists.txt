@@ -64,4 +64,4 @@ target_link_libraries(Trident PRIVATE
     mui_headers
     -lamiga)        # DoMethod / DoSuperMethodA / MUI vararg macros
 
-psd_debug_finalize(Trident)   # links -ldebug only for the serial backend (Trident has no log sites)
+nep_debug_finalize(Trident)   # links -ldebug only for the serial backend (Trident has no log sites)

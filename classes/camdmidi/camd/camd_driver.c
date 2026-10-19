@@ -32,7 +32,7 @@
 
 #include <midi/camddevices.h>
 #include "camdusbmidi.h"
-#include <poseidon_version.h>
+#include <neptune_version.h>
 
 extern BOOL Init(void);
 extern VOID Expunge(VOID);
@@ -77,7 +77,7 @@ static struct MidiDeviceData MidiDeviceData __attribute__((used, section(".text.
    behind the initializer is what the class may use - gen_camddriver.py asserts it and
    finds it by this placeholder. */
 char name[32] = "camdusbmidi";
-char vers[] = PSD_VER("camdusbmidi") " CAMD MIDI driver";
+char vers[] = NEP_VER("camdusbmidi") " CAMD MIDI driver";
 
 struct ExecBase *SysBase = NULL;
 struct Library *nh = NULL;

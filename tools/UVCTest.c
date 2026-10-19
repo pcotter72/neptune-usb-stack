@@ -59,7 +59,7 @@
 
 #include <inline/macros.h>
 #include <string.h>
-#include <poseidon_version.h>
+#include <neptune_version.h>
 
 #include "uvc_client.h"
 #include "mjpegdht.h"
@@ -88,7 +88,7 @@ enum
 
 const char UVCTest_prgname[] = "UVCTest";
 static const char *template = "UNIT/N/K,PROBE/S,WIDTH/N/K,HEIGHT/N/K,FPS/N/K,FRAMES/N/K,TO/K,CYCLES/N/K,VHI/S,CONTROLS/S,EVENTS/N/K,FORMAT/K,BITRATE/N/K,KEYFRAME/N/K";
-const char UVCTest_version[] = PSD_VER("UVCTest");
+const char UVCTest_version[] = NEP_VER("UVCTest");
 static LONG ArgsArray[ARGS_SIZEOF];
 
 /* Set a mode (NSCMD_UV_SETMODE), print the negotiated mode and leave it in

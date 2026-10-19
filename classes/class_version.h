@@ -2,14 +2,14 @@
  * and class_main.c (the romtag id-string).
  *
  * Requires CLASS_NAME from the class's CMakeLists (-D). The version numbers are the
- * distribution's (POSEIDON_VERSION/REVISION, injected globally by the top-level
+ * distribution's (NEPTUNE_VERSION/REVISION, injected globally by the top-level
  * CMakeLists) - the class fleet ships in lockstep, so no class states its own.
  */
 #ifndef POSEIDON_CLASS_VERSION_H
 #define POSEIDON_CLASS_VERSION_H
 
-#include <poseidon_version.h>
+#include <neptune_version.h>
 
-#define VERSION_STRING  PSD_VER(CLASS_NAME)
+#define VERSION_STRING  NEP_VER(CLASS_NAME)
 
 #endif /* POSEIDON_CLASS_VERSION_H */

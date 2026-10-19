@@ -15,7 +15,7 @@
 
 #include "UPSTool.h"
 #include <string.h>
-#include <poseidon_version.h>
+#include <neptune_version.h>
 
 #define ARGS_RAW            0
 #define ARGS_ID             1
@@ -29,7 +29,7 @@
 
 const char UPSTool_prgname[] = "UPSTool";
 static const char *template = "RAW/K,ID/S,QUERY/S,TOGGLEBEEPER=TG/S,SHUTDOWN/S,STARTBATTERYTEST=STARTBT/S,STOPBATTERYTEST=STOPBT/S,UNIT/N/K";
-const char UPSTool_version[] = PSD_VER("UPSTool") ", by Chris Hodges <chrisly@platon42.de>";
+const char UPSTool_version[] = NEP_VER("UPSTool") ", by Chris Hodges <chrisly@platon42.de>";
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 

@@ -2,7 +2,7 @@
  *
  * Header-only: the KPRINTF()/XPRINTF()/DB() macros AND the formatter live here as
  * static inlines (no shared .c). The output backend is chosen at build time by
- * cmake/PoseidonDebug.cmake (POSEIDON_DEBUG_BACKEND):
+ * cmake/NeptuneDebug.cmake (NEPTUNE_DEBUG_BACKEND):
  *
  *   pistorm : RawDoFmt -> *(UBYTE*)0xdeadbeef, which Emu68/PiStorm traps and prints
  *             on the Pi console. No debug.lib.                       (default)
@@ -12,7 +12,7 @@
  * DEBUG is simply defined (logging on) or not (off) by the backend - it carries no
  * level. Verbosity is DB_LEVEL: KPRINTF(level, x) emits iff level >= DB_LEVEL, where
  * level is the message priority (1 = trace ... 200 = critical) and DB_LEVEL (default
- * 1 = show all) comes from cmake via POSEIDON_DEBUG_LEVEL. The call-site API is
+ * 1 = show all) comes from cmake via NEPTUNE_DEBUG_LEVEL. The call-site API is
  * unchanged from the old per-component debug.h's; only the output path changed
  * (debug.lib KPrintF -> exec RawDoFmt + a switchable byte sink).
  */

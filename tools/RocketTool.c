@@ -20,7 +20,7 @@
 
 #include "RocketTool.h"
 #include <string.h>
-#include <poseidon_version.h>
+#include <neptune_version.h>
 
 #define ARGS_LEFT     0
 #define ARGS_RIGHT    1
@@ -34,7 +34,7 @@
 
 const char RocketTool_prgname[] = "RocketTool";
 static const char *template = "LEFT/S,RIGHT/S,UP/S,DOWN/S,FIRE/S,TIME/N/K,JOYPORT/N/K,UNIT/N/K";
-const char RocketTool_version[] = PSD_VER("RocketTool") ", by Chris Hodges <chrisly@platon42.de>";
+const char RocketTool_version[] = NEP_VER("RocketTool") ", by Chris Hodges <chrisly@platon42.de>";
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 

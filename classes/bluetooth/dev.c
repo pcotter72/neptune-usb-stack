@@ -14,8 +14,8 @@ DEVBASETYPEPTR devInit(DEVBASETYPEPTR base asm("d0"), BPTR seglist asm("a0"), st
     base->np_Library.lib_Node.ln_Type = NT_DEVICE;
     base->np_Library.lib_Node.ln_Name = DEVNAME;
     base->np_Library.lib_Flags        = LIBF_SUMUSED|LIBF_CHANGED;
-    base->np_Library.lib_Version      = POSEIDON_VERSION;
-    base->np_Library.lib_Revision     = POSEIDON_REVISION;
+    base->np_Library.lib_Version      = NEPTUNE_VERSION;
+    base->np_Library.lib_Revision     = NEPTUNE_REVISION;
     base->np_Library.lib_IdString     = VERSION_STRING;
 
     /* Store segment */
@@ -453,12 +453,12 @@ WORD cmdQueryDevice(struct IOBTHCIReq *ioreq,
     }
     if((tag = FindTagItem(BTA_Version, taglist)))
     {
-        *((IPTR *) tag->ti_Data) = POSEIDON_VERSION;
+        *((IPTR *) tag->ti_Data) = NEPTUNE_VERSION;
         count++;
     }
     if((tag = FindTagItem(BTA_Revision, taglist)))
     {
-        *((IPTR *) tag->ti_Data) = POSEIDON_REVISION;
+        *((IPTR *) tag->ti_Data) = NEPTUNE_REVISION;
         count++;
     }
     if((tag = FindTagItem(BTA_DriverVersion, taglist)))

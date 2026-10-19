@@ -802,7 +802,7 @@ void nGUITask()
     gui->ug_App = ApplicationObject,
         MUIA_Application_Title      , (IPTR)libname,
         MUIA_Application_Version    , (IPTR)VERSION_STRING,
-        MUIA_Application_Copyright  , (IPTR)POSEIDON_DIST_NAME,
+        MUIA_Application_Copyright  , (IPTR)NEPTUNE_DIST_NAME,
         MUIA_Application_Description, (IPTR)"Settings for a USB camera",
         MUIA_Application_Base       , (IPTR)"USBVIDEO",
         MUIA_Application_HelpFile   , (IPTR)"HELP:Poseidon.guide",

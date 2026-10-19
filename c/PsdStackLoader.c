@@ -15,7 +15,7 @@
 #include <proto/poseidon.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
-#include <poseidon_version.h>
+#include <neptune_version.h>
 #include <classdir.h>
 
 #define ARGS_DEVICE   0
@@ -23,7 +23,7 @@
 #define ARGS_SIZEOF   2
 
 static const char *template = "DEVICE,UNIT/N";
-const char *psd_version = PSD_VER("PsdStackLoader") ", by Chris Hodges <chrisly@platon42.de>";
+const char *psd_version = NEP_VER("PsdStackLoader") ", by Chris Hodges <chrisly@platon42.de>";
 
 /* TRUE if no host controller is attached to the stack. */
 static BOOL noHardware(struct Library *ps)

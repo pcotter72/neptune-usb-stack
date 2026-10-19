@@ -1,4 +1,4 @@
-# PoseidonModuleLayout.cmake - psd_module_layout(<target> [WRITABLE])
+# NeptuneModuleLayout.cmake - nep_module_layout(<target> [WRITABLE])
 #
 # Link <target> with the shared freestanding-module layout script (ldscripts/module.lds).
 #
@@ -15,27 +15,27 @@
 # debugging aid, not a shippable ROM, and a -serial archive ships no ROM/ drawer.
 #
 # Usage:
-#   include(cmake/PoseidonModuleLayout.cmake)
-#   psd_module_layout(<target> [WRITABLE])
+#   include(cmake/NeptuneModuleLayout.cmake)
+#   nep_module_layout(<target> [WRITABLE])
 
-get_filename_component(_psd_module_ldscript
+get_filename_component(_nep_module_ldscript
     "${CMAKE_CURRENT_LIST_DIR}/../ldscripts/module.lds" ABSOLUTE)
-set(_PSD_MODULE_LDSCRIPT "${_psd_module_ldscript}"
-    CACHE INTERNAL "poseidon freestanding module layout script")
-unset(_psd_module_ldscript)
+set(_NEP_MODULE_LDSCRIPT "${_nep_module_ldscript}"
+    CACHE INTERNAL "freestanding module layout script")
+unset(_nep_module_ldscript)
 
-set(_PSD_LAYOUT_CHECK_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/PoseidonModuleLayoutCheckScript.cmake"
-    CACHE INTERNAL "psd_module_layout entry-stub check")
+set(_NEP_LAYOUT_CHECK_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/NeptuneModuleLayoutCheckScript.cmake"
+    CACHE INTERNAL "nep_module_layout entry-stub check")
 
-function(psd_module_layout target)
+function(nep_module_layout target)
     cmake_parse_arguments(ARG "WRITABLE" "" "" ${ARGN})
-    if(NOT EXISTS "${_PSD_MODULE_LDSCRIPT}")
+    if(NOT EXISTS "${_NEP_MODULE_LDSCRIPT}")
         message(FATAL_ERROR
-            "psd_module_layout(${target}): layout script not found at ${_PSD_MODULE_LDSCRIPT}")
+            "nep_module_layout(${target}): layout script not found at ${_NEP_MODULE_LDSCRIPT}")
     endif()
-    target_link_options(${target} PRIVATE "-Wl,-T,${_PSD_MODULE_LDSCRIPT}")
-    if(ARG_WRITABLE OR POSEIDON_DEBUG_BACKEND STREQUAL "serial")
-        target_link_options(${target} PRIVATE "-Wl,--defsym,__psd_writable_ok=1")
+    target_link_options(${target} PRIVATE "-Wl,-T,${_NEP_MODULE_LDSCRIPT}")
+    if(ARG_WRITABLE OR NEPTUNE_DEBUG_BACKEND STREQUAL "serial")
+        target_link_options(${target} PRIVATE "-Wl,--defsym,__nep_writable_ok=1")
     endif()
     # The script places .text.entry first, but only if something is in it: assert the
     # linked module really starts with the stub, so a new class that forgets the attribute
@@ -44,9 +44,9 @@ function(psd_module_layout target)
         COMMAND ${CMAKE_COMMAND}
             -DBINARY=$<TARGET_FILE:${target}>
             -DEXPECT=70ff4e75
-            -P ${_PSD_LAYOUT_CHECK_SCRIPT}
+            -P ${_NEP_LAYOUT_CHECK_SCRIPT}
         COMMENT "Layout check: ${target} must start with the do-not-execute stub"
         VERBATIM)
     # Relink when the contract changes.
-    set_property(TARGET ${target} APPEND PROPERTY LINK_DEPENDS "${_PSD_MODULE_LDSCRIPT}")
+    set_property(TARGET ${target} APPEND PROPERTY LINK_DEPENDS "${_NEP_MODULE_LDSCRIPT}")
 endfunction()

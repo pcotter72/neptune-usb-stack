@@ -2736,7 +2736,7 @@ struct NepAudioSubLibBase * subLibInit(struct NepAudioSubLibBase * nas asm("d0")
     nas->nas_Library.lib_Node.ln_Name = SUBLIBNAME;
     nas->nas_Library.lib_Flags        = LIBF_SUMUSED | LIBF_CHANGED;
     nas->nas_Library.lib_Version      = AHI_SUB_LIB_VERSION;
-    nas->nas_Library.lib_Revision     = POSEIDON_REVISION;
+    nas->nas_Library.lib_Revision     = NEPTUNE_REVISION;
     nas->nas_Library.lib_IdString     = VERSION_STRING;
 
     /* Store segment */

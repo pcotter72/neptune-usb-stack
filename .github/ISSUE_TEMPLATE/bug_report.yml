@@ -80,7 +80,7 @@ body:
       label: Debug log
       description: |
         Output from `PsdErrorlog`, and/or a serial/Sashimi capture from a debug
-        build (`-DPOSEIDON_DEBUG_BACKEND=serial`). This will be formatted as code.
+        build (`-DNEPTUNE_DEBUG_BACKEND=serial`). This will be formatted as code.
       render: text
     validations:
       required: false

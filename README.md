@@ -83,10 +83,10 @@ your CPU (see [Requirements](#requirements)) - that is the only choice that matt
 
 | Archive | When to use it |
 |---|---|
-| `Poseidon-<ver>-020.lha` | **Start here** on a 68020 or 68030. Also runs on an 040 or 060, just not tuned for them. |
-| `Poseidon-<ver>-040.lha` | **Start here** on a 68040, and on PiStorm / Emu68. |
-| `Poseidon-<ver>-060.lha` | **Start here** on a 68060. |
-| `Poseidon-<ver>-<cpu>-serial.lha` | Identical to the above, but also prints diagnostics to the serial port. Troubleshooting only. |
+| `Neptune-<ver>-020.lha` | **Start here** on a 68020 or 68030. Also runs on an 040 or 060, just not tuned for them. |
+| `Neptune-<ver>-040.lha` | **Start here** on a 68040, and on PiStorm / Emu68. |
+| `Neptune-<ver>-060.lha` | **Start here** on a 68060. |
+| `Neptune-<ver>-<cpu>-serial.lha` | Identical to the above, but also prints diagnostics to the serial port. Troubleshooting only. |
 
 The archives are otherwise the same: same version, same components, same settings. Every
 component reports its CPU at the end of its version string, so `Version
@@ -265,7 +265,7 @@ toolchain container (a public image, pulled automatically; no host toolchain to 
 
 ```sh
 ./build.sh --build                 # build everything in the container
-./build.sh --package               # …and produce the installable Poseidon-<ver>-<cpu>.lha
+./build.sh --package               # …and produce the installable Neptune-<ver>-<cpu>.lha
 ./build.sh --package --all-cpus    # …one archive per released CPU (020, 040, 060)
 ```
 
@@ -278,11 +278,11 @@ tree (`build-020/`, `build-060/`) so the variants never clobber each other. With
 Under the hood `build.sh` (and CI) run the container build through
 `scripts/docker-build.sh`, which owns the image tag and the `cmake` configure
 incantation. Drive it directly for a bare build:
-`POSEIDON_CONFIGURE_ARGS="-DPOSEIDON_DEBUG_BACKEND=off" ./scripts/docker-build.sh`.
+`NEPTUNE_CONFIGURE_ARGS="-DNEPTUNE_DEBUG_BACKEND=off" ./scripts/docker-build.sh`.
 
-`POSEIDON_LTO` (default `ON`) builds `poseidon.library` and the classes with link-time
+`NEPTUNE_LTO` (default `ON`) builds `poseidon.library` and the classes with link-time
 optimization. It needs the container toolchain, whose binutils has linker-plugin support; set
-`-DPOSEIDON_LTO=OFF` to bisect a suspected miscompile.
+`-DNEPTUNE_LTO=OFF` to bisect a suspected miscompile.
 
 ### Native build (without the container)
 
@@ -298,7 +298,7 @@ MUI/SANA SDKs default to `$HOME/amiga/{MUI5,NDK3.2R4}`; override `AMIGA_SDK_ROOT
 cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain.cmake
 cmake --build build -j"$(nproc)"
 cmake --build build --target bootmouse_class    # …or a single component
-cmake --build build --target package            # …or build/Poseidon-<ver>-<cpu>.lha
+cmake --build build --target package            # …or build/Neptune-<ver>-<cpu>.lha
 ```
 
 **Clean rebuild:** `rm -rf build`, then re-run the configure command (re-passing

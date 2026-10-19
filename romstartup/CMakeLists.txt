@@ -39,5 +39,5 @@ target_link_libraries(usbromstart PRIVATE poseidon_headers usbclass_headers
 target_link_options(usbromstart PRIVATE
     -nostdlib -nostartfiles -s)
 
-psd_debug_finalize(usbromstart)   # links -ldebug only for the serial backend
-psd_module_layout(usbromstart)
+nep_debug_finalize(usbromstart)   # links -ldebug only for the serial backend
+nep_module_layout(usbromstart)

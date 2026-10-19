@@ -128,21 +128,21 @@ freestanding link line is defined once, in the root `CMakeLists.txt`, and inheri
 
 A new component adds only its `-O` level, `-ffreestanding` if it is a library or class (a **COMPILE**
 option - as a link-only flag it is silently inert), `-D__NOLIBBASE__`, its include dirs (`include/`,
-the component, the generated sfd dir), `psd_debug_finalize(<target>)` (§6),
-`psd_module_layout(<target>)` + `psd_enable_lto(<target>)` (below), and `OUTPUT_NAME <m>` +
+the component, the generated sfd dir), `nep_debug_finalize(<target>)` (§6),
+`nep_module_layout(<target>)` + `nep_enable_lto(<target>)` (below), and `OUTPUT_NAME <m>` +
 `SUFFIX ".library"`; reuse `cmake/GenerateSfdHeaders.cmake`.
 
 Two things that look like flags but are not, and so do not break the three-level rule:
 
-- **Layout.** `psd_module_layout(<target>)` links the module through `ldscripts/module.lds`, which
+- **Layout.** `nep_module_layout(<target>)` links the module through `ldscripts/module.lds`, which
   places `.text.entry` (the `doNotExecute` stub, which LoadSeg runs at offset 0) then `.text.modhdr`
   (the romtag) first, defines `_endOfCode` for `RT_ENDSKIP` at the true end of `.text`, and asserts
   the module has no writable sections. Pin the stub and the romtag with
   `__attribute__((used, section(".text.entry")))` / `(".text.modhdr")` - `used` is load-bearing, and
   `ENTRY()` is not a substitute for it. Pass `WRITABLE` only for a module that is never in ROM.
-- **LTO** is a CMake *property*, not a flag: `psd_enable_lto(<target>)`. Never add `-flto` by hand.
+- **LTO** is a CMake *property*, not a flag: `nep_enable_lto(<target>)`. Never add `-flto` by hand.
   A TU whose payload is file-scope `asm()` must opt out with
-  `psd_lto_keep_real_objects(<target> <src>)` - LTO's symbol table cannot see a definition that
+  `nep_lto_keep_real_objects(<target> <src>)` - LTO's symbol table cannot see a definition that
   exists only inside an asm string, and the link fails with an undefined reference (or, worse,
   silently drops it). `classes/massstorage/mounter/bootpoint.c` is the existing example. Two traps: any *second* force-include
 beyond `aros_compat.h` (Trident's `mui_compat.h`) must use the `"SHELL:-include …"` form, since CMake
@@ -176,7 +176,7 @@ infrastructure make most of it mechanical. No per-class `.sfd` (the 3 usbclass A
 ### 3.1 Per-class recipe (mechanical core)
 
 1. **`dearos_lh.py --inplace`** the `<name>.class.c` *and* its `.h`; **`%p` sweep** (§1.5).
-2. **CMakeLists** via `add_poseidon_class()` (§3.2): set `CLASS_NAME`/`VERSION`/`REVISION`/`PRI`,
+2. **CMakeLists** via `add_neptune_class()` (§3.2): set `CLASS_NAME`/`VERSION`/`REVISION`/`PRI`,
    `HAS_LIBOPEN`/`HAS_LIBCLOSE` as the source needs; link `poseidon_headers` (+ `mui_headers` if GUI,
    + `DEPS` for family headers).
 3. **GUI classes:** the class struct header ends with the `mui_base.h` block (`MUI_BASE_USERDATA` +
@@ -187,7 +187,7 @@ infrastructure make most of it mechanical. No per-class `.sfd` (the 3 usbclass A
 5. **New `aros_compat.h` vocab / non-NDK headers** carried into `include/` as they surface.
 6. **Build 0/0**; deploy adds it to the install automatically.
 
-### 3.2 `add_poseidon_class()` CMake helper
+### 3.2 `add_neptune_class()` CMake helper
 
 Defined and documented at the top of the root `CMakeLists.txt` (next to `generate_sfd_headers`); it
 collapses a class's ~40-line CMakeLists to ~3 lines. **Read the signature there, not here** -
@@ -205,7 +205,7 @@ absent; camdmidi vendors only `include/midi/camddevices.h`.
 ### 3.3 Class skeleton & embedded-device recipe
 
 The shared `class_main.c` + `common.h` bake in the **`$4` exec base** and `const` tables. Romtag name
-need not equal dir name - pass the *romtag* name to `add_poseidon_class` so `<name>.class.c`/`.h`
+need not equal dir name - pass the *romtag* name to `add_neptune_class` so `<name>.class.c`/`.h`
 resolve; the dir is only the `add_subdirectory` path.
 
 **Embedded-device (dual-library) recipe** (massstorage / serial / eth / audio / arosx): the class
@@ -343,13 +343,13 @@ line here saying which and where.
 
 ## 6. Debug backend
 
-`include/debug.h` (the shared header-only formatter) and `cmake/PoseidonDebug.cmake` (the `-DPOSEIDON_DEBUG_BACKEND=pistorm|serial|off` and
-`-DPOSEIDON_DEBUG_LEVEL=<n>` knobs) document themselves. What matters when porting:
+`include/debug.h` (the shared header-only formatter) and `cmake/NeptuneDebug.cmake` (the `-DNEPTUNE_DEBUG_BACKEND=pistorm|serial|off` and
+`-DNEPTUNE_DEBUG_LEVEL=<n>` knobs) document themselves. What matters when porting:
 
 - Every `KPRINTF(level,(fmt,…))` / `XPRINTF` / `DB` call site is **unchanged** by the port; AROS
   `bug()`/`D()` become `KPRINTF` (§3.3). Output goes through classic exec `RawDoFmt`, hence the
   `%p`/`%ld` rules of §1.5.
-- **A new target must call `psd_debug_finalize(<target>)`** - it links `-ldebug` plus a weak
+- **A new target must call `nep_debug_finalize(<target>)`** - it links `-ldebug` plus a weak
   `__divsi3` glue, and only for the `serial` backend.
 - The framework is purely compile-time; there is no runtime verbosity knob. The error log itself
   (`PsdErrorlog`) is untouched by any of it.

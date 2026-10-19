@@ -31,7 +31,7 @@ target_include_directories(poseidon_library PRIVATE
 # mui_headers brings the MUI 5 SDK include dir (popo.gui.c). -lc (libnix string fns),
 # -lamiga (BOOPSI DoMethod/set/get used by popo's MUI tree), -lgcc (intrinsics). The
 # serial debug backend appends -ldebug (+ a weak __divsi3 glue object) via
-# psd_debug_finalize() below; pistorm/off link neither.
+# nep_debug_finalize() below; pistorm/off link neither.
 target_link_libraries(poseidon_library PRIVATE
     poseidon_headers usbclass_headers mui_headers
     -Wl,--start-group -lc -lamiga -lgcc -Wl,--end-group)
@@ -41,9 +41,9 @@ target_link_options(poseidon_library PRIVATE
 
 set_target_properties(poseidon_library PROPERTIES
     OUTPUT_NAME poseidon SUFFIX ".library")
-psd_debug_finalize(poseidon_library)   # links -ldebug only for the serial backend
+nep_debug_finalize(poseidon_library)   # links -ldebug only for the serial backend
 
 # The core goes into the Kickstart ROM set, so hold it to the no-writable-data
 # rule the code is already written for (asserted by ldscripts/module.lds).
-psd_enable_lto(poseidon_library)
-psd_module_layout(poseidon_library)
+nep_enable_lto(poseidon_library)
+nep_module_layout(poseidon_library)

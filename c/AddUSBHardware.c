@@ -14,7 +14,7 @@
 #include <proto/poseidon.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
-#include <poseidon_version.h>
+#include <neptune_version.h>
 #include <hwmatch.h>
 
 #define ARGS_DEVICE   0
@@ -25,7 +25,7 @@
 #define ARGS_SIZEOF   5
 
 static const char *template = "DEVICE,UNIT/N,QUIET/S,REMOVE/S,ALL/S";
-const char *version = PSD_VER("AddUSBHardware") ", by Chris Hodges <chrisly@platon42.de>";
+const char *version = NEP_VER("AddUSBHardware") ", by Chris Hodges <chrisly@platon42.de>";
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 

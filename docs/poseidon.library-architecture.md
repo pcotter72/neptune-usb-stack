@@ -117,7 +117,7 @@ skeleton (`poseidon_main.c` + `poseidon_funcs.inc` + `poseidon_end.c`); proto/in
 headers are generated from `poseidon.sfd` by `sfdc`.
 
 * **Romtag / resident** (`poseidon_main.c`): `romTag` is a `const struct Resident` -
-  `RTC_MATCHWORD`, `RTF_AUTOINIT | RTF_COLDSTART`, version `POSEIDON_VERSION`, `NT_LIBRARY`,
+  `RTC_MATCHWORD`, `RTF_AUTOINIT | RTF_COLDSTART`, version `NEPTUNE_VERSION`, `NT_LIBRARY`,
   priority `LIBRARY_PRIORITY` (−44), `initTable`. `initTable = { sizeof(struct PsdBase),
   funcTable, NULL, LibInit }`.
 * **LVO table** is `funcTable[]`: the four standard vectors `LibOpen, LibClose,

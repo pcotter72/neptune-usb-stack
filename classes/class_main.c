@@ -8,7 +8,7 @@
  *   CLASS_BASETYPE_NAME  NepHubBase              -- struct tag of the libbase
  *   CLASS_INCLUDE        "hub.h"                 -- header defining that struct
  *   HAS_LIBOPEN          (defined if the class has a libOpen hook)
- * The version pair is the distribution's (POSEIDON_VERSION/REVISION, global); the
+ * The version pair is the distribution's (NEPTUNE_VERSION/REVISION, global); the
  * $VER id-string is VERSION_STRING (built from it and CLASS_NAME in class_version.h).
  *
  * Every class libbase starts with `struct Library` (so the std vectors use a
@@ -88,7 +88,7 @@ static CLASS_BASE *LibInit(CLASS_BASE *base    asm("d0"),
 {
     (void)sysbase;                     /* exec base comes from $4 (EXEC_BASE_NAME) */
     base->nh_SegList = seglist;
-    ((struct Library *)base)->lib_Revision = POSEIDON_REVISION;
+    ((struct Library *)base)->lib_Revision = NEPTUNE_REVISION;
     if(libInit(base))
         return base;
     freeBase(base);
@@ -171,7 +171,7 @@ const struct Resident romTag __attribute__((used, section(".text.modhdr"))) = {
     (struct Resident *)&romTag,
     (APTR)&endOfCode,
     RTF_AUTOINIT | RTF_COLDSTART,
-    POSEIDON_VERSION,
+    NEPTUNE_VERSION,
     NT_LIBRARY,
     CLASS_PRI,
     (char *)libName,

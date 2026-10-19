@@ -47,7 +47,7 @@
 #include <proto/timer.h>
 #include <inline/usbclass.h>
 
-#include <poseidon_version.h>
+#include <neptune_version.h>
 #include "debug.h"
 
 /* This is only the compile-time default (cmake -DROMSTART_HCD=<name>); the slot
@@ -107,17 +107,17 @@ static ULONG initUsbRom(ULONG            dummy   asm("d0"),
                         BPTR             seglist asm("a0"),
                         struct ExecBase *sysbase asm("a6"));
 
-/* `residentId` feeds the shared $VER cookie (include/poseidon_version.h), so this
+/* `residentId` feeds the shared $VER cookie (include/neptune_version.h), so this
    module carries the same version identity as the rest of the distribution. */
 static const char residentName[] = "Poseidon ROM Init";
-static const char residentId[]   = PSD_VER("Poseidon ROM Startup");
+static const char residentId[]   = NEP_VER("Poseidon ROM Startup");
 
 const struct Resident romTag __attribute__((used, section(".text.modhdr"))) = {
     RTC_MATCHWORD,
     (struct Resident *)&romTag,
     (APTR)&endOfCode,
     RTF_COLDSTART,
-    POSEIDON_VERSION,
+    NEPTUNE_VERSION,
     NT_TASK,
     -46,
     (char *)residentName,

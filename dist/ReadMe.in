@@ -1,4 +1,4 @@
-Poseidon for AmigaOS @POSEIDON_PKG_VERSION@
+Poseidon for AmigaOS @NEPTUNE_PKG_VERSION@
 ========================
 
 @BUILD_NOTICE@The Poseidon USB stack for AmigaOS 3.1 and newer, with the Trident preferences
@@ -44,7 +44,7 @@ Every component here reports its CPU in its version string, so you can always
 check what is installed:
 
   Version LIBS:poseidon.library
-  -> poseidon.library @POSEIDON_PKG_VERSION@ (...) Poseidon for AmigaOS @M68K_CPU@
+  -> poseidon.library @NEPTUNE_PKG_VERSION@ (...) Poseidon for AmigaOS @M68K_CPU@
 
 
 BUILD VARIANT

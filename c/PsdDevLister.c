@@ -12,7 +12,7 @@
 #include <proto/poseidon.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
-#include <poseidon_version.h>
+#include <neptune_version.h>
 
 #define ARGS_SHOWROOT 0
 #define ARGS_QUICK    1
@@ -21,7 +21,7 @@
 #define ARGS_SIZEOF   4
 
 static const char *template = "SHOWROOT/S,QUICK/S,STRINGS/S,TOPOLOGY/S";
-const char *version = PSD_VER("PsdDevLister") ", by Chris Hodges <chrisly@platon42.de>";
+const char *version = NEP_VER("PsdDevLister") ", by Chris Hodges <chrisly@platon42.de>";
 static IPTR ArgsArray[ARGS_SIZEOF];
 static struct RDArgs *ArgsHook = NULL;
 

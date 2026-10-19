@@ -1,10 +1,10 @@
-# Packaging - assemble a distributable Poseidon archive (LhA, the Amiga-native format)
+# Packaging - assemble a distributable Neptune archive (LhA, the Amiga-native format)
 # laid out as the drawer the Commodore Installer script copies from. Centralised here
 # (cmake >= 3.13 allows install(TARGETS) across directories) so the component
 # CMakeLists stay focused.
 #
-#   make package  ->  <build>/Poseidon-<ver>-<cpu>[-<backend>].lha
-#       Poseidon-<ver>-<cpu>[-<backend>]/
+#   make package  ->  <build>/Neptune-<ver>-<cpu>[-<backend>].lha
+#       Neptune-<ver>-<cpu>[-<backend>]/
 #         Install  Install.info            the Installer script (dist/)
 #         LIBS/poseidon.library
 #         LIBS/VHI/usbvideo.vhi            VHI driver for USB cameras -> LIBS:VHI/ (opt-in)
@@ -19,21 +19,21 @@
 
 # Distribution version = the project version (top-level CMakeLists), which is also what every
 # component reports in its $VER - so the archive name and the fleet can never disagree.
-# Override with -DPOSEIDON_PKG_VERSION=... (that lands in the cache and still wins here).
+# Override with -DNEPTUNE_PKG_VERSION=... (that lands in the cache and still wins here).
 # Deliberately NOT a cache variable of its own: a cached copy initialises once and then
 # sticks, so bumping project(VERSION) in an existing build dir would quietly package the
 # new fleet inside an archive named after the old version.
-if(NOT POSEIDON_PKG_VERSION)
-    set(POSEIDON_PKG_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+if(NOT NEPTUNE_PKG_VERSION)
+    set(NEPTUNE_PKG_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
 endif()
 
 # --- the built artifacts, into the distribution drawer layout ------------------
 install(TARGETS poseidon_library RUNTIME DESTINATION LIBS)
 
-# Every USB class - the full fleet, gathered from the global list add_poseidon_class()
+# Every USB class - the full fleet, gathered from the global list add_neptune_class()
 # appends to (CMakeLists.txt). No hand-maintained roster: add a class, it ships.
-get_property(_poseidon_classes GLOBAL PROPERTY POSEIDON_CLASS_TARGETS)
-install(TARGETS ${_poseidon_classes} RUNTIME DESTINATION Classes/USB)
+get_property(_neptune_classes GLOBAL PROPERTY NEPTUNE_CLASS_TARGETS)
+install(TARGETS ${_neptune_classes} RUNTIME DESTINATION Classes/USB)
 
 install(TARGETS PsdStackLoader AddUSBHardware AddUSBClasses PsdDevLister PsdErrorlog
         RUNTIME DESTINATION C)
@@ -44,7 +44,7 @@ install(TARGETS PsdStackLoader AddUSBHardware AddUSBClasses PsdDevLister PsdErro
 # ROM set beside this drawer, in LIBS/ and Classes/USB/. Only when the modules are
 # ROM-clean: a serial build links debug.lib, whose writable _SysBase would be lost in a
 # read-only bank, and the script no longer checks - the build is the check.
-if(NOT POSEIDON_DEBUG_BACKEND STREQUAL "serial")
+if(NOT NEPTUNE_DEBUG_BACKEND STREQUAL "serial")
     install(TARGETS usbromstart RUNTIME DESTINATION ROM)
     install(PROGRAMS ${CMAKE_SOURCE_DIR}/scripts/build-kickstart.py DESTINATION ROM)
     install(FILES ${CMAKE_SOURCE_DIR}/dist/ROM-ReadMe.md DESTINATION ROM)
@@ -140,22 +140,22 @@ else()
     set(CPU_DESCRIPTION "Built for the ${M68K_CPU}.")
 endif()
 
-set(DEBUG_BACKEND "${POSEIDON_DEBUG_BACKEND}")
-if(POSEIDON_DEBUG_BACKEND STREQUAL "off")
+set(DEBUG_BACKEND "${NEPTUNE_DEBUG_BACKEND}")
+if(NEPTUNE_DEBUG_BACKEND STREQUAL "off")
     set(DEBUG_BACKEND_DESCRIPTION
         "Production build - USB stack debug output is disabled.")
-elseif(POSEIDON_DEBUG_BACKEND STREQUAL "serial")
+elseif(NEPTUNE_DEBUG_BACKEND STREQUAL "serial")
     set(DEBUG_BACKEND_DESCRIPTION
         "Debug build - debug output is sent to the Amiga serial port (9600 baud)\n  on real hardware, or can be captured/redirected on a host with Sashimi.")
 else()
     set(DEBUG_BACKEND_DESCRIPTION
-        "Debug build (${POSEIDON_DEBUG_BACKEND} backend) - debug output is routed\n  through the Emu68/PiStorm debug console.")
+        "Debug build (${NEPTUNE_DEBUG_BACKEND} backend) - debug output is routed\n  through the Emu68/PiStorm debug console.")
 endif()
 # Banner ahead of the intro paragraph for a local build; a release's ReadMe is unchanged.
 set(BUILD_NOTICE "")
-if(POSEIDON_BUILD_STAMP)
+if(NEPTUNE_BUILD_STAMP)
     set(BUILD_NOTICE
-        "*** LOCAL DEVELOPMENT BUILD ${POSEIDON_BUILD_STAMP}\n*** Not an official release.\n\n")
+        "*** LOCAL DEVELOPMENT BUILD ${NEPTUNE_BUILD_STAMP}\n*** Not an official release.\n\n")
 endif()
 configure_file("${CMAKE_SOURCE_DIR}/dist/ReadMe.in" "${CMAKE_BINARY_DIR}/ReadMe" @ONLY)
 install(FILES "${CMAKE_BINARY_DIR}/ReadMe" DESTINATION .)
@@ -169,11 +169,11 @@ install(FILES ${CMAKE_SOURCE_DIR}/LICENSE
         DESTINATION .)
 
 # --- the .lha distribution (`make package`) -----------------------------------
-# Stage the install() layout above into a Poseidon-<ver>/ drawer, then `lha a` its contents
+# Stage the install() layout above into a Neptune-<ver>/ drawer, then `lha a` its contents
 # so the drawer sits at the archive root.
 #
 #   cmake --build build               # build everything first
-#   cmake --build build --target package   # -> build/Poseidon-<ver>-<cpu>.lha
+#   cmake --build build --target package   # -> build/Neptune-<ver>-<cpu>.lha
 #
 # (Run a full build before `package`: the target stages whatever is currently built.)
 find_program(LHA_EXECUTABLE NAMES lha)
@@ -187,29 +187,29 @@ set(LHA_FILENAME_ARGS "--system-kanji-code=utf8;--archive-kanji-code=latin1"
 
 # Suffix the package by debug backend so a release can ship both variants side by side.
 # 'off' is the production download and carries no suffix; 'serial' gets -serial (and any
-# other backend its own name) so e.g. `make package` with serial debug -> Poseidon-<ver>-serial.lha.
-if(POSEIDON_DEBUG_BACKEND STREQUAL "off")
+# other backend its own name) so e.g. `make package` with serial debug -> Neptune-<ver>-serial.lha.
+if(NEPTUNE_DEBUG_BACKEND STREQUAL "off")
     set(_pkg_suffix "")
-elseif(POSEIDON_DEBUG_BACKEND STREQUAL "serial")
+elseif(NEPTUNE_DEBUG_BACKEND STREQUAL "serial")
     set(_pkg_suffix "-serial")
 else()
-    set(_pkg_suffix "-${POSEIDON_DEBUG_BACKEND}")
+    set(_pkg_suffix "-${NEPTUNE_DEBUG_BACKEND}")
 endif()
 
 # The CPU is the other variant axis: the release ships one archive per CPU. Tag derived
 # from M68K_CPU (68040 -> 040) rather than a hand-kept map, and placed ahead of the
-# backend suffix so the two compose: Poseidon-<ver>-060-serial.lha. The tag also rides in
+# backend suffix so the two compose: Neptune-<ver>-060-serial.lha. The tag also rides in
 # _pkg_stage below, so the drawer inside the archive carries it too - three variants can
 # be unpacked side by side without colliding.
 string(REGEX REPLACE "^68" "" _cpu_tag "${M68K_CPU}")
 
-# A local build (POSEIDON_BUILD_STAMP set by build.sh) carries its stamp last, so a
+# A local build (NEPTUNE_BUILD_STAMP set by build.sh) carries its stamp last, so a
 # workstation archive can never pass for a release one, and two of them never collide.
-if(POSEIDON_BUILD_STAMP)
-    string(APPEND _pkg_suffix "-${POSEIDON_BUILD_STAMP}")
+if(NEPTUNE_BUILD_STAMP)
+    string(APPEND _pkg_suffix "-${NEPTUNE_BUILD_STAMP}")
 endif()
 
-set(_pkg_name    "Poseidon-${POSEIDON_PKG_VERSION}-${_cpu_tag}${_pkg_suffix}")
+set(_pkg_name    "Neptune-${NEPTUNE_PKG_VERSION}-${_cpu_tag}${_pkg_suffix}")
 set(_pkg_root    "${CMAKE_BINARY_DIR}/package")
 set(_pkg_stage   "${_pkg_root}/${_pkg_name}")
 set(_pkg_archive "${CMAKE_BINARY_DIR}/${_pkg_name}.lha")
