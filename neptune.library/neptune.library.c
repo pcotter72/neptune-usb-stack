@@ -3718,8 +3718,9 @@ static void pAddEjectBinding(struct EjectBindings *eb, APTR binding, struct PsdU
     eb->eb_Count++;
 }
 
-/* A class can sit at either of Neptune's two binding levels (§7.2): one
-   binding for the whole device, or one per interface of the current config -
+/* A class can sit at either of Neptune's two binding levels
+   (neptune.library-architecture.md section 5.5): one binding for the whole
+   device, or one per interface of the current config -
    which is the level massstorage binds at.  Both are asked, exactly as
    psdSuspendBindings() does. */
 static void pCollectEjectBindings(struct PsdDevice *pd, struct EjectBindings *eb)
@@ -4884,7 +4885,7 @@ BOOL (psdSuspendDevice)(struct PsdDevice * pd asm("a0"), struct PsdBase * ps asm
                    of them succeed abort EP1 and clear nch_Running".
 
                    Documented exception to the sole-writer rule of
-                   docs/hub.class-architecture.md S9: for a ROOT device the core
+                   docs/hub.class-architecture.md section 6, rule 4: for a ROOT device the core
                    owns PDFF_SUSPENDED, because no hub class can - there is no
                    parent hub class to own it.  Written strictly AFTER the
                    bindings stopped and never before: the child suspends above
@@ -8283,14 +8284,13 @@ static UWORD pLoadCfgFile(struct PsdBase *ps, STRPTR filename)
 
                 psdReadCfg(NULL, buf);
                 BOOL migrated = pMigrateCfg(ps);
-                psdParseCfg();
+                psdParseCfg();      /* records the live config as saved */
 
                 KPRINTF(1, ("All done\n"));
                 level = RETURN_OK;
-                /* the live config now matches this file; a migrated
-                   one matches no file until it is saved */
-                if(!migrated) {
-                    ps->ps_SavedConfigHash = ps->ps_ConfigHash;
+                /* a migrated config matches no file until it is saved */
+                if(migrated) {
+                    ps->ps_SavedConfigHash = ~ps->ps_ConfigHash;
                 }
             }
             psdFreeVec(buf);

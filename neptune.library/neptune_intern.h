@@ -461,7 +461,7 @@ struct PsdDevice
     UWORD               pd_HubPort;       /* Port number at parent hub */
     UWORD               pd_HubThinkTime;  /* Think time for TT inter-transaction gap */
     UWORD               pd_HubNumPorts;   /* Hub port count (set by the hub classes via DA_HubNumPorts) */
-    UWORD               pd_HubHdrDecLat;  /* SS hubs: bHubHdrDecLat, 0.1µs units (DA_HubHdrDecLat) */
+    UWORD               pd_HubHdrDecLat;  /* SS hubs: bHubHdrDecLat, 0.1 us units (DA_HubHdrDecLat) */
     UWORD               pd_HubDelay;      /* SS hubs: wHubDelay in ns (DA_HubDelay) */
     UWORD               pd_USBVers;       /* USB Version */
     UWORD               pd_DevClass;      /* Class code */
@@ -603,7 +603,7 @@ struct PsdPipe
     {                                     /* context-backend message framings (ops only - transfers are direct calls) */
         struct IOStdReq ppc_Std;          /* lifecycle ops (io_Data -> Uhcd* op block) */
         struct
-        {                                 /* clock-driven iso-hook ops (§10.3) */
+        {                                 /* clock-driven iso-hook ops (ABI doc 10.3) */
             struct IOStdReq     ppcr_Std; /* wire request */
             struct UhcdIsoHooks ppcr_Op;  /* io_Data payload - must outlive the submit */
         }               ppc_RtIso;
