@@ -95,7 +95,7 @@ endfunction()
 #           AMIGALIB  links -lamiga without MUI (a non-GUI class that still uses amiga.lib stubs)
 # One-val:  BASETYPE (required); INCLUDE (default "<name>.h"); PRI (default NEP_CLASS_PRI)
 # Multi:    SOURCES   extra .c beyond <name>.class.c + the skeleton
-#           DEFINES   extra -D (HAS_LIBOPEN, HAS_LIBCLOSE, DISKLABELS, …)
+#           DEFINES   extra -D (HAS_LIBOPEN, HAS_LIBCLOSE, DISKLABELS, ...)
 #           DEPS      extra link targets (e.g. sana2_headers for the ethernet family)
 set(NEP_CLASS_PRI -45)
 

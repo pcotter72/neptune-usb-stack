@@ -1196,7 +1196,7 @@ struct NepClassHubSS * nAllocHub(void) {
                                                     TAG_END);
 
                                         if(!nch->nch_IsRootHub) {
-                                            /* USB 3 §10.14.2.9: an SS hub routes nothing downstream
+                                            /* USB 3 section 10.14.2.9: an SS hub routes nothing downstream
                                                until told its tier (the root hub needs no depth). */
                                             UWORD depth = 0;
                                             APTR up = NULL;

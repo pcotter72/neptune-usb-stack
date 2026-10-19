@@ -14,7 +14,7 @@
 > This document describes structure, behaviour and the rules that keep it correct. It names
 > functions as anchors; the code is the reference for wire and field layouts, timings and retry
 > counts. Open work: [implementation-plan.md](implementation-plan.md) §2.2 (stages), §3 (built,
-> never run), §4.2 (video regression list). Notes on the specification, Linux `uvcvideo` and VHI:
+> never run), §4.2 (video regression list). Notes on the specification and VHI:
 > [uvc/notes/](uvc/notes/).
 
 ---
@@ -303,7 +303,7 @@ stateDiagram-v2
 ```
 
 Compliant cameras close on EOF; one whose EOF is missing or lost closes on the next FID; one
-whose FID never toggles closes on EOF. Linux needs a quirk list for the last (rule 4).
+whose FID never toggles closes on EOF, so the last needs no quirk entry (rule 4).
 
 **Judging** (`uvcCloseFrame`): no read was waiting - skipped. Longer than the read's buffer -
 returned with `UVERR_OVERFLOW` and what fitted (rule 10). Damaged (ERR bit, lost interval, bad
@@ -464,7 +464,7 @@ Each rule exists because breaking it caused, or would cause, a real failure.
    it; repairs go beside it. A host-order mirror needs a marshal pair kept in step and zeroes the
    fields a later revision adds; an edited block sends numbers the camera did not agree to.
 3. **Only SET_CUR and GET_CUR on the probe control.** GET_MIN/MAX/DEF crash some firmware
-   (Linux's `PROBE_MINMAX`/`PROBE_DEF` lists); they tune compression, left to the device.
+   or return garbage; they tune compression, left to the device.
 4. **Avoid rather than quirk.** Generic frame rules, untrusted size fields, zero-filled short
    control replies, interval fixes at parse time. No vendor table exists; a defect the rules
    cannot absorb would get one, consulted at bind.
@@ -590,7 +590,7 @@ older personality); makers' extension-unit controls in the window (raw requests 
 **Built, never run on hardware:** the frame-based, H.264 and VP8 rows (§5.1); the bulk transport
 (§5.4, tested on a PC against a simulated endpoint); the VHI driver's YUY2 path (§5.10).
 
-Quirk-table candidates from Linux, should a camera need one: echo `dwMaxVideoFrameSize` in PROBE
+Quirk-table candidates, should a camera need one: echo `dwMaxVideoFrameSize` in PROBE
 SET_CUR; `SET_INTERFACE(0)` before the first video request; compute an uncompressed payload size
 from size and rate when the camera states one far too high.
 

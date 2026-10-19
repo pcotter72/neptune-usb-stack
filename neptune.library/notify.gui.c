@@ -17,7 +17,7 @@
 
 #include <proto/alib.h>
 
-/* ROM-safe per-instance MUI base. MUI's __inline object constructors (the `…End`
+/* ROM-safe per-instance MUI base. MUI's __inline object constructors (the `...End`
  * idiom) resolve MUIMASTER_BASE_NAME at *file* scope, so the per-call-site
  * `#define MUIMasterBase ntf->nt_MUIBase` below - fine for the OpenLibrary/CloseLibrary
  * sites that have `ntf` in scope - is invisible to them. Recover the base from the

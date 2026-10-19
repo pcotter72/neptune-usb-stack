@@ -906,16 +906,16 @@ void bayer_unshuffle(struct SCImageHeader *scih, UBYTE *raw, UBYTE *output)
     UBYTE *oline;
 
 /* Byte Order. Each cell is one byte.
-   start + 0:  B00 G01 B02 G03
-   start + 4:  G10 R11 G12 R13
-   start + 8:  B20 G21 B22 G23
-   start + 12: G30 R31 G32 R33 */
+   start + 0:  B00 G01 B02 G03
+   start + 4:  G10 R11 G12 R13
+   start + 8:  B20 G21 B22 G23
+   start + 12: G30 R31 G32 R33 */
 
 /* Byte Order. Each cell is one byte.
-   start + 0:  G00 B01 G02 B03
-   start + 4:  R10 G11 R12 G13
-   start + 8:  G20 B21 G22 B23
-   start + 12: R30 G31 R32 G33 */
+   start + 0:  G00 B01 G02 B03
+   start + 4:  R10 G11 R12 G13
+   start + 8:  G20 B21 G22 B23
+   start + 12: R30 G31 R32 G33 */
 
     // RGB
     for(y = 0; y < vh; y++)

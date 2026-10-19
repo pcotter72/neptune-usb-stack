@@ -282,8 +282,8 @@ Each rule exists because breaking it caused, or would cause, a real failure.
    a late up adds scroll steps.
 4. **Never send a key with no Amiga code.** The keymap's `0xff` ("no key") is unchanged by
    `IECODE_UP_PREFIX`, so its up reads as a down: under `IND_ADDEVENT`, a key that never releases.
-5. **An ErrorRollOver array is ignored**, state kept, as Linux hid-core does. Diffing it would
-   release every held key and press it again when it clears.
+5. **An ErrorRollOver array is ignored**, state kept. Diffing it would release every held key and
+   press it again when it clears.
 6. **`nCheckReset` reads `nch_LastRawKey`, not the event.** `DoIO` may destroy the event, and on a
    keyboard-and-mouse device the flush overwrites it with a mouse event first.
 7. **Slow or blocking actions go to the dispatcher.** The HID task delivers key-ups and re-arms the

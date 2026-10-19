@@ -3390,8 +3390,8 @@ static void pLinkPowerClearDevFeature(struct PsdBase *ps, struct PsdDevice *pd,
     pd->pd_LpmArmed &= ~flag;
 }
 
-/* Take back exactly what pLinkPowerArm() put on the wire, in the reverse order
-   (mirrors Linux usb_disable_link_state): device-initiated states off first, so
+/* Take back exactly what pLinkPowerArm() put on the wire, in the reverse order:
+   device-initiated states off first, so
    the device stops proposing U1/U2 before the port stops allowing it, then the
    host-initiated port timeouts, then the controller side state.
 

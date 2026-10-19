@@ -541,18 +541,18 @@ void nHidTask()
                                     KPRINTF(2, ("Raw Coords %ld, %ld, %02lx, %ld\n", xpos, ypos, packet[0], nch->nch_RMBState));
                                     switch(nch->nch_CDC->cdc_Rotate)
                                     {
-                                        case 1: // 90°
+                                        case 1: // 90 degrees
                                             tmp = ypos;
                                             ypos = xpos;
                                             xpos = 2047 - tmp;
                                             break;
 
-                                        case 2: // 180°
+                                        case 2: // 180 degrees
                                             ypos = 2047 - ypos;
                                             xpos = 2047 - xpos;
                                             break;
 
-                                        case 3: // 270°
+                                        case 3: // 270 degrees
                                             tmp = xpos;
                                             xpos = ypos;
                                             ypos = 2047 - tmp;

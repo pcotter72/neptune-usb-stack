@@ -120,8 +120,7 @@ The script adds it.
   it as a Port and put the change in a Follow-up, so `git blame` shows who wrote which
   line.
 - **Fix-ups that only make it build go in the Port commit**, named in a bracketed line in
-  its own paragraph above the trailer - the Linux-kernel convention for "whoever carried
-  this patch changed it". (Keep the blank line: a non-trailer line inside the last
+  its own paragraph above the trailer, saying what whoever carried the patch changed. (Keep the blank line: a non-trailer line inside the last
   paragraph stops git from recognising the trailer.)
 - **The subject may gain a component prefix**, nothing else: upstream's `minor refactor.`
   becomes `ptp.class: minor refactor.`

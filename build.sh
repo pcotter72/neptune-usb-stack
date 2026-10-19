@@ -65,7 +65,7 @@ USER_CONFIGURE_ARGS="${NEPTUNE_CONFIGURE_ARGS:-}"
 
 # The local-build stamp (see the header). One per run, so an --all-cpus run and the
 # separate package configure all carry the same one. Untracked files do not make a tree
-# dirty (as in Linux's setlocalversion); no git => date and time only.
+# dirty; no git => date and time only.
 build_stamp() {
     local stamp hash
     stamp="dev-$(date +%Y%m%d-%H%M%S)"
@@ -200,7 +200,7 @@ copy_one() {                               # copy_one <src-under-build> <amiga-d
 deploy_group() { local e; for e in "$@"; do copy_one "${e%%|*}" "${e#*|}"; done; }
 
 # Every built class under build/classes/*/*.class -> DEVS:USBClasses/<file> (output names
-# differ from dir names - pegasus.class, dm9601eth.class, usbaudio.class, … - so glob the
+# differ from dir names - pegasus.class, dm9601eth.class, usbaudio.class, ... - so glob the
 # actual artifacts rather than the source-dir names).
 deploy_classes() {
     local f rel; local -a list

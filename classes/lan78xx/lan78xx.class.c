@@ -970,8 +970,8 @@ void nSetOnline(struct NepClassEth *ncp)
  * same 16-word VHF hash table written via the indirect DP_* register
  * window.  SANA-II has no ALLMULTI concept, so we map:
  *
- *   opener with SANA2OPF_PROM set  →  accept all unicast + all multicast
- *   otherwise                      →  perfect-match my MAC + hashed multicasts
+ *   opener with SANA2OPF_PROM set  ->  accept all unicast + all multicast
+ *   otherwise                      ->  perfect-match my MAC + hashed multicasts
  *
  * Broadcast is always accepted.  Called with no lock held; the chip's
  * EP0 requests are serialised by our ethernet task, so it's safe to

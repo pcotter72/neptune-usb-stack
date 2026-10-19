@@ -63,7 +63,7 @@ install(FILES ${CMAKE_SOURCE_DIR}/dist/NeptuneUSB.info DESTINATION Prefs)
 install(FILES ${CMAKE_SOURCE_DIR}/dist/datatypes/Neptune DESTINATION DEVS/DataTypes)
 install(FILES ${CMAKE_SOURCE_DIR}/dist/def_Neptune.info DESTINATION Icons)
 
-# Default USB attach/detach sounds → SYS:Prefs/Presets/Neptune/ (NEP_PRESETDRAWER, include/nep_paths.h:
+# Default USB attach/detach sounds -> SYS:Prefs/Presets/Neptune/ (NEP_PRESETDRAWER, include/nep_paths.h:
 # the library's default Insert/Remove sound files). Capitalised to match the code's path (FFS is
 # case-insensitive, but keep it tidy).
 install(FILES ${CMAKE_SOURCE_DIR}/presets/Neptune/connect.iff
@@ -71,8 +71,8 @@ install(FILES ${CMAKE_SOURCE_DIR}/presets/Neptune/connect.iff
 install(FILES ${CMAKE_SOURCE_DIR}/presets/Neptune/disconnect.iff
         DESTINATION Prefs/Presets/Neptune RENAME Disconnect.iff)
 
-# NeptuneUSB catalogs (built by the neptuneusb_catalogs target) → Catalogs/<locale-language>/System/Prefs/
-# so the Install script's `copyfiles Catalogs → LOCALE:Catalogs` lands them where OpenCatalog looks.
+# NeptuneUSB catalogs (built by the neptuneusb_catalogs target) -> Catalogs/<locale-language>/System/Prefs/
+# so the Install script's `copyfiles Catalogs -> LOCALE:Catalogs` lands them where OpenCatalog looks.
 # Language dir = the .ct's `## language` name, which is what locale.library looks up - and on an
 # Amiga that name is latin-1 (français = 0xE7, español = 0xF1), matching the .ct `## language`
 # lines. This file is UTF-8, so the two names below are UTF-8 here and the staged directories are
@@ -106,7 +106,7 @@ install(TARGETS DRadioTool PencamTool PowManTool RocketTool SonixcamTool UPSTool
 # drivers in LIBS:VHI/, and the drawer mirrors that.
 install(TARGETS usbvideo_vhi RUNTIME DESTINATION LIBS/VHI)
 
-# USBEject safe-eject daemon → SYS:WBStartup (the Installer asks; icon carries DONOTWAIT).
+# USBEject safe-eject daemon -> SYS:WBStartup (the Installer asks; icon carries DONOTWAIT).
 install(TARGETS USBEject RUNTIME DESTINATION WBStartup)
 install(FILES ${CMAKE_SOURCE_DIR}/dist/USBEject.info DESTINATION WBStartup)
 

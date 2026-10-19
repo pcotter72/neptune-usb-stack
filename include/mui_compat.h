@@ -9,7 +9,7 @@
  *     stored tag with no values and no TAG_DONE, and MUI walks off the end. This is not
  *     a miscompile to be waited out, it is invalid C; it breaks identically at -O1, -O2,
  *     -O3 and -Os (only -O0 survives, which is why it looks like an optimizer bug).
- *     See porting-playbook.md §4.1 for the disassembly.
+ *     See porting-playbook.md section 4.1 for the disassembly.
  *
  *     Fix: a va_list replacement, shadowed by an OBJECT-LIKE macro so the SDK's
  *     XxxObject tree macros keep expanding to a plain call. Object-like is forced: a
