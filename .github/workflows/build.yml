@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      build_stamp:
+        description: "POSEIDON_BUILD_STAMP (rides at the end of every $VER cookie); empty = release"
+        required: false
+        default: ""
 
 jobs:
   build:
@@ -43,6 +48,7 @@ jobs:
             -DPOSEIDON_DEBUG_BACKEND=${{ matrix.backend }}
             -DM68K_CPU=${{ matrix.cpu }}
             -DM68K_FPU=${{ matrix.fpu }}
+            -DPOSEIDON_BUILD_STAMP=${{ inputs.build_stamp }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
