@@ -37,7 +37,7 @@
 #   * Your own stock 512 KiB AmigaOS 3.2 Kickstart.
 #
 # Usage
-#   build-kickstart.sh [--hcd <name>] <kick.rom> [module ...]
+#   build-kickstart.sh [--hcd <name>] [--hcd-bcm2837 <name>] <kick.rom> [module ...]
 #     <kick.rom>   stock 512 KiB Kickstart (or set KICK=<path>)
 #     module ...   extra ROM-able binaries to embed, e.g. your bcmpcie.library,
 #                  xhci.device and nvme.device
@@ -49,6 +49,13 @@
 #                  the resident opens it before DOS exists and waits on it with no
 #                  timeout, so a name that opens something which is *not* a host
 #                  controller hangs the boot rather than reporting anything.
+#     --hcd-bcm2837 <name>
+#                  host controller the resident adds instead when the Emu68
+#                  devicetree's root "compatible" lists "brcm,bcm2837" (Raspberry
+#                  Pi 3 family, DWC2 USB), e.g. --hcd-bcm2837 berrypi3ap.device, so
+#                  one image serves a Pi 3 and a Pi 4/CM4. Same rules as --hcd;
+#                  without it the compiled-in default (cmake -DROMSTART_HCD_BCM2837,
+#                  normally none) is used.
 #     -h, --help   this help
 #
 # Env overrides:
@@ -64,19 +71,25 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 KICK="${KICK:-}"
 HCD=""
+HCD_BCM2837=""
 EXTRA=()
 want_hcd=0
+want_bcm=0
 for a in "$@"; do
     if (( want_hcd )); then HCD="$a"; want_hcd=0; continue; fi
+    if (( want_bcm )); then HCD_BCM2837="$a"; want_bcm=0; continue; fi
     case "$a" in
         -h|--help) sed -n '2,/^[^#]/{/^#/p}' "$0"; exit 0 ;;
         --hcd) want_hcd=1 ;;
         --hcd=*) HCD="${a#--hcd=}" ;;
+        --hcd-bcm2837) want_bcm=1 ;;
+        --hcd-bcm2837=*) HCD_BCM2837="${a#--hcd-bcm2837=}" ;;
         -*) echo "unknown option: $a (try --help)" >&2; exit 2 ;;
         *)  if [[ -z "$KICK" ]]; then KICK="$a"; else EXTRA+=("$a"); fi ;;
     esac
 done
 (( want_hcd == 0 )) || { echo "--hcd needs a device name (try --help)" >&2; exit 2; }
+(( want_bcm == 0 )) || { echo "--hcd-bcm2837 needs a device name (try --help)" >&2; exit 2; }
 
 # --- where the Poseidon modules are -----------------------------------------------
 # The resident sitting next to this script is what tells the two layouts apart: the
@@ -138,21 +151,27 @@ python3 "$HERE/kickpatch.py" "$KICK" "$PATCHED_KICK"
 # --- 1. point the startup resident at a different host controller ------------------
 # Patched into a copy, so the shipped resident stays what it was and a later run
 # without --hcd still produces the stock image.
-if [[ -n "$HCD" ]]; then
+if [[ -n "$HCD" || -n "$HCD_BCM2837" ]]; then
     # The resident opens this device pre-DOS and waits on it with no timeout, so a
     # name that resolves to something which is not a host controller hangs the boot
     # instead of failing. A name that is in the image is not proof it is an HCD, but
     # a name that is *not* is nearly always a typo or a forgotten module.
-    hcd_seen=0
-    for m in "${MODULES[@]}"; do
-        [[ "$(basename "$m")" == "$HCD" ]] && hcd_seen=1
-    done
-    (( hcd_seen )) || echo "   WARNING: --hcd $HCD names no module being embedded - the resident will
+    # (Matched against the file name: a module whose file is named differently from
+    # its device warns here although the image is fine.)
+    for opt_name in "--hcd:$HCD" "--hcd-bcm2837:$HCD_BCM2837"; do
+        opt="${opt_name%%:*}"; name="${opt_name#*:}"
+        [[ -n "$name" ]] || continue
+        hcd_seen=0
+        for m in "${MODULES[@]}"; do
+            [[ "$(basename "$m")" == "$name" ]] && hcd_seen=1
+        done
+        (( hcd_seen )) || echo "   WARNING: $opt $name names no module being embedded - the resident will
             look for it at boot and find nothing. Fine only if it comes from your
             Kickstart or the board ROM; otherwise you forgot to pass the driver."
+    done
 
     PATCHED_ROMSTART="$TMP/usbromstart-hcd"
-    python3 "$HERE/hcdpatch.py" "$ROMSTART" "$PATCHED_ROMSTART" "$HCD"
+    python3 "$HERE/hcdpatch.py" "$ROMSTART" "$PATCHED_ROMSTART" "${HCD:--}" "${HCD_BCM2837:--}"
     for i in "${!MODULES[@]}"; do
         [[ "${MODULES[$i]}" == "$ROMSTART" ]] && MODULES[$i]="$PATCHED_ROMSTART"
     done

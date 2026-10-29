@@ -12,21 +12,32 @@
 set(ROMSTART_HCD "xhci.device" CACHE STRING
     "Default host-controller device name (build-kickstart.sh --hcd overrides per image)")
 
+# The host controller added instead on a BCM2837 board (Raspberry Pi 3 family, DWC2
+# USB), decided at boot from the Emu68 devicetree. Empty: every board gets ROMSTART_HCD.
+# build-kickstart.sh --hcd-bcm2837 sets it per image.
+set(ROMSTART_HCD_BCM2837 "" CACHE STRING
+    "Host controller for BCM2837 boards, empty for none (build-kickstart.sh --hcd-bcm2837 overrides per image)")
+
+# devicetree.resource inlines: the resident reads the SoC from the Emu68 devicetree.
+generate_sfd_headers(devicetree DEVICETREE_GEN_DIR)
+
 add_executable(usbromstart
     usbromstart.c
     )
-add_dependencies(usbromstart poseidon_sfd_headers usbclass_sfd_headers)
+add_dependencies(usbromstart poseidon_sfd_headers usbclass_sfd_headers devicetree_sfd_headers)
 
 target_compile_options(usbromstart PRIVATE -Os -ffreestanding)
 
 target_compile_definitions(usbromstart PRIVATE
     __NOLIBBASE__
     POSEIDON_BASE_NAME=ps
-    ROMSTART_HCD_NAME="${ROMSTART_HCD}")
+    ROMSTART_HCD_NAME="${ROMSTART_HCD}"
+    ROMSTART_HCD_BCM2837_NAME="${ROMSTART_HCD_BCM2837}")
 
 target_include_directories(usbromstart PRIVATE
     ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR})
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${DEVICETREE_GEN_DIR})
 
 # usbclass_headers: the resident asks massstorage.class directly whether a medium is
 # still coming up (UCM_MediaPending, inline LVO macros).

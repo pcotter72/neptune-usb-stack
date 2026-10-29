@@ -135,6 +135,20 @@ the distribution; `cmake -DROMSTART_HCD=<name>` only sets the default. The name 
 characters, and the script warns if it matches no module being embedded - nearly always a typo or
 a forgotten driver.
 
+One image can also serve two kinds of board. `--hcd-bcm2837 <name>` (default from
+`cmake -DROMSTART_HCD_BCM2837=<name>`, normally empty) fills a second field in the same slot: at
+boot the resident opens `devicetree.resource` and, if the root node's `compatible` list holds
+`brcm,bcm2837` (the Raspberry Pi 3 family, whose USB is a DWC2 and not an xHCI), adds that
+controller instead of the default one - e.g. `--hcd xhci.device --hcd-bcm2837 berrypi3ap.device`.
+Without `devicetree.resource` (any non-Emu68 machine) or with the field empty, the default is used,
+as before. Only the chosen controller is ever opened; the other one may sit in the ROM unopened,
+so its romtag init must not touch hardware. The choice is logged ("Pi SoC brcm,bcm2837: using
+...").
+
+The cookie's last byte is the slot layout (`PSDHCD\2` since the second field was added), and
+`hcdpatch.py` checks it, so a script refuses a module of another layout instead of writing past
+its slot.
+
 **It must be a real Poseidon host controller.** The resident opens the device before DOS exists
 and waits on it with no timeout, so a name that resolves to something which is *not* a host
 controller hangs the coldstart chain instead of reporting an error - the machine simply never
@@ -176,7 +190,7 @@ and `Classes/USB/`:
 
 ```
 ./build.sh --build                        # any backend but serial
-./scripts/build-kickstart.sh [--hcd <name>] <kick.rom> <bcmpcie.library> <xhci.device> [module ...]
+./scripts/build-kickstart.sh [--hcd <name>] [--hcd-bcm2837 <name>] <kick.rom> <bcmpcie.library> <xhci.device> [module ...]
 ```
 
 `BUILD_DIR` (default `build/`) selects the tree, `OUT` the image (default
