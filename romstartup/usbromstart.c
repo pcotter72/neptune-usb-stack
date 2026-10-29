@@ -219,11 +219,18 @@ static BOOL socCompatible(CONST_STRPTR soc)
    (when one is set), the default slot everywhere else. */
 static CONST_STRPTR chooseHardware(struct Library *ps, CONST_STRPTR origin)
 {
-    if(romstartHcd.bcm2837[0] && socCompatible((CONST_STRPTR)"brcm,bcm2837"))
+    /* Read through an empty asm: the slot is const and its compiled-in bcm2837
+       field is normally "", so the compiler folds the test below to FALSE and drops
+       the devicetree check - but the field is patched in the binary after the build
+       (hcdpatch.py).  The asm hides what the pointer points at. */
+    const char *bcm2837 = romstartHcd.bcm2837;
+    __asm__("" : "+r" (bcm2837));
+
+    if(bcm2837[0] && socCompatible((CONST_STRPTR)"brcm,bcm2837"))
     {
         psdAddErrorMsg(RETURN_OK, (STRPTR)origin,
-                       "Pi SoC brcm,bcm2837: using %s.", (STRPTR)romstartHcd.bcm2837);
-        return (CONST_STRPTR)romstartHcd.bcm2837;
+                       "Pi SoC brcm,bcm2837: using %s.", (STRPTR)bcm2837);
+        return (CONST_STRPTR)bcm2837;
     }
     return (CONST_STRPTR)romstartHcd.name;
 }
