@@ -205,36 +205,50 @@ def patch_kickstart(stock, banks):
 
 
 # --- the startup resident's host controller --------------------------------------------
-# romstartup/usbromstart.c carries the HCD name in a fixed-size field tagged with its
+# romstartup/usbromstart.c carries the HCD names in fixed-size fields tagged with their
 # own cookie, so an image can embed a controller other than the one the distribution
-# was compiled for. Both values must match ROMSTART_HCD_COOKIE and
-# sizeof(romstartHcd.name) there. The trailing \x01 is the layout version: bump it there
-# and here together if the field ever moves or changes size, so an old script cannot
-# silently mis-patch a new module.
-HCD_COOKIE = b"NEPHCD\x01\x00"
+# was compiled for. These values must match ROMSTART_HCD_COOKIE and the romstartHcd
+# struct there: the default name, then the name used instead on a BCM2837 board
+# (Raspberry Pi 3 family, chosen at boot from the Emu68 devicetree; empty = none). The
+# trailing \x02 is the layout version: bump it there and here together if a field ever
+# moves or changes size, so a script of one layout cannot mis-patch a module of another.
+HCD_COOKIE = b"NEPHCD\x02\x00"
 HCD_NAME_LEN = 32
+HCD_FIELDS = ("--hcd", "--hcd-bcm2837")     # in slot order
 
 
-def patch_hcd(romstart, name):
-    """The startup resident with `name` as its host controller, as bytes."""
+def _encode_hcd(option, name, allow_empty):
     try:
         encoded = name.encode("latin-1")
     except UnicodeEncodeError:
-        die(f"--hcd: {name!r} has characters an Amiga device name cannot hold")
-    if not encoded:
-        die("--hcd: the device name is empty")
+        die(f"{option}: {name!r} has characters an Amiga device name cannot hold")
+    if not encoded and not allow_empty:
+        die(f"{option}: the device name is empty")
     if len(encoded) + 1 > HCD_NAME_LEN:
-        die(f"--hcd: {name!r} is {len(encoded)} bytes; the slot holds "
+        die(f"{option}: {name!r} is {len(encoded)} bytes; the slot holds "
             f"{HCD_NAME_LEN - 1} plus a NUL")
+    return encoded
+
+
+def patch_hcd(romstart, name=None, bcm2837=None):
+    """The startup resident with its host controller fields set, as bytes.
+
+    `name` replaces the default host controller, `bcm2837` the one added instead on a
+    BCM2837 board ("" clears it). None leaves a field as it is."""
     if romstart.count(HCD_COOKIE) != 1:
         die(f"--hcd: cookie {HCD_COOKIE!r} not found exactly once in the ROM startup "
-            f"resident - was it built from a source carrying the patchable slot?")
+            f"resident - was it built from a source carrying the layout-2 slot?")
 
-    # Whole field, NUL-padded: never leave a tail of the previous name behind.
-    field_off = romstart.index(HCD_COOKIE) + len(HCD_COOKIE)
+    slot = romstart.index(HCD_COOKIE) + len(HCD_COOKIE)
     patched = bytearray(romstart)
-    patched[field_off:field_off + HCD_NAME_LEN] = encoded.ljust(HCD_NAME_LEN, b"\0")
-    print(f"   patched HCD name -> {name} (slot at {field_off:#x})")
+    for index, (option, value) in enumerate(zip(HCD_FIELDS, (name, bcm2837))):
+        if value is None:
+            continue
+        encoded = _encode_hcd(option, value, allow_empty=(index > 0))
+        # Whole field, NUL-padded: never leave a tail of the previous name behind.
+        field_off = slot + index * HCD_NAME_LEN
+        patched[field_off:field_off + HCD_NAME_LEN] = encoded.ljust(HCD_NAME_LEN, b"\0")
+        print(f"   patched {option[2:]} -> {value or '(none)'} (field at {field_off:#x})")
     return bytes(patched)
 
 
@@ -356,6 +370,14 @@ def parse_args():
                              "before DOS exists and waits on it with no timeout, so a "
                              "name that opens something which is *not* a host controller "
                              "hangs the boot rather than reporting anything.")
+    parser.add_argument("--hcd-bcm2837", metavar="NAME",
+                        help="host controller the startup resident adds instead of the "
+                             "default when the Emu68 devicetree's root \"compatible\" "
+                             "lists brcm,bcm2837 (Raspberry Pi 3 family), e.g. "
+                             "--hcd-bcm2837 berrypi3ap.device; every other board - and a "
+                             "machine with no devicetree.resource - keeps the default, and "
+                             "the controller not chosen is never opened. An empty name "
+                             "switches it off. The same warning as for --hcd applies.")
     parser.add_argument("-o", "--output", type=Path, metavar="FILE",
                         help="output image (default ./kick-usb-2m.rom from the archive, "
                              "<build dir>/kick-usb-2m.rom from a source tree)")
@@ -405,17 +427,19 @@ def main():
         # --- 1. point the startup resident at a different host controller ------------
         # Patched into a copy, so the shipped resident stays what it was and a later
         # run without --hcd still produces the stock image.
-        if args.hcd is not None:
+        if args.hcd is not None or args.hcd_bcm2837 is not None:
             # The resident opens this device pre-DOS and waits on it with no timeout, so
             # a name that resolves to something which is not a host controller hangs the
             # boot instead of failing. A name that is in the image is not proof it is an
             # HCD, but a name that is *not* is nearly always a typo or a forgotten module.
-            if args.hcd not in [module.name for module in modules]:
-                print(f"   WARNING: --hcd {args.hcd} names no module being embedded - the resident will\n"
-                      f"            look for it at boot and find nothing. Fine only if it comes from your\n"
-                      f"            Kickstart or the board ROM; otherwise you forgot to pass the driver.")
+            for option, value in (("--hcd", args.hcd), ("--hcd-bcm2837", args.hcd_bcm2837)):
+                if value and value not in [module.name for module in modules]:
+                    print(f"   WARNING: {option} {value} names no module being embedded - the resident will\n"
+                          f"            look for it at boot and find nothing. Fine only if it comes from your\n"
+                          f"            Kickstart or the board ROM; otherwise you forgot to pass the driver.")
             patched_romstart = tmp / romstart.name
-            patched_romstart.write_bytes(patch_hcd(romstart.read_bytes(), args.hcd))
+            patched_romstart.write_bytes(patch_hcd(romstart.read_bytes(), args.hcd,
+                                                   args.hcd_bcm2837))
             modules[modules.index(romstart)] = patched_romstart
 
         # --- 2. the modules, and the bank each one goes in ---------------------------
