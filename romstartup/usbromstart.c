@@ -41,11 +41,12 @@
 #include <libraries/neptune.h>
 #include <proto/neptune.h>
 
-/* Inline LVO macros only, for both of these: the base is a local (TimerBase,
-   UsbClsBase - the names the inlines default to), because a ROM module may not
-   carry a writable global to hold one. */
+/* Inline LVO macros only, for all three of these: the base is a local (TimerBase,
+   UsbClsBase, DeviceTreeBase - the names the inlines default to), because a ROM
+   module may not carry a writable global to hold one. */
 #include <proto/timer.h>
 #include <inline/neptune_class.h>
+#include <inline/devicetree.h>
 
 #include <neptune_version.h>
 #include <nep_otherstack.h>
@@ -57,6 +58,12 @@
 #define ROMSTART_HCD_NAME  "xhci.device"
 #endif
 
+/* Host controller for a BCM2837 board (Raspberry Pi 3 family), whose USB is a DWC2
+   rather than an xHCI.  Empty: no such switch, every board gets ROMSTART_HCD_NAME. */
+#ifndef ROMSTART_HCD_BCM2837_NAME
+#define ROMSTART_HCD_BCM2837_NAME  ""
+#endif
+
 /* Patchable host-controller slot.
  *
  * The ROM image is assembled from whatever modules the builder hands to
@@ -64,18 +71,29 @@
  * controller must not need a recompile of the whole distribution.  The name
  * therefore lives in a fixed-size field carrying its own cookie:
  * `build-kickstart.py --hcd <name>` finds ROMSTART_HCD_COOKIE in the built module,
- * checks it occurs exactly once, and overwrites the 32 bytes that follow.  A byte
+ * checks it occurs exactly once, and overwrites the fields that follow.  A byte
  * signature rather than a symbol because the module is linked -s.
+ *
+ * Layout 2 added the bcm2837 field (`--hcd-bcm2837 <name>`): on a board whose
+ * devicetree root lists "brcm,bcm2837" that name is added instead of the default.
+ * The layout byte changed with it, so a script written for one layout refuses a
+ * module of the other: a layout-1 script would leave the second field unknown, and
+ * a layout-2 script writing it into a layout-1 module would overwrite the code
+ * after the slot.
  */
-#define ROMSTART_HCD_COOKIE "NEPHCD\1"   /* 8 bytes with the NUL; \1 = layout version */
+#define ROMSTART_HCD_COOKIE "NEPHCD\2"   /* 8 bytes with the NUL; \2 = layout version */
 
 static const struct {
     char cookie[8];
-    char name[32];
-} romstartHcd __attribute__((used)) = { ROMSTART_HCD_COOKIE, ROMSTART_HCD_NAME };
+    char name[32];                      /* default host controller */
+    char bcm2837[32];                   /* instead on a BCM2837 board; "" = none */
+} romstartHcd __attribute__((used)) = { ROMSTART_HCD_COOKIE, ROMSTART_HCD_NAME,
+                                        ROMSTART_HCD_BCM2837_NAME };
 
 _Static_assert(sizeof(ROMSTART_HCD_NAME) <= sizeof(romstartHcd.name),
                "ROMSTART_HCD name does not fit the patchable slot");
+_Static_assert(sizeof(ROMSTART_HCD_BCM2837_NAME) <= sizeof(romstartHcd.bcm2837),
+               "ROMSTART_HCD_BCM2837 name does not fit the patchable slot");
 
 /* Linker entry point (-Wl,-e,_doNotExecute): a resident module is data to the
    loader, never a program. */
@@ -150,15 +168,86 @@ static void addInputClasses(struct Library *ps, CONST_STRPTR origin)
     }
 }
 
+/* TRUE if the Emu68 devicetree's root "compatible" list holds exactly `soc`.
+ *
+ * The property is a run of NUL-terminated strings, most specific first; every read
+ * stays inside the DT_GetPropLen() bytes the resource reports.  No devicetree.resource
+ * (not Emu68, e.g. WinUAE) or no such property reads as FALSE.
+ */
+static BOOL socCompatible(CONST_STRPTR soc)
+{
+    APTR DeviceTreeBase = OpenResource((CONST_STRPTR)"devicetree.resource");
+    BOOL found = FALSE;
+
+    if(!DeviceTreeBase)
+    {
+        return FALSE;
+    }
+
+    APTR root = DT_OpenKey((CONST_STRPTR)"/");
+    APTR prop = root ? DT_FindProperty(root, (CONST_STRPTR)"compatible") : NULL;
+    const char *list = prop ? (const char *)DT_GetPropValue(prop) : NULL;
+    ULONG len = list ? DT_GetPropLen(prop) : 0;
+    ULONG pos = 0;
+
+    while((pos < len) && !found)
+    {
+        ULONG n = 0;
+
+        while(soc[n] && ((pos + n) < len) && (list[pos + n] == soc[n]))
+        {
+            n++;
+        }
+        if(!soc[n] && ((pos + n) < len) && !list[pos + n])
+        {
+            found = TRUE;
+        }
+
+        /* on to the next string */
+        while((pos < len) && list[pos])
+        {
+            pos++;
+        }
+        pos++;
+    }
+
+    if(root)
+    {
+        DT_CloseKey(root);
+    }
+    return found;
+}
+
+/* The host controller to ask for: the bcm2837 slot on a Raspberry Pi 3-family board
+   (when one is set), the default slot everywhere else.  Only the chosen one is ever
+   opened. */
+static CONST_STRPTR chooseHardware(struct Library *ps, CONST_STRPTR origin)
+{
+    /* Read through an empty asm: the slot is const and its compiled-in bcm2837
+       field is normally "", so the compiler folds the test below to FALSE and drops
+       the devicetree check - but the field is patched in the binary after the build
+       (build-kickstart.py --hcd-bcm2837).  The asm hides what the pointer points at. */
+    const char *bcm2837 = romstartHcd.bcm2837;
+    __asm__("" : "+r" (bcm2837));
+
+    if(bcm2837[0] && socCompatible((CONST_STRPTR)"brcm,bcm2837"))
+    {
+        psdAddErrorMsg(RETURN_OK, (STRPTR)origin,
+                       "Pi SoC brcm,bcm2837: using %s.", (STRPTR)bcm2837);
+        return (CONST_STRPTR)bcm2837;
+    }
+    return (CONST_STRPTR)romstartHcd.name;
+}
+
 /* Every unit of the host controller, enumerated.  Returns the number found; 0 means
    there is no USB at all and the caller has nothing to wait for. */
-static ULONG addHardware(struct Library *ps, CONST_STRPTR origin)
+static ULONG addHardware(struct Library *ps, CONST_STRPTR origin, CONST_STRPTR hcd)
 {
     ULONG units = 0;
 
     for(ULONG unit = 0; ; unit++)
     {
-        APTR phw = psdAddHardware((STRPTR)romstartHcd.name, unit);
+        APTR phw = psdAddHardware((STRPTR)hcd, unit);
 
         if(!phw)
         {
@@ -169,7 +258,7 @@ static ULONG addHardware(struct Library *ps, CONST_STRPTR origin)
             continue;
         }
 
-        KPRINTF(10, ("usbromstart: added %s unit %ld\n", (STRPTR)romstartHcd.name, unit));
+        KPRINTF(10, ("usbromstart: added %s unit %ld\n", (STRPTR)hcd, unit));
         psdEnumerateHardware(phw);
         units++;
     }
@@ -177,11 +266,11 @@ static ULONG addHardware(struct Library *ps, CONST_STRPTR origin)
     if(units)
     {
         psdAddErrorMsg(RETURN_OK, (STRPTR)origin,
-                       "Started %ld %s unit(s) from ROM.", units, (STRPTR)romstartHcd.name);
+                       "Started %ld %s unit(s) from ROM.", units, (STRPTR)hcd);
     } else {
         psdAddErrorMsg(RETURN_WARN, (STRPTR)origin,
                        "No %s unit found; USB is not available at boot.",
-                       (STRPTR)romstartHcd.name);
+                       (STRPTR)hcd);
     }
 
     return units;
@@ -454,7 +543,7 @@ static ULONG initUsbRom(ULONG            dummy   asm("d0"),
     APTR msdclass   = psdAddClass("massstorage.usbclass", 0);
     addInputClasses(ps, origin);
 
-    ULONG units = addHardware(ps, origin);
+    ULONG units = addHardware(ps, origin, chooseHardware(ps, origin));
 
     /* Unconditional, including on the no-HCD path: besides binding the root device's
        classes, this is what sets ps_StartedAsTask, which is how the first class
