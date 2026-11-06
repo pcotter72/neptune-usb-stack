@@ -375,14 +375,45 @@ static BOOL DOSUnit(CONST_STRPTR name, ULONG *unitp, STRPTR why, ULONG whylen)
     dname[len] = 0;
 
     BOOL ok = FALSE;
+    ULONG mounted = 0;
     const ULONG lflags = LDF_DEVICES|LDF_VOLUMES|LDF_READ;
     struct DosList *dl = LockDosList(lflags);
     struct DosList *dev = FindDosEntry(dl, (STRPTR) dname, LDF_DEVICES);
     if(!dev)
     {
-        /* a volume: its device is the one served by the same handler port */
-        struct DosList *vol = FindDosEntry(dl, (STRPTR) dname, LDF_VOLUMES);
-        if(vol && vol->dol_Task)
+        /* A volume: its device is the one served by the same handler port.
+           FindDosEntry() would take the first node of that name, which may be
+           a node left behind with no handler (fat95 leaves one on inhibit,
+           measured) or the other of two sticks with the same label. So walk
+           them all and accept exactly one mounted volume of that name. */
+        struct DosList *vol = NULL;
+        struct DosList *v = dl;
+        while((v = NextDosEntry(v, LDF_VOLUMES)))
+        {
+            UBYTE *vn = (UBYTE *) BADDR(v->dol_Name);
+            BOOL same = (vn && (vn[0] == len));
+            for(ULONG i = 0; same && (i < len); i++)
+            {
+                /* ASCII and Latin-1 letters, upper and lower case alike */
+                UBYTE a = vn[i + 1];
+                UBYTE b = (UBYTE) dname[i];
+                if(((a >= 'a') && (a <= 'z')) || ((a >= 0xe0) && (a <= 0xfe) && (a != 0xf7)))
+                {
+                    a -= 0x20;
+                }
+                if(((b >= 'a') && (b <= 'z')) || ((b >= 0xe0) && (b <= 0xfe) && (b != 0xf7)))
+                {
+                    b -= 0x20;
+                }
+                same = (a == b);
+            }
+            if(same && v->dol_Task)
+            {
+                vol = v;
+                mounted++;
+            }
+        }
+        if(mounted == 1)
         {
             struct DosList *d = dl;
             while((d = NextDosEntry(d, LDF_DEVICES)))
@@ -397,7 +428,13 @@ static BOOL DOSUnit(CONST_STRPTR name, ULONG *unitp, STRPTR why, ULONG whylen)
     }
     if(!dev)
     {
-        psdSafeRawDoFmt(why, whylen, "%s: no such device or volume", dname);
+        if(mounted > 1)
+        {
+            psdSafeRawDoFmt(why, whylen, "%s: %ld mounted volumes have this name - use the device name, e.g. UMSD0:",
+                            dname, mounted);
+        } else {
+            psdSafeRawDoFmt(why, whylen, "%s: no such device or volume", dname);
+        }
     } else {
         /* dol_Startup is not always a FileSysStartupMsg: check before use */
         struct FileSysStartupMsg *fssm = (struct FileSysStartupMsg *) BADDR(dev->dol_misc.dol_handler.dol_Startup);
@@ -525,7 +562,7 @@ static void Tell(BOOL quiet, CONST_STRPTR body, CONST_STRPTR arg1, CONST_STRPTR 
    that can be found, RETURN_FAIL the eject failed. */
 static LONG OneShotEject(CONST_STRPTR name, BOOL quiet)
 {
-    char why[96];
+    char why[128];
     char prodname[48];
     ULONG unit = 0;
     APTR pd = NULL;
