@@ -162,7 +162,9 @@ Each is `DEVS:USBClasses/<name>.usbclass`.
 - **USBEject** (optional, `SYS:WBStartup/`) - a Workbench **USB** menu with an *Eject* item
   per drive: it flushes and unmounts the drive's volumes (refusing while a file or drawer on
   them is open, Directory Opus windows included), then stops the drive and says when it is safe
-  to unplug.
+  to unplug. From a Shell, `USBEject DEVICE=UMSD0: [QUIET]` ejects one drive and exits (rc 0
+  ejected, 5 in use, 10 not a USB drive, 20 failed); `QUIET` prints the messages instead of
+  showing requesters.
 - **Gadget tools** (optional, `SYS:Tools/`): `USBRadio`, `USBPencam`, `USBSonixcam`,
   `USBRocket`, `USBPowMan`, `USBUPS`, `USBVideo`.
 - **USBVideo** works in the Shell, or from its icon as a window: pick a camera and a mode,
