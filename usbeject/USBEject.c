@@ -391,7 +391,12 @@ static BOOL DOSUnit(CONST_STRPTR name, ULONG *unitp, STRPTR why, ULONG whylen)
         while((v = NextDosEntry(v, LDF_VOLUMES)))
         {
             UBYTE *vn = (UBYTE *) BADDR(v->dol_Name);
-            BOOL same = (vn && (vn[0] == len));
+            ULONG vlen = vn ? vn[0] : 0;
+            if(vlen && !vn[vlen])   /* a closing NUL may be counted, as in fssm_Device */
+            {
+                vlen--;
+            }
+            BOOL same = (vn && (vlen == len));
             for(ULONG i = 0; same && (i < len); i++)
             {
                 /* ASCII and Latin-1 letters, upper and lower case alike */
