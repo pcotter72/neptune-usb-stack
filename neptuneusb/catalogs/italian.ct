@@ -1145,8 +1145,8 @@ Espulsione di '%s' non riuscita.\nControllare il registro errori; potrebbe esser
 ; Ejecting '%s' failed.\nSee the error log; an updated\nmassstorage.usbclass may be required.
 ;
 MSG_ACTION_DEV_EJECT_ASK_TXT
-'%s' contiene %s.\nIl suo filesystem non rifiuta l'espulsione\nanche se un file è ancora aperto.\nChiudere prima tutti i file su di esso.\n\nEspellere ora?
-; '%s' holds %s.\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
+'%s' contiene %s\nIl suo filesystem non rifiuta l'espulsione\nanche se un file è ancora aperto.\nChiudere prima tutti i file su di esso.\n\nEspellere ora?
+; '%s' holds %s\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
 ;
 MSG_ACTION_DEV_EJECT_ASK_GAD
 _Espelli|*_Annulla

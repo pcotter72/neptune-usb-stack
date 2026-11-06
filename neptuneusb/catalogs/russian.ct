@@ -1145,8 +1145,8 @@ MSG_ACTION_DEV_EJECT_FAILED_TXT
 ; Ejecting '%s' failed.\nSee the error log; an updated\nmassstorage.usbclass may be required.
 ;
 MSG_ACTION_DEV_EJECT_ASK_TXT
-'%s' содержит %s.\nЕго файловая система не отказывает в извлечении,\nдаже если на нём ещё открыт файл.\nСначала закройте все файлы на нём.\n\nИзвлечь сейчас?
-; '%s' holds %s.\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
+'%s' содержит %s\nЕго файловая система не отказывает в извлечении,\nдаже если на нём ещё открыт файл.\nСначала закройте все файлы на нём.\n\nИзвлечь сейчас?
+; '%s' holds %s\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
 ;
 MSG_ACTION_DEV_EJECT_ASK_GAD
 _Извлечь|*_Отмена

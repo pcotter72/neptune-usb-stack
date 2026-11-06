@@ -266,6 +266,34 @@ static void MenuSync(void)
 }
 /* \\\ */
 
+/* /// "CentredRequest()" */
+/* EasyRequestArgs() with no reference window, centred on its screen. With
+   NULL, EasyRequestArgs() opened the requester in the screen's top-left
+   corner (seen on the A1200, OS 3.9), and the autodocs give no way to place
+   it. So: BuildEasyRequestArgs(), ChangeWindowBox() to the middle, then the
+   input loop from the SysReqHandler() autodoc. All V36. Returns what
+   EasyRequestArgs() would. */
+static LONG CentredRequest(struct EasyStruct *es, APTR args)
+{
+    struct Window *w = BuildEasyRequestArgs(NULL, es, 0, args);
+    if(((IPTR) w) <= 1)
+    {
+        return((LONG) (IPTR) w);   /* no window: 0 or 1 is the answer (autodoc) */
+    }
+    struct Screen *s = w->WScreen;
+    LONG left = (s->Width - w->Width) / 2;
+    LONG top = (s->Height - w->Height) / 2;
+    ChangeWindowBox(w, (left > 0) ? left : 0, (top > 0) ? top : 0, w->Width, w->Height);
+    LONG res;
+    /* -2: not answered yet; -1: an extra IDCMP event, and we asked for none */
+    while((res = SysReqHandler(w, NULL, TRUE)) < 0)
+    {
+    }
+    FreeSysRequest(w);
+    return(res);
+}
+/* \\\ */
+
 /* /// "ShowReq()" */
 static void ShowReq(CONST_STRPTR body, CONST_STRPTR arg1, CONST_STRPTR arg2)
 {
@@ -274,7 +302,7 @@ static void ShowReq(CONST_STRPTR body, CONST_STRPTR arg1, CONST_STRPTR arg2)
     IPTR args[2];
     args[0] = (IPTR) arg1;
     args[1] = (IPTR) arg2;
-    EasyRequestArgs(NULL, &es, NULL, (APTR) args);
+    CentredRequest(&es, (APTR) args);
 }
 /* \\\ */
 
@@ -302,7 +330,7 @@ static BOOL AskEject(CONST_STRPTR devname, CONST_STRPTR volumes)
     IPTR args[2];
     args[0] = (IPTR) devname;
     args[1] = (IPTR) volumes;
-    return(EasyRequestArgs(NULL, &es, NULL, (APTR) args) == 1);
+    return(CentredRequest(&es, (APTR) args) == 1);
 }
 /* \\\ */
 

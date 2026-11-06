@@ -39,8 +39,8 @@ Espulsione di '%s' non riuscita.\nVedere il registro errori di Neptune (Neptune 
 ; Ejecting '%s' failed.\nSee the Neptune error log (Neptune USB).
 ;
 MSG_REQ_OPENFILES
-'%s' contiene %s.\nIl suo filesystem non rifiuta l'espulsione\nanche se un file è ancora aperto.\nChiudere prima tutti i file su di esso.\n\nEspellere ora?
-; '%s' holds %s.\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
+'%s' contiene %s\nIl suo filesystem non rifiuta l'espulsione\nanche se un file è ancora aperto.\nChiudere prima tutti i file su di esso.\n\nEspellere ora?
+; '%s' holds %s\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
 ;
 MSG_REQ_EJECT_CANCEL
 Espelli|Annulla

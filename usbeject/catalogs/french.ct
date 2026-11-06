@@ -39,8 +39,8 @@ L'éjection de '%s' a échoué.\nConsultez le journal d'erreurs de Neptune (Neptune
 ; Ejecting '%s' failed.\nSee the Neptune error log (Neptune USB).
 ;
 MSG_REQ_OPENFILES
-'%s' contient %s.\nSon système de fichiers ne refuse pas l'éjection\nmême si un fichier y est encore ouvert.\nFermez d'abord tous ses fichiers.\n\nÉjecter maintenant ?
-; '%s' holds %s.\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
+'%s' contient %s\nSon système de fichiers ne refuse pas l'éjection\nmême si un fichier y est encore ouvert.\nFermez d'abord tous ses fichiers.\n\nÉjecter maintenant ?
+; '%s' holds %s\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
 ;
 MSG_REQ_EJECT_CANCEL
 Éjecter|Annuler

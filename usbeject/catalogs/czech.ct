@@ -39,8 +39,8 @@ Vysunutí '%s' selhalo.\nViz záznam chyb Neptunu (Neptune USB).
 ; Ejecting '%s' failed.\nSee the Neptune error log (Neptune USB).
 ;
 MSG_REQ_OPENFILES
-'%s' obsahuje %s.\nJeho souborový systém neodmítne vysunutí,\nani kdy¾ je na nìm soubor stále otevøený.\nNejprve na nìm zavøete v¹echny soubory.\n\nVysunout nyní?
-; '%s' holds %s.\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
+'%s' obsahuje %s\nJeho souborový systém neodmítne vysunutí,\nani kdy¾ je na nìm soubor stále otevøený.\nNejprve na nìm zavøete v¹echny soubory.\n\nVysunout nyní?
+; '%s' holds %s\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
 ;
 MSG_REQ_EJECT_CANCEL
 Vysunout|Zru¹it

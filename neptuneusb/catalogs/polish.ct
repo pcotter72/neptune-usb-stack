@@ -1143,8 +1143,8 @@ Wysuwanie '%s' nie powiod³o siê.\nSprawd¼ dziennik b³êdów; mo¿e byæ wymagana\nak
 ; Ejecting '%s' failed.\nSee the error log; an updated\nmassstorage.usbclass may be required.
 ;
 MSG_ACTION_DEV_EJECT_ASK_TXT
-'%s' zawiera %s.\nJego system plików nie odmawia wysuniêcia,\ngdy plik na nim jest wci±¿ otwarty.\nNajpierw zamknij wszystkie pliki na nim.\n\nWysun±æ teraz?
-; '%s' holds %s.\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
+'%s' zawiera %s\nJego system plików nie odmawia wysuniêcia,\ngdy plik na nim jest wci±¿ otwarty.\nNajpierw zamknij wszystkie pliki na nim.\n\nWysun±æ teraz?
+; '%s' holds %s\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
 ;
 MSG_ACTION_DEV_EJECT_ASK_GAD
 _Wysuñ|*_Anuluj

@@ -26,7 +26,7 @@ MSG_REQ_FAILED (//)
 Ejecting '%s' failed.\nSee the Neptune error log (Neptune USB).
 ;
 MSG_REQ_OPENFILES (//)
-'%s' holds %s.\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
+'%s' holds %s\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
 ;
 MSG_REQ_EJECT_CANCEL (//)
 Eject|Cancel

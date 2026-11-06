@@ -1144,8 +1144,8 @@ L'éjection de '%s' a échoué.\nConsultez le journal d'erreurs ; une mise à jour\n
 ; Ejecting '%s' failed.\nSee the error log; an updated\nmassstorage.usbclass may be required.
 ;
 MSG_ACTION_DEV_EJECT_ASK_TXT
-'%s' contient %s.\nSon système de fichiers ne refuse pas l'éjection\nmême si un fichier y est encore ouvert.\nFermez d'abord tous ses fichiers.\n\nÉjecter maintenant ?
-; '%s' holds %s.\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
+'%s' contient %s\nSon système de fichiers ne refuse pas l'éjection\nmême si un fichier y est encore ouvert.\nFermez d'abord tous ses fichiers.\n\nÉjecter maintenant ?
+; '%s' holds %s\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
 ;
 MSG_ACTION_DEV_EJECT_ASK_GAD
 _Éjecter|*_Annuler

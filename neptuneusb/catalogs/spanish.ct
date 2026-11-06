@@ -1143,8 +1143,8 @@ La expulsión de '%s' ha fallado.\nConsulte el registro de errores; puede ser nec
 ; Ejecting '%s' failed.\nSee the error log; an updated\nmassstorage.usbclass may be required.
 ;
 MSG_ACTION_DEV_EJECT_ASK_TXT
-'%s' contiene %s.\nSu sistema de archivos no rechaza la expulsión\naunque un archivo siga abierto.\nCierre antes todos sus archivos.\n\n¿Expulsar ahora?
-; '%s' holds %s.\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
+'%s' contiene %s\nSu sistema de archivos no rechaza la expulsión\naunque un archivo siga abierto.\nCierre antes todos sus archivos.\n\n¿Expulsar ahora?
+; '%s' holds %s\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
 ;
 MSG_ACTION_DEV_EJECT_ASK_GAD
 _Expulsar|*_Cancelar

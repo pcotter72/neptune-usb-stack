@@ -1145,8 +1145,8 @@ Vysunutí '%s' selhalo.\nPodívejte se do záznamu chyb; mo¾ná je\nnutná aktualizac
 ; Ejecting '%s' failed.\nSee the error log; an updated\nmassstorage.usbclass may be required.
 ;
 MSG_ACTION_DEV_EJECT_ASK_TXT
-'%s' obsahuje %s.\nJeho souborový systém neodmítne vysunutí,\nani kdy¾ je na nìm soubor stále otevøený.\nNejprve na nìm zavøete v¹echny soubory.\n\nVysunout nyní?
-; '%s' holds %s.\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
+'%s' obsahuje %s\nJeho souborový systém neodmítne vysunutí,\nani kdy¾ je na nìm soubor stále otevøený.\nNejprve na nìm zavøete v¹echny soubory.\n\nVysunout nyní?
+; '%s' holds %s\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
 ;
 MSG_ACTION_DEV_EJECT_ASK_GAD
 _Vysunout|*_Zru¹it
