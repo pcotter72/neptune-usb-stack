@@ -151,7 +151,8 @@ menu of USB drives. The requesters are those of the menu; `QUIET` prints the mes
 Shell instead. Return codes: 0 ejected, 5 still in use, 10 not a USB drive (or a volume name
 that two mounted drives share - give the device name then), 20 the eject failed. Started
 without `DEVICE`, or from its icon, USBEject is the Workbench menu as before, and the one-shot
-mode runs next to it. Only the first unit of a multi-slot card reader can be ejected this way.
+mode runs next to it. With a multi-slot card reader, name a drive in its first slot: that
+ejects the whole reader; drives in the other slots are refused (rc 10).
 
 **FAT drives and open files:** fat95 4.1 agrees to an eject even while a file on the drive
 is open, also one that is being written, so neither the menu nor the Shell command refuses
