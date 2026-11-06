@@ -20,6 +20,8 @@
 
 #include <exec/exec.h>
 #include <dos/dos.h>
+#include <dos/dosextens.h>
+#include <dos/filehandler.h>
 #include <intuition/intuition.h>
 #include <workbench/workbench.h>
 #include <devices/timer.h>
@@ -27,6 +29,7 @@
 #include <libraries/neptune_class.h>
 
 #include <proto/exec.h>
+#include <proto/dos.h>
 #include <proto/intuition.h>
 #include <proto/wb.h>
 #include <proto/locale.h>
@@ -79,6 +82,7 @@ static ULONG titlekey = 0;
 static ULONG nextid = 0;
 static BOOL dirty = FALSE;
 static BOOL nomenuwarned = FALSE;   /* the "no AppMenu" warning is logged once, not every retry */
+static struct RDArgs *rdargs = NULL;   /* one-shot mode's arguments, freed in Cleanup() */
 
 /* /// "Timer helpers" */
 static void TimerStop(void)
@@ -347,6 +351,241 @@ static void DoEject(ULONG id)
 }
 /* \\\ */
 
+/* /// "One-shot eject" */
+/* "USBEject DEVICE=UMSD0:" - from a Shell, or a Directory Opus filetype on the
+   disk icon: eject the USB device that holds that DOS device (or volume), then
+   exit. No menu, no single-instance port, so it runs next to the daemon.
+   The DOS device must sit on usbscsi.device. Opening that unit hands back
+   massstorage's unit structure in io_Unit (classes/massstorage/dev.c devOpen),
+   and for LUN 0 that is the interface binding Neptune reports as IFA_Binding
+   (the class's attach returns its first unit). The other LUNs of a card reader
+   do not match: refuse rather than eject a guess. */
+
+/* The usbscsi.device unit behind a DOS device or volume name ("UMSD0:",
+   "GOTEK:"). FALSE with the reason in why. */
+static BOOL DOSUnit(CONST_STRPTR name, ULONG *unitp, STRPTR why, ULONG whylen)
+{
+    char dname[32];
+    ULONG len = 0;
+    while(name[len] && (name[len] != ':') && (len < sizeof(dname) - 1))
+    {
+        dname[len] = name[len];
+        len++;
+    }
+    dname[len] = 0;
+
+    BOOL ok = FALSE;
+    const ULONG lflags = LDF_DEVICES|LDF_VOLUMES|LDF_READ;
+    struct DosList *dl = LockDosList(lflags);
+    struct DosList *dev = FindDosEntry(dl, (STRPTR) dname, LDF_DEVICES);
+    if(!dev)
+    {
+        /* a volume: its device is the one served by the same handler port */
+        struct DosList *vol = FindDosEntry(dl, (STRPTR) dname, LDF_VOLUMES);
+        if(vol && vol->dol_Task)
+        {
+            struct DosList *d = dl;
+            while((d = NextDosEntry(d, LDF_DEVICES)))
+            {
+                if(d->dol_Task == vol->dol_Task)
+                {
+                    dev = d;
+                    break;
+                }
+            }
+        }
+    }
+    if(!dev)
+    {
+        psdSafeRawDoFmt(why, whylen, "%s: no such device or volume", dname);
+    } else {
+        /* dol_Startup is not always a FileSysStartupMsg: check before use */
+        struct FileSysStartupMsg *fssm = (struct FileSysStartupMsg *) BADDR(dev->dol_misc.dol_handler.dol_Startup);
+        struct DosEnvec *de = NULL;
+        UBYTE *bdev = NULL;
+        if(fssm && TypeOfMem(fssm) && (*(UBYTE *) fssm == 0))
+        {
+            de = (struct DosEnvec *) BADDR(fssm->fssm_Environ);
+            bdev = (UBYTE *) BADDR(fssm->fssm_Device);
+        }
+        if(de && TypeOfMem(de) && ((de->de_TableSize & 0xffffff00) == 0) && bdev && TypeOfMem(bdev))
+        {
+            static const char want[] = "usbscsi.device";
+            /* the BSTR length often counts a closing NUL: measured 15 for
+               massstorage's own mounts, and on other drivers' mountlists too */
+            ULONG blen = bdev[0];
+            if(blen && !bdev[blen])
+            {
+                blen--;
+            }
+            BOOL same = (blen == sizeof(want) - 1);
+            for(ULONG i = 0; same && (i < sizeof(want) - 1); i++)
+            {
+                UBYTE c = bdev[i + 1];
+                if((c >= 'A') && (c <= 'Z'))
+                {
+                    c += 'a' - 'A';
+                }
+                same = (c == (UBYTE) want[i]);
+            }
+            if(same)
+            {
+                *unitp = fssm->fssm_Unit;
+                ok = TRUE;
+            }
+        }
+        if(!ok)
+        {
+            psdSafeRawDoFmt(why, whylen, "%s: not a drive on usbscsi.device", dname);
+        }
+    }
+    UnLockDosList(lflags);
+    return(ok);
+}
+
+/* The Neptune device whose interface binding is massstorage's unit 'unit'
+   (LUN 0 only, see above), NULL if none. Copies its product name to name. */
+static APTR DeviceForUnit(ULONG unit, STRPTR name, ULONG namelen)
+{
+    APTR unitptr = NULL;
+    struct MsgPort *mp = CreateMsgPort();
+    struct IOStdReq *io = mp ? (struct IOStdReq *) CreateIORequest(mp, sizeof(struct IOStdReq)) : NULL;
+    if(io && !OpenDevice("usbscsi.device", unit, (struct IORequest *) io, 0))
+    {
+        unitptr = io->io_Unit;
+        /* closed before the eject: our own open must not count as a user */
+        CloseDevice((struct IORequest *) io);
+    }
+    if(io)
+    {
+        DeleteIORequest((struct IORequest *) io);
+    }
+    if(mp)
+    {
+        DeleteMsgPort(mp);
+    }
+    if(!unitptr)
+    {
+        return(NULL);
+    }
+
+    APTR found = NULL;
+    psdLockReadPBase();
+    APTR pd = NULL;
+    while(!found && (pd = psdGetNextDevice(pd)))
+    {
+        struct List *cfgs = NULL;
+        psdGetAttrs(PGA_DEVICE, pd, DA_ConfigList, &cfgs, TAG_END);
+        struct Node *pc = cfgs ? cfgs->lh_Head : NULL;
+        while(!found && pc && pc->ln_Succ)
+        {
+            struct List *ifs = NULL;
+            psdGetAttrs(PGA_CONFIG, pc, CA_InterfaceList, &ifs, TAG_END);
+            struct Node *pif = ifs ? ifs->lh_Head : NULL;
+            while(!found && pif && pif->ln_Succ)
+            {
+                IPTR binding = 0;
+                psdGetAttrs(PGA_INTERFACE, pif, IFA_Binding, &binding, TAG_END);
+                if(binding && ((APTR) binding == unitptr))
+                {
+                    found = pd;
+                }
+                pif = pif->ln_Succ;
+            }
+            pc = pc->ln_Succ;
+        }
+    }
+    if(found)
+    {
+        STRPTR prodname = NULL;
+        psdGetAttrs(PGA_DEVICE, found, DA_ProductName, &prodname, TAG_END);
+        psdSafeRawDoFmt(name, namelen, "%s",
+                        (prodname && *prodname) ? prodname : (STRPTR) _(MSG_FALLBACK_NAME));
+    }
+    psdUnlockPBase();
+    return(found);
+}
+
+/* A message as a requester, or on the Shell with QUIET */
+static void Tell(BOOL quiet, CONST_STRPTR body, CONST_STRPTR arg1, CONST_STRPTR arg2)
+{
+    if(quiet)
+    {
+        IPTR args[2];
+        args[0] = (IPTR) arg1;
+        args[1] = (IPTR) arg2;
+        VPrintf((STRPTR) body, (APTR) args);
+        PutStr("\n");
+    } else {
+        ShowReq(body, arg1, arg2);
+    }
+}
+
+/* RETURN_OK ejected, RETURN_WARN still in use, RETURN_ERROR not a USB drive
+   that can be found, RETURN_FAIL the eject failed. */
+static LONG OneShotEject(CONST_STRPTR name, BOOL quiet)
+{
+    char why[96];
+    char prodname[48];
+    ULONG unit = 0;
+    APTR pd = NULL;
+
+    if(DOSUnit(name, &unit, why, sizeof(why)))
+    {
+        pd = DeviceForUnit(unit, prodname, sizeof(prodname));
+        if(!pd)
+        {
+            psdSafeRawDoFmt(why, sizeof(why), "%s: no ejectable USB device found for usbscsi.device unit %ld",
+                            (STRPTR) name, unit);
+        }
+    }
+    if(!pd)
+    {
+        psdAddErrorMsg(RETURN_WARN, LOGNAME, "%s", why);
+        if(quiet)
+        {
+            Tell(TRUE, "%s", why, NULL);
+        } else {
+            ShowReq(_(MSG_REQ_FAILED), name, NULL);
+        }
+        return(RETURN_ERROR);
+    }
+
+    char busyname[64];
+    busyname[0] = 0;
+    IPTR res = psdSafeEjectDevice(pd, busyname, sizeof(busyname));
+    switch(res)
+    {
+        case SAFEEJECT_OK:
+        {
+            /* the port disable runs in the hub task: EHMB_REMDEVICE confirms it */
+            BOOL removed = FALSE;
+            TimerStart(DETACH_SECS);
+            while(!removed && !TimerFired())
+            {
+                Wait((1UL << eventport->mp_SigBit) | (1UL << timerport->mp_SigBit));
+                removed = DrainEvents(pd);
+            }
+            TimerStop();
+            Tell(quiet, removed ? _(MSG_REQ_SAFE) : _(MSG_REQ_NODETACH), prodname, NULL);
+            return(RETURN_OK);
+        }
+
+        case SAFEEJECT_BUSY:
+            Tell(quiet, _(MSG_REQ_BUSY), prodname, busyname);
+            return(RETURN_WARN);
+
+        case SAFEEJECT_NOT_SUPPORTED:
+            Tell(quiet, _(MSG_REQ_TOOOLD), prodname, NULL);
+            return(RETURN_FAIL);
+
+        default:
+            Tell(quiet, _(MSG_REQ_FAILED), prodname, NULL);
+            return(RETURN_FAIL);
+    }
+}
+/* \\\ */
+
 /* /// "Cleanup()" */
 static void Cleanup(void)
 {
@@ -397,6 +636,11 @@ static void Cleanup(void)
         eventport = NULL;
     }
     Locale_Deinitialize();
+    if(rdargs)
+    {
+        FreeArgs(rdargs);
+        rdargs = NULL;
+    }
     if(LocaleBase)     { CloseLibrary((struct Library *) LocaleBase);    LocaleBase = NULL; }
     if(ps)             { CloseLibrary(ps);                              ps = NULL; }
     if(WorkbenchBase)  { CloseLibrary(WorkbenchBase);                   WorkbenchBase = NULL; }
@@ -408,6 +652,18 @@ static void Cleanup(void)
 int main(int argc, char *argv[])
 {
     NewList(&devlist);
+
+    /* From a Shell, DEVICE selects the one-shot eject (see "One-shot eject");
+       without it, or from Workbench (argc 0), this is the daemon as before. */
+    IPTR oneshot[2] = { 0, 0 };   /* DEVICE, QUIET */
+    if(argc > 0)
+    {
+        if(!(rdargs = ReadArgs((STRPTR) "DEVICE,QUIET/S", (LONG *) oneshot, NULL)))
+        {
+            PrintFault(IoErr(), (STRPTR) "USBEject");
+            return(RETURN_FAIL);
+        }
+    }
 
     IntuitionBase = (struct IntuitionBase *) OpenLibrary("intuition.library", 39);
     /* AddAppMenuItemA() itself is V36. WBAPPMENUA_GetTitleKey is V45, but MenuSetup() probes for
@@ -437,6 +693,15 @@ int main(int argc, char *argv[])
         return(RETURN_FAIL);
     }
     timeropen = TRUE;
+
+    if(oneshot[0])
+    {
+        /* no menu and no named port: it runs next to the daemon */
+        eventhandler = psdAddEventHandler(eventport, EHMF_REMDEVICE);
+        LONG rc = OneShotEject((CONST_STRPTR) oneshot[0], oneshot[1] ? TRUE : FALSE);
+        Cleanup();
+        return(rc);
+    }
 
     /* Single instance: the named AppMessage port is the guard, so claiming the
        name and publishing it have to be one atomic step. */
