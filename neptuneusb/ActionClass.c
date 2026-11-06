@@ -3862,6 +3862,20 @@ IPTR Action_Dev_Eject(struct IClass *cl, Object *obj, Msg msg)
         char devname[64];
         psdSafeRawDoFmt(devname, sizeof(devname), "%s",
                         (prodname && *prodname) ? prodname : (STRPTR) "USB device");
+        /* volumes the busy check cannot protect (fat95 does not refuse with
+           files open): ask first. An older neptune.library has no
+           psdSafeEjectCheck() LVO, and then the eject goes ahead unasked. */
+        char volumes[128];
+        volumes[0] = 0;
+        if(NEPTUNE_HAS_SAFEEJECTCHECK(ps) &&
+           psdSafeEjectCheck(dlnode->pd, volumes, sizeof(volumes)) &&
+           !MUI_Request(data->appobj, data->winobj, 0, NULL,
+                        _(MSG_ACTION_DEV_EJECT_ASK_GAD),
+                        _(MSG_ACTION_DEV_EJECT_ASK_TXT),
+                        devname, volumes))
+        {
+            return(TRUE);
+        }
         char busyname[64];
         busyname[0] = 0;
         /* see Action_Dev_Suspend() on why this sleeps the application */

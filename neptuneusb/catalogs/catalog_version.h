@@ -20,4 +20,4 @@
  *         its base id; MSG_REQ_OOPS_PLAIN renamed MSG_REQ_OK.
  */
 
-#define CATALOG_VERSION  7
+#define CATALOG_VERSION  8

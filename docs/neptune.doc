@@ -113,6 +113,7 @@ Added by Neptune:
 psdResetDevice
 psdSafeEjectDevice
 psdClearEndpointHalt
+psdSafeEjectCheck
 
 
 neptune.library/psdReadCfg                       neptune.library/psdReadCfg
@@ -722,8 +723,8 @@ psdClearEndpointHalt
           usbhardware.doc, or Neptune's own context interface
           (neptune-context-hcd-abi.md). Poseidon's V3 host-controller
           interface is not implemented, so a V3 driver does not work.
-        - Neptune adds psdResetDevice(), psdSafeEjectDevice() and
-          psdClearEndpointHalt(). psdSaveCfgToDisk() takes only a file name
+        - Neptune adds psdResetDevice(), psdSafeEjectDevice(),
+          psdClearEndpointHalt() and psdSafeEjectCheck(). psdSaveCfgToDisk() takes only a file name
           (NULL saves to both ENVARC: and ENV:). These are described in
           neptune.library-architecture.md, not here.
         - When a bulk or interrupt transfer ends with UHIOERR_STALL (or

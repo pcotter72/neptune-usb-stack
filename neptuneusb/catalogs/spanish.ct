@@ -1,4 +1,4 @@
-## version $VER: NeptuneUSB.catalog 7.0 (19.10.2026)
+## version $VER: NeptuneUSB.catalog 8.0 (06.11.2026)
 ## language español
 ## codeset 0
 ;
@@ -1127,8 +1127,9 @@ MSG_PANEL_DEVICES_EJECT
 ; \33c Eject
 ;
 MSG_PANEL_DEVICES_EJECT_HELP
-Retira con seguridad un dispositivo de almacenamiento:\nvacía y desmonta todos sus volúmenes (se niega si\nalgún archivo sigue abierto), detiene la unidad y\ndesactiva su puerto para poder desconectarlo sin\npérdida de datos.
-; Safely removes a mass storage device: flushes and\nunmounts all its volumes (refusing if any file is\nstill open), stops the drive and disables its hub\nport so it can be unplugged without data loss.
+Retira con seguridad un dispositivo de almacenamiento:\nvacía y desmonta todos sus volúmenes (se niega si\nalgún archivo sigue abierto;
+en volúmenes FAT pregunta antes), detiene la unidad y\ndesactiva su puerto para poder desconectarlo sin\npérdida de datos.
+; Safely removes a mass storage device: flushes and\nunmounts all its volumes (refusing if any file is\nstill open; on FAT volumes, whose filesystem does\nnot refuse, it asks first), stops the drive and\ndisables its hub port so it can be unplugged\nwithout data loss.
 ;
 MSG_ACTION_DEV_EJECT_OK
 OK
@@ -1141,4 +1142,12 @@ No se puede expulsar '%s':\n%s todavía está en uso.\nCierre todos los archivos y
 MSG_ACTION_DEV_EJECT_FAILED_TXT
 La expulsión de '%s' ha fallado.\nConsulte el registro de errores; puede ser necesario\nactualizar massstorage.usbclass.
 ; Ejecting '%s' failed.\nSee the error log; an updated\nmassstorage.usbclass may be required.
+;
+MSG_ACTION_DEV_EJECT_ASK_TXT
+'%s' contiene %s.\nSu sistema de archivos no rechaza la expulsión\naunque un archivo siga abierto.\nCierre antes todos sus archivos.\n\n¿Expulsar ahora?
+; '%s' holds %s.\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
+;
+MSG_ACTION_DEV_EJECT_ASK_GAD
+_Expulsar|*_Cancelar
+; _Eject|*_Cancel
 ;

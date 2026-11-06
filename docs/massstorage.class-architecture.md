@@ -447,6 +447,14 @@ covering extra LUNs and extra storage interfaces.
   belongs to the removable task). Stop goes through the unit task, so it gets the UAS drain.
 - The library disables the hub port afterwards; the class never touches the bus.
 
+`UCM_SafeEjectCheck` (`nSafeEjectCheck`) is the read-only question asked before it: under one
+device-list read lock, the DOS nodes riding the device's units whose `de_DosType` is the unit's
+configured FAT dostype and which have a mounted volume. Those are counted and named, because fat95
+4.1 accepts `ACTION_INHIBIT` with a file open (read or write, measured), so `nInhibitAll` cannot
+veto for them. Other FAT handlers are not measured and are treated the same. Not counted, and
+so ejected unasked: a node on `usbscsi.device` with any other dostype, e.g. a user DOSDriver with
+another FAT variant, or a node mounted before the FAT dostype in the unit's config was changed.
+
 ### 5.10 Suspend and resume
 
 `UCM_AttemptSuspendDevice` **refuses rather than drains**: it fails while a synchronous command is
@@ -544,7 +552,7 @@ Each rule exists because breaking it caused, or would cause, a real failure.
 **Implemented (`usbclass` methods):** interface binding (attempt, force, release), class
 attributes (`UCCA_Priority` 0, class and binding config GUIs, supports suspend, supports safe
 eject), `UCM_OpenCfgWindow`, `UCM_OpenBindingCfgWindow`, `UCM_ConfigChangedEvent`,
-`UCM_AttemptSuspendDevice`/`ResumeDevice`, `UCM_SafeEject` and `UCM_MediaPending`.
+`UCM_AttemptSuspendDevice`/`ResumeDevice`, `UCM_SafeEject`, `UCM_SafeEjectCheck` and `UCM_MediaPending`.
 
 **Implemented (`usbscsi.device`):** trackdisk block I/O, seek, format, geometry, change detection
 and change interrupts, protection status, start/stop/eject, reset/flush; TD64 and NSD 64-bit

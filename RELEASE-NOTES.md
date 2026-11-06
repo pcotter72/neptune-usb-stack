@@ -145,18 +145,25 @@ interface once in the MIDI Ports editor.
 
 ## Eject one drive from a Shell or a script
 
-`USBEject DEVICE=<drive> [QUIET]` ejects the USB drive behind a DOS device (`UMSD0:`) or a
+`USBEject DEVICE=<drive> [QUIET] [FORCE]` ejects the USB drive behind a DOS device (`UMSD0:`) or a
 volume name (`MyStick:`) and exits; Directory Opus uses it for *Eject safely* in the disk
 menu of USB drives. The requesters are those of the menu; `QUIET` prints the messages in the
-Shell instead. Return codes: 0 ejected, 5 still in use, 10 not a USB drive (or a volume name
+Shell instead. Return codes: 0 ejected, 5 still in use or not confirmed, 10 not a USB drive (or a volume name
 that two mounted drives share - give the device name then), 20 the eject failed. Started
 without `DEVICE`, or from its icon, USBEject is the Workbench menu as before, and the one-shot
 mode runs next to it. With a multi-slot card reader, name a drive in its first slot: that
 ejects the whole reader; drives in the other slots are refused (rc 10).
 
 **FAT drives and open files:** fat95 4.1 agrees to an eject even while a file on the drive
-is open, also one that is being written, so neither the menu nor the Shell command refuses
-then. Close your files before ejecting a FAT drive.
+is open, also one that is being written, so the eject cannot refuse then. Before ejecting a
+drive with a mounted FAT volume, the USBEject menu, `USBEject DEVICE=` and Neptune USB's
+*Eject* button therefore ask first, naming the volumes; *Cancel* leaves the drive mounted
+(rc 5 from the Shell). With `QUIET` the command cannot ask and refuses with rc 5 unless
+`FORCE` is given; `FORCE` also skips the question otherwise. This needs the new
+`neptune.library` and `massstorage.usbclass` (on a machine that runs Neptune from the
+Kickstart ROM, a ROM built with them); with older ones the eject goes ahead unasked, as before.
+The check knows a FAT volume by the FAT dostype set in massstorage's settings (`FAT` for
+fat95 by default); a drive mounted with another dostype is ejected without the question.
 
 ## Bug fixes
 

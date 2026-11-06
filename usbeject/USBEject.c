@@ -6,7 +6,8 @@
 ** Neptune events. Selecting one runs psdSafeEjectDevice(), which has the
 ** bound classes flush and cleanly unmount their volumes - a volume with open
 ** files vetoes the whole eject - and then takes the device off the bus,
-** whereupon we tell the user it is safe to unplug.
+** whereupon we tell the user it is safe to unplug. Where the filesystem
+** cannot veto (fat95), psdSafeEjectCheck() names the volumes and we ask first.
 **
 ** Two presentations, decided at runtime (see MenuSync): our own "USB" menu in
 ** the menu bar where workbench.library V45 hierarchical AppMenus work, and
@@ -277,6 +278,34 @@ static void ShowReq(CONST_STRPTR body, CONST_STRPTR arg1, CONST_STRPTR arg2)
 }
 /* \\\ */
 
+/* /// "UnprotectedVolumes()" */
+/* How many mounted volumes on pd the eject's busy check cannot protect
+   (their filesystem, fat95 so far, does not refuse an eject with files
+   open), named in names. psdSafeEjectCheck() is newer than the 6.3 LVO set:
+   an older library or ROM lacks it, and then this says 0 and the eject goes
+   ahead unasked, as before. */
+static ULONG UnprotectedVolumes(APTR pd, STRPTR names, ULONG len)
+{
+    names[0] = 0;
+    if(!NEPTUNE_HAS_SAFEEJECTCHECK(ps))
+    {
+        return(0);
+    }
+    return((ULONG) psdSafeEjectCheck(pd, names, len));
+}
+
+/* TRUE when the user picks Eject */
+static BOOL AskEject(CONST_STRPTR devname, CONST_STRPTR volumes)
+{
+    struct EasyStruct es = { sizeof(struct EasyStruct), 0,
+                             (STRPTR) "USBEject", (STRPTR) _(MSG_REQ_OPENFILES), (STRPTR) _(MSG_REQ_EJECT_CANCEL) };
+    IPTR args[2];
+    args[0] = (IPTR) devname;
+    args[1] = (IPTR) volumes;
+    return(EasyRequestArgs(NULL, &es, NULL, (APTR) args) == 1);
+}
+/* \\\ */
+
 /* /// "DoEject()" */
 static void DoEject(ULONG id)
 {
@@ -310,6 +339,12 @@ static void DoEject(ULONG id)
     if(!valid)
     {
         dirty = TRUE;
+        return;
+    }
+
+    char volumes[128];
+    if(UnprotectedVolumes(pd, volumes, sizeof(volumes)) && !AskEject(devname, volumes))
+    {
         return;
     }
 
@@ -563,9 +598,11 @@ static void Tell(BOOL quiet, CONST_STRPTR body, CONST_STRPTR arg1, CONST_STRPTR 
     }
 }
 
-/* RETURN_OK ejected, RETURN_WARN still in use, RETURN_ERROR not a USB drive
-   that can be found, RETURN_FAIL the eject failed. */
-static LONG OneShotEject(CONST_STRPTR name, BOOL quiet)
+/* RETURN_OK ejected, RETURN_WARN still in use (or not confirmed, see
+   UnprotectedVolumes), RETURN_ERROR not a USB drive that can be found,
+   RETURN_FAIL the eject failed. force skips the question; QUIET cannot ask,
+   so without force it refuses. */
+static LONG OneShotEject(CONST_STRPTR name, BOOL quiet, BOOL force)
 {
     char why[128];
     char prodname[48];
@@ -591,6 +628,20 @@ static LONG OneShotEject(CONST_STRPTR name, BOOL quiet)
             ShowReq(_(MSG_REQ_FAILED), name, NULL);
         }
         return(RETURN_ERROR);
+    }
+
+    char volumes[128];
+    if((!force) && UnprotectedVolumes(pd, volumes, sizeof(volumes)))
+    {
+        if(quiet)
+        {
+            Tell(TRUE, _(MSG_SHELL_OPENFILES), prodname, volumes);
+            return(RETURN_WARN);
+        }
+        if(!AskEject(prodname, volumes))
+        {
+            return(RETURN_WARN);
+        }
     }
 
     char busyname[64];
@@ -697,10 +748,10 @@ int main(int argc, char *argv[])
 
     /* From a Shell, DEVICE selects the one-shot eject (see "One-shot eject");
        without it, or from Workbench (argc 0), this is the daemon as before. */
-    IPTR oneshot[2] = { 0, 0 };   /* DEVICE, QUIET */
+    IPTR oneshot[3] = { 0, 0, 0 };   /* DEVICE, QUIET, FORCE */
     if(argc > 0)
     {
-        if(!(rdargs = ReadArgs((STRPTR) "DEVICE,QUIET/S", (LONG *) oneshot, NULL)))
+        if(!(rdargs = ReadArgs((STRPTR) "DEVICE,QUIET/S,FORCE/S", (LONG *) oneshot, NULL)))
         {
             PrintFault(IoErr(), (STRPTR) "USBEject");
             return(RETURN_FAIL);
@@ -740,7 +791,7 @@ int main(int argc, char *argv[])
     {
         /* no menu and no named port: it runs next to the daemon */
         eventhandler = psdAddEventHandler(eventport, EHMF_REMDEVICE);
-        LONG rc = OneShotEject((CONST_STRPTR) oneshot[0], oneshot[1] ? TRUE : FALSE);
+        LONG rc = OneShotEject((CONST_STRPTR) oneshot[0], oneshot[1] ? TRUE : FALSE, oneshot[2] ? TRUE : FALSE);
         Cleanup();
         return(rc);
     }

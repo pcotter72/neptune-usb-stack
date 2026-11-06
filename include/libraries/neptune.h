@@ -35,6 +35,13 @@
  * Bump ONLY when neptune.sfd gains functions - never merely because a release ships. */
 #define NEPTUNE_LIB_MIN_VERSION 6
 
+/* LVOs appended within a major version cannot be told apart by lib_Version, so an
+ * optional one is detected by the size of the jump table: MakeLibrary() rounds
+ * lib_NegSize up to a longword (exec autodoc, V36+), never by a whole 6-byte vector.
+ * psdSafeEjectCheck() is vector 104 (4 standard + the 100th neptune.sfd entry,
+ * LVO -624) and absent from neptune.library 6.3 builds before it. */
+#define NEPTUNE_HAS_SAFEEJECTCHECK(base) (((struct Library *) (base))->lib_NegSize >= 624)
+
 /* Types for psdGetAttrs() and psdSetAttrs() */
 #define PGA_STACK      0x01
 #define PGA_USBCLASS   0x02

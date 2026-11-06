@@ -1199,6 +1199,10 @@ IPTR (usbDoMethodA)(ULONG methodid asm("d0"), IPTR * methoddata asm("a1"), struc
             return(nSafeEjectDevice(nh, (struct NepClassMS *) methoddata[0],
                                     (STRPTR) methoddata[1], (ULONG) methoddata[2]));
 
+        case UCM_SafeEjectCheck:
+            return(nSafeEjectCheck(nh, (struct NepClassMS *) methoddata[0],
+                                   (STRPTR) methoddata[1], (ULONG) methoddata[2]));
+
         /* Units that have not settled yet, for the ROM boot gate. Forbid()
            rather than a semaphore: the caller is the coldstart chain polling us
            every fraction of a second, and the removable task must not be made to
@@ -4840,6 +4844,83 @@ IPTR nSafeEjectDevice(struct NepMSBase *nh, struct NepClassMS *ncm, STRPTR busyb
                    "'%s' safely ejected.", ncm->ncm_LUNIDStr);
     /* taking the device off the bus is psdSafeEjectDevice()'s job */
     return(SAFEEJECT_OK);
+}
+/* \\\ */
+
+/* /// "nSafeEjectCheck()" */
+/* UCM_SafeEjectCheck: the mounted volumes on this device's LUNs that
+   nInhibitAll() cannot protect, because their filesystem accepts
+   ACTION_INHIBIT with files open. Counted: a mounted volume on a DOS node
+   whose de_DosType is the FAT dostype in that unit's config - the type the
+   mounter wrote for a FAT partition (mounter.c, de_DosType = fs->dosType).
+   Measured on fat95 4.1 only (inhibit accepted with a file open for reading
+   and for writing); another handler configured for FAT is assumed to behave
+   the same until measured. A FAT node with no volume holds no files and is
+   not counted. Names go to buf ("STICK:, DATA:"). Changes nothing. */
+
+IPTR nSafeEjectCheck(struct NepMSBase *nh, struct NepClassMS *ncm, STRPTR buf, ULONG buflen)
+{
+    struct PsdDevice *pd = ncm->ncm_Device;
+    ULONG found = 0;
+    ULONG used = 0;
+
+    if(buf && buflen)
+    {
+        buf[0] = 0;
+    } else {
+        buf = NULL;
+        buflen = 0;
+    }
+    if((FindTask(NULL)->tc_Node.ln_Type != NT_PROCESS) || ncm->ncm_Ejected || !nOpenDOSLib(nh))
+    {
+        return(0);
+    }
+
+    const ULONG lflags = LDF_DEVICES | LDF_VOLUMES | LDF_READ;
+    struct DosList *head;
+    if(!(head = LockDosList(lflags)))
+    {
+        return(0);
+    }
+    struct DosList *list = head;
+    while((list = NextDosEntry(list, LDF_DEVICES)))
+    {
+        struct NepClassMS *lun = nLUNForDosEntry(nh, pd, list);
+        if((!lun) || (!list->dol_Task))
+        {
+            continue;
+        }
+        /* nDosEntryMatches() checked fssm and the environment table */
+        struct FileSysStartupMsg *fssm = BADDR(list->dol_misc.dol_handler.dol_Startup);
+        struct DosEnvec *de = BADDR(fssm->fssm_Environ);
+        if((de->de_TableSize < DE_DOSTYPE) || (de->de_DosType != *nDevFsDosType(lun->ncm_CDC, MSFS_FAT)))
+        {
+            continue;
+        }
+        struct DosList *vol = head;
+        while((vol = NextDosEntry(vol, LDF_VOLUMES)))
+        {
+            if(vol->dol_Task == list->dol_Task)
+            {
+                break;
+            }
+        }
+        if(!vol)
+        {
+            continue;   /* no medium mounted: no files to lose */
+        }
+        found++;
+        if(buf && (used + 1 < buflen))
+        {
+            char volname[256];
+            UBYTE *vstr = (UBYTE *) BADDR(vol->dol_Name);
+            b2cstr(vstr, volname);
+            psdSafeRawDoFmt(buf + used, buflen - used, used ? ", %s:" : "%s:", volname);
+            used += strlen(buf + used);
+        }
+    }
+    UnLockDosList(lflags);
+    return(found);
 }
 /* \\\ */
 

@@ -582,6 +582,18 @@ outside the lock it calls `UCM_SafeEject` on each - storage classes flush and un
 answer busy with a reason. Only if all agree does it disable the parent port; the caller watches for
 `EHMB_REMDEVICE`. `DA_CanSafeEject` uses the same collection.
 
+**`psdSafeEjectCheck`** (same calling rules) asks the same bindings `UCM_SafeEjectCheck` and returns
+how many mounted volumes on the device the busy check cannot protect, because their filesystem does
+not refuse the eject with files open; their names are joined into the caller's buffer. It changes
+nothing: the caller asks the user, then calls `psdSafeEjectDevice`. It was appended inside 6.3, so
+`lib_Version` cannot tell it apart; clients test `NEPTUNE_HAS_SAFEEJECTCHECK()` (the jump-table size,
+`lib_NegSize`) before calling it.
+
+**Fork-only slot.** `psdSafeEjectCheck` is vector 104 (LVO -624) in this fork and in no upstream
+(rondoval) release yet. If upstream appends a different function first, fork and upstream binaries
+would call each other's function at -624: an upstream sync must keep this slot (or move it on both
+sides). The `_Static_assert` after `psdFuncTable` fails the build if the table length changes.
+
 ### 5.12 Settings persistence and import
 
 ```mermaid
@@ -754,7 +766,7 @@ devices and bindings, reset, safe eject). The LVO order is the ABI: new entries 
 `neptune.sfd` and `neptune_funcs.inc` together.
 
 **Called: `usbclass` methods.** Binding (attempt, force, release, at both levels),
-`UCM_AttemptSuspendDevice`/`UCM_AttemptResumeDevice`, `UCM_SafeEject`, `UCM_ConfigChangedEvent`,
+`UCM_AttemptSuspendDevice`/`UCM_AttemptResumeDevice`, `UCM_SafeEject`, `UCM_SafeEjectCheck`, `UCM_ConfigChangedEvent`,
 `UCM_DOSAvailableEvent`; on the parent hub's class `UCM_HubClassScan`, `UCM_HubClaimAppBinding`,
 `UCM_HubSuspendDevice`/`UCM_HubResumeDevice`, `UCM_HubResetPort`, `UCM_HubPowerCyclePort` and
 `UCM_HubDisablePort`. Queried: `UCCA_Priority`, `UCCA_Description`, `UCCA_AfterDOSRestart`,

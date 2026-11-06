@@ -97,3 +97,4 @@
     (APTR)psdResetDevice,
     (APTR)psdSafeEjectDevice,
     (APTR)psdClearEndpointHalt,
+    (APTR)psdSafeEjectCheck,

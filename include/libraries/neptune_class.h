@@ -102,6 +102,19 @@
                                               as UCM_MediaPending: polled pre-DOS from the
                                               Kickstart ROM startup resident, must not block,
                                               0 = nothing pending / not implemented. */
+#define UCM_SafeEjectCheck          0x0055 /* count = { binding, STRPTR namebuf, ULONG
+                                              namebufsize } - device-scoped, changes nothing:
+                                              how many mounted volumes on the binding's device
+                                              sit on a filesystem that does NOT refuse
+                                              UCM_SafeEject while files are open, so the
+                                              eject's busy check cannot protect them; their
+                                              names go to namebuf ("STICK:, DATA:"), which
+                                              may be NULL.  The caller asks the user before
+                                              ejecting.  Same context rules as UCM_SafeEject.
+                                              Advertise UCCA_SupportsSafeEject to be asked;
+                                              0 = none, which is also what a class that does
+                                              not implement this returns.  Reached through
+                                              psdSafeEjectCheck(). */
 
 /* UCM_SafeEject / psdSafeEjectDevice() results. 0 is deliberately reserved: a class's
    usbDoMethodA() default arm returns 0 for methods it does not know, so 0 must always

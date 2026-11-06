@@ -1,4 +1,4 @@
-## version $VER: NeptuneUSB.catalog 7.0 (19.10.2026)
+## version $VER: NeptuneUSB.catalog 8.0 (06.11.2026)
 ## language czech
 ## codeset 5
 ;
@@ -1129,8 +1129,9 @@ MSG_PANEL_DEVICES_EJECT
 ; \33c Eject
 ;
 MSG_PANEL_DEVICES_EJECT_HELP
-Bezpeènì odebere velkokapacitní zaøízení: ulo¾í\na odpojí v¹echny jeho svazky (odmítne, pokud je\nnìkterý soubor stále otevøen), zastaví jednotku\na vypne její port, aby ¹lo zaøízení odpojit\nbez ztráty dat.
-; Safely removes a mass storage device: flushes and\nunmounts all its volumes (refusing if any file is\nstill open), stops the drive and disables its hub\nport so it can be unplugged without data loss.
+Bezpeènì odebere velkokapacitní zaøízení: ulo¾í\na odpojí v¹echny jeho svazky (odmítne, pokud je\nnìkterý soubor stále otevøen;
+u svazkù FAT se nejprve zeptá), zastaví jednotku\na vypne její port, aby ¹lo zaøízení odpojit\nbez ztráty dat.
+; Safely removes a mass storage device: flushes and\nunmounts all its volumes (refusing if any file is\nstill open; on FAT volumes, whose filesystem does\nnot refuse, it asks first), stops the drive and\ndisables its hub port so it can be unplugged\nwithout data loss.
 ;
 MSG_ACTION_DEV_EJECT_OK
 OK
@@ -1143,4 +1144,12 @@ Nelze vysunout '%s':\n%s se stále pou¾ívá.\nZavøete na nìm v¹echny soubory a zku
 MSG_ACTION_DEV_EJECT_FAILED_TXT
 Vysunutí '%s' selhalo.\nPodívejte se do záznamu chyb; mo¾ná je\nnutná aktualizace massstorage.usbclass.
 ; Ejecting '%s' failed.\nSee the error log; an updated\nmassstorage.usbclass may be required.
+;
+MSG_ACTION_DEV_EJECT_ASK_TXT
+'%s' obsahuje %s.\nJeho souborový systém neodmítne vysunutí,\nani kdy¾ je na nìm soubor stále otevøený.\nNejprve na nìm zavøete v¹echny soubory.\n\nVysunout nyní?
+; '%s' holds %s.\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
+;
+MSG_ACTION_DEV_EJECT_ASK_GAD
+_Vysunout|*_Zru¹it
+; _Eject|*_Cancel
 ;

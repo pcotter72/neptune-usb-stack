@@ -1,4 +1,4 @@
-## version $VER: USBEject.catalog 1.0 (17.08.2026)
+## version $VER: USBEject.catalog 2.0 (06.11.2026)
 ## language czech
 ## codeset 5
 ;
@@ -37,4 +37,16 @@ Nelze vysunout '%s':\nnainstalovaná massstorage.usbclass je pro bezpeèné\nvysunu
 MSG_REQ_FAILED
 Vysunutí '%s' selhalo.\nViz záznam chyb Neptunu (Neptune USB).
 ; Ejecting '%s' failed.\nSee the Neptune error log (Neptune USB).
+;
+MSG_REQ_OPENFILES
+'%s' obsahuje %s.\nJeho souborový systém neodmítne vysunutí,\nani kdy¾ je na nìm soubor stále otevøený.\nNejprve na nìm zavøete v¹echny soubory.\n\nVysunout nyní?
+; '%s' holds %s.\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
+;
+MSG_REQ_EJECT_CANCEL
+Vysunout|Zru¹it
+; Eject|Cancel
+;
+MSG_SHELL_OPENFILES
+'%s' se nevysouvá: souborový systém %s neodmítne vysunutí, kdy¾ jsou soubory otevøené. Zavøete je a pou¾ijte FORCE.
+; Not ejecting '%s': the filesystem of %s does not refuse an eject while files are open. Close them, then use FORCE.
 ;

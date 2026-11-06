@@ -5188,6 +5188,64 @@ IPTR (psdSafeEjectDevice)(struct PsdDevice * pd asm("a0"), STRPTR busybuf asm("a
 }
 /* \\\ */
 
+/* /// "psdSafeEjectCheck()" */
+/*
+ * What psdSafeEjectDevice()'s busy check cannot protect: the number of
+ * mounted volumes on the device whose filesystem does not refuse the eject
+ * while files are open (UCM_SafeEjectCheck; massstorage counts its FAT
+ * volumes - fat95 4.1 accepts the inhibit with a file open, even one being
+ * written, measured).  A caller asks the user before ejecting when this is
+ * not 0.  namebuf gets the volume names ("STICK:, DATA:") and may be NULL.
+ * Changes nothing.  0 also when no bound class can tell.
+ *
+ * Same calling rules as psdSafeEjectDevice(): a Process, no device lock held
+ * (the class walks the DOS list).
+ */
+IPTR (psdSafeEjectCheck)(struct PsdDevice * pd asm("a0"), STRPTR namebuf asm("a1"),
+                         ULONG namebuflen asm("d0"), struct PsdBase * ps asm("a6"))
+{
+    KPRINTF(5, ("psdSafeEjectCheck(0x%08lx)\n", pd));
+    if(namebuf && namebuflen) {
+        namebuf[0] = 0;
+    } else {
+        namebuf = NULL;
+        namebuflen = 0;
+    }
+    if((!pd) || (FindTask(NULL)->tc_Node.ln_Type != NT_PROCESS)) {
+        return 0;
+    }
+
+    struct EjectBindings eb;
+    psdLockReadDevice(pd);
+    pCollectEjectBindings(pd, &eb);
+    psdUnlockDevice(pd);
+
+    IPTR count = 0;
+    ULONG idx;
+    for(idx = 0; idx < eb.eb_Count; idx++) {
+        struct PsdUsbClass *puc = eb.eb_Classes[idx];
+        /* each class writes behind what the ones before it left, ", "-joined */
+        ULONG used = namebuf ? (ULONG) strlen(namebuf) : 0;
+        BOOL sep = FALSE;
+        if(used && (used + 3 < namebuflen)) {
+            namebuf[used++] = ',';
+            namebuf[used++] = ' ';
+            namebuf[used] = 0;
+            sep = TRUE;
+        }
+        STRPTR part = (namebuf && (used + 1 < namebuflen)) ? namebuf + used : NULL;
+        IPTR found = (IPTR) usbDoMethod(UCM_SafeEjectCheck, eb.eb_Bindings[idx],
+                                        part, part ? (namebuflen - used) : 0);
+        if(found) {
+            count += found;
+        } else if(sep) {
+            namebuf[used - 2] = 0;   /* nothing added: drop the separator again */
+        }
+    }
+    return count;
+}
+/* \\\ */
+
 /* /// "psdResetDevice()" */
 /*
  * Full device reset without teardown:
@@ -11720,4 +11778,10 @@ const APTR psdFuncTable[] = {
 #include "neptune_funcs.inc"
     (APTR)-1
 };
+/* NEPTUNE_HAS_SAFEEJECTCHECK() (libraries/neptune.h) detects psdSafeEjectCheck()
+   as vector 104 by lib_NegSize: a function appended before it, or a removed
+   one, must fail here rather than silently move what the gate finds.
+   105 = 4 std vectors + 100 neptune.sfd entries + the -1 terminator. */
+_Static_assert(sizeof(psdFuncTable) / sizeof(psdFuncTable[0]) == 105,
+               "neptune.sfd LVO count changed: update NEPTUNE_HAS_SAFEEJECTCHECK()");
 /* \\\ */

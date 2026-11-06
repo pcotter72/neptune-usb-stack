@@ -142,6 +142,7 @@ BOOL nDosEntryMatches(struct NepClassMS *ncm, struct DosList *list);
 struct DeviceNode * FindMatchingDevice(struct NepClassMS *ncm);
 void nBusyName(struct NepClassMS *ncm, struct DeviceNode *node, STRPTR buf, ULONG len);
 IPTR nSafeEjectDevice(struct NepMSBase *nh, struct NepClassMS *ncm, STRPTR busybuf, ULONG busybuflen);
+IPTR nSafeEjectCheck(struct NepMSBase *nh, struct NepClassMS *ncm, STRPTR buf, ULONG buflen);
 
 void AutoDetectMaxTransfer(struct NepClassMS *ncm);
 

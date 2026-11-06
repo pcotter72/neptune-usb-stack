@@ -1,4 +1,4 @@
-## version $VER: NeptuneUSB.catalog 7.0 (19.10.2026)
+## version $VER: NeptuneUSB.catalog 8.0 (06.11.2026)
 ## codeset 2104
 ## language russian
 ;
@@ -1129,8 +1129,9 @@ MSG_PANEL_DEVICES_EJECT
 ; \33c Eject
 ;
 MSG_PANEL_DEVICES_EJECT_HELP
-Безопасно извлекает накопитель: сбрасывает и\nразмонтирует все его тома (отказывает, если\nкакой-либо файл ещё открыт), останавливает диск\nи отключает его порт, чтобы устройство можно\nбыло отсоединить без потери данных.
-; Safely removes a mass storage device: flushes and\nunmounts all its volumes (refusing if any file is\nstill open), stops the drive and disables its hub\nport so it can be unplugged without data loss.
+Безопасно извлекает накопитель: сбрасывает и\nразмонтирует все его тома (отказывает, если\nкакой-либо файл ещё открыт;
+для томов FAT сначала спрашивает), останавливает диск\nи отключает его порт, чтобы устройство можно\nбыло отсоединить без потери данных.
+; Safely removes a mass storage device: flushes and\nunmounts all its volumes (refusing if any file is\nstill open; on FAT volumes, whose filesystem does\nnot refuse, it asks first), stops the drive and\ndisables its hub port so it can be unplugged\nwithout data loss.
 ;
 MSG_ACTION_DEV_EJECT_OK
 OK
@@ -1143,4 +1144,12 @@ MSG_ACTION_DEV_EJECT_BUSY_TXT
 MSG_ACTION_DEV_EJECT_FAILED_TXT
 Не удалось извлечь '%s'.\nСмотрите журнал ошибок; возможно, требуется\nобновление massstorage.usbclass.
 ; Ejecting '%s' failed.\nSee the error log; an updated\nmassstorage.usbclass may be required.
+;
+MSG_ACTION_DEV_EJECT_ASK_TXT
+'%s' содержит %s.\nЕго файловая система не отказывает в извлечении,\nдаже если на нём ещё открыт файл.\nСначала закройте все файлы на нём.\n\nИзвлечь сейчас?
+; '%s' holds %s.\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
+;
+MSG_ACTION_DEV_EJECT_ASK_GAD
+_Извлечь|*_Отмена
+; _Eject|*_Cancel
 ;

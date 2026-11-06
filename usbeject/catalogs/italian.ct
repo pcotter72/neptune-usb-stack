@@ -1,4 +1,4 @@
-## version $VER: USBEject.catalog 1.0 (17.08.2026)
+## version $VER: USBEject.catalog 2.0 (06.11.2026)
 ## language italiano
 ## codeset 0
 ;
@@ -37,4 +37,16 @@ Impossibile espellere '%s':\nla massstorage.usbclass installata è troppo vecchia
 MSG_REQ_FAILED
 Espulsione di '%s' non riuscita.\nVedere il registro errori di Neptune (Neptune USB).
 ; Ejecting '%s' failed.\nSee the Neptune error log (Neptune USB).
+;
+MSG_REQ_OPENFILES
+'%s' contiene %s.\nIl suo filesystem non rifiuta l'espulsione\nanche se un file è ancora aperto.\nChiudere prima tutti i file su di esso.\n\nEspellere ora?
+; '%s' holds %s.\nIts filesystem does not refuse an eject\nwhile a file on it is still open.\nClose all files on it first.\n\nEject now?
+;
+MSG_REQ_EJECT_CANCEL
+Espelli|Annulla
+; Eject|Cancel
+;
+MSG_SHELL_OPENFILES
+'%s' non espulso: il filesystem di %s non rifiuta l'espulsione con file aperti. Chiuderli, poi usare FORCE.
+; Not ejecting '%s': the filesystem of %s does not refuse an eject while files are open. Close them, then use FORCE.
 ;
