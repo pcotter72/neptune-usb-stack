@@ -1129,8 +1129,7 @@ MSG_PANEL_DEVICES_EJECT
 ; \33c Eject
 ;
 MSG_PANEL_DEVICES_EJECT_HELP
-Безопасно извлекает накопитель: сбрасывает и\nразмонтирует все его тома (отказывает, если\nкакой-либо файл ещё открыт;
-для томов FAT сначала спрашивает), останавливает диск\nи отключает его порт, чтобы устройство можно\nбыло отсоединить без потери данных.
+Безопасно извлекает накопитель: сбрасывает и\nразмонтирует все его тома (отказывает, если\nкакой-либо файл ещё открыт;\nдля томов FAT сначала спрашивает), останавливает диск\nи отключает его порт, чтобы устройство можно\nбыло отсоединить без потери данных.
 ; Safely removes a mass storage device: flushes and\nunmounts all its volumes (refusing if any file is\nstill open; on FAT volumes, whose filesystem does\nnot refuse, it asks first), stops the drive and\ndisables its hub port so it can be unplugged\nwithout data loss.
 ;
 MSG_ACTION_DEV_EJECT_OK

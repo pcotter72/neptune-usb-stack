@@ -1127,8 +1127,7 @@ MSG_PANEL_DEVICES_EJECT
 ; \33c Eject
 ;
 MSG_PANEL_DEVICES_EJECT_HELP
-Bezpiecznie usuwa urz±dzenie pamiêci masowej: zapisuje\ni odmontowuje wszystkie jego wolumeny (odmawia, gdy\njaki¶ plik jest wci±¿ otwarty;
-przy wolumenach FAT najpierw pyta), zatrzymuje napêd\ni wy³±cza jego port, aby mo¿na by³o je od³±czyæ\nbez utraty danych.
+Bezpiecznie usuwa urz±dzenie pamiêci masowej: zapisuje\ni odmontowuje wszystkie jego wolumeny (odmawia, gdy\njaki¶ plik jest wci±¿ otwarty;\nprzy wolumenach FAT najpierw pyta), zatrzymuje napêd\ni wy³±cza jego port, aby mo¿na by³o je od³±czyæ\nbez utraty danych.
 ; Safely removes a mass storage device: flushes and\nunmounts all its volumes (refusing if any file is\nstill open; on FAT volumes, whose filesystem does\nnot refuse, it asks first), stops the drive and\ndisables its hub port so it can be unplugged\nwithout data loss.
 ;
 MSG_ACTION_DEV_EJECT_OK

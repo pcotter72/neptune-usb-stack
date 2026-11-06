@@ -1129,8 +1129,7 @@ MSG_PANEL_DEVICES_EJECT
 ; \33c Eject
 ;
 MSG_PANEL_DEVICES_EJECT_HELP
-Rimuove in sicurezza un dispositivo di memoria di\nmassa: scarica e smonta tutti i suoi volumi (rifiuta\nse un file è ancora aperto;
-per i volumi FAT chiede prima), arresta l'unità e\ndisabilita la sua porta per poterla scollegare\nsenza perdita di dati.
+Rimuove in sicurezza un dispositivo di memoria di\nmassa: scarica e smonta tutti i suoi volumi (rifiuta\nse un file è ancora aperto;\nper i volumi FAT chiede prima), arresta l'unità e\ndisabilita la sua porta per poterla scollegare\nsenza perdita di dati.
 ; Safely removes a mass storage device: flushes and\nunmounts all its volumes (refusing if any file is\nstill open; on FAT volumes, whose filesystem does\nnot refuse, it asks first), stops the drive and\ndisables its hub port so it can be unplugged\nwithout data loss.
 ;
 MSG_ACTION_DEV_EJECT_OK
