@@ -159,13 +159,14 @@ Each is `DEVS:USBClasses/<name>.usbclass`.
 - **USBAddHardware**, **USBAddClasses** - attach or remove controllers and classes by hand.
 - **USBList** - lists connected USB devices.
 - **USBErrorlog** - prints the stack's error log.
-- **USBEject** (optional, `SYS:WBStartup/`) - a Workbench **USB** menu with an *Eject* item
-  per drive: it flushes and unmounts the drive's volumes (refusing while a file or drawer on
-  them is open), then stops the drive and says when it is safe to unplug. Directory Opus
-  windows on the drive are closed first (Directory Opus CaffeineOS Edition, `CloseListers`);
-  while one of them is busy, the drive is not ejected. From a Shell, `USBEject DEVICE=UMSD0: [QUIET]` ejects one drive and exits (rc 0
-  ejected, 5 in use, 10 not a USB drive, 20 failed); `QUIET` prints the messages instead of
-  showing requesters.
+- **USBEject** (optional, `SYS:WBStartup/`) - a Workbench **USB** menu with an *Eject* item per
+  drive: it flushes and unmounts the drive's volumes (refusing while a file or drawer on them is
+  open), then stops the drive and says when it is safe to unplug. Directory Opus windows on the
+  drive are closed first (Directory Opus CaffeineOS Edition, `CloseListers`); while one of them is
+  busy, the drive is not ejected (tested with `DEVICE=` and Directory Opus's *Eject safely*; not
+  yet from the USB menu). From a Shell, `USBEject DEVICE=UMSD0: [QUIET]` ejects one drive and
+  exits (rc 0 ejected, 5 in use, 10 not a USB drive, 20 failed); `QUIET` prints the messages
+  instead of showing requesters.
 - **Gadget tools** (optional, `SYS:Tools/`): `USBRadio`, `USBPencam`, `USBSonixcam`,
   `USBRocket`, `USBPowMan`, `USBUPS`, `USBVideo`.
 - **USBVideo** works in the Shell, or from its icon as a window: pick a camera and a mode,

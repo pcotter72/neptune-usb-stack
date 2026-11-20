@@ -39,6 +39,9 @@ Everything in this archive reports version **6.4**, followed by the CPU it was b
   through the `CloseListers` command of Directory Opus CaffeineOS Edition. While one of those
   windows is busy (copying, for example), nothing is closed and the drive is not ejected (rc 5).
   An older Directory Opus without the command is not affected: its windows still block the eject.
+  Tested so far with `USBEject DEVICE=` from a Shell and from Directory Opus's *Eject safely*; the
+  USB menu (Workbench menu or Directory Opus Tools) and an older Directory Opus are covered by the
+  same code but not tested yet.
 
 ## H.265 cameras
 
