@@ -1,4 +1,4 @@
-## version $VER: USBEject.catalog 1.0 (17.08.2026)
+## version $VER: USBEject.catalog 3.0 (20.11.2026)
 ## language russian
 ## codeset 2104
 ;
@@ -37,4 +37,8 @@ MSG_REQ_TOOOLD
 MSG_REQ_FAILED
 Не удалось извлечь '%s'.\nСм. журнал ошибок Neptune (Neptune USB).
 ; Ejecting '%s' failed.\nSee the Neptune error log (Neptune USB).
+;
+MSG_REQ_DOPUSBUSY
+Невозможно извлечь '%s':\nокно Directory Opus на %s занято.\nДождитесь завершения и повторите попытку.
+; Cannot eject '%s':\na Directory Opus window on %s is busy.\nWait until it has finished and try again.
 ;

@@ -36,6 +36,13 @@
 #include <proto/neptune.h>
 #include <proto/neptune_class.h>
 
+#include <rexx/storage.h>
+#include <rexx/errors.h>
+/* our own base name: the inline stubs pass the base as void *, so its type does not matter, and
+   rexxsyslib.library stays optional (opened only when Directory Opus is running) */
+#define REXXSYSLIB_BASE_NAME RexxLib
+#include <proto/rexxsyslib.h>
+
 #include <neptune_version.h>
 
 #include "locale.h"
@@ -83,6 +90,10 @@ static ULONG nextid = 0;
 static BOOL dirty = FALSE;
 static BOOL nomenuwarned = FALSE;   /* the "no AppMenu" warning is logged once, not every retry */
 static struct RDArgs *rdargs = NULL;   /* one-shot mode's arguments, freed in Cleanup() */
+static struct Library *RexxLib = NULL;  /* rexxsyslib.library, only while talking to Directory Opus */
+
+static APTR DeviceForUnit(ULONG unit, STRPTR name, ULONG namelen);
+static LONG CloseDOpusListers(APTR pd, STRPTR drive, ULONG drivelen);
 
 /* /// "Timer helpers" */
 static void TimerStop(void)
@@ -309,6 +320,15 @@ static void DoEject(ULONG id)
     psdUnlockPBase();
     if(!valid)
     {
+        dirty = TRUE;
+        return;
+    }
+
+    char busydrive[32];
+    busydrive[0] = 0;
+    if(CloseDOpusListers(pd, busydrive, sizeof(busydrive)) != RETURN_OK)
+    {
+        ShowReq(_(MSG_REQ_DOPUSBUSY), devname, busydrive);
         dirty = TRUE;
         return;
     }
@@ -548,6 +568,268 @@ static APTR DeviceForUnit(ULONG unit, STRPTR name, ULONG namelen)
     return(found);
 }
 
+/* /// "Directory Opus listers" */
+/* Neptune refuses an eject while anything holds a lock on a volume of the
+   device (massstorage nInhibitAll: the handler leaves its locks parked), and
+   Directory Opus 5 holds one for every lister that shows a drive - it opens a
+   lister by itself when a stick appears. So before the eject we ask Directory
+   Opus to close its listers on the drive, through its ARexx port, with its
+   internal command CloseListers (Directory Opus CaffeineOS Edition): it closes
+   every lister whose current directory is on the named DOS device, or on
+   another DOS device of the same exec device and unit, waits until they have
+   let go, and closes none if one of them is busy. ARexx "lister close" will
+   not do: it returns before the lister has let go, and it aborts the job of a
+   busy lister.
+   The eject takes every DOS device on every unit of the USB device, so every
+   one of them is asked for: the usbscsi.device units of the device, and the
+   virtual drives on usbscsivd.device (unit = parent unit * 10 + slot, mounter
+   vdrive.h VDRIVE_PARENT). A unit whose interface binding is not the device
+   (the other LUNs of a card reader, see "One-shot eject") cannot be matched,
+   so listers there stay open and the eject then names their volume as in
+   use. */
+
+#define DOPUS_PORT        "DOPUS.1"
+#define DOPUS_RC_BUSY     5    /* rc of CloseListers: a lister on it is busy (TO CONFIRM with the DOpus side) */
+#define DOPUS_MAXDRIVES   24
+#define VDRIVE_SLOTS      10                        /* mounter vdrive.h */
+
+/* TRUE if the BSTR names 'want' (lower case), ignoring case and a closing NUL
+   that the length may count (measured 15 for massstorage's own mounts) */
+static BOOL BstrIs(const UBYTE *bstr, CONST_STRPTR want)
+{
+    ULONG wlen = 0;
+    while(want[wlen])
+    {
+        wlen++;
+    }
+    ULONG blen = bstr[0];
+    if(blen && !bstr[blen])
+    {
+        blen--;
+    }
+    if(blen != wlen)
+    {
+        return(FALSE);
+    }
+    for(ULONG i = 0; i < wlen; i++)
+    {
+        UBYTE c = bstr[i + 1];
+        if((c >= 'A') && (c <= 'Z'))
+        {
+            c += 'a' - 'A';
+        }
+        if(c != (UBYTE) want[i])
+        {
+            return(FALSE);
+        }
+    }
+    return(TRUE);
+}
+
+struct DOpusDrive
+{
+    char  dd_Name[32];   /* "UMSD0:" */
+    ULONG dd_Parent;     /* the usbscsi.device unit it rides on */
+};
+
+/* The DOS devices with a running handler on usbscsi.device or usbscsivd.device,
+   with the usbscsi.device unit each rides on. Nothing is sent while the list is
+   locked. Return: how many went into 'out'. */
+static ULONG CollectUSBDrives(struct DOpusDrive *out, ULONG max)
+{
+    ULONG count = 0;
+    struct DosList *dl = LockDosList(LDF_DEVICES|LDF_READ);
+    while((count < max) && (dl = NextDosEntry(dl, LDF_DEVICES)))
+    {
+        if(!dl->dol_Task)
+        {
+            continue;   /* handler never started: it holds no locks */
+        }
+        /* dol_Startup is not always a FileSysStartupMsg: check before use */
+        struct FileSysStartupMsg *fssm = (struct FileSysStartupMsg *) BADDR(dl->dol_misc.dol_handler.dol_Startup);
+        if(!fssm || !TypeOfMem(fssm) || (*(UBYTE *) fssm != 0))
+        {
+            continue;
+        }
+        struct DosEnvec *de = (struct DosEnvec *) BADDR(fssm->fssm_Environ);
+        UBYTE *bdev = (UBYTE *) BADDR(fssm->fssm_Device);
+        if(!de || !TypeOfMem(de) || (de->de_TableSize & 0xffffff00) || !bdev || !TypeOfMem(bdev))
+        {
+            continue;
+        }
+        ULONG parent;
+        if(BstrIs(bdev, "usbscsi.device"))
+        {
+            parent = fssm->fssm_Unit;
+        }
+        else if(BstrIs(bdev, "usbscsivd.device"))
+        {
+            parent = fssm->fssm_Unit / VDRIVE_SLOTS;
+        } else {
+            continue;
+        }
+        UBYTE *bname = (UBYTE *) BADDR(dl->dol_Name);
+        ULONG nlen = bname ? bname[0] : 0;
+        if(nlen && !bname[nlen])
+        {
+            nlen--;
+        }
+        if(!nlen || (nlen > sizeof(out[count].dd_Name) - 2))
+        {
+            continue;
+        }
+        for(ULONG i = 0; i < nlen; i++)
+        {
+            out[count].dd_Name[i] = bname[i + 1];
+        }
+        out[count].dd_Name[nlen] = ':';
+        out[count].dd_Name[nlen + 1] = 0;
+        out[count].dd_Parent = parent;
+        count++;
+    }
+    UnLockDosList(LDF_DEVICES|LDF_READ);
+    return(count);
+}
+
+/* Send one command to Directory Opus's ARexx port and wait for the reply.
+   Directory Opus answers "command wait ..." with rm_Result1 0 and the
+   function's return code as a decimal string in rm_Result2 - only if the
+   message asks for a result (RXFF_RESULT; Directory Opus rexx_proc.c).
+   Return: that code; -1 if Directory Opus is not running or the message
+   could not be built; -2 if it refused the command (rm_Result1 != 0, then
+   rm_Result2 is an error number, not a string). */
+static LONG DOpusCommand(struct MsgPort *reply, CONST_STRPTR cmd)
+{
+    LONG rc = -1;
+    ULONG len = 0;
+    while(cmd[len])
+    {
+        len++;
+    }
+    struct RexxMsg *rm = CreateRexxMsg(reply, NULL, NULL);
+    if(!rm)
+    {
+        return(rc);
+    }
+    rm->rm_Args[0] = (IPTR) CreateArgstring((STRPTR) cmd, len);
+    rm->rm_Action = RXCOMM | RXFF_RESULT;
+    if(rm->rm_Args[0])
+    {
+        /* found and sent under Forbid(): the port may go away with Directory Opus */
+        Forbid();
+        struct MsgPort *port = FindPort((STRPTR) DOPUS_PORT);
+        if(port)
+        {
+            PutMsg(port, (struct Message *) rm);
+        }
+        Permit();
+        if(port)
+        {
+            WaitPort(reply);
+            GetMsg(reply);
+            if(rm->rm_Result1)
+            {
+                rc = -2;
+            }
+            else if(rm->rm_Result2)
+            {
+                CONST_STRPTR s = (CONST_STRPTR) rm->rm_Result2;
+                BOOL neg = (*s == '-');
+                if(neg)
+                {
+                    s++;
+                }
+                rc = 0;
+                while((*s >= '0') && (*s <= '9'))
+                {
+                    rc = rc * 10 + (*s++ - '0');
+                }
+                if(neg)
+                {
+                    rc = -rc;
+                }
+                DeleteArgstring((UBYTE *) rm->rm_Result2);
+            } else {
+                rc = 0;
+            }
+        }
+        DeleteArgstring((UBYTE *) rm->rm_Args[0]);
+    }
+    DeleteRexxMsg(rm);
+    return(rc);
+}
+
+/* Ask Directory Opus to close its listers on every drive of 'pd'.
+   Return: RETURN_OK done (or Directory Opus is not running), RETURN_WARN a
+   lister on 'drive' is busy and nothing was closed there. */
+static LONG CloseDOpusListers(APTR pd, STRPTR drive, ULONG drivelen)
+{
+    Forbid();
+    BOOL running = (FindPort((STRPTR) DOPUS_PORT) != NULL);
+    Permit();
+    if(!running)
+    {
+        return(RETURN_OK);
+    }
+    struct DOpusDrive *drives = AllocVec(DOPUS_MAXDRIVES * sizeof(struct DOpusDrive), MEMF_CLEAR);
+    if(!drives)
+    {
+        return(RETURN_OK);   /* the eject itself still refuses if a lister holds a lock */
+    }
+    LONG result = RETURN_OK;
+    ULONG count = CollectUSBDrives(drives, DOPUS_MAXDRIVES);
+    struct MsgPort *reply = NULL;
+    for(ULONG i = 0; (i < count) && (result == RETURN_OK); i++)
+    {
+        char dummy[4];
+        if(DeviceForUnit(drives[i].dd_Parent, dummy, sizeof(dummy)) != pd)
+        {
+            continue;
+        }
+        if(!RexxLib)
+        {
+            RexxLib = OpenLibrary("rexxsyslib.library", 36);
+            if(!RexxLib)
+            {
+                break;
+            }
+        }
+        if(!reply && !(reply = CreateMsgPort()))
+        {
+            break;
+        }
+        char cmd[64];
+        psdSafeRawDoFmt(cmd, sizeof(cmd), "command wait CloseListers DEVICE=%s", drives[i].dd_Name);
+        LONG rc = DOpusCommand(reply, cmd);
+        if(rc == DOPUS_RC_BUSY)
+        {
+            psdSafeRawDoFmt(drive, drivelen, "%s", drives[i].dd_Name);
+            psdAddErrorMsg(RETURN_WARN, LOGNAME,
+                           "Not ejected: a Directory Opus lister on %s is busy.", drives[i].dd_Name);
+            result = RETURN_WARN;
+        }
+        else if(rc != 0)
+        {
+            /* an older Directory Opus without CloseListers, or a timeout: the
+               eject decides, and names the volume if a lister still holds it */
+            psdAddErrorMsg(RETURN_WARN, LOGNAME,
+                           "Directory Opus CloseListers on %s returned %ld.", drives[i].dd_Name, rc);
+        }
+    }
+    if(reply)
+    {
+        DeleteMsgPort(reply);
+    }
+    if(RexxLib)
+    {
+        CloseLibrary(RexxLib);
+        RexxLib = NULL;
+    }
+    FreeVec(drives);
+    return(result);
+}
+/* \\\ */
+
 /* A message as a requester, or on the Shell with QUIET */
 static void Tell(BOOL quiet, CONST_STRPTR body, CONST_STRPTR arg1, CONST_STRPTR arg2)
 {
@@ -591,6 +873,14 @@ static LONG OneShotEject(CONST_STRPTR name, BOOL quiet)
             ShowReq(_(MSG_REQ_FAILED), name, NULL);
         }
         return(RETURN_ERROR);
+    }
+
+    char busydrive[32];
+    busydrive[0] = 0;
+    if(CloseDOpusListers(pd, busydrive, sizeof(busydrive)) != RETURN_OK)
+    {
+        Tell(quiet, _(MSG_REQ_DOPUSBUSY), prodname, busydrive);
+        return(RETURN_WARN);
     }
 
     char busyname[64];

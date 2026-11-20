@@ -1,4 +1,4 @@
-## version $VER: USBEject.catalog 1.0 (17.08.2026)
+## version $VER: USBEject.catalog 3.0 (20.11.2026)
 ## language polski
 ## codeset 5
 ;
@@ -37,4 +37,8 @@ Nie mo¿na wysun±æ '%s':\nzainstalowana massstorage.usbclass jest za stara\ndla b
 MSG_REQ_FAILED
 Wysuwanie '%s' nie powiod³o siê.\nZobacz dziennik b³êdów Neptuna (Neptune USB).
 ; Ejecting '%s' failed.\nSee the Neptune error log (Neptune USB).
+;
+MSG_REQ_DOPUSBUSY
+Nie mo¿na wysun±æ '%s':\nokno Directory Opus na %s jest zajête.\nPoczekaj, a¿ skoñczy, i spróbuj ponownie.
+; Cannot eject '%s':\na Directory Opus window on %s is busy.\nWait until it has finished and try again.
 ;

@@ -8,4 +8,4 @@
  * text. Rejecting them is the point.
  */
 
-#define CATALOG_VERSION  1
+#define CATALOG_VERSION  3   /* 2 was used by the 6.3 caffeine line (FAT question), with another layout */

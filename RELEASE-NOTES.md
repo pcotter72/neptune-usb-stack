@@ -24,6 +24,14 @@ Everything in this archive reports version **6.4**, followed by the CPU it was b
 * **A drive pulled out while a file or drawer on it is open** no longer leaves the program to hang
   when it closes the file. The volume stays listed, and comes back with its open files when the same
   drive is plugged back in.
+* **Eject one drive from a Shell or a script:** `USBEject DEVICE=<drive> [QUIET]` ejects the USB
+  drive behind a DOS device (`UMSD0:`) or a volume name (`MyStick:`) and exits; Directory Opus uses
+  it for *Eject safely* in the disk menu of USB drives. The requesters are those of the menu;
+  `QUIET` prints the messages in the Shell instead. Return codes: 0 ejected, 5 still in use, 10 not
+  a USB drive (or a volume name that two mounted drives share - give the device name then), 20 the
+  eject failed. Started without `DEVICE`, or from its icon, USBEject is the Workbench menu as
+  before, and the one-shot mode runs next to it. With a multi-slot card reader, name a drive in its
+  first slot: that ejects the whole reader; drives in the other slots are refused (rc 10).
 
 ## H.265 cameras
 
@@ -199,21 +207,6 @@ interface once in the MIDI Ports editor.
 
 * The custom Kickstart holds 1.5 MB of modules instead of 1 MB.
 * The build script is now `python3 ROM/build-kickstart.py`, with the same arguments.
-
-## Eject one drive from a Shell or a script
-
-`USBEject DEVICE=<drive> [QUIET]` ejects the USB drive behind a DOS device (`UMSD0:`) or a
-volume name (`MyStick:`) and exits; Directory Opus uses it for *Eject safely* in the disk
-menu of USB drives. The requesters are those of the menu; `QUIET` prints the messages in the
-Shell instead. Return codes: 0 ejected, 5 still in use, 10 not a USB drive (or a volume name
-that two mounted drives share - give the device name then), 20 the eject failed. Started
-without `DEVICE`, or from its icon, USBEject is the Workbench menu as before, and the one-shot
-mode runs next to it. With a multi-slot card reader, name a drive in its first slot: that
-ejects the whole reader; drives in the other slots are refused (rc 10).
-
-**FAT drives and open files:** fat95 4.1 agrees to an eject even while a file on the drive
-is open, also one that is being written, so neither the menu nor the Shell command refuses
-then. Close your files before ejecting a FAT drive.
 
 ## Bug fixes
 
