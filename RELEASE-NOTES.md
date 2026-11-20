@@ -32,6 +32,13 @@ Everything in this archive reports version **6.4**, followed by the CPU it was b
   eject failed. Started without `DEVICE`, or from its icon, USBEject is the Workbench menu as
   before, and the one-shot mode runs next to it. With a multi-slot card reader, name a drive in its
   first slot: that ejects the whole reader; drives in the other slots are refused (rc 10).
+* **Directory Opus windows no longer block an eject.** Directory Opus keeps a lock on every drive
+  one of its windows shows, and opens a window by itself when a stick appears, so the eject used to
+  be refused. USBEject (its menu and `DEVICE=`, which Directory Opus's *Eject safely* runs) now
+  asks every running Directory Opus to close its windows on all of the drive's partitions first,
+  through the `CloseListers` command of Directory Opus CaffeineOS Edition. While one of those
+  windows is busy (copying, for example), nothing is closed and the drive is not ejected (rc 5).
+  An older Directory Opus without the command is not affected: its windows still block the eject.
 
 ## H.265 cameras
 
