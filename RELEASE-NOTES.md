@@ -4,6 +4,46 @@ Everything in this archive reports version **6.4**, followed by the CPU it was b
 
 **Upgrading from 6.3:** run the installer.
 
+## This build: CaffeineOS fork, `caffeine7`
+
+Built from the Neptune 6.4 development line (`2e5a644`; 6.4 has no upstream release tag yet) with
+these changes on top. The `$VER` strings end in `caffeine7`.
+
+* **The ROM start picks the USB controller from the Emu68 device tree** (`791f6f0`): `xhci.device`
+  on a Raspberry Pi 4 or CM4, `dwc2usb.device` on the Pi 3 family.
+* **A class named without a path is found in `DEVS:USBClasses/`** (`e807f50`, `8a9d45e`). Saved
+  settings from the ROM era list some classes by name only; they were skipped, and a stack started
+  from disk then had no hub or mass-storage class.
+* **A stick whose partition starts at block 63 is no longer mounted twice** after a hub port power
+  cycle (`474dcb2`: mounter `7a730d5`, extents compared in blocks).
+* **USBEject's requesters are centred** on the screen (`31d6837`).
+
+### Tested
+
+On Amigas with a PiStorm (Emu68, CM4):
+
+* **A1200, AmigaOS 3.9, stack started from disk** (20.11.2026, on a Kickstart without USB): the
+  classes named without a path load; six hub port power cycles of a block-63 stick mount it once
+  each time; the eject requester is centred; with a file open for writing (`MODE_NEWFILE` and
+  `MODE_READWRITE`) on a FAT stick the eject is refused (error 202) and the file is intact; the
+  Directory Opus cases under *Ejecting and unplugging drives*; Neptune USB opens and ejects a
+  drive.
+* **A1200, AmigaOS 3.9, stack in a CaffeineOS Kickstart** (21.11.2026): the stack starts from ROM
+  and picks `xhci.device`; a USB keyboard and mouse are bound; a stick mounts; one hub port power
+  cycle mounts it once; with a file open for writing the eject is refused (error 202) and the file
+  keeps its 4096 bytes; with nothing open it is ejected; Neptune USB opens and closes.
+* **A600, AmigaOS 3.2.3, stack in a 3.2.3 Kickstart with the USB stack added** (21.11.2026): the
+  stack starts from ROM and picks `xhci.device`. No USB device was attached; the USB cases were
+  not run there.
+* **Not tested:** the Pi 3 path (`dwc2usb.device`) - no Pi 3 board was at hand; `neptune.vhi`;
+  the catalogs on a non-English system.
+
+**An older Neptune in the Kickstart wins over these files.** If the Kickstart carries Neptune 6.3,
+the ROM copy keeps running after the disk is updated, until the Kickstart is updated too.
+Measured on the A1200 (Neptune 6.3 in ROM, these files on disk): an eject with a file open for
+writing on a FAT stick went ahead without a warning, and the file was left with 0 bytes; the other
+files on the stick were unharmed. Update the Kickstart before you rely on the eject.
+
 ## Emu68 SD cards in a USB card reader
 
 * An Emu68 SD card keeps its Amiga partitions inside *virtual drives*: partitions (MBR type
